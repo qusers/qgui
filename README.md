@@ -26,7 +26,7 @@ terminal:
 git clone https://github.com/qusers/qgui.git
 ```
 
-This will asks for your github username and password.
+This will ask for your github username and password.
 
 As **Qgui** is written in python and uses its standard tkinter graphic libraries
 no more dependencies need to be fullfiled apart from installing the free
@@ -53,11 +53,11 @@ also give the correct path to where you have cloned **Qgui**.
 
 
 ###Examples
-The following are simple step-by-step examples of usage of **Q-gui** from the
+The following are simple step-by-step examples of usage of **Qgui** from the
 ground-up.
 
 ####n-butane
-Now that you've installed *Qgui* and made sure that all additional packages
+Now that you've installed **Qgui** and made sure that all additional packages
 are installed we can start with a simple example.
 
 First you will have to create a PDB (Protein Data Bank) formatted coordinate
@@ -72,7 +72,7 @@ sure to include two spaces to replace the T, and M, letters in HETATM.
 Finally you will have to replace UNK with LIG. Now you finally have a clean
 file you can work with.
 
-Next step is to go ahead and fire-up **Q-gui** from a terminal with your
+Next step is to go ahead and fire-up **Qgui** from a terminal with your
 brand new alias:
 
 ```bash
