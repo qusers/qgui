@@ -16,7 +16,8 @@ kinetic experiments.
 ###Installation
 
 **Qgui** is easy to install. The only demand on the user is that of making sure
-of having a working version of **Q** and python.
+of having a working version of **Q**, python, and the matplotlib and numpy python
+packages used in the analysis modules.
 
 The program can be cloned from github issuing the following command in the user
 terminal:
@@ -29,7 +30,7 @@ This will asks for your github username and password.
 
 As **Qgui** is written in python and uses its standard tkinter graphic libraries
 no more dependencies need to be fullfiled apart from installing the free
-for academics version of *Maestro* to be able to generate force-field topologies
+for academics version of *Maestro* to be able to generate force-field libraries
 and parameters for ligand modeling. A working installation of pymol also comes
 handy for molecular visualization but it's not required.
 
@@ -48,23 +49,23 @@ alias qgui="python /Users/username/software/qgui/qgui.py"
 ```
 
 In the previous command you will have to replace *username* by your own and
-also give the correct path to where you have cloned qgui. 
+also give the correct path to where you have cloned **Qgui**. 
 
 
 ###Examples
-The following are simple step-by-step examples of usage of Q-gui from the
+The following are simple step-by-step examples of usage of **Q-gui** from the
 ground-up.
 
 ####n-butane
 Now that you've installed *Qgui* and made sure that all additional packages
 are installed we can start with a simple example.
 
-First you will have to create a PDB (Protein Data Bank) formated coordinate
+First you will have to create a PDB (Protein Data Bank) formatted coordinate
 file of n-butane, you can use *pymol* or *avogadro*, or download a coordinate file
 online and convert it to the correct format. A popular molecule repository is
 pubchem (https://pubchem.ncbi.nlm.nih.gov/). You can just go to pubchem and
 use the search box to query for n-butane scroll-down to the 3D-Conformer
-area and dowload the file in .sdf format. Later you can open the dowloaded file
+area and download the file in .sdf format. Later you can open the downloaded file
 in pymol and save the file as .pdb. You will still have to do some editing
 and delete all rows starting with CONNECT and replace HETATM with ATOM making
 sure to include two spaces to replace the T, and M, letters in HETATM.
@@ -80,7 +81,7 @@ qgui
 
 Now you will have to make sure that the settings point to the right places.
 In the upper side of your screen go to File/Settings and make sure that
-the name of the executables for **Q** corresponds to the ones in your system
+the name of the executables for **Q** correspond to the ones in your system
 (e.g. qprep5, qdyn5). Also set-up the path to the schrodinger installation,
 usually it is automatically installed at:
 
@@ -95,15 +96,24 @@ As you will also want to have all files in the same folder holding your
 *n-butane.pdb* file go to File/Change workdir and make sure to select the
 folder holding your n-butane pdb file.
 
-Now you can proceed to load your PDB file by clicking on Load and Browse to
+Now you can proceed to load your PDB file by clicking on Load, and Browse to
 the folder where your file is located.
-Once loaded you will want to generate parameters for you ligand, go to
+
+Once loaded you will want to generate parameters for you ligand. Go to
 Prepare/Parameters, select the atoms in your pdb file and select a force-field.
 Then click on Run. If succesful a new window will pop-up telling you that a
 library file with a corresponding pdb, and parameter file has been generated.
+
+Now go back to File/Setttings and load the LIG.lib library file and the
+QOPLS2001_LIG.prm parameter file which have just been generated.
+**Qgui** takes care of assembling a new parameter file which merges
+the oplsaa parameters and the newly generated ligand parameters into a new file
+called merged.prm. You must always check that file to make sure that the parameter
+assignment makes chemical sense.
+
 Now you can generate a topology file. Go to Prepare/Topology, make sure all
-options are as you want them, for example, TIP3 water model or SPC. Click
-on write and then click on Run.
+options are as you want them, for example, TIP3 water model or SPC, etc. Click
+on Write and then click on Run.
 
 Now you are ready to run simulations.
 
@@ -119,7 +129,9 @@ continue to click on Run and wait for approximately 10 minutes running the
 non-parallel version of **qdyn5** on a 3.3GHz intel core i7 processor with
 16Gb of RAM.
 
-More examples will be coming to this readme soon.
+The analysis tools in **Qgui** are quite powerful and customizable as they
+rely on the matplotlib and numpy python libraries. Usage examples of the
+analysis tools will soon be explored here.
 
 
 
