@@ -113,7 +113,7 @@ assignment makes chemical sense.
 
 Now you can generate a topology file. Go to Prepare/Topology, make sure all
 options are as you want them, for example, TIP3 water model or SPC, etc. Click
-on Write and then click on Run.
+on Run to launch Qprep, or Write if you just want to write the input files.
 
 Now you are ready to run simulations.
 
@@ -124,10 +124,10 @@ options provided in the Setup MD window, of course, you can always turn
 to the **Q** users manual.
 
 After making sure that you've set-up the option most appropiate for your
-simulation you can click on Write, and, if no error messages pop-up you can
-continue to click on Run and wait for approximately 10 minutes running the
-non-parallel version of **qdyn5** on a 3.3GHz intel core i7 processor with
-16Gb of RAM.
+simulation you can click on Run, and, if no error messages pop-up, wait for 
+approximately 10 minutes running the non-parallel version of **qdyn5** on a 
+3.3GHz intel core i7 processor with 16Gb of RAM. Alternatively, you can press
+Write to write the files to disk, and submit them from command line.
 
 The analysis tools in **Qgui** are quite powerful and customizable as they
 rely on the matplotlib and numpy python libraries. Usage examples of the
