@@ -143,7 +143,7 @@ class MainWindow(Frame):
         button_clear.grid(row = 0, column = 5)
         button_clear.config(highlightbackground = self.main_color, relief = GROOVE)
 
-        photo = PhotoImage(file=self.app.settings_path + "/Qmods/logo_qgui.gif")
+        photo = PhotoImage(file=self.app.qgui_path + "/Qmods/logo_qgui.gif")
         w = Label(upper_frame, image=photo, bg=self.main_color)
         w.photo = photo
         w.grid(row=0, rowspan=2, column=0)

@@ -4,7 +4,7 @@ __author__ = "Geir Villy Isaksen"
 __copyright__ = "Copyright (C) 2014 University of Tromso / Geir Villy Isaksen"
 __credits__ = ["Bjorn Olav Brandsdal","Laura Liikanen", "Johan Aqvist", "Christoffer Lind"]
 __license__ = "GPL v3"
-__version__ = "1.0.3b"
+__version__ = "1.0.4"
 __maintainer__ = "Geir Isaksen"
 __email__ = "geir.isaksen@uit.no"
 __status__ = "Production"
@@ -33,7 +33,7 @@ import os
 import sys
 import tkMessageBox
 import datetime
-import signal
+import getpass
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/Qmods')
 
@@ -69,7 +69,19 @@ class QGui(object):
 
     def __init__(self, root): #receives root from main-method
         self.root = root
-        self.settings_path = os.path.dirname(os.path.abspath(__file__))
+        #Path to user settings
+        if 'darwin' in sys.platform:
+            self.settings_path = '/Users/' + getpass.getuser() + '/.qgui'
+        else:
+            self.settings_path = '/home/' + getpass.getuser() + '/.qgui'
+
+        #Check if settings directory exists, if not create it
+        if not os.path.exists(self.settings_path):
+            os.makedirs(self.settings_path)
+
+        #path to Qgui code
+        self.qgui_path = os.path.dirname(os.path.abspath(__file__))
+
         self.root.withdraw()
         self.show_splash()
 
@@ -94,7 +106,7 @@ class QGui(object):
         self.checkUpdates()
 
     def show_splash(self):
-        SplashScreen(self, self.root, self.settings_path+"/Qmods/qgui_box.gif")
+        SplashScreen(self, self.root, self.qgui_path + "/Qmods/qgui_box.gif")
 
         time.sleep(2)
         self.root.deiconify()
@@ -114,7 +126,7 @@ class QGui(object):
         self.q_settings = ['workdir',[prm],[lib],[equilibration],[use sub script (1/0), command], [executables],'schrodinger path']
         """
         try:
-            self.q_settings = cPickle.load(open(self.settings_path + '/.Qsettings','rb'))
+            self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
         except:
             self.q_settings = [
                 'default',
@@ -132,11 +144,15 @@ class QGui(object):
                 None
             ]
 
-            cPickle.dump(self.q_settings, open(self.settings_path + '/.Qsettings','wb'))
+            cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
         #Get workdirectory:
         if self.q_settings[0] == 'default':
-            self.workdir = os.path.dirname(os.path.abspath(__file__))
+            #self.workdir = os.path.dirname(os.path.abspath(__file__))
+            if 'darwin' in sys.platform:
+                self.workdir = '/Users/' + getpass.getuser()
+            else:
+                self.workdir = '/home/' + getpass.getuser()
         else:
             self.workdir = self.q_settings[0]
 
@@ -148,9 +164,9 @@ class QGui(object):
 
     def saveSettings(self):
         """
-        saves q_settings to file .Qsettings
+        saves q_settings to file Qsettings
         """
-        cPickle.dump(self.q_settings, open(self.settings_path + '/.Qsettings','wb'))
+        cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
     def log(self, useDate = 'nope', msg='text'):
         if useDate == 'info':

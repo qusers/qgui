@@ -4426,7 +4426,7 @@ class SetupFEP(Toplevel):
 
         fepname = self.pdbfile.split('/')[-1].split('.')[0] + '.fep'
 
-        q_settings = cPickle.load(open(self.app.settings_path + '/.Qsettings','rb'))
+        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
 
 
         lambda_list = list(self.lambdasteps_listbox.get(0, END))
@@ -4453,10 +4453,10 @@ class SetupFEP(Toplevel):
         self.submitcommand = q_settings[4][1]
         submitfile = open(self.submit,'w')
         if int(q_settings[4][0]) == 1:
-            if os.path.isfile(self.app.settings_path + '/.qsubmit'):
-                submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
-            elif os.path.isfile(self.app.workdir + '/' + '.qsubmit'):
-                submissionscipt = open(self.app.workdir + '/' + '.qsubmit','r').readlines()
+            if os.path.isfile(self.app.settings_path + '/qsubmit'):
+                submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
+            elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
+                submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
                 print 'submission script not found! Please edit this in settings'
@@ -4719,7 +4719,7 @@ class SetupFEP(Toplevel):
         #If use submission script, check for end statements (comes after #Qdyn I/O):
         if int(q_settings[4][0]) == 1:
             write_end = False
-            submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
+            submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             for k in range(len(submissionscipt)):
                 if '#Qdyn I/O' in submissionscipt[k]:
                     end_statements_start = k + 1

@@ -361,7 +361,7 @@ class EvbArrhenius(Toplevel):
                 self.app.log(' ', '\n#####\nqfep.inp does not exist in %s. New input generated!\n####\n'
                                   % '/'.join(path.split('/')[-3:]))
                 self.write_qfep_inp(path)
-            self.run_qfep(path)
+            self.run_qfep(path, 'qfep.inp')
 
         if os.path.isfile(qfepout):
             with open(qfepout, 'r') as qfepout:

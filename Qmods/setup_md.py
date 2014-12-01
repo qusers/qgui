@@ -134,9 +134,9 @@ class SetupMd(Toplevel):
 
         self.inputfiles_entry.delete(0,END)
         #Check if default MD settings exist, and use values from there:
-        if os.path.isfile(self.app.settings_path + '/.qmd_settings') and not self.fep:
+        if os.path.isfile(self.app.settings_path + '/qmd_settings') and not self.fep:
             print 'file found'
-            with open(self.app.settings_path + '/.qmd_settings', 'r') as mdsettings:
+            with open(self.app.settings_path + '/qmd_settings', 'r') as mdsettings:
                 for line in mdsettings:
                     if '#' in line:
                         self.qmd_settings[line.split('#')[1].strip('\n')] = line.split('#')[0].strip()
@@ -328,7 +328,7 @@ class SetupMd(Toplevel):
             return
 
         #Get global settings:
-        q_settings = cPickle.load(open(self.app.settings_path + '/.Qsettings','rb'))
+        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
         output_int = self.output.get()
         trj_int = self.trajectory.get()
         ene_int = self.energyfile.get()
@@ -374,10 +374,10 @@ class SetupMd(Toplevel):
         self.submitcommand = q_settings[4][1]
         submitfile = open(self.app.workdir + '/' + self.submit,'w')
         if int(q_settings[4][0]) == 1:
-            if os.path.isfile(self.app.settings_path + '/.qsubmit'):
-                submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
-            elif os.path.isfile(self.app.workdir + '/' + '.qsubmit'):
-                submissionscipt = open(self.app.workdir + '/' + '.qsubmit','r').readlines()
+            if os.path.isfile(self.app.settings_path + '/qsubmit'):
+                submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
+            elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
+                submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
                 print 'submission script not found! Please edit this in settings'
@@ -623,7 +623,7 @@ class SetupMd(Toplevel):
         #If use submission script, check for end statements (comes after #Qdyn I/O):
         if int(q_settings[4][0]) == 1:
             write_end = False
-            submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
+            submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             for k in range(len(submissionscipt)):
                 if '#Qdyn I/O' in submissionscipt[k]:
                     end_statements_start = k + 1

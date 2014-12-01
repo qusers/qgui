@@ -58,6 +58,13 @@ class SetupEVB(Toplevel):
         self.select_h = IntVar()
         self.select_h.set(0)
 
+        #Use couplings in FEP?
+        self.use_coupling = False
+
+        self.coupling_var = IntVar()
+        self.coupling_var.set(0)
+
+
         #Input files written?
         self.files_written = False
 
@@ -1711,6 +1718,17 @@ class SetupEVB(Toplevel):
                             note += ' --> '
                 self.softpairs_listbox.insert(END, '%3d %3d  !%s' % (q1, q2, note))
 
+    def coupling_true_false(self):
+        """
+        Select if coupling is to be included or not
+        """
+        if not self.use_coupling:
+            self.use_coupling = True
+        else:
+            self.use_coupling = False
+
+        self.update_couplings()
+
     def update_couplings(self):
         """
         Angles, torsions and impropers dependent on bonds formed/broken are automatically added
@@ -1721,6 +1739,11 @@ class SetupEVB(Toplevel):
         self.angle_couplings_listbox.delete(0, END)
         self.torsion_couplings_listbox.delete(0, END)
         self.improper_couplings_listbox.delete(0, END)
+
+        print self.use_coupling
+
+        if self.use_coupling == 0:
+            return
 
         #Get bonds broken/formed and enumerate
         bonds_to_couple = []
@@ -4379,7 +4402,7 @@ class SetupEVB(Toplevel):
 
         fepname = self.pdbfile.split('/')[-1].split('.')[0] + '.fep'
 
-        q_settings = cPickle.load(open(self.app.settings_path + '/.Qsettings','rb'))
+        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
 
 
         lambda_list = list(self.lambdasteps_listbox.get(0, END))
@@ -4406,10 +4429,10 @@ class SetupEVB(Toplevel):
         self.submitcommand = q_settings[4][1]
         submitfile = open(self.submit,'w')
         if int(q_settings[4][0]) == 1:
-            if os.path.isfile(self.app.settings_path + '/.qsubmit'):
-                submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
-            elif os.path.isfile(self.app.workdir + '/' + '.qsubmit'):
-                submissionscipt = open(self.app.workdir + '/' + '.qsubmit','r').readlines()
+            if os.path.isfile(self.app.settings_path + '/qsubmit'):
+                submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
+            elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
+                submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
                 print 'submission script not found! Please edit this in settings'
@@ -4672,7 +4695,7 @@ class SetupEVB(Toplevel):
         #If use submission script, check for end statements (comes after #Qdyn I/O):
         if int(q_settings[4][0]) == 1:
             write_end = False
-            submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
+            submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             for k in range(len(submissionscipt)):
                 if '#Qdyn I/O' in submissionscipt[k]:
                     end_statements_start = k + 1
@@ -5356,6 +5379,12 @@ class SetupEVB(Toplevel):
         self.improper_couplings_listbox.grid(row=1, rowspan=10, column = 4, columnspan=1, sticky = 'e')
         self.improper_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
 
+        self.coupling_check = Checkbutton(self.coupling_frame, bg=self.main_color, variable=self.coupling_var,
+                                          command=self.coupling_true_false)
+        self.coupling_check.grid(row=12, column=4, sticky='w')
+
+        use_coupling = Label(self.coupling_frame, text='Include angle/torsion/improper couplings:', bg=self.main_color)
+        use_coupling.grid(row=12, column=0, columnspan=4)
 
         #### EXCLUDED PAIRS ####
         excluded_label = Label(self.excludedpairs_frame, text=u"     i          j       \N{GREEK SMALL LETTER PHI}1"

@@ -30,7 +30,7 @@ class CreatePrmLib(Toplevel):
         self.app = app
         self.main_color = self.app.main_color
         self.root = root
-        self.q_settings = cPickle.load(open(self.app.settings_path + '/' + '.Qsettings','rb'))
+        self.q_settings = cPickle.load(open(self.app.settings_path + '/' + 'Qsettings','rb'))
         self.ffld_path = self.app.q_settings[6]
         if not self.ffld_path:
             self.app.errorBox('Error', 'Schrodinger path not in settings.')
@@ -211,12 +211,12 @@ class CreatePrmLib(Toplevel):
                     elif pdbname in pdbnames:
                         pdbnames.append(pdbname)
                         #Check how many times name occures and compare to number of residues
-                        name_count = 0
                         for name in pdbnames:
                             if name == pdbname:
                                 count += 1
                         if len(residues) < count:
                             pdb_duplicate = True
+
 
         if len(residues) > 1:
             self.app.errorBox('Info','More than 1 residue in selection. A new single residue will be generated')
@@ -290,10 +290,17 @@ class CreatePrmLib(Toplevel):
         os.chdir(self.app.workdir)
 
         tmpfile = open('.tmpfile','wb')
-        #call(['%s/utilities/ffld_server' % self.ffld_path,'-ipdb', '%s/%s.pdb' % (self.app.workdir, self.ligname),
-         #     '-print_parameters', '-version', '%s' % version], shell=True, stdout=tmpfile, stderr=tmpfile)
-        call('%s/utilities/ffld_server -ipdb %s/%s.pdb -print_parameters -version %s' %
-             (self.ffld_path, self.app.workdir, self.ligname, version), shell=True, stdout=tmpfile, stderr=tmpfile)
+
+        input_type = 'pdb'
+        #Check if maestro file exist
+        maefile = self.ligname.split('.pdb')[0]+'.mae'
+        if os.path.isfile(self.app.workdir+'/'+maefile):
+            print 'Found maestro file, using this by default'
+            input_type = 'mae'
+
+        call('%s/utilities/ffld_server -i%s %s/%s.%s -print_parameters -version %s' %
+             (self.ffld_path, input_type, self.app.workdir, self.ligname, input_type, version),
+             shell=True, stdout=tmpfile, stderr=tmpfile)
 
         self.update()
 

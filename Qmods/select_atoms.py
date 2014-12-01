@@ -43,13 +43,13 @@ class AtomSelectRange(Toplevel):
         self.entry1 = entry1
         self.entry2 = entry2
 
-
     def update_list(self):
         pdblist = open(self.pdbfile,'r').readlines()
         for line in pdblist:
-            if 'ATOM' in line.split()[0]:
-                txt = line.split('\n')[0]
-                self.listbox.insert(END, txt)
+            if len(line.split()) > 3:
+                if 'ATOM' in line.split()[0]:
+                    txt = line.split('\n')[0]
+                    self.listbox.insert(END, txt)
 
     def get_selected(self):
         """

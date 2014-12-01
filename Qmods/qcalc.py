@@ -372,10 +372,10 @@ class AnalyzeQcalc(Toplevel):
         sub_script = open(script_name, 'w')
         if submit:
             #Write submission script:
-            if os.path.isfile(self.app.settings_path + '/.qsubmit'):
-                submissionscipt = open(self.app.settings_path + '/.qsubmit','r').readlines()
-            elif os.path.isfile(self.app.workdir + '/' + '.qsubmit'):
-                submissionscipt = open(self.app.workdir + '/' + '.qsubmit','r').readlines()
+            if os.path.isfile(self.app.settings_path + '/qsubmit'):
+                submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
+            elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
+                submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
                 print 'submission script not found! Please edit this in settings'

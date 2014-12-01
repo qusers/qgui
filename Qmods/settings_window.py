@@ -33,7 +33,7 @@ class QguiSettings(Toplevel):
         self.app = app
         self.main_color = self.app.main_color
         self.root = root
-        self.q_settings = cPickle.load(open(self.app.settings_path + '/.Qsettings','rb'))
+        self.q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
         self.submit_check = IntVar()
         self.dialog_window()
         self.updateSettings()
@@ -51,7 +51,7 @@ class QguiSettings(Toplevel):
         self.q_settings[6] = self.schrodinger_path.get().strip()
 
 
-        cPickle.dump(self.q_settings, open(self.app.settings_path + '/.Qsettings','wb'))
+        cPickle.dump(self.q_settings, open(self.app.settings_path + '/Qsettings','wb'))
         self.app.getSettings()
         self.destroy()
 
@@ -60,19 +60,19 @@ class QguiSettings(Toplevel):
         opens the submit file for editing
         """
 
-        if not os.path.isfile(self.app.settings_path + '/.qsubmit'):
-            newfile = open(self.app.settings_path + '/.qsubmit','w')
+        if not os.path.isfile(self.app.settings_path + '/qsubmit'):
+            newfile = open(self.app.settings_path + '/qsubmit','w')
             newfile.write('#!/bin/bash\n#\n#Qdyn I/O\n')
             newfile.close()
 
-        self.fileEdit = FileEdit(self, self.app.settings_path + '/.qsubmit')
+        self.fileEdit = FileEdit(self, self.app.settings_path + '/qsubmit')
         self.fileEdit.config(bg=self.main_color)
         self.fileEdit.title('Edit submission script')
         self.fileEdit.resizable()
 
     def edit_md_settings(self):
-        if not os.path.isfile(self.app.settings_path + '/.qmd_settings'):
-            newfile = open(self.app.settings_path + '/.qmd_settings','w')
+        if not os.path.isfile(self.app.settings_path + '/qmd_settings'):
+            newfile = open(self.app.settings_path + '/qmd_settings','w')
             newfile.write('0.5   #simulation time\n1.0   #stepsize\n1     #inputfiles\n'
                           '300   #temperature\n10    #bath coupling\n'
                           '1     #shake solvent\n0     #shake solute\n0     #shake hydrogens\n1     #lrf\n'
@@ -84,13 +84,13 @@ class QguiSettings(Toplevel):
                           'all   #trajectory atoms\n')
             newfile.close()
 
-        self.fileEdit = FileEdit(self, self.app.settings_path + '/.qmd_settings')
+        self.fileEdit = FileEdit(self, self.app.settings_path + '/qmd_settings')
         self.fileEdit.config(bg=self.main_color)
         self.fileEdit.title('Edit default MD settings')
         self.fileEdit.resizable()
 
     def reset_md_settings(self):
-        newfile = open(self.app.settings_path + '/.qmd_settings','w')
+        newfile = open(self.app.settings_path + '/qmd_settings','w')
         newfile.write('0.5   #simulation time\n1.0   #stepsize\n1     #inputfiles\n'
                         '300   #temperature\n10    #bath coupling\n'
                         '1     #shake solvent\n0     #shake solute\n0     #shake hydrogens\n1     #lrf\n'
@@ -190,7 +190,7 @@ class QguiSettings(Toplevel):
 
     def remove_from_lib(self):
         """
-        Removes selected item in prm list from q_settings list and saves .Qsettings file
+        Removes selected item in prm list from q_settings list and saves Qsettings file
         """
         if len(self.q_settings[2]) > 0:
             try:
@@ -204,7 +204,7 @@ class QguiSettings(Toplevel):
 
     def add_lib(self):
         """
-        Opens file dialog (.lib) and selected lib is added to .Qsettings.
+        Opens file dialog (.lib) and selected lib is added to Qsettings.
         """
         libfile = askopenfilename(parent = self, initialdir = self.workdir,
                                   filetypes=(("Library", "*.lib"),("All files","*.*")))
@@ -219,7 +219,7 @@ class QguiSettings(Toplevel):
 
     def add_prm(self):
         """
-        Opens file dialog (.prm) and selected prm is added to .Qsettings.
+        Opens file dialog (.prm) and selected prm is added to Qsettings.
         """
         prmfile = askopenfilename(parent = self, initialdir = self.workdir,
                                   filetypes=(("Parameters", "*.prm"),("All files","*.*")))
