@@ -3371,7 +3371,6 @@ class SetupFEP(Toplevel):
             for atom in self.monitor_groups[group]:
                 self.group_atoms_listbox.insert(END, '%6s' % atom)
 
-
     def toggle_pymol(self, *args):
         """
         Start/close pymol when checkbutton is toggled
@@ -3467,7 +3466,6 @@ class SetupFEP(Toplevel):
                 color = atom_color[elem]
                 self.session.stdin.write('alter state%d and id %s, elem="%s"\n' % (state + 1, atom_id, elem))
                 self.session.stdin.write('color %s, state%d and id %s\n' % (color, state + 1, atom_id))
-
 
     def start_pymol(self):
         """
@@ -3796,6 +3794,59 @@ class SetupFEP(Toplevel):
         fepfile.close()
         self.app.log('info','FEP file (inputfiles/%s) written' % fepname.split('/')[-1])
 
+    def change_bond_length(self, q1, q2, r_target, pymol_obj):
+        """
+        Alters xyz for atom q1 so that the distance to q2 is the desired r_target.
+        q1 is moved relative to q2.
+        NOTE: If pymol session is not open, the xyz coordinates will be returned.
+        """
+        atom1 = int(self.q_atom_nr[int(q1)])
+        atom2 = int(self.q_atom_nr[int(q2)])
+
+        print atom1
+        print atom2
+
+        c1 = None
+        c2 = None
+
+        with open(self.pdbfile, 'r') as pdb:
+            for line in pdb:
+                if 'ATOM' in line:
+                    if int(line.split()[1]) == atom1:
+                        c1 = map(lambda x: float(x), line[26:].split()[0:3])
+                    if int(line.split()[1]) == atom2:
+                        c2 = map(lambda x: float(x), line[26:].split()[0:3])
+
+                if c1 and c2:
+                    break
+
+        if not c1:
+            print 'No coordinates found'
+            return
+        if not c2:
+            print 'No coordinates found'
+            return
+
+        c1_c2 = [x - y for x,y in zip(c1, c2)]
+
+        dx = c2[0] - c1[0]
+        dy = c2[1] - c1[1]
+        dz = c2[2] - c1[2]
+
+        r_old = np.sqrt(dx**2 + dy**2 + dz**2)
+
+        c1_c2_adjust = map(lambda x: round((x/r_old) * r_target, 3), c1_c2)
+
+        c1_new = [x + y for x,y in zip(c2, c1_c2_adjust)]
+
+        print c1_new
+
+        if self.sync_pymol.get() != 0:
+            self.session.stdin.write('alter_state 1, %s and id %d, (x,y,z)=(%.3f, %.3f, %.3f)\n'
+                                     % (pymol_obj, atom1, c1_new[0], c1_new[1], c1_new[2]))
+        else:
+            return c1_new
+
     def auto_evb(self, only_charges=False):
         """
         Generates structures from pymol (must be enabled) and use ffld_server to get parameters
@@ -3899,18 +3950,52 @@ class SetupFEP(Toplevel):
         h_add_string = ' or '.join(h_add_list)
         print h_add_string
 
+        #Fix bond distances to any H-atom that has replaced another atom. (The H-bond distances are crucial to
+        #avoid ffld_server failure)
+        changin_atoms = self.atoms_listbox.get(0, END)
+        feps = self.fepatoms_listbox.get(0,END)
+
+        state_qnr = dict()
+        for line in changin_atoms:
+            q1 = int(line.split()[0])
+            atoms_ = line.split()[1:]
+            no_bonds = list()
+            if 'H' in atoms_:
+                for i in range(len(atoms_)):
+                    if atoms_[i] == 'H':
+                        state = i+1
+                        if state not in state_qnr.keys():
+                            state_qnr[state] = dict()
+                        for line in feps:
+                            q = int(line.split()[0])
+                            if int(line.split()[state]) == 0:
+                                no_bonds.append(q)
+
+                        for qi in self.q_bonds[q1][i]:
+                            if qi not in no_bonds:
+                                state_qnr[state][q1] = qi
+
+
         #Make templates for ffld_server in pymol:
         for state in range(1, self.evb_states.get() + 1):
             self.session.stdin.write('create state%d_auto, state%d and (%s) \n' % (state, state, pml_select))
             for atomnr in sorted(self.fep_atoms.keys()):
                 if int(self.fep_atoms[atomnr][state - 1]) == 0:
                     self.session.stdin.write('remove state%d_auto and id %d\n' % (state, atomnr))
+
+            if state in state_qnr.keys():
+                for q1 in state_qnr[state].keys():
+                    q2 = state_qnr[state][q1]
+                    if q2 > 0:
+                       xyz = self.change_bond_length(q1, q2, 1.0, 'state%d_auto' % state)
+
             if not h_add_all:
                 self.session.stdin.write('fix_chemistry state%d_auto and (%s)\n' % (state, h_add_string))
             if len(h_add_string) > 0:
                 self.session.stdin.write('h_add state%d_auto and (%s)\n' % (state, h_add_string))
             if not h_add_all and len(h_add_string) > 0:
                 self.session.stdin.write('clean state%d_auto\n' % state)
+
 
             self.session.stdin.write('save qevb_org%d.pdb, state%d_auto\n' % (state, state))
             self.session.stdin.write('disable state%d\n' % state)
@@ -3972,7 +4057,15 @@ class SetupFEP(Toplevel):
 
             #Run ffld_server and generate parameter for state
             ff = 'OPLS'+self.force_field.get()
-            ffld_failed = self.run_ffld_server('qevb_tmp%d.pdb' % state, ff,
+
+            #Can use maestro files for ffld if existing (better structure description)
+            if os.path.isfile(self.app.workdir+'/qevb_tmp%d.mae' % state):
+                ffld_input = 'qevb_tmp%d.mae' % state
+                print 'Found MAE file. Using this by default.'
+            else:
+                ffld_input = 'qevb_tmp%d.pdb' % state
+
+            ffld_failed = self.run_ffld_server(ffld_input, ff,
                                                '%s/prm_tmp%d.out' % (self.app.workdir, state))
             if ffld_failed:
                 self.app.errorBox('Error', 'Parameter assignment with ffld_server failed!')
@@ -3988,6 +4081,12 @@ class SetupFEP(Toplevel):
         self.update_all()
         self.app.log('info','Parameter assignment for %d FEP states completed.' % self.evb_states.get())
         self.app.log(' ', 'Always control and verify parameters. Use with care!\n')
+
+        #try:
+        #    os.killpg(self.session.pid, signal.SIGTERM)
+        #except:
+        #    pass
+        #self.start_pymol()
 
     def check_imp(self,q1,q2,q3,q4):
         """

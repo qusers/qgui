@@ -1,0 +1,16 @@
+07.04.14 version 1.0.1b
+   +Changed fine tune search funciton in EVB RRC to 
+   check [dG(act) - dG(rxn)] when tuning Hij. Old version
+   checked only dG(rxn) when fine tuning Hij.
+
+09.04.14 version 1.0.2b
+    New standar error estimation implemented for Analyze LIE.
+    (statistical inefficiency. s = lim [tb<E>b/<E>] 
+
+13.10.14 version 1.0.4
+    User dependent settings are now stored independent of Qgui code
+    in $USER home directory (.qgui)
+
+09.12.14 version 1.0.5
+    Added state dependent el_scale for EVB setup.
+    Major improvement to autoassignment of parameters in FEP setup

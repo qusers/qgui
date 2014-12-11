@@ -320,6 +320,7 @@ class SetupEVB(Toplevel):
 
         self.update_all()
         self.update_excluded_pairs()
+        self.update_elscale()
         self.update_lambdasteps()
         self.show_var_frame()
 
@@ -2728,15 +2729,21 @@ class SetupEVB(Toplevel):
         scale = self.elscale.get()
 
         qpair = '%3d %3d' % (q1, q2)
-        self.qpair_elscale[qpair] = scale
+        self.qpair_elscale[qpair] = [scale, scale, scale, scale]
         self.update_elscale()
 
     def update_elscale(self):
+        """
+        Updates the el_scale listbox with user defined values
+        """
         self.elscale_listbox.delete(0, END)
 
-        for i in self.qpair_elscale.keys():
-            scale = str(self.qpair_elscale[i])
-            self.elscale_listbox.insert(END, '%7s   %s' % (i, scale))
+        for qpair in self.qpair_elscale.keys():
+            states = ' '
+            for state in range(self.evb_states.get()):
+                states += '%5s' % self.qpair_elscale[qpair][state]
+            self.elscale_listbox.insert(END, '%s %s' % (qpair, states))
+
 
     def add_elscale(self):
         try:
@@ -2754,8 +2761,9 @@ class SetupEVB(Toplevel):
                 q2 = int(self.qatoms_listbox.get(selections[i]).split()[0])
 
         qpair = '%3d %3d' % (q1, q2)
+        scale = self.elscale.get()
         if qpair not in self.qpair_elscale.keys():
-            self.qpair_elscale[qpair] = 1.00
+            self.qpair_elscale[qpair] = [scale, scale, scale, scale]
 
         self.update_elscale()
 
@@ -2778,6 +2786,30 @@ class SetupEVB(Toplevel):
                     self.app.errorBox('Error', 'An error has occured in el scale lists. Please report problem!')
 
         self.update_elscale()
+
+    def el_state(self, state):
+        """
+        Toggle el_scale for specific state state
+        """
+        selections = map(int, self.elscale_listbox.curselection())
+        if len(selections) == 0:
+            return
+
+        indexes = []
+        for selected in selections:
+            indexes.append(selected)
+            q1, q2 = map(int, self.elscale_listbox.get(selected).split()[0:2])
+
+            qpair = '%3d %3d' % (q1, q2)
+            qpair_rev = '%3d %3d' % (q2, q1)
+            if qpair_rev in self.qpair_elscale.keys():
+                qpair = qpair_rev
+            scale = self.elscale.get()
+            self.qpair_elscale[qpair][state] = scale
+
+        self.update_elscale()
+        for i in indexes:
+            self.elscale_listbox.select_set(indexes[i])
 
     def add_offdiagonal(self):
         try:
@@ -3322,7 +3354,6 @@ class SetupEVB(Toplevel):
 
         try:
             selections = map(int, self.elscale_listbox.curselection())
-
         except:
             return
 
@@ -3339,7 +3370,10 @@ class SetupEVB(Toplevel):
             self.elscale.delete(0, END)
             self.elscale.insert(0, scale)
 
-        self.qatoms_listbox.yview(min(indexes))
+        try:
+            self.qatoms_listbox.yview(min(indexes))
+        except:
+            return
         self.list_q_atoms_event()
 
     def list_offdiagonal_event(self, *args):
@@ -3655,8 +3689,9 @@ class SetupEVB(Toplevel):
         # [el_scale]
         if len(self.elscale_listbox.get(0, END)) > 0:
             fepfile.write('[el_scale]\n')
-            for line in self.elscale_listbox.get(0, END):
-                fepfile.write(line)
+            for el_scale in self.elscale_listbox.get(0, END):
+                fepfile.write('%s \n' % el_scale)
+            fepfile.write('\n')
 
         # [bond_types]
         fepfile.write('[bond_types]\n')
@@ -5436,14 +5471,16 @@ class SetupEVB(Toplevel):
         self.state4_enabled.append(self.state4)
 
         #### EL SCALE ####
-        elscale_label = Label(self.elscale_frame, text=u"Qi      Qj  Scaling",
-                            bg=self.main_color)
+        elscale_label = Label(self.elscale_frame, text=u"Qi      Qj      \N{GREEK SMALL LETTER PHI}1"
+                                                            u"    \N{GREEK SMALL LETTER PHI}2"
+                                                            u"    \N{GREEK SMALL LETTER PHI}3"
+                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         elscale_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
         elscale_yscroll = Scrollbar(self.softpair_frame)
         elscale_yscroll.grid(row = 1, rowspan=10, column = 6, sticky = 'nsw', padx=(0,10))
         self.elscale_listbox = Listbox(self.elscale_frame, yscrollcommand = softpairs_yscroll.set,
-                                      width=20, height=10, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED,
+                                      width=35, height=10, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED,
                                       exportselection=False)
         elscale_yscroll.config(command=self.elscale_listbox.yview)
         self.elscale_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
@@ -5460,11 +5497,34 @@ class SetupEVB(Toplevel):
 
         self.elscale = Spinbox(self.elscale_frame, width=7, highlightthickness=0, relief=GROOVE,
                                    from_=0.00, to=1.00, increment=0.1)
+        self.elscale.delete(0, END)
+        self.elscale.insert(0, '0.5')
         self.elscale.grid(row=5, column=7, columnspan=2)
 
         set_elscale = Button(self.elscale_frame, text='Set scale', highlightbackground=self.main_color,
                              command=self.set_elscale)
         set_elscale.grid(row=6, column=7, columnspan=2)
+
+        el_state1 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+                        command=lambda: self.el_state(0))
+        el_state1.grid(row=11, column=2)
+
+        el_state2 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+                        command=lambda: self.el_state(1))
+        el_state2.grid(row=11, column=3)
+
+        self.el_state3 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+                             highlightbackground=self.main_color, command=lambda: self.el_state(2))
+        self.el_state3.grid(row=11, column=4)
+        self.el_state3.config(state=DISABLED)
+        self.state3_enabled.append(self.el_state3)
+
+        self.el_state4 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+                             highlightbackground=self.main_color, command=lambda: self.el_state(3))
+        self.el_state4.grid(row=11, column=5)
+        self.el_state4.config(state=DISABLED)
+        self.state4_enabled.append(self.el_state4)
+
 
         #### OFF-DIAGONALS ####
         off_label = Label(self.offdiagonal_frame, text=u"\N{GREEK SMALL LETTER PHI}k  \N{GREEK SMALL LETTER PHI}l   "

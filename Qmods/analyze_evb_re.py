@@ -530,7 +530,7 @@ class EvbReactions(Toplevel):
 
         self.canvas.show()
 
-    def recomp_evb(self):
+    def recomp_evb(self): #TODO not working properly all the time! (delete dicts/list upon recompute..)
         """
         Recomputes EVB with current settings (alpha, Hij etc.) from main window.
         """
@@ -1277,7 +1277,8 @@ class EvbReactions(Toplevel):
         frames = {'Reaction Free Energy Profiles': self.plot_frame,
                   'Reaction Free energies': self.dg_frame,
                   'Activation Energies Total': self.ae_tot_frame,
-                  'Activation Energies Non Bonded': self.ae_nb_frame}
+                  'Activation Energies Non Bonded': self.ae_nb_frame,
+                  'Reorganization Energies': self.reorg_energies}
 
         for i in frames.keys():
             frames[i].grid_forget()
@@ -1315,13 +1316,13 @@ class EvbReactions(Toplevel):
         self.proj_frame = Frame(self.mainframe, bg=self.main_color)
         self.proj_frame.grid(row=1, column=0, pady=(0,10))
 
-        self.ae_tot_frame =  Frame(self.mainframe, bg=self.main_color)
+        self.ae_tot_frame = Frame(self.mainframe, bg=self.main_color)
 
         self.ae_nb_frame = Frame(self.mainframe, bg=self.main_color)
 
         self.dg_frame = Frame(self.mainframe, bg=self.main_color)
 
-        #self.rxn_energies = Frame(self.mainframe, bg=self.main_color)
+        self.reorg_energies = Frame(self.mainframe, bg=self.main_color)
 
 
         #topframe content
@@ -1408,7 +1409,8 @@ class EvbReactions(Toplevel):
         #Select frame
         self.view_frame = OptionMenu(sel_frame, self.selected_frame,
                                    'Reaction Free Energy Profiles', 'Reaction Free energies',
-                                   'Activation Energies Total', 'Activation Energies Non Bonded')
+                                   'Activation Energies Total', 'Activation Energies Non Bonded',
+                                   'Reorganization Energies')
         self.view_frame.config(highlightbackground=self.main_color, bg=self.main_color, width=30)
         self.view_frame.grid(row=4, column=0)
 

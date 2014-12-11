@@ -306,6 +306,17 @@ class EvbArrhenius(Toplevel):
             found_ene_files = False
             return found_ene_files
 
+        if not self.kT.get()[0].isdigit():
+            try:
+                T = float(path.split('/')[-2])
+            except:
+                print 'Could not recognize temperature, using 300 K'
+                T = 300.00
+        else:
+            T = float(self.kT.get())
+
+        kT = 0.001987209 * T
+
         #Sort energy files (if not Qfep will give messed up free energy profile!)
         enefiles = sorted(enefiles, key=lambda x: x.split('/')[-1])
 
@@ -313,7 +324,7 @@ class EvbArrhenius(Toplevel):
         inputfile = open('%s/qfep.inp' % path,'w')
         inputfile.write('%d\n' % len(enefiles))
         inputfile.write('2  0\n')
-        inputfile.write('%s  %s\n' % (self.kT.get(), self.skip_points.get()))
+        inputfile.write('%.4f  %s\n' % (kT, self.skip_points.get()))
         inputfile.write('%s\n' % self.bins.get())
         inputfile.write('%s\n' % self.binpoints_min.get())
         inputfile.write('%s\n' % self.alpha_entry.get())
@@ -1012,7 +1023,7 @@ class EvbArrhenius(Toplevel):
         self.kT = Entry(topframe, width=5, highlightthickness=0)
         self.kT.grid(row=1, column=4)
         self.kT.delete(0,END)
-        self.kT.insert(0, '0.596')
+        self.kT.insert(0, 'auto')
 
         self.bins = Entry(topframe, width=5, highlightthickness=0)
         self.bins.grid(row=1, column=5)
