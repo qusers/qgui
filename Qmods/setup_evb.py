@@ -5836,7 +5836,7 @@ class SetupEVB(Toplevel):
         overwrite = Checkbutton(frame4, bg=self.main_color, variable=self.check_overwrite)
         overwrite.grid(row=2,column=3, sticky='w')
 
-        submit_button = Button(frame4, text='Run', highlightbackground=self.main_color, command=None)
+        submit_button = Button(frame4, text='Run', highlightbackground=self.main_color, command=self.run_evb)
         submit_button.grid(row=1, column=0)
 
         save_button = Button(frame4, text='Write', highlightbackground=self.main_color,

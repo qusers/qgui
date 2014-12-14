@@ -2053,7 +2053,7 @@ class SetupFEP(Toplevel):
 
     def auto_setup(self):
         """
-        Use Impact to get charges, bonds, angles, torsions and impropers for Q-atoms in state 1 and 2.
+        Use ffld_server to get charges, bonds, angles, torsions and impropers for Q-atoms in state 1 - n; n_max=4.
         """
         self.app.errorBox('Info', 'Sorry, not implemented yet.')
         self.update_status()
@@ -3954,6 +3954,7 @@ class SetupFEP(Toplevel):
         #avoid ffld_server failure)
         changin_atoms = self.atoms_listbox.get(0, END)
         feps = self.fepatoms_listbox.get(0,END)
+        no_copy_atoms = dict()
 
         state_qnr = dict()
         for line in changin_atoms:
@@ -3970,18 +3971,28 @@ class SetupFEP(Toplevel):
                             q = int(line.split()[0])
                             if int(line.split()[state]) == 0:
                                 no_bonds.append(q)
+                                if not state in no_copy_atoms.keys():
+                                    no_copy_atoms[state] = list()
+                                no_copy_atoms[state].append('id %d' % self.q_atom_nr[q])
 
                         for qi in self.q_bonds[q1][i]:
                             if qi not in no_bonds:
                                 state_qnr[state][q1] = qi
 
-
+        #TODO do not copy all atoms and then reomve: avoid copying dummy atoms!
         #Make templates for ffld_server in pymol:
         for state in range(1, self.evb_states.get() + 1):
-            self.session.stdin.write('create state%d_auto, state%d and (%s) \n' % (state, state, pml_select))
-            for atomnr in sorted(self.fep_atoms.keys()):
-                if int(self.fep_atoms[atomnr][state - 1]) == 0:
-                    self.session.stdin.write('remove state%d_auto and id %d\n' % (state, atomnr))
+            not_string = ''
+            if state in no_copy_atoms.keys():
+                not_string = ' or '.join(no_copy_atoms[state])
+                self.session.stdin.write('create state%d_auto, state%d and (%s) and not (%s) \n'
+                                     % (state, state, pml_select, not_string))
+            else:
+                self.session.stdin.write('create state%d_auto, state%d and (%s)\n'
+                                     % (state, state, pml_select))
+            #for atomnr in sorted(self.fep_atoms.keys()):
+            #    if int(self.fep_atoms[atomnr][state - 1]) == 0:
+            #        self.session.stdin.write('remove state%d_auto and id %d\n' % (state, atomnr))
 
             if state in state_qnr.keys():
                 for q1 in state_qnr[state].keys():
@@ -6129,7 +6140,7 @@ class SetupFEP(Toplevel):
         overwrite = Checkbutton(frame4, bg=self.main_color, variable=self.check_overwrite)
         overwrite.grid(row=2,column=3, sticky='w')
 
-        submit_button = Button(frame4, text='Run', highlightbackground=self.main_color, command=None)
+        submit_button = Button(frame4, text='Run', highlightbackground=self.main_color, command=self.run_evb)
         submit_button.grid(row=1, column=0)
 
         save_button = Button(frame4, text='Write', highlightbackground=self.main_color,

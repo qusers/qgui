@@ -14,3 +14,7 @@
 09.12.14 version 1.0.5
     Added state dependent el_scale for EVB setup.
     Major improvement to autoassignment of parameters in FEP setup
+
+14.12.14 version 1.0.5b
+    Improved auto-generation of pymol template structures used for 
+    ffld_server in FEP setup
