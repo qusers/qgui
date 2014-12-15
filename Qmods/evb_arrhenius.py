@@ -132,8 +132,17 @@ class EvbArrhenius(Toplevel):
         try:
             temp = float(rundir.split('/')[-1])
             if temp < 270:
-                print 'Directory ../%s not recognized as temperature directory' % '/'.join(rundir.split('/')[-3:])
-                return
+                if len(os.listdir(rundir)) > 3:
+                    for t in os.listdir(rundir):
+                        try:
+                            temp = float(t.split('/')[-1])
+                            if temp > 270.0:
+                                temperatures.append('%s/%s' % (rundir, t))
+                        except:
+                            continue
+                else:
+                    print 'Directory ../%s not recognized as temperature directory' % '/'.join(rundir.split('/')[-3:])
+                    return
             temperatures.append(rundir)
 
         except:

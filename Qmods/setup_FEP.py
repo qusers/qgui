@@ -2941,7 +2941,17 @@ class SetupFEP(Toplevel):
         """
         Deletes selection from the change atom listbox
         """
-        pass
+        selection = map(int, self.atoms_listbox.curselection())
+
+        if len(selection) < 1:
+            print 'Nothing selected'
+            return
+
+        for selected in reversed(selection):
+            q = int(self.atoms_listbox.get(selected).split()[0])
+            del self.q_element[q]
+
+        self.update_change_atoms_listbox()
 
     def change_atom_state(self, state=0):
         """
@@ -3844,8 +3854,8 @@ class SetupFEP(Toplevel):
         if self.sync_pymol.get() != 0:
             self.session.stdin.write('alter_state 1, %s and id %d, (x,y,z)=(%.3f, %.3f, %.3f)\n'
                                      % (pymol_obj, atom1, c1_new[0], c1_new[1], c1_new[2]))
-        else:
-            return c1_new
+
+        return c1_new
 
     def auto_evb(self, only_charges=False):
         """
@@ -3979,10 +3989,11 @@ class SetupFEP(Toplevel):
                             if qi not in no_bonds:
                                 state_qnr[state][q1] = qi
 
-        #TODO do not copy all atoms and then reomve: avoid copying dummy atoms!
+
+
         #Make templates for ffld_server in pymol:
         for state in range(1, self.evb_states.get() + 1):
-            not_string = ''
+            atom_xyz = dict()
             if state in no_copy_atoms.keys():
                 not_string = ' or '.join(no_copy_atoms[state])
                 self.session.stdin.write('create state%d_auto, state%d and (%s) and not (%s) \n'
@@ -3990,15 +4001,20 @@ class SetupFEP(Toplevel):
             else:
                 self.session.stdin.write('create state%d_auto, state%d and (%s)\n'
                                      % (state, state, pml_select))
-            #for atomnr in sorted(self.fep_atoms.keys()):
-            #    if int(self.fep_atoms[atomnr][state - 1]) == 0:
-            #        self.session.stdin.write('remove state%d_auto and id %d\n' % (state, atomnr))
 
             if state in state_qnr.keys():
+                time.sleep(1)
                 for q1 in state_qnr[state].keys():
                     q2 = state_qnr[state][q1]
                     if q2 > 0:
-                       xyz = self.change_bond_length(q1, q2, 1.0, 'state%d_auto' % state)
+                        xyz = self.change_bond_length(q1, q2, 1.0, 'state%d_auto' % state)
+                        #If server delay, this sometimes fails --> do it explixitly in pdb file:
+                        resnr = self.q_atom_res[q1].split()[-1]
+                        name = self.q_atom_name[q1]
+                        if resnr not in atom_xyz.keys():
+                            atom_xyz[resnr] = dict()
+
+                        atom_xyz[resnr][name] = xyz
 
             if not h_add_all:
                 self.session.stdin.write('fix_chemistry state%d_auto and (%s)\n' % (state, h_add_string))
@@ -4010,6 +4026,34 @@ class SetupFEP(Toplevel):
 
             self.session.stdin.write('save qevb_org%d.pdb, state%d_auto\n' % (state, state))
             self.session.stdin.write('disable state%d\n' % state)
+
+            if len(atom_xyz) > 0:
+                #pymol can be delayed, wait until file exist:
+                t_delayed = 0
+                while not os.path.isfile('%s/qevb_org%d.pdb' % (self.app.workdir, state)):
+                    t_delayed += 1
+                    time.sleep(0.5)
+                    if t_delayed > 20:
+                        print 'Could  not find pdb template from pymol!!'
+                        return
+                old_pdb = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'r').readlines()
+                new_pdb = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'w')
+                for l in old_pdb:
+                    if 'ATOM' in l:
+                        resnr = l[21:26].strip()
+                        if resnr in atom_xyz.keys():
+                            name = l[11:16].strip()
+                            if name in atom_xyz[resnr].keys():
+                                x,y,z = atom_xyz[resnr][name][0:]
+                                new_pdb.write('%s%8.3f%8.3f%8.3f%s' % (l[0:30], x, y, z, l[54:]))
+                            else:
+                                new_pdb.write(l)
+                        else:
+                            new_pdb.write(l)
+                    else:
+                        new_pdb.write(l)
+
+                new_pdb.close()
 
         time.sleep(1)
         self.session.stdin.write('set grid_mode, 1\n')
@@ -4518,7 +4562,7 @@ class SetupFEP(Toplevel):
             os.chdir(self.app.workdir)
             tmpfile = open('.tmpfile', 'w')
             #os.system('bash runLIE.sh')
-            call('bash EVB_run.sh', shell=True, stdout=tmpfile, stderr=tmpfile)
+            call('bash FEP_run.sh', shell=True, stdout=tmpfile, stderr=tmpfile)
             job_id = open(self.app.workdir + '/.tmpfile','r').readlines()
             self.app.log('info','Submitting FEP jobs ...')
             for line in job_id:
