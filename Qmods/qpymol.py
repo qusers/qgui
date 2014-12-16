@@ -121,10 +121,13 @@ class ViewPyMol(Toplevel):
                         len_log = lines
                         if 'You clicked' in line:
                             self.app.log(' ', line)
-                            selected = ' '.join(line.split('/')[-2:])
-                            if '`' in selected:
-                                selected = ' '.join(selected.split('`'))
-                            selected = selected.split('\n')[0]
+                            res = line.split('/')[-2]
+                            name = line.split('/')[-1].split('\n')[0]
+                            if '`' in res:
+                                res = ' '.join(res.split('`'))
+                            if '`' in name:
+                                name = ''.join(name.split('`'))
+                            selected = '%s %s' % (res, name)
                             print selected
                             self.set_selection(selected)
 

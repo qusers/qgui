@@ -1890,7 +1890,6 @@ class SetupFEP(Toplevel):
                 if insert_coupling:
                     self.improper_couplings_listbox.insert(END, '%3d %3d' % (nr, bnd_nr))
 
-
     def update_excluded_pairs(self):
         """
         Updates excluded pairs listbox
@@ -2683,8 +2682,9 @@ class SetupFEP(Toplevel):
                 q2 = int(self.qatoms_listbox.get(selections[i]).split()[0])
 
         qpair = '%3d %3d' % (q1, q2)
+        scale = self.elscale.get()
         if qpair not in self.qpair_elscale.keys():
-            self.qpair_elscale[qpair] = 1.00
+            self.qpair_elscale[qpair] = [scale, scale, scale, scale]
 
         self.update_elscale()
 
@@ -4042,7 +4042,7 @@ class SetupFEP(Toplevel):
                     if 'ATOM' in l:
                         resnr = l[21:26].strip()
                         if resnr in atom_xyz.keys():
-                            name = l[11:16].strip()
+                            name = l[11:17].strip()
                             if name in atom_xyz[resnr].keys():
                                 x,y,z = atom_xyz[resnr][name][0:]
                                 new_pdb.write('%s%8.3f%8.3f%8.3f%s' % (l[0:30], x, y, z, l[54:]))
@@ -4137,11 +4137,6 @@ class SetupFEP(Toplevel):
         self.app.log('info','Parameter assignment for %d FEP states completed.' % self.evb_states.get())
         self.app.log(' ', 'Always control and verify parameters. Use with care!\n')
 
-        #try:
-        #    os.killpg(self.session.pid, signal.SIGTERM)
-        #except:
-        #    pass
-        #self.start_pymol()
 
     def check_imp(self,q1,q2,q3,q4):
         """
@@ -4513,7 +4508,7 @@ class SetupFEP(Toplevel):
                 return
 
         self.app.log(' ', 'Editing FEP file: \n'
-                          'Saved changes will be overwritten if settings are toggled later in Setup EVB')
+                          'Saved changes will be overwritten if settings are toggled later in Setup FEP')
 
         self.fileEdit = FileEdit(self, fepname)
         self.fileEdit.config(bg=self.main_color)
@@ -5745,14 +5740,16 @@ class SetupFEP(Toplevel):
         self.state4_enabled.append(self.state4)
 
         #### EL SCALE ####
-        elscale_label = Label(self.elscale_frame, text=u"Qi      Qj  Scaling",
-                            bg=self.main_color)
+        elscale_label = Label(self.elscale_frame, text=u"Qi      Qj      \N{GREEK SMALL LETTER PHI}1"
+                                                            u"    \N{GREEK SMALL LETTER PHI}2"
+                                                            u"    \N{GREEK SMALL LETTER PHI}3"
+                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         elscale_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
         elscale_yscroll = Scrollbar(self.softpair_frame)
         elscale_yscroll.grid(row = 1, rowspan=10, column = 6, sticky = 'nsw', padx=(0,10))
         self.elscale_listbox = Listbox(self.elscale_frame, yscrollcommand = softpairs_yscroll.set,
-                                      width=20, height=10, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED,
+                                      width=35, height=10, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED,
                                       exportselection=False)
         elscale_yscroll.config(command=self.elscale_listbox.yview)
         self.elscale_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
@@ -5769,11 +5766,33 @@ class SetupFEP(Toplevel):
 
         self.elscale = Spinbox(self.elscale_frame, width=7, highlightthickness=0, relief=GROOVE,
                                    from_=0.00, to=1.00, increment=0.1)
+        self.elscale.delete(0, END)
+        self.elscale.insert(0, '0.5')
         self.elscale.grid(row=5, column=7, columnspan=2)
 
         set_elscale = Button(self.elscale_frame, text='Set scale', highlightbackground=self.main_color,
                              command=self.set_elscale)
         set_elscale.grid(row=6, column=7, columnspan=2)
+
+        el_state1 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+                        command=lambda: self.el_state(0))
+        el_state1.grid(row=11, column=2)
+
+        el_state2 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+                        command=lambda: self.el_state(1))
+        el_state2.grid(row=11, column=3)
+
+        self.el_state3 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+                             highlightbackground=self.main_color, command=lambda: self.el_state(2))
+        self.el_state3.grid(row=11, column=4)
+        self.el_state3.config(state=DISABLED)
+        self.state3_enabled.append(self.el_state3)
+
+        self.el_state4 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+                             highlightbackground=self.main_color, command=lambda: self.el_state(3))
+        self.el_state4.grid(row=11, column=5)
+        self.el_state4.config(state=DISABLED)
+        self.state4_enabled.append(self.el_state4)
 
 
         #### LAMBDA STEPS ####
