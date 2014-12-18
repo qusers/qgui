@@ -3851,9 +3851,9 @@ class SetupFEP(Toplevel):
 
         print c1_new
 
-        if self.sync_pymol.get() != 0:
-            self.session.stdin.write('alter_state 1, %s and id %d, (x,y,z)=(%.3f, %.3f, %.3f)\n'
-                                     % (pymol_obj, atom1, c1_new[0], c1_new[1], c1_new[2]))
+        #if self.sync_pymol.get() != 0:
+        #    self.session.stdin.write('alter_state 1, %s and id %d, (x,y,z)=(%.3f, %.3f, %.3f)\n'
+        #                             % (pymol_obj, atom1, c1_new[0], c1_new[1], c1_new[2]))
 
         return c1_new
 

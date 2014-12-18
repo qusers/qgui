@@ -105,6 +105,19 @@ class QGui(object):
         self.getSettings()
         self.checkUpdates()
 
+        #Check for workdir key upon launce (-p)
+        try:
+            this_dir = sys.argv[1]
+            if this_dir == '-p':
+                new_workdir = os.getcwd()
+                print '\nWorkdir: %s\n' % new_workdir
+                self.q_settings[0] = new_workdir
+                self.workdir = new_workdir
+
+        except:
+            print '\nUsing workdir defined in settings'
+            print 'TIPS: Launch Qgui -p to automatically set current directory as workdir.\n'
+
     def show_splash(self):
         SplashScreen(self, self.root, self.qgui_path + "/Qmods/qgui_box.gif")
 
