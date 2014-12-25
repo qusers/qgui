@@ -1,3 +1,14 @@
+25.12.14 version 1.1.0
+    Brand new tool available in the Analyze EVB Reaction Energies
+    - Fit Marcus parabolas to the diabatic free energy functions
+    - Compute the (intrinsic) reorganization energies
+    - Visualize the diabatic state functions and the adiabatic
+      mixing with and without the eigenvector coeffecients 
+
+22.12.14 version 1.0.7b
+    Fixed normalization bug of EVB reaction free energy profiles
+    when recomputing EVB in Analyze EVB Reaction Energies.
+
 18.12.14 version 1.0.7
     Launching Qgui with -p automatically sets the workdir to the
     current directory.

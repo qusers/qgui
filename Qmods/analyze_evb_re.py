@@ -43,6 +43,20 @@ class EvbReactions(Toplevel):
 
         self.dg_plot = None
 
+        #Toggle between plotting diabatic states (reorganization energy calculations) and reaction free energy profiles
+        self.diabatic_plot = False
+
+        #Plot options in reorganization energy window
+        self.plot_hii = IntVar()
+        self.plot_fit = IntVar()
+        self.plot_norm_fit = IntVar()
+        self.plot_hij = IntVar()
+        self.plot_c = IntVar()
+        self.plot_mix = IntVar()
+
+        self.plot_hii.set(1)
+
+        #Selector when changing windows from dropdown menu
         self.selected_frame = StringVar()
 
         #{'name': {1:path, 2:path ....}}
@@ -61,6 +75,10 @@ class EvbReactions(Toplevel):
         #'EQtot', 'EQbnd', 'EQang', 'EQtor', 'EQimp' , 'EQel', 'EQvdw', 'qq_el', 'qq_vdw', 'qp_el', 'qp_vdw',
         # 'qw_el', 'qw_vdw', 'alpha', 'Hij'}
         self.titles_dU = dict()
+
+        #{title: {run:{energy_gap: [dg1, dg2, c1, c2, Hij]}}}
+        self.title_reorge = dict()
+
 
         self.dialog_window()
 
@@ -530,7 +548,164 @@ class EvbReactions(Toplevel):
 
         self.canvas.show()
 
-    def recomp_evb(self): #TODO not working properly all the time! (delete dicts/list upon recompute..)
+    def update_diabatic_plot(self):
+        """
+        Plots diabatic free energy functions and updates reorganization energies
+        {title: {run: 'diabatic': {energy_gap: [dg1, dg2, c1, c2, Hij], 'marcus1': [[e], [dg]], 'marcus2': {[e]:[dg]},
+         'norm1':[[e], [dg]], 'norm2': [[e], [dg]], 'reorg': value}}}
+        """
+        selections = map(int, self.titles_listbox.curselection())
+        if len(selections) == 0:
+            return
+
+        if self.dg_plot:
+            self.dg_plot.clear()
+
+        reorgs = list()
+
+        title = None
+        #Get reorganization energy avarage for selected title(s)
+        for i in selections:
+            title = self.titles_listbox.get(i)
+            if not title in self.title_reorge.keys():
+                return
+            for run in self.title_reorge[title].keys():
+                reorgs.append(self.title_reorge[title][run]['reorg'])
+
+        reorg_ave = np.average(reorgs)
+        reorg_se = np.std(reorgs) / np.sqrt(len(reorgs))
+
+        self.reorg_avg.config(state=NORMAL)
+        self.reorg_se.config(state=NORMAL)
+        self.reorg_avg.delete(0.0, END)
+        self.reorg_se.delete(0.0, END)
+
+        self.reorg_avg.insert(0.0, '%.1f' % reorg_ave)
+        self.reorg_se.insert(0.0, '%.1f' % reorg_se)
+
+        self.reorg_avg.config(state=DISABLED)
+        self.reorg_se.config(state=DISABLED)
+
+        #Plot selected run
+        runs = map(int, self.runs_listbox.curselection())
+        if len(runs) > 1:
+            print 'Select exactly one title with one run to plot diabatic energy functions'
+            return
+
+        run = self.runs_listbox.get(runs[0]).split('/')[-1]
+        path = None
+
+        for i in self.title_reorge[title].keys():
+            if i.split('/')[-1] == run:
+                path = i
+
+        if not path:
+            return
+
+        self.reorg_curr.config(state=NORMAL)
+        self.reorg_curr.delete(0.0, END)
+
+        self.reorg_curr.insert(0.0, '%.1f' % self.title_reorge[title][path]['reorg'])
+
+        self.reorg_curr.config(state=DISABLED)
+
+
+        #Create subplot
+        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.plot_window.subplots_adjust(hspace=0.5)
+
+        #X/Y labels
+        self.dg_plot.set_xlabel(r'$\Delta \epsilon$ (kcal/mol)')
+        self.dg_plot.set_ylabel(r'$\Delta g$ (kcal/mol)')
+
+        #Move label box outside plot region
+        box = self.dg_plot.get_position()
+        self.dg_plot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+        #Fit subplot to figure/canvas
+        #rect=(left,bottom,top,right)
+        self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
+
+        deps = list()
+        dg1_list = list()
+        dg2_list = list()
+        dg1_c1_list = list()
+        dg2_c2_list = list()
+        hij_list = list()
+        dg_mix = list()
+        dg_c_mix = list()
+
+        for enegap in sorted(self.title_reorge[title][path]['diabatic'].keys()):
+            deps.append(enegap)
+            dg1, dg2, c1, c2, hij = self.title_reorge[title][path]['diabatic'][enegap][0:]
+            dg1_list.append(dg1)
+            dg2_list.append(dg2)
+            dg1_c1_list.append(dg1 * c1)
+            dg2_c2_list.append(dg2 * c2)
+            hij_list.append(2 * hij * np.sqrt(c1*c2))
+            dg_mix.append(dg1 + dg2)
+            dg_c_mix.append((dg1*c1) + (dg2*c2))
+
+        #Check if something was plotted
+        plot_it = False
+
+        #Plot diabatic free energy functions?
+        if self.plot_hii.get() == 1:
+            plot_it = True
+            if self.plot_mix.get() == 0:
+                if self.plot_c.get() == 1:
+                    self.dg_plot.plot(deps, dg1_c1_list, 'bo', linewidth=1.0, label = r'$\Delta g_1$')
+                    self.dg_plot.plot(deps, dg2_c2_list, 'ro', linewidth=1.0, label = r'$\Delta g_2$')
+                else:
+                    self.dg_plot.plot(deps, dg1_list, 'bo', linewidth=1.0, label = r'$\Delta g_1$')
+                    self.dg_plot.plot(deps, dg2_list, 'ro', linewidth=1.0, label = r'$\Delta g_2$')
+            else:
+                self.dg_plot.plot(deps, dg1_list, 'bo', linewidth=1.0, label = r'$\Delta g_1$')
+                self.dg_plot.plot(deps, dg2_list, 'ro', linewidth=1.0, label = r'$\Delta g_2$')
+
+        #Plot fit?
+        if self.plot_fit.get() == 1:
+            plot_it = True
+            eps1 = self.title_reorge[title][path]['marcus1'][0]
+            marcus1 = self.title_reorge[title][path]['marcus1'][1]
+            eps2 = self.title_reorge[title][path]['marcus2'][0]
+            marcus2 = self.title_reorge[title][path]['marcus2'][1]
+
+            self.dg_plot.plot(eps1, marcus1, 'k', linewidth=2.0, label='Fit')
+            self.dg_plot.plot(eps2, marcus2, 'k', linewidth=2.0)
+
+        #Plot normalized fit?
+        if self.plot_norm_fit.get() == 1:
+            plot_it = True
+            eps1 = self.title_reorge[title][path]['norm1'][0]
+            norm1 = self.title_reorge[title][path]['norm1'][1]
+            eps2 = self.title_reorge[title][path]['norm2'][0]
+            norm2 = self.title_reorge[title][path]['norm2'][1]
+
+            self.dg_plot.plot(eps1, norm1, 'y', linewidth=2.0, label='Fit*')
+            self.dg_plot.plot(eps2, norm2, 'y', linewidth=2.0)
+
+        #Plot adiabatic mixing?
+        if self.plot_mix.get() == 1:
+            plot_it = True
+
+            if self.plot_c.get() == 1:
+                if self.plot_hij.get() == 1:
+                    self.dg_plot.plot(deps, [a - b for a, b in zip(dg_c_mix, hij_list)], 'kx',
+                                      label=r'$\Delta g_1 + \Delta g_2$')
+                else:
+                    self.dg_plot.plot(deps, dg_c_mix, 'kx', label=r'$\Delta g_1 + \Delta g_2$')
+    
+            else:
+                self.dg_plot.plot(deps, dg_mix, 'kx', label=r'$\Delta g_1 + \Delta g_2$')
+
+
+
+        if plot_it:
+            self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
+        self.canvas.show()
+
+    def recomp_evb(self):
         """
         Recomputes EVB with current settings (alpha, Hij etc.) from main window.
         """
@@ -547,8 +722,10 @@ class EvbReactions(Toplevel):
         for title in titles:
             self.get_binave_out(title, True)
 
+
         for title in titles:
             self.titles_listbox.selection_set(existing.index(title))
+            self.get_dG(title)
             self.compute_ave_activation_ene(title)
 
         self.update_tables()
@@ -849,7 +1026,7 @@ class EvbReactions(Toplevel):
         Goes through part 0 of qfep.out and extracts average EVB potential energies (state 1 + state 2) scaled with
         corresponding eigenvector coefficient and weighted by the lambda contribution (w_i) to RS/TS bin.
 
-        U(lambda_i) = w_i * (c1*u1(lambda_i) + c2*u2(1 - lambda_i) + C2**2 alpha - 2|c1c2|Hij
+        U(lambda_i) = w_i * (c1**2 * u1(lambda_i) + c2**2 * u2(1 - lambda_i) + C2**2 alpha - 2|c1c2|Hij
 
         returns rs_energies and ts_energies
         rs/ts_energies = {lambda_i: {w_i, EQtot, EQbnd, EQang, EQtor, EQimp, EQel, EQvdw, qq_el, qq_vdw, qp_el, qp_vdw,
@@ -1066,9 +1243,50 @@ class EvbReactions(Toplevel):
 
         return part0
 
+    def get_qfep_part2(self, path, filename):
+        """
+        Returns dictionary with energy gaps as keys and for each key a list on the form
+        [dg1, dg2, c1**2, c2**2]
+        A key with alpha and H12 will also be generated
+        """
+        de_dg = dict()
+        found_p2 = False
+        qfepout = '%s/%s' % (path, filename)
+
+        hij = 0
+        dg1 = 3
+        dg2 = 4
+        c1 = 7
+        c2 = 8
+
+        with open(qfepout, 'r') as p2:
+            for i in p2:
+                if '--> i, j, A_ij, mu_ij, eta_ij, r_xy0: #' in i:
+                    hij = float(i.split()[10])
+
+                if '# Linear combination co-efficients' in i:
+                    try:
+                        if float(i.split('=')[-1].split()[0]) == -1.0:
+                            dg1 = 4
+                            dg2 = 3
+                            c1 = 8
+                            c2 = 7
+                    except:
+                        continue
+                if '# Part 3: Bin-averaged summary:' in i:
+                    break
+                if found_p2:
+                    if len(i.split()) > 6 and '#' not in i:
+                        de_dg[float(i.split()[2])] = [float(i.split()[dg1]), float(i.split()[dg2]),
+                                                      float(i.split()[c1]), float(i.split()[c2]), hij]
+                if '# Part 2: Reaction free energy summary:' in i:
+                    found_p2 = True
+
+        return de_dg
+
     def get_qfep_part3(self, path, filename):
         """
-        Reads qfep.out in path, and returns part 2 as list
+        Reads qfep.out in path, and returns part 3 as list
         """
         part3 = list()
         found_part3 = False
@@ -1084,6 +1302,142 @@ class EvbReactions(Toplevel):
                     found_part3 = True
 
         return part3
+
+    def get_parab_data(self, de_dg12):
+        """
+        Sorts energy gaps from smalles to biggest and generate lists with points to crossing point.
+        These data points are used to make the fitted marcus parabolas.
+        """
+        e1_list = list()
+        dg1_list = list()
+        e2_list = list()
+        dg2_list = list()
+
+        e1_cont = list()
+        dg1_cont = list()
+        e2_cont = list()
+        dg2_cont = list()
+
+        for i in sorted(de_dg12.keys()):
+            dg1 = de_dg12[i][0]
+            dg2 = de_dg12[i][1]
+
+            if dg1 <= dg2:
+                e1_list.append(i)
+                dg1_list.append(dg1)
+                e2_cont.append(i)
+                dg2_cont.append(dg2)
+            else:
+                e2_list.append(i)
+                dg2_list.append(dg2)
+                e1_cont.append(i)
+                dg1_cont.append(dg1)
+
+        return e1_list, dg1_list, e2_list, dg2_list, e1_cont, dg1_cont, e2_cont, dg2_cont
+
+    def f_parabel(self, prm, x):
+        """
+        2nd order polynomial function where prm is a list with the three constants a,b,c (ax^2 + bx + c).
+        Returns parabel value for x.
+        """
+        return (prm[0] * x**2) + (prm[1] * x) + prm[2]
+
+    def reorgE_intrinsic(self, norm1, norm2):
+        """
+        Finds energy gap when the two normalized Marcus parabalas
+        are equal (lambda/4) and returns the reorganization energy.
+        """
+        a = norm1[0] - norm2[0]
+        b = norm1[1] - norm2[1]
+        c = norm1[2] - norm2[2]
+        de = (-b + np.sqrt(b**2 - (4*a*c)))/ (2*a)
+        de2 = (-b - np.sqrt(b**2 - (4*a*c)))/ (2*a)
+
+        l_4 = (norm1[0] * de**2) + (norm1[1] * de) + norm1[2]
+        l_4_2 = (norm1[0] * de2**2) + (norm1[1] * de2) + norm1[2]
+
+        if l_4_2 < l_4:
+            l_4 = l_4_2
+
+        return 4.*l_4
+
+    def normalize_parabel(self, prm):
+        """
+        Shifts a 2nd-order polynom to f(x) = 0 when f'(x) = 0. Returns new parameters.
+        f(x) = ax**2 + bx + c
+        prm = [a,b,c]
+        """
+        a,b,c = prm[0:]
+
+        f_shift = (b**2 - (2 * b**2)) / (4 * a) + c
+
+        return [a, b, (c - f_shift)]
+
+    def compute_reorganization(self):
+        """
+        Extractes the diabatic free energy functions, with corresponding eigenvector coefficients and computes
+        the (intrinsic) reaorganization energy by fitting marcus parabolas to the free energy functions. This is done
+        for all runs in the selected title.
+
+        {title: {run: 'diabatic': {energy_gap: [dg1, dg2, c1, c2, Hij], 'marcus1': [[e], [dg]], 'marcus2': {[e]:[dg]},
+         'norm1':[[e], [dg]], 'norm2': [[e], [dg]], 'reorg': value}}}
+        """
+
+        #Get selected title(s)
+        selections = map(int, self.titles_listbox.curselection())
+        if len(selections) == 0:
+            return
+
+        #Collect dibatic energies for all runs in title(s)
+        for selected in selections:
+            title = self.titles_listbox.get(selected)
+            self.app.log(' ', '\n\nComputing reorganization energies for %s\n' % title)
+            if title not in self.title_reorge.keys():
+                self.title_reorge[title] = dict()
+            for i in self.titles[title].keys():
+                path = self.titles[title][i]
+                self.app.log(' ', '%s\n' % path)
+                print '%s' % path
+                self.title_reorge[title][path] = dict()
+                de_dg = self.get_qfep_part2(path, 'qfep.out')
+                self.title_reorge[title][path]['diabatic'] = de_dg
+
+                e1, dg1, e2, dg2, e1_2, dg1_2, e2_2, dg2_2 = self.get_parab_data(de_dg)
+
+                #Generate energy gaps for parapbel function
+                e1_mod = np.arange(min(e1) * 1.6, max(e1) + 60, 10)
+                e2_mod = np.arange(min(e2) - 60, 1.6 * max(e2), 10)
+
+                #Genere fit parameters (a,b,c)
+                dg1_prm = np.polyfit(e1, dg1, 2)
+                dg2_prm = np.polyfit(e2, dg2, 2)
+
+                marc1 = self.f_parabel(dg1_prm, e1_mod)
+                marc2 = self.f_parabel(dg2_prm, e2_mod)
+
+                self.title_reorge[title][path]['marcus1'] = [e1_mod, marc1]
+                self.title_reorge[title][path]['marcus2'] = [e2_mod, marc2]
+
+                #Generate marcus parabolas with equal bottom point
+                #dg1_norm = np.polyfit(e1, map(lambda x: x - min(dg1 + dg1_2), dg1), 2)
+                #dg2_norm = np.polyfit(e2, map(lambda x: x - min(dg2 + dg2_2), dg2), 2)
+
+                dg1_norm = self.normalize_parabel(dg1_prm)
+                dg2_norm = self.normalize_parabel(dg2_prm)
+
+                norm1 = self.f_parabel(dg1_norm, e1_mod)
+                norm2 = self.f_parabel(dg2_norm, e2_mod)
+
+                self.title_reorge[title][path]['norm1'] = [e1_mod, norm1]
+                self.title_reorge[title][path]['norm2'] = [e2_mod, norm2]
+
+                reorge = self.reorgE_intrinsic(dg1_norm, dg2_norm)
+
+                self.title_reorge[title][path]['reorg'] = reorge
+
+            self.app.log(' ', '\n\nCompleted %s\n' % title)
+
+        self.update_diabatic_plot()
 
     def export_table(self, listbox):
         """
@@ -1191,7 +1545,10 @@ class EvbReactions(Toplevel):
         self.dg_act.config(state=DISABLED)
 
         #plot average Qfep for titles:
-        self.update_plot(d_eps, d_G, plot_titles)
+        if not self.diabatic_plot:
+            self.update_plot(d_eps, d_G, plot_titles)
+        else:
+            self.update_diabatic_plot()
 
     def list_runs_event(self, *args):
         selections = map(int, self.runs_listbox.curselection())
@@ -1233,8 +1590,10 @@ class EvbReactions(Toplevel):
                             dg_rxn.append(self.titles_dG[title][nr][1])
 
                         break
-
-        self.update_plot(d_eps, d_G, titles)
+        if not self.diabatic_plot:
+            self.update_plot(d_eps, d_G, titles)
+        else:
+            self.update_diabatic_plot()
 
 
         #Update dG values
@@ -1278,16 +1637,26 @@ class EvbReactions(Toplevel):
                   'Reaction Free energies': self.dg_frame,
                   'Activation Energies Total': self.ae_tot_frame,
                   'Activation Energies Non Bonded': self.ae_nb_frame,
-                  'Reorganization Energies': self.reorg_energies}
+                  'Reorganization Energies': self.plot_frame}
 
         for i in frames.keys():
             frames[i].grid_forget()
         try:
             frames[self.selected_frame.get()].grid(row=3, column=0, columnspan=2)
+            if self.selected_frame.get() == 'Reorganization Energies':
+                self.diabatic_plot = True
+                self.reorg_frame.grid(row=4, column=0, columnspan=2)
+                if self.dg_plot:
+                    self.dg_plot.clear()
+                    self.canvas.show()
+            else:
+                self.diabatic_plot = False
+                self.reorg_frame.grid_forget()
         except:
             pass
 
     def dialog_window(self):
+
         self.title('EVB Reaction Energies')
         self.mainframe = Frame(self, bg=self.main_color)
         self.mainframe.pack(fill='both', padx=(10, 10), pady=(10, 10))
@@ -1308,7 +1677,7 @@ class EvbReactions(Toplevel):
 
         #Bottomframe
         bottomframe = Frame(self.mainframe, bg=self.main_color)
-        bottomframe.grid(row=4, column=0)
+        bottomframe.grid(row=5, column=0)
 
         #Variable frames:
 
@@ -1322,7 +1691,7 @@ class EvbReactions(Toplevel):
 
         self.dg_frame = Frame(self.mainframe, bg=self.main_color)
 
-        self.reorg_energies = Frame(self.mainframe, bg=self.main_color)
+        self.reorg_frame = Frame(self.mainframe, bg=self.main_color)
 
 
         #topframe content
@@ -1563,6 +1932,109 @@ class EvbReactions(Toplevel):
         export_dg = Button(self.dg_frame, text='Export table', highlightbackground=self.main_color,
                            command=lambda: self.export_table(self.dg_listbox))
         export_dg.grid(row=17, column=0, columnspan=3, sticky='e')
+
+        #Reorganization Energies
+        hii_plot_check = Checkbutton(self.reorg_frame, bg=self.main_color, variable=self.plot_hii,
+                                          command=self.update_diabatic_plot)
+        hii_plot_check.grid(row=0, column=0, sticky='e')
+
+        hii = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
+        hii.tag_configure("subscript", offset=-1)
+        hii.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}g","",'i,j','subscript')
+        hii.grid(row=0, column=1, sticky='w')
+        hii.config(state=DISABLED)
+
+        fit_plot_check = Checkbutton(self.reorg_frame, bg=self.main_color, variable=self.plot_fit,
+                                          command=self.update_diabatic_plot)
+        fit_plot_check.grid(row=0, column=2, sticky='e')
+
+        fit = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
+        fit.insert("insert", 'Fit')
+        fit.grid(row=0, column=3, sticky='w')
+        fit.config(state=DISABLED)
+
+        fitnorm_plot_check = Checkbutton(self.reorg_frame, bg=self.main_color, variable=self.plot_norm_fit,
+                                          command=self.update_diabatic_plot)
+        fitnorm_plot_check.grid(row=0, column=4, sticky='e')
+
+        fit_norm = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
+        fit_norm.insert("insert", 'Fit shifted')
+        fit_norm.grid(row=0, column=5, sticky='w')
+        fit_norm.config(state=DISABLED)
+
+        cj_plot_check = Checkbutton(self.reorg_frame, bg=self.main_color, variable=self.plot_mix,
+                                          command=self.update_diabatic_plot)
+        cj_plot_check.grid(row=1, column=0, sticky='e')
+
+        mix = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
+        mix.insert("insert", u"\N{GREEK CAPITAL LETTER DELTA}gi + \N{GREEK CAPITAL LETTER DELTA}gj")
+        mix.grid(row=1, column=1, sticky='w')
+        mix.config(state=DISABLED)
+
+        ci_plot_check = Checkbutton(self.reorg_frame, bg=self.main_color, variable=self.plot_c,
+                                          command=self.update_diabatic_plot)
+        ci_plot_check.grid(row=1, column=2, sticky='e')
+
+        ci = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
+        ci.tag_configure("subscript", offset=-1)
+        ci.insert("insert",'C',"",'i,j','subscript')
+        ci.grid(row=1, column=3, sticky='w')
+        ci.config(state=DISABLED)
+
+        hij_plot_check = Checkbutton(self.reorg_frame, bg=self.main_color, variable=self.plot_hij,
+                                          command=self.update_diabatic_plot)
+        hij_plot_check.grid(row=1, column=4, sticky='e')
+
+        hij = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
+        hij.tag_configure("subscript", offset=-1)
+        hij.insert("insert",'H',"",'ij','subscript')
+        hij.grid(row=1, column=5, sticky='w')
+        hij.config(state=DISABLED)
+
+
+
+
+
+        avg_lamdbda = Text(self.reorg_frame, width=4, height=1, bg=self.main_color, borderwidth=0,
+                           highlightthickness=0)
+        avg_lamdbda.insert('insert', u"<\N{GREEK small LETTER LAMDA}>")
+        avg_lamdbda.grid(row=0, column=6, sticky='e', padx=(20,5))
+        avg_lamdbda.config(state=DISABLED)
+
+        curr_lamdbda = Text(self.reorg_frame, width=4, height=1, bg=self.main_color, borderwidth=0,
+                           highlightthickness=0)
+        curr_lamdbda.insert('insert', u" \N{GREEK small LETTER LAMDA} ")
+        curr_lamdbda.grid(row=1, column=6, sticky='e', padx=(20,5))
+        curr_lamdbda.config(state=DISABLED)
+
+        self.reorg_avg = Text(self.reorg_frame, width=8, height=1, bg=self.main_color, borderwidth=0,
+                              highlightthickness=0)
+        self.reorg_avg.insert('insert', '--')
+        self.reorg_avg.grid(row=0, column=7)
+        self.reorg_avg.config(state=DISABLED)
+
+        reorg_se = Text(self.reorg_frame, width=4, height=1, bg=self.main_color, borderwidth=0,
+                           highlightthickness=0)
+        reorg_se.insert('insert', "+/-")
+        reorg_se.grid(row=0, column=8, sticky='e', padx=(5,5))
+        reorg_se.config(state=DISABLED)
+
+        self.reorg_se = Text(self.reorg_frame, width=8, height=1, bg=self.main_color, borderwidth=0,
+                              highlightthickness=0)
+        self.reorg_se.insert('insert', '--')
+        self.reorg_se.grid(row=0, column=9)
+        self.reorg_se.config(state=DISABLED)
+
+        self.reorg_curr = Text(self.reorg_frame, width=8, height=1, bg=self.main_color, borderwidth=0,
+                               highlightthickness=0)
+        self.reorg_curr.insert('insert', '--')
+        self.reorg_curr.grid(row=1, column=7)
+        self.reorg_curr.config(state=DISABLED)
+
+        compute_reorg = Button(self.reorg_frame, text='Compute', highlightbackground=self.main_color,
+                               command=self.compute_reorganization)
+        compute_reorg.grid(row=1, column=8, columnspan=2)
+
 
 
         #Bottom frame Quit/save

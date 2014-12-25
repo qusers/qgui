@@ -113,6 +113,7 @@ class QGui(object):
                 print '\nWorkdir: %s\n' % new_workdir
                 self.q_settings[0] = new_workdir
                 self.workdir = new_workdir
+                self.saveSettings()
 
         except:
             print '\nUsing workdir defined in settings'
