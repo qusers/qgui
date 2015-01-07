@@ -1,3 +1,9 @@
+07.01.15 version 1.1.2
+    Fixed 'Recompute EVB' error in Analyze EVB Thermodynamic Parameters
+
+02.01.15 version 1.1.1
+    Improved x-labeling for plot in Analyze EVB Thermodynamic Parameters 
+
 25.12.14 version 1.1.0
     Brand new tool available in the Analyze EVB Reaction Energies
     - Fit Marcus parabolas to the diabatic free energy functions

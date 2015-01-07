@@ -592,6 +592,9 @@ class EvbReactions(Toplevel):
             print 'Select exactly one title with one run to plot diabatic energy functions'
             return
 
+        if len(runs) == 0:
+            return
+
         run = self.runs_listbox.get(runs[0]).split('/')[-1]
         path = None
 
@@ -695,7 +698,7 @@ class EvbReactions(Toplevel):
                                       label=r'$\Delta g_1 + \Delta g_2$')
                 else:
                     self.dg_plot.plot(deps, dg_c_mix, 'kx', label=r'$\Delta g_1 + \Delta g_2$')
-    
+
             else:
                 self.dg_plot.plot(deps, dg_mix, 'kx', label=r'$\Delta g_1 + \Delta g_2$')
 

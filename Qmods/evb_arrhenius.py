@@ -486,6 +486,12 @@ class EvbArrhenius(Toplevel):
             dh = parameters[i][0]
             ds = parameters[i][1]
 
+            #genereate temperature labels
+            temp_labels = list()
+            for inv in temp:
+                t_real = 1. / inv
+                temp_labels.append(r'$%.0f^{-1}$' % t_real)
+
             #plt.xticks([list of tick locations], [list of tick lables])
             self.dg_plot.errorbar(temp, dg, error, fmt='o', color=line_color, linestyle='None')
             if len(t_exc) > 0:
@@ -496,6 +502,11 @@ class EvbArrhenius(Toplevel):
                     self.dg_plot.errorbar(exc_t, exc_dg, exc_error, fmt='x', color=line_color, linestyle='None')
             self.dg_plot.plot(temp, dh * temp - ds, '-', linewidth=2.0, color=line_color, label=title)
             self.dg_plot.autoscale(enable=True)
+
+            #Set new xtick labels
+            self.dg_plot.axes.set_xticks(temp)
+            self.dg_plot.axes.set_xticklabels(temp_labels)
+
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
 
         self.canvas.show()
@@ -515,7 +526,7 @@ class EvbArrhenius(Toplevel):
             titles.append(self.titles_listbox.get(selected))
 
         for title in titles:
-            for temp in sorted(titles[title].keys()):
+            for temp in sorted(self.titles[title].keys()):
                     for path in self.titles[title][temp].keys():
                         self.write_qfep_inp(path)
                         self.run_qfep(path, 'qfep.inp')
