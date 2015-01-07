@@ -526,8 +526,10 @@ class EvbArrhenius(Toplevel):
             titles.append(self.titles_listbox.get(selected))
 
         for title in titles:
+            ##{name: T1: {1: [dG_act, dG_react]}, 2...}
             for temp in sorted(self.titles[title].keys()):
-                    for path in self.titles[title][temp].keys():
+                    for i in sorted(self.titles[title][temp].keys()):
+                        path = self.titles[title][temp][i]
                         self.write_qfep_inp(path)
                         self.run_qfep(path, 'qfep.inp')
 
