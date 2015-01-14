@@ -2627,14 +2627,16 @@ class SetupFEP(Toplevel):
             print 'Please specify valid number'
             return
 
-        for selected in selections:
+        for selected in range(len(selections)):
             try:
                 q = int(self.softcore_listbox.get(selections[selected]).split()[0])
+                for state in range(4):
+                    self.q_softcore[q][state] = soft[state]
             except:
                 print 'Could not get Q atom number ...'
+                print selections
 
-            for state in range(4):
-                self.q_softcore[q][state] = soft[state]
+
 
         self.update_softcore()
         self.softcore_listbox.selection_set(selections[0])
@@ -3090,12 +3092,13 @@ class SetupFEP(Toplevel):
         indexes = []
         for selected in selections:
             try:
-                q1 = int(self.charge_listbox.get(selected).split()[0])
+                q1 = int(self.softcore_listbox.get(selected).split()[0])
                 _ind = q1-1
                 self.qatoms_listbox.selection_set(_ind)
                 indexes.append(_ind)
 
             except:
+                print 'Did not find Q atom! Contact developer!'
                 return
         self.qatoms_listbox.yview(min(indexes))
         if len(selections) == 1:
@@ -6021,19 +6024,19 @@ class SetupFEP(Toplevel):
         s4.grid(row=5, column=4)
 
         self.softcore1 = Spinbox(self.softcore_frame, width=7, highlightthickness=0, relief=GROOVE,
-                                   from_=0, to=100, increment=1)
+                                   from_=0, to=1000, increment=10)
         self.softcore1.grid(row=4, column=3)
         self.softcore1.delete(0, END)
         self.softcore1.insert(0, '')
 
         self.softcore2 = Spinbox(self.softcore_frame, width=7, highlightthickness=0, relief=GROOVE,
-                                   from_=-3.00, to=3.00, increment=0.01)
+                                   from_=0, to=1000, increment=10)
         self.softcore2.grid(row=4, column=4)
         self.softcore2.delete(0, END)
         self.softcore2.insert(0, '')
 
         self.softcore3 = Spinbox(self.softcore_frame, width=7, highlightthickness=0, relief=GROOVE,
-                                   from_=-3.00, to=3.00, increment=0.01)
+                                   from_=0, to=1000, increment=10)
         self.softcore3.grid(row=6, column=3)
         self.softcore3.delete(0, END)
         self.softcore3.insert(0, '')
@@ -6041,7 +6044,7 @@ class SetupFEP(Toplevel):
         self.state3_enabled.append(self.softcore3)
 
         self.softcore4 = Spinbox(self.softcore_frame, width=7, highlightthickness=0, relief=GROOVE,
-                                   from_=-3.00, to=3.00, increment=0.01)
+                                   from_=0, to=1000, increment=10)
         self.softcore4.grid(row=6, column=4)
         self.softcore4.delete(0, END)
         self.softcore4.insert(0, '')
