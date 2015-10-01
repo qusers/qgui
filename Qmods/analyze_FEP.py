@@ -252,6 +252,8 @@ class AnalyzeFEP(Toplevel):
         inputfile.write('0\n')
         inputfile.write('%s\n' % self.linear_comb.get())
 
+        #ene files must be read by Qfep from 1 --> 0
+        enefiles.reverse()
         for ene in enefiles:
             inputfile.write('%s\n' % ene.split('/')[-1])
 
@@ -294,8 +296,8 @@ class AnalyzeFEP(Toplevel):
 
         part1 = {'lambda': list(), 'sum_dGf': list(), 'sum_dGr': list(), 'dG': list() }
 
-        if not os.path.isfile('%s/%s' % (path, qfep)):
-            self.run_qfep(path, 'qfep.inp')
+        #if not os.path.isfile('%s/%s' % (path, qfep)):
+        self.run_qfep(path, 'qfep.inp')
 
         with open('%s/%s' % (path, qfep), 'r') as qfep_out:
             found_part1 = False

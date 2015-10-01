@@ -3784,8 +3784,14 @@ class SetupFEP(Toplevel):
         softcores = self.softcore_listbox.get(0, END)
         if len(softcores) > 0:
             fepfile.write('[softcore]\n')
+            qsoft = list()
             for softcore in softcores:
                 fepfile.write('%s\n' % softcore)
+                qsoft.append(int(softcore.split()[0]))
+            for q in sorted(self.q_atom_nr.keys()):
+                if q not in qsoft:
+                    fepfile.write('%3d'  % q + self.evb_states.get() * '  0.0  ' + '\n')
+
             fepfile.write('\n')
 
         #[monitor_groups]

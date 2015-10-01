@@ -1,0 +1,1656 @@
+*------------------------------------------------------------------
+*
+* Q residue library file: CHARMM27 nucleic acid library
+*
+*------------------------------------------------------------------
+{ADE}
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 C5     CN5          0.280
+        14 N7     NN4         -0.710
+        15 C8     CN4          0.340
+        16 H8     HN3          0.120
+        17 N9     NN2         -0.050
+        18 N1     NN3A        -0.740
+        19 C2     CN4          0.500
+        20 H2     HN3          0.130
+        21 N3     NN3A        -0.750
+        22 C4     CN5          0.430
+        23 C6     CN2          0.460
+        24 N6     NN1         -0.770
+        25 H61    HN1          0.380
+        26 H62    HN1          0.380
+        27 C2'    CN8         -0.180
+        28 H2''   HN8          0.090
+        29 H2'    HN8          0.090
+        30 C3'    CN7          0.010
+        31 H3'    HN7          0.090
+        32 O3'    ON2         -0.570
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N1
+       C6   N6
+       N6   H61
+       N6   H62
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   H2
+       N1   C6
+       C2   N3
+       C4   C5
+       N7   C8
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+       H62     C6    H61     N6
+        N6     N1     C5     C6
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    C5    N7    C8    H8    N9    N1    C2    H2    N3    C4    C6    N6    H61    H62
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{AD0}                 !neutral 5', neutral 3', net charge 0.00
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.080
+         2 O1P    ON3         -0.360
+         3 O2P    ON3         -0.360
+         4 O5'    ON2         -0.360
+         5 C5'    CN8B        -0.180
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 C5     CN5          0.280
+        14 N7     NN4         -0.710
+        15 C8     CN4          0.340
+        16 H8     HN3          0.120
+        17 N9     NN2         -0.050
+        18 N1     NN3A        -0.740
+        19 C2     CN4          0.500
+        20 H2     HN3          0.130
+        21 N3     NN3A        -0.750
+        22 C4     CN5          0.430
+        23 C6     CN2          0.460
+        24 N6     NN1         -0.770
+        25 H61    HN1          0.380
+        26 H62    HN1          0.380
+        27 C2'    CN8         -0.180
+        28 H2''   HN8          0.090
+        29 H2'    HN8          0.090
+        30 C3'    CN7          0.270
+        31 H3'    HN7          0.090
+        32 O3'    ON2         -0.360
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N1
+       C6   N6
+       N6   H61
+       N6   H62
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   H2
+       N1   C6
+       C2   N3
+       C4   C5
+       N7   C8
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+       H62     C6    H61     N6
+        N6     N1     C5     C6
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    C5    N7    C8    H8    N9    N1    C2    H2    N3    C4    C6    N6    H61    H62
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{AD1}                 !terminal 5', -0.47 3', net charge -0.47
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 H5T    HN5          0.430
+         2 O5'    ON5         -0.660
+         3 C5'    CN8B         0.050
+         4 H5'    HN8          0.090
+         5 H5''   HN8          0.090
+         6 C4'    CN7          0.160
+         7 H4'    HN7          0.090
+         8 O4'    ON6         -0.500
+         9 C1'    CN7B         0.160
+        10 H1'    HN7          0.090
+        11 C5     CN5          0.280
+        12 N7     NN4         -0.710
+        13 C8     CN4          0.340
+        14 H8     HN3          0.120
+        15 N9     NN2         -0.050
+        16 N1     NN3A        -0.740
+        17 C2     CN4          0.500
+        18 H2     HN3          0.130
+        19 N3     NN3A        -0.750
+        20 C4     CN5          0.430
+        21 C6     CN2          0.460
+        22 N6     NN1         -0.770
+        23 H61    HN1          0.380
+        24 H62    HN1          0.380
+        25 C2'    CN8         -0.180
+        26 H2''   HN8          0.090
+        27 H2'    HN8          0.090
+        28 C3'    CN7          0.010
+        29 H3'    HN7          0.090
+        30 O3'    ON2         -0.570
+    [bonds]
+       H5T  O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N1
+       C6   N6
+       N6   H61
+       N6   H62
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   H2
+       N1   C6
+       C2   N3
+       C4   C5
+       N7   C8
+    [connections]   !how to bond to previous and next
+        tail     O3'
+    [impropers]
+       H62     C6    H61     N6
+        N6     N1     C5     C6
+    [charge_groups] !charge groups, with switch atom first
+    H5T    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    C5    N7    C8    H8    N9    N1    C2    H2    N3    C4    C6    N6
+H61    H62
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{AD5}                 ! neutral 5', -0.47 3', net charge -0.47
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.080
+         2 O1P    ON3         -0.360
+         3 O2P    ON3         -0.360
+         4 O5'    ON2         -0.360
+         5 C5'    CN8B        -0.180
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 C5     CN5          0.280
+        14 N7     NN4         -0.710
+        15 C8     CN4          0.340
+        16 H8     HN3          0.120
+        17 N9     NN2         -0.050
+        18 N1     NN3A        -0.740
+        19 C2     CN4          0.500
+        20 H2     HN3          0.130
+        21 N3     NN3A        -0.750
+        22 C4     CN5          0.430
+        23 C6     CN2          0.460
+        24 N6     NN1         -0.770
+        25 H61    HN1          0.380
+        26 H62    HN1          0.380
+        27 C2'    CN8         -0.180
+        28 H2''   HN8          0.090
+        29 H2'    HN8          0.090
+        30 C3'    CN7          0.010
+        31 H3'    HN7          0.090
+        32 O3'    ON2         -0.570
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N1
+       C6   N6
+       N6   H61
+       N6   H62
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   H2
+       N1   C6
+       C2   N3
+       C4   C5
+       N7   C8
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+       H62     C6    H61     N6
+        N6     N1     C5     C6
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    C5    N7    C8    H8    N9    N1    C2    H2    N3    C4    C6    N6    H61    H62
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{AD6}                 !-0.53 5', terminal 3', net charge -0.53
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 C5     CN5          0.280
+        14 N7     NN4         -0.710
+        15 C8     CN4          0.340
+        16 H8     HN3          0.120
+        17 N9     NN2         -0.050
+        18 N1     NN3A        -0.740
+        19 C2     CN4          0.500
+        20 H2     HN3          0.130
+        21 N3     NN3A        -0.750
+        22 C4     CN5          0.430
+        23 C6     CN2          0.460
+        24 N6     NN1         -0.770
+        25 H61    HN1          0.380
+        26 H62    HN1          0.380
+        27 C2'    CN8         -0.180
+        28 H2''   HN8          0.090
+        29 H2'    HN8          0.090
+        30 C3'    CN7          0.110 !At. no., name, iac, charge
+        31 H3'    HN7          0.090 !At. no., name, iac, charge
+        32 O3'    ON5         -0.600 !At. no., name, iac, charge
+        33 H3''   HN5          0.400 !At. no., name, iac, charge
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N1
+       C6   N6
+       N6   H61
+       N6   H62
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   H2
+       N1   C6
+       C2   N3
+       C4   C5
+       N7   C8
+       O3'  H3''
+    [connections]   !how to bond to previous and next
+        head     P
+    [impropers]
+       H62     C6    H61     N6
+        N6     N1     C5     C6
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    C5    N7    C8    H8    N9    N1    C2    H2    N3    C4    C6    N6    H61    H62
+    C2'    H2''    H2'
+    C3'    H3'    O3'   H3''
+*------------------------------------------------------------------
+{CYT}
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N1     NN2         -0.130
+        14 C6     CN3          0.050
+        15 H6     HN3          0.170
+        16 C2     CN1          0.520
+        17 O2     ON1C        -0.490
+        18 N3     NN3         -0.660
+        19 C4     CN2          0.650
+        20 N4     NN1         -0.750
+        21 H41    HN1          0.370
+        22 H42    HN1          0.330
+        23 C5     CN3         -0.130
+        24 H5     HN3          0.070
+        25 C2'    CN8         -0.180
+        26 H2''   HN8          0.090
+        27 H2'    HN8          0.090
+        28 C3'    CN7          0.010
+        29 H3'    HN7          0.090
+        30 O3'    ON2         -0.570
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       C4   N4
+       N4   H41
+       N4   H42
+       C4   C5
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C5   H5
+       C6   H6
+       C2   O2
+       C5   C6
+       N3   C4
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        N4     N3     C5     C4
+       H42     C4    H41     N4
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    C4    N4    H41    H42    C5    H5
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{CY0}                 !neutral 5', neutral 3', net charge 0.00
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.080
+         2 O1P    ON3         -0.360
+         3 O2P    ON3         -0.360
+         4 O5'    ON2         -0.360
+         5 C5'    CN8B        -0.180
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N1     NN2         -0.130
+        14 C6     CN3          0.050
+        15 H6     HN3          0.170
+        16 C2     CN1          0.520
+        17 O2     ON1C        -0.490
+        18 N3     NN3         -0.660
+        19 C4     CN2          0.650
+        20 N4     NN1         -0.750
+        21 H41    HN1          0.370
+        22 H42    HN1          0.330
+        23 C5     CN3         -0.130
+        24 H5     HN3          0.070
+        25 C2'    CN8         -0.180
+        26 H2''   HN8          0.090
+        27 H2'    HN8          0.090
+        28 C3'    CN7          0.270
+        29 H3'    HN7          0.090
+        30 O3'    ON2         -0.360
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       C4   N4
+       N4   H41
+       N4   H42
+       C4   C5
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C5   H5
+       C6   H6
+       C2   O2
+       C5   C6
+       N3   C4
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        N4     N3     C5     C4
+       H42     C4    H41     N4
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    C4    N4    H41    H42    C5    H5
+    C2'    H2''   H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{CY1}                 !terminal 5', -0.47 3', net charge -0.47
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 H5T    HN5          0.430
+         2 O5'    ON5         -0.660
+         3 C5'    CN8B         0.050
+         4 H5'    HN8          0.090
+         5 H5''   HN8          0.090
+         6 C4'    CN7          0.160
+         7 H4'    HN7          0.090
+         8 O4'    ON6         -0.500
+         9 C1'    CN7B         0.160
+        10 H1'    HN7          0.090
+        11 N1     NN2         -0.130
+        12 C6     CN3          0.050
+        13 H6     HN3          0.170
+        14 C2     CN1          0.520
+        15 O2     ON1C        -0.490
+        16 N3     NN3         -0.660
+        17 C4     CN2          0.650
+        18 N4     NN1         -0.750
+        19 H41    HN1          0.370
+        20 H42    HN1          0.330
+        21 C5     CN3         -0.130
+        22 H5     HN3          0.070
+        23 C2'    CN8         -0.180
+        24 H2''   HN8          0.090
+        25 H2'    HN8          0.090
+        26 C3'    CN7          0.010
+        27 H3'    HN7          0.090
+        28 O3'    ON2         -0.570
+    [bonds]
+       H5T  O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       C4   N4
+       N4   H41
+       N4   H42
+       C4   C5
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C5   H5
+       C6   H6
+       C2   O2
+       C5   C6
+       N3   C4
+    [connections]   !how to bond to previous and next
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        N4     N3     C5     C4
+       H42     C4    H41     N4
+    [charge_groups] !charge groups, with switch atom first
+    H5T    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    C4    N4    H41    H42    C5    H5
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{CY6}                 !-0.53 5', terminal 3', net charge -0.53
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500 !At. no., name, iac, charge
+         2 O1P    ON3         -0.780 !At. no., name, iac, charge
+         3 O2P    ON3         -0.780 !At. no., name, iac, charge
+         4 O5'    ON2         -0.570 !At. no., name, iac, charge
+         5 C5'    CN8B        -0.080 !At. no., name, iac, charge
+         6 H5'    HN8          0.090 !At. no., name, iac, charge
+         7 H5''   HN8          0.090 !At. no., name, iac, charge
+         8 C4'    CN7          0.160 !At. no., name, iac, charge
+         9 H4'    HN7          0.090 !At. no., name, iac, charge
+        10 O4'    ON6         -0.500 !At. no., name, iac, charge
+        11 C1'    CN7B         0.160 !At. no., name, iac, charge
+        12 H1'    HN7          0.090 !At. no., name, iac, charge
+        13 N1     NN2         -0.130 !At. no., name, iac, charge
+        14 C6     CN3          0.050 !At. no., name, iac, charge
+        15 H6     HN3          0.170 !At. no., name, iac, charge
+        16 C2     CN1          0.520 !At. no., name, iac, charge
+        17 O2     ON1C        -0.490 !At. no., name, iac, charge
+        18 N3     NN3         -0.660 !At. no., name, iac, charge
+        19 C4     CN2          0.650 !At. no., name, iac, charge
+        20 N4     NN1         -0.750 !At. no., name, iac, charge
+        21 H41    HN1          0.370 !At. no., name, iac, charge
+        22 H42    HN1          0.330 !At. no., name, iac, charge
+        23 C5     CN3         -0.130 !At. no., name, iac, charge
+        24 H5     HN3          0.070 !At. no., name, iac, charge
+        25 C2'    CN8         -0.180 !At. no., name, iac, charge
+        26 H2''   HN8          0.090 !At. no., name, iac, charge
+        27 H2'    HN8          0.090 !At. no., name, iac, charge
+        28 C3'    CN7          0.110 !At. no., name, iac, charge
+        29 H3'    HN7          0.090 !At. no., name, iac, charge
+        30 O3'    ON5         -0.600 !At. no., name, iac, charge
+        31 H3''   HN5          0.400 !At. no., name, iac, charge
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   O2
+       C2   N3
+       N3   C4
+       C4   N4
+       N4   H41
+       N4   H42
+       C4   C5
+       C5   C6
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C5   H5
+       C6   H6
+       O3'  H3''
+    [connections]   !how to bond to previous and next
+        head     P
+    [impropers]
+        O2     N1     N3     C2
+        N4     N3     C5     C4
+       H42     C4    H41     N4
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    C4    N4    H41    H42    C5    H5
+    C2'    H2''   H2'
+    C3'    H3'    O3'   H3''
+*------------------------------------------------------------------
+{CY7}                 ! neutral 5', terminal 3', net charge 0.00
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.080
+         2 O1P    ON3         -0.360
+         3 O2P    ON3         -0.360
+         4 O5'    ON2         -0.360
+         5 C5'    CN8B        -0.180
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N1     NN2         -0.130
+        14 C6     CN3          0.050
+        15 H6     HN3          0.170
+        16 C2     CN1          0.520
+        17 O2     ON1C        -0.490
+        18 N3     NN3         -0.660
+        19 C4     CN2          0.650
+        20 N4     NN1         -0.750
+        21 H41    HN1          0.370
+        22 H42    HN1          0.330
+        23 C5     CN3         -0.130
+        24 H5     HN3          0.070
+        25 C2'    CN8         -0.180
+        26 H2''   HN8          0.090
+        27 H2'    HN8          0.090
+        28 C3'    CN7          0.110
+        29 H3'    HN7          0.090
+        30 O3'    ON5         -0.600
+        31 H3''   HN5          0.400
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       C4   N4
+       N4   H41
+       N4   H42
+       C4   C5
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C5   H5
+       C6   H6
+       C2   O2
+       C5   C6
+       N3   C4
+       O3'  H3''
+    [connections]   !how to bond to previous and next
+        head     P
+    [impropers]
+        O2     N1     N3     C2
+        N4     N3     C5     C4
+       H42     C4    H41     N4
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    C4    N4    H41    H42    C5    H5
+    C2'    H2''    H2'
+    C3'  H3'' O3'  H3'
+*------------------------------------------------------------------
+{GUA}
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N9     NN2B        -0.020
+        14 C4     CN5          0.260
+        15 N3     NN3G        -0.740
+        16 C2     CN2          0.750
+        17 N1     NN2G        -0.340
+        18 H1     HN2          0.260
+        19 N2     NN1         -0.680
+        20 H21    HN1          0.320
+        21 H22    HN1          0.350
+        22 C6     CN1          0.540
+        23 O6     ON1         -0.510
+        24 C5     CN5G         0.000
+        25 N7     NN4         -0.600
+        26 C8     CN4          0.250
+        27 H8     HN3          0.160
+        28 C2'    CN8         -0.180
+        29 H2''   HN8          0.090
+        30 H2'    HN8          0.090
+        31 C3'    CN7          0.010
+        32 H3'    HN7          0.090
+        33 O3'    ON2         -0.570
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N2
+       C2   N1
+       N2   H21
+       N2   H22
+       N1   H1
+       N1   C6
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   N3
+       C4   C5
+       N7   C8
+       C6   O6
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        N2     N3     N1     C2
+        O6     N1     C5     C6
+       H22    H21     C2     N2
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N9    C4    N3    C2    N1    H1    N2    H21    H22    C6    O6    C5    N7    C8    H8
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{GU0}                 !neutral 5', neutral 3', net charge 0.00
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.080
+         2 O1P    ON3         -0.360
+         3 O2P    ON3         -0.360
+         4 O5'    ON2         -0.360
+         5 C5'    CN8B        -0.180
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N9     NN2B        -0.020
+        14 C4     CN5          0.260
+        15 N3     NN3G        -0.740
+        16 C2     CN2          0.750
+        17 N1     NN2G        -0.340
+        18 H1     HN2          0.260
+        19 N2     NN1         -0.680
+        20 H21    HN1          0.320
+        21 H22    HN1          0.350
+        22 C6     CN1          0.540
+        23 O6     ON1         -0.510
+        24 C5     CN5G         0.000
+        25 N7     NN4         -0.600
+        26 C8     CN4          0.250
+        27 H8     HN3          0.160
+        28 C2'    CN8         -0.180
+        29 H2''   HN8          0.090
+        30 H2'    HN8          0.090
+        31 C3'    CN7          0.270
+        32 H3'    HN7          0.090
+        33 O3'    ON2         -0.360
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N2
+       C2   N1
+       N2   H21
+       N2   H22
+       N1   H1
+       N1   C6
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   N3
+       C4   C5
+       N7   C8
+       C6   O6
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        N2     N3     N1     C2
+        O6     N1     C5     C6
+       H22    H21     C2     N2
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N9    C4    N3    C2    N1    H1    N2    H21    H22    C6    O6    C5    N7    C8    H8
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{GU1}                 !terminal 5', -0.47 3', net charge -0.47
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 H5T    HN5          0.430
+         2 O5'    ON5         -0.660
+         3 C5'    CN8B         0.050
+         4 H5'    HN8          0.090
+         5 H5''   HN8          0.090
+         6 C4'    CN7          0.160
+         7 H4'    HN7          0.090
+         8 O4'    ON6         -0.500
+         9 C1'    CN7B         0.160
+        10 H1'    HN7          0.090
+        11 N9     NN2B        -0.020
+        12 C4     CN5          0.260
+        13 N3     NN3G        -0.740
+        14 C2     CN2          0.750
+        15 N1     NN2G        -0.340
+        16 H1     HN2          0.260
+        17 N2     NN1         -0.680
+        18 H21    HN1          0.320
+        19 H22    HN1          0.350
+        20 C6     CN1          0.540
+        21 O6     ON1         -0.510
+        22 C5     CN5G         0.000
+        23 N7     NN4         -0.600
+        24 C8     CN4          0.250
+        25 H8     HN3          0.160
+        26 C2'    CN8         -0.180
+        27 H2''   HN8          0.090
+        28 H2'    HN8          0.090
+        29 C3'    CN7          0.010
+        30 H3'    HN7          0.090
+        31 O3'    ON2         -0.570
+    [bonds]
+       H5T  O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N2
+       C2   N1
+       N2   H21
+       N2   H22
+       N1   H1
+       N1   C6
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   N3
+       C4   C5
+       N7   C8
+       C6   O6
+    [connections]   !how to bond to previous and next
+        tail     O3'
+    [impropers]
+        N2     N3     N1     C2
+        O6     N1     C5     C6
+       H22    H21     C2     N2
+    [charge_groups] !charge groups, with switch atom first
+    H5T  O5'  C5'  H5'  H5''
+    C4'    H4'    O4'    C1'    H1'
+    N9    C4    N3    C2    N1    H1    N2    H21    H22    C6    O6    C5    N7    C8    H8
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{GU2}                 !terminal 5', neutral 3', net charge 0.00
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 H5T    HN5          0.430
+         2 O5'    ON5         -0.660
+         3 C5'    CN8B         0.050
+         4 H5'    HN8          0.090
+         5 H5''   HN8          0.090
+         6 C4'    CN7          0.160
+         7 H4'    HN7          0.090
+         8 O4'    ON6         -0.500
+         9 C1'    CN7B         0.160
+        10 H1'    HN7          0.090
+        11 N9     NN2B        -0.020
+        12 C4     CN5          0.260
+        13 N3     NN3G        -0.740
+        14 C2     CN2          0.750
+        15 N1     NN2G        -0.340
+        16 H1     HN2          0.260
+        17 N2     NN1         -0.680
+        18 H21    HN1          0.320
+        19 H22    HN1          0.350
+        20 C6     CN1          0.540
+        21 O6     ON1         -0.510
+        22 C5     CN5G         0.000
+        23 N7     NN4         -0.600
+        24 C8     CN4          0.250
+        25 H8     HN3          0.160
+        26 C2'    CN8         -0.180
+        27 H2''   HN8          0.090
+        28 H2'    HN8          0.090
+        29 C3'    CN7          0.270
+        30 H3'    HN7          0.090
+        31 O3'    ON2         -0.360
+    [bonds]
+       H5T  O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N2
+       C2   N1
+       N2   H21
+       N2   H22
+       N1   H1
+       N1   C6
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   N3
+       C4   C5
+       N7   C8
+       C6   O6
+    [connections]   !how to bond to previous and next
+        tail     O3'
+    [impropers]
+        N2     N3     N1     C2
+        O6     N1     C5     C6
+       H22    H21     C2     N2
+    [charge_groups] !charge groups, with switch atom first
+        H5T  O5'  C5'  H5'  H5''
+    C4'    H4'    O4'    C1'    H1'
+    N9    C4    N3    C2    N1    H1    N2    H21    H22    C6    O6    C5    N7    C8    H8
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{GU6}                 !-0.53 5', terminal 3', net charge -0.53
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N9     NN2B        -0.020
+        14 C4     CN5          0.260
+        15 N3     NN3G        -0.740
+        16 C2     CN2          0.750
+        17 N1     NN2G        -0.340
+        18 H1     HN2          0.260
+        19 N2     NN1         -0.680
+        20 H21    HN1          0.320
+        21 H22    HN1          0.350
+        22 C6     CN1          0.540
+        23 O6     ON1         -0.510
+        24 C5     CN5G         0.000
+        25 N7     NN4         -0.600
+        26 C8     CN4          0.250
+        27 H8     HN3          0.160
+        28 C2'    CN8         -0.180
+        29 H2''   HN8          0.090
+        30 H2'    HN8          0.090
+        31 C3'    CN7          0.110
+        32 H3'    HN7          0.090
+        33 O3'    ON5         -0.600
+        34 H3''   HN5          0.400
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N9
+       C1'  C2'
+       N9   C4
+       N9   C8
+       C4   N3
+       C2   N2
+       C2   N1
+       N2   H21
+       N2   H22
+       N1   H1
+       N1   C6
+       C6   C5
+       C5   N7
+       C2'  C3'
+       C3'  O3'
+       O3'  H3''
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C8   H8
+       C2   N3
+       C4   C5
+       N7   C8
+       C6   O6
+    [connections]   !how to bond to previous and next
+        head     P
+    [impropers]
+        N2     N3     N1     C2
+        O6     N1     C5     C6
+       H22    H21     C2     N2
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N9    C4    N3    C2    N1    H1    N2    H21    H22    C6    O6    C5    N7    C8    H8
+    C2'    H2''    H2'
+    C3'    H3'    O3'    H3''
+*------------------------------------------------------------------
+{THY}
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N1     NN2B        -0.340
+        14 C6     CN3          0.170
+        15 H6     HN3          0.170
+        16 C2     CN1T         0.510
+        17 O2     ON1         -0.410
+        18 N3     NN2U        -0.460
+        19 H3     HN2          0.360
+        20 C4     CN1          0.500
+        21 O4     ON1         -0.450
+        22 C5     CN3T        -0.150
+        23 C5M    CN9         -0.110
+        24 H51    HN9          0.070
+        25 H52    HN9          0.070
+        26 H53    HN9          0.070
+        27 C2'    CN8         -0.180
+        28 H2''   HN8          0.090
+        29 H2'    HN8          0.090
+        30 C3'    CN7          0.010
+        31 H3'    HN7          0.090
+        32 O3'    ON2         -0.570
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       N3   H3
+       N3   C4
+       C4   C5
+       C5   C5M
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C6   H6
+       C5M  H51
+       C5M  H52
+       C5M  H53
+       C2   O2
+       C4   O4
+       C5   C6
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        O4     N3     C5     C4
+       C5M     C4     C6     C5
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    H3    C4    O4    C5    C5M    H51    H52    H53
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*-------------------------------------------------------------
+{TH0}                 !neutral 5', neutral 3', net charge 0.00
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.080 !At. no., name, iac, charge
+         2 O1P    ON3         -0.360 !At. no., name, iac, charge
+         3 O2P    ON3         -0.360 !At. no., name, iac, charge
+         4 O5'    ON2         -0.360 !At. no., name, iac, charge
+         5 C5'    CN8B        -0.180 !At. no., name, iac, charge
+         6 H5'    HN8          0.090 !At. no., name, iac, charge
+         7 H5''   HN8          0.090 !At. no., name, iac, charge
+         8 C4'    CN7          0.160 !At. no., name, iac, charge
+         9 H4'    HN7          0.090 !At. no., name, iac, charge
+        10 O4'    ON6         -0.500 !At. no., name, iac, charge
+        11 C1'    CN7B         0.160 !At. no., name, iac, charge
+        12 H1'    HN7          0.090 !At. no., name, iac, charge
+        13 N1     NN2B        -0.340 !At. no., name, iac, charge
+        14 C6     CN3          0.170 !At. no., name, iac, charge
+        15 H6     HN3          0.170 !At. no., name, iac, charge
+        16 C2     CN1T         0.510 !At. no., name, iac, charge
+        17 O2     ON1         -0.410 !At. no., name, iac, charge
+        18 N3     NN2U        -0.460 !At. no., name, iac, charge
+        19 H3     HN2          0.360 !At. no., name, iac, charge
+        20 C4     CN1          0.500 !At. no., name, iac, charge
+        21 O4     ON1         -0.450 !At. no., name, iac, charge
+        22 C5     CN3T        -0.150 !At. no., name, iac, charge
+        23 C5M    CN9         -0.110 !At. no., name, iac, charge
+        24 H51    HN9          0.070 !At. no., name, iac, charge
+        25 H52    HN9          0.070 !At. no., name, iac, charge
+        26 H53    HN9          0.070 !At. no., name, iac, charge
+        27 C2'    CN8         -0.180 !At. no., name, iac, charge
+        28 H2''   HN8          0.090 !At. no., name, iac, charge
+        29 H2'    HN8          0.090 !At. no., name, iac, charge
+        30 C3'    CN7          0.270 !At. no., name, iac, charge
+        31 H3'    HN7          0.090 !At. no., name, iac, charge
+        32 O3'    ON2         -0.360 !At. no., name, iac, charge
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       N3   H3
+       N3   C4
+       C4   C5
+       C5   C5M
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C6   H6
+       C5M  H51
+       C5M  H52
+       C5M  H53
+       C2   O2
+       C4   O4
+       C5   C6
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        O4     N3     C5     C4
+       C5M     C4     C6     C5
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    H3    C4    O4    C5    C5M    H51    H52    H53
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{TH1}                 !terminal 5', -0.47 3', net charge -0.47
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 H5T    HN5          0.430
+         2 O5'    ON5         -0.660
+         3 C5'    CN8B         0.050
+         4 H5'    HN8          0.090
+         5 H5''   HN8          0.090
+         6 C4'    CN7          0.160
+         7 H4'    HN7          0.090
+         8 O4'    ON6         -0.500
+         9 C1'    CN7B         0.160
+        10 H1'    HN7          0.090
+        11 N1     NN2B        -0.340
+        12 C6     CN3          0.170
+        13 H6     HN3          0.170
+        14 C2     CN1T         0.510
+        15 O2     ON1         -0.410
+        16 N3     NN2U        -0.460
+        17 H3     HN2          0.360
+        18 C4     CN1          0.500
+        19 O4     ON1         -0.450
+        20 C5     CN3T        -0.150
+        21 C5M    CN9         -0.110
+        22 H51    HN9          0.070
+        23 H52    HN9          0.070
+        24 H53    HN9          0.070
+        25 C2'    CN8         -0.180
+        26 H2''   HN8          0.090
+        27 H2'    HN8          0.090
+        28 C3'    CN7          0.010
+        29 H3'    HN7          0.090
+        30 O3'    ON2         -0.570
+    [bonds]
+       H5T  O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       N3   H3
+       N3   C4
+       C4   C5
+       C5   C5M
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C6   H6
+       C5M  H51
+       C5M  H52
+       C5M  H53
+       C2   O2
+       C4   O4
+       C5   C6
+    [connections]   !how to bond to previous and next
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        O4     N3     C5     C4
+       C5M     C4     C6     C5
+    [charge_groups] !charge groups, with switch atom first
+    H5T  O5'  C5'  H5'  H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    H3    C4    O4    C5    C5M    H51    H52    H53
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+{TH6}                 !-0.53 5', terminal 3', net charge -0.53
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N1     NN2B        -0.340
+        14 C6     CN3          0.170
+        15 H6     HN3          0.170
+        16 C2     CN1T         0.510
+        17 O2     ON1         -0.410
+        18 N3     NN2U        -0.460
+        19 H3     HN2          0.360
+        20 C4     CN1          0.500
+        21 O4     ON1         -0.450
+        22 C5     CN3T        -0.150
+        23 C5M    CN9         -0.110
+        24 H51    HN9          0.070
+        25 H52    HN9          0.070
+        26 H53    HN9          0.070
+        27 C2'    CN8         -0.180
+        28 H2''   HN8          0.090
+        29 H2'    HN8          0.090
+        30 C3'    CN7          0.110
+        31 H3'    HN7          0.090
+        32 O3'    ON5         -0.600
+        33 H3''   HN5          0.400 !At. no., name, iac, charge
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       N3   H3
+       N3   C4
+       C4   C5
+       C5   C5M
+       C2'  C3'
+       C3'  O3'
+       O3'  H3''
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C6   H6
+       C5M  H51
+       C5M  H52
+       C5M  H53
+       C2   O2
+       C4   O4
+       C5   C6
+    [connections]   !how to bond to previous and next
+        head     P
+    [impropers]
+        O2     N1     N3     C2
+        O4     N3     C5     C4
+       C5M     C4     C6     C5
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5'' 
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    H3    C4    O4    C5    C5M
+H51    H52    H53
+    C2'    H2''    H2'
+    C3'    H3'    O3'    H3''
+*------------------------------------------------------------------
+{URA} ! With Deoxyribose 
+    [info]
+        SYBYLtype  RESIDUE     !SYBYL substructure type
+    [atoms]
+         1 P      P            1.500
+         2 O1P    ON3         -0.780
+         3 O2P    ON3         -0.780
+         4 O5'    ON2         -0.570
+         5 C5'    CN8B        -0.080
+         6 H5'    HN8          0.090
+         7 H5''   HN8          0.090
+         8 C4'    CN7          0.160
+         9 H4'    HN7          0.090
+        10 O4'    ON6         -0.500
+        11 C1'    CN7B         0.160
+        12 H1'    HN7          0.090
+        13 N1     NN2B        -0.340
+        14 C6     CN3          0.200
+        15 H6     HN3          0.140
+        16 C2     CN1T         0.550
+        17 O2     ON1         -0.450
+        18 N3     NN2U        -0.460
+        19 H3     HN2          0.360
+        20 C4     CN1          0.530
+        21 O4     ON1         -0.480
+        22 C5     CN3         -0.150
+        23 H5     HN3          0.100 
+        24 C2'    CN8         -0.180
+        25 H2''   HN8          0.090
+        26 H2'    HN8          0.090
+        27 C3'    CN7          0.010
+        28 H3'    HN7          0.090
+        29 O3'    ON2         -0.570
+    [bonds]
+       P    O1P
+       P    O2P
+       P    O5'
+       O5'  C5'
+       C5'  C4'
+       C4'  O4'
+       C4'  C3'
+       O4'  C1'
+       C1'  N1
+       C1'  C2'
+       N1   C2
+       N1   C6
+       C2   N3
+       N3   H3
+       N3   C4
+       C4   C5
+       C5   H5
+       C2'  C3'
+       C3'  O3'
+       C1'  H1'
+       C2'  H2'
+       C2'  H2''
+       C3'  H3'
+       C4'  H4'
+       C5'  H5'
+       C5'  H5''
+       C6   H6
+       C2   O2
+       C4   O4
+       C5   C6
+    [connections]   !how to bond to previous and next
+        head     P
+        tail     O3'
+    [impropers]
+        O2     N1     N3     C2
+        O4     N3     C5     C4
+    [charge_groups] !charge groups, with switch atom first
+    P    O1P    O2P    O5'    C5'    H5'    H5''
+    C4'    H4'    O4'    C1'    H1'
+    N1    C6    H6    C2    O2    N3    H3    C4    O4    C5    H5
+    C2'    H2''    H2'
+    C3'    H3'    O3'
+*------------------------------------------------------------------
+

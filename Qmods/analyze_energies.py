@@ -362,17 +362,17 @@ class AnalyzeEnergies(Toplevel):
                                 self.titles_ene[title][entry][log]['restraints']['shell atoms'].append(shell)
                                 self.titles_ene[title][entry][log]['restraints']['solute'].append(solute)
 
-                            elif 'SUM           ' in line:
+                            elif 'SUM           ' in line and len(line.split()) > 3:
                                 total, potential, kinetic = map(float, line.split()[1:4])
                                 self.titles_ene[title][entry][log]['SUM']['total'].append(total)
                                 self.titles_ene[title][entry][log]['SUM']['potential'].append(potential)
                                 self.titles_ene[title][entry][log]['SUM']['kinetic'].append(kinetic)
 
-                            elif 'Temperature at step' in line and 'T_tot' in line:
+                            elif 'Temperature at step' in line and 'T_free' in line:
                                 step = int(line.split(':')[0].split()[-1])
-                                t_tot = float(line.split()[5])
+                                t_free = float(line.split()[-1])
                                 self.titles_ene[title][entry][log]['temperature']['step'].append(step)
-                                self.titles_ene[title][entry][log]['temperature']['T (K)'].append(t_tot)
+                                self.titles_ene[title][entry][log]['temperature']['T (K)'].append(t_free)
 
         self.app.log(' ', '\nEnergy collection completed!\n')
 

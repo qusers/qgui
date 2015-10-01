@@ -26,6 +26,8 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.backend_bases import  key_press_handler
 from matplotlib.figure import Figure
+from matplotlib import rc
+rc('text', usetex=True)
 from tkFileDialog import askopenfilename, asksaveasfilename
 from edit_lie import EditLIE
 
@@ -222,8 +224,9 @@ class FitQlie(Toplevel):
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
-        self.dg_plot.set_xlabel(r'$\Delta G_{bind}^{exp}$ (kcal/mol)')
-        self.dg_plot.set_ylabel(r'$\Delta G_{bind}^{calc}$ (kcal/mol)')
+
+        self.dg_plot.set_xlabel(r'$\Delta G_{\mathrm{bind}}^{\mathrm{expt}}$ (kcal/mol)')
+        self.dg_plot.set_ylabel(r'$\Delta G_{\mathrm{bind}}^{\mathrm{calc}}$ (kcal/mol)')
 
         #Move label box outside plot region
         box = self.dg_plot.get_position()
@@ -236,15 +239,15 @@ class FitQlie(Toplevel):
 
         for point in range(len(dG)):
             self.dg_plot.plot(dG_exp[point], dG[point], 'o', label='%s' % titles[point].split('#')[-1])
-            self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
+            self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8}, numpoints=1)
 
 
 
         if len(self.lie_data) > 0:
             #Plot regression line:
-            self.dg_plot.plot(dG_exp, dG_reg, 'b--')
+            self.dg_plot.plot(dG_exp, dG_reg, 'b--', linewidth=1)
             #Plot diagonal line:
-            self.dg_plot.plot(dG_exp, dG_exp, 'k-')
+            self.dg_plot.plot(dG_exp, dG_exp, 'k-', linewidth=1)
             #Insert SSE for dG vs dG_reg:
             sse = self.sum_errors_squared(dG_reg, dG)
             self.sum_se.delete(0.0, END)
@@ -509,7 +512,7 @@ class FitQlie(Toplevel):
 
         #Frame with plot:
         frame3 = Frame(self.mainframe, bg=self.main_color)
-        frame3.grid(row=2, column=1)
+        frame3.grid(row=0, rowspan=3, column=1)
         frame_plot= Frame(frame3, bg=self.main_color)
         frame_plot.pack(side=TOP, padx=(10, 10), pady=(10, 10), fill=BOTH)
 

@@ -477,6 +477,7 @@ class EvbArrhenius(Toplevel):
         #rect=(left,bottom,top,right)
         self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
 
+        temp_labels = list()
         for i in range(len(titles)):
             line_color = matplotlib.rcParams['axes.color_cycle'][i]
             title = titles[i]
@@ -487,8 +488,11 @@ class EvbArrhenius(Toplevel):
             ds = parameters[i][1]
 
             #genereate temperature labels
-            temp_labels = list()
-            for inv in temp:
+            all_temps = temp
+            if len(t_exc[i]) > 0:
+                all_temps = np.array(sorted(t_inv[i] + t_exc[i], reverse=True))
+
+            for inv in all_temps:
                 t_real = 1. / inv
                 temp_labels.append(r'$%.0f^{-1}$' % t_real)
 
@@ -500,11 +504,12 @@ class EvbArrhenius(Toplevel):
                     exc_dg = np.array(dg_exc[i])
                     exc_error = np.array(sem_exc[i])
                     self.dg_plot.errorbar(exc_t, exc_dg, exc_error, fmt='x', color=line_color, linestyle='None')
-            self.dg_plot.plot(temp, dh * temp - ds, '-', linewidth=2.0, color=line_color, label=title)
+
+            self.dg_plot.plot(all_temps, (dh * all_temps) - ds, '-', linewidth=2.0, color=line_color, label=title)
             self.dg_plot.autoscale(enable=True)
 
             #Set new xtick labels
-            self.dg_plot.axes.set_xticks(temp)
+            self.dg_plot.axes.set_xticks(all_temps)
             self.dg_plot.axes.set_xticklabels(temp_labels)
 
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
@@ -647,9 +652,15 @@ class EvbArrhenius(Toplevel):
         model, resid = np.linalg.lstsq(_A, _y)[:2]     #generate model and residuals
         r2 = 1 - resid / (_y.size * _y.var())         # R^2
 
+        #Remove this:
+        print model
+        print r2
+
         dH = model[0]
         dS = -model[1]
+
         r2 = r2[0]
+
 
         s2_dg = 0
         s2_dg2 = 0

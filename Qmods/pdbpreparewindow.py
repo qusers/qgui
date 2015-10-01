@@ -455,7 +455,6 @@ class PdbFilePrepare(Toplevel):
         self.water_deletion_final is used is delete_atoms() method."""  
         state = self.check_variable.get()
 
-        index_list = []
         delete_list = []
 
         if state == 1:
@@ -463,6 +462,7 @@ class PdbFilePrepare(Toplevel):
                 for index_residue, residue in enumerate(chain):
                     if residue == 'HOH':
                         delete_list.append((index_chain, index_residue))
+            self.txt.insert(INSERT, 'Delete all HOH;')
 
         self.water_deletion = []                
 
@@ -474,7 +474,13 @@ class PdbFilePrepare(Toplevel):
             if result == True:
                 self.water_deletion_final.extend(entry)
 
-        self.txt.insert(INSERT, 'Delete all HOH;')
+        if state == 0:
+            a = self.txt.get(0.0, END)
+            self.txt.delete(0.0, END)
+
+            self.txt.insert(0.0, (' ').join(a.split('Delete all HOH;')))
+
+
 
 
     def delete_atoms(self):

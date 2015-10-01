@@ -49,6 +49,9 @@ class SetupEVB(Toplevel):
         #Forcefields availiable in ffld_server
         self.forcefields = ('2005', '2001')
 
+        #Try to guess from parameter file if force field is CHARMM or OPLS (important for impropers)
+        self.ff_is_charmm = True
+
         #Control if new inputfiles are to be made and old overwritten or not
         self.overwrite = True
         self.check_overwrite = IntVar()
@@ -461,9 +464,8 @@ class SetupEVB(Toplevel):
 
             for qj in self.q_bonds.keys():
                 for state in range(4):
-                    print self.q_bonds[qj][state]
                     if q_old in self.q_bonds[qj][state]:
-                        print 'befor: %s' % self.q_bonds[qj][state]
+                        print 'before: %s' % self.q_bonds[qj][state]
                         self.q_bonds[qj][state][self.q_bonds[qj][state].index(q_old)] = q_old_new[q_old]
                         print 'after: %s' % self.q_bonds[qj][state]
 
@@ -592,6 +594,11 @@ class SetupEVB(Toplevel):
 
                                     if imp_atoms:
                                         q1, q2, q3, q4 = q_imp[0:]
+                                        if self.ff_is_charmm:
+                                            print 'org: %d %d %d %d' % (q1, q2, q3, q4)
+                                            q1, q2, q3, q4 = self.check_imp(q1,q2,q3,q4)
+                                        print 'added %d' % q2
+                                        print q1,q2,q3,q4
                                         self.q_impropers[q2] = [q1, q3, q4]
 
                             #### CONNECTIONS ####
@@ -760,6 +767,10 @@ class SetupEVB(Toplevel):
                                     #Check that atomtype is not already in list (may be added/edited by user):
                                     if atomtype not in self.atomtype_prm.keys():
                                         ri = float(line.split()[1].strip())
+                                        if ri > 100:
+                                            if self.ff_is_charmm:
+                                                self.ff_is_charmm = False
+                                                print 'Force field parameters is not CHARMM'
                                         ei = float(line.split()[3].strip())
                                         ci = 70.0
                                         if atomtype[0] == 'H':
@@ -775,7 +786,6 @@ class SetupEVB(Toplevel):
                         found_atomtypes = True
                     if '[bonds]' in line:
                         break
-        print self.atomtype_prm
 
     def update_atom_parameters(self):
         """
@@ -807,6 +817,10 @@ class SetupEVB(Toplevel):
         for prm in prm_nr.keys():
             if prm in self.atomtype_prm.keys():
                 ri, ei, ci, ai, ri1_4, ei1_4, mass  = self.atomtype_prm[prm][0:]
+                if ri > 100:
+                    if self.ff_is_charmm:
+                        self.ff_is_charmm = False
+                        print 'Force field parameters is not CHARMM'
                 self.atomtypes_listbox.insert(END, '%4s %7.2f %5.2f %5.2f %4.2f %7.2f %5.2f %5.2f' %
                                                (prm.ljust(4), ri, ei, ci, ai, ri1_4, ei1_4, mass))
             else:
@@ -882,6 +896,7 @@ class SetupEVB(Toplevel):
                         #If parameters already exist, do not look for them:
                         if bond not in self.bond_prm.keys() and bond_rev not in self.bond_prm.keys():
                             bonds.append(bond)
+
         print bonds
         if len(bonds) == 0:
             return
@@ -910,7 +925,6 @@ class SetupEVB(Toplevel):
                             continue
                     if '[bonds]' in line:
                         found_bonds = True
-        print self.bond_prm
 
     def update_q_bonds(self):
         """
@@ -1451,7 +1465,6 @@ class SetupEVB(Toplevel):
                                         self.torsion_prm[torsion][abs(minima) - 1] = [kt, phase, paths]
                                         self.torsion_prm[torsion_rev][abs(minima) - 1] = [kt, phase, paths]
 
-
                                     if minima > 0:
                                         del missing_prms[missing_prms.index(torsion)]
 
@@ -1501,7 +1514,8 @@ class SetupEVB(Toplevel):
         Uses information from self.q_impropers (from the library files) to generate all improper types.
         self.q_bonds is checked against each state to verify if bond exist.
 
-        ==> self.q_impropers  {q2 : [q1,q3,q4]} --> search for q1 q2 q3 q4
+        ==> self.q_impropers  {q2 : [q1,q3,q4]} --> search for q1 q2 q3 q4 (OPLS)
+                                                --> search for q2 q2 q3 q4 (CHARMM)
         ==> self.q_bonds
         ==> self.improper_prm
         ==> self.impropertypes_listbox
@@ -1539,27 +1553,42 @@ class SetupEVB(Toplevel):
         #Write change impropers lisbox
         prm_nr = 0
         nr_type = dict()
+        print 'Q impropers'
+        print self.q_impropers
         for q2 in self.q_impropers.keys():
             q1, q3, q4 = self.q_impropers[q2][0:]
             if q1 in q_atoms or q2 in q_atoms or q3 in q_atoms or q4 in q_atoms:
                 states = [' ',' ',' ',' ']
                 for state in range(self.evb_states.get()):
                     bonds_q2 = self.q_bonds[q2][state]
+                    print q1,q2,q3,q4
+                    print bonds_q2
                     if q1 not in bonds_q2 or q3 not in bonds_q2 or q4 not in bonds_q2:
                         states[state] = 0
+
                     #If true improper, q2 is bonded to exactly 3 atoms!
                     elif len(self.q_bonds[q2][state]) != 3:
                         states[state] = 0
+
                     #q3 and q4 can not both be sp3!
                     elif len(self.q_bonds[q3][state]) > 3 and len(self.q_bonds[q4][state]) > 3:
                         states[state] = 0
+
                     else:
                         t1 = self.q_atomtypes[q1][state]
                         t2 = self.q_atomtypes[q2][state]
                         t3 = self.q_atomtypes[q3][state]
                         t4 = self.q_atomtypes[q4][state]
-                        imp_type = '%s %s %s %s' % (t1, t2, t3, t4)
-                        imp_type_rev = '%s %s %s %s' % (t4, t3, t2, t1)
+
+                        if self.ff_is_charmm:
+                            imp_type = '%s %s %s %s' % (t2, t1, t3, t4)
+                            imp_type_rev = '%s %s %s %s' % (t4, t3, t1, t2)
+                        else:
+                            imp_type = '%s %s %s %s' % (t1, t2, t3, t4)
+                            imp_type_rev = '%s %s %s %s' % (t4, t3, t2, t1)
+
+                        print imp_type
+
                         if imp_type not in nr_type.values() and imp_type_rev not in nr_type.values():
                             prm_nr += 1
                             nr_type[prm_nr] = imp_type
@@ -1576,8 +1605,10 @@ class SetupEVB(Toplevel):
                     a3 = self.q_atom_nr[q3]
                     a4 = self.q_atom_nr[q4]
 
-                    self.changeimproper_listbox.insert(END, '%6d %6d %6d %6d  %3s %3s %3s %3s' %
-                                                   (a1, a2, a3, a4, s1, s2, s3, s4))
+                    imp_sequence = '%6d %6d %6d %6d' % (a1, a3, a4, a2)
+
+                    self.changeimproper_listbox.insert(END, '%s  %3s %3s %3s %3s' %
+                                                   (imp_sequence, s1, s2, s3, s4))
                 except:
                     continue
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
@@ -1589,6 +1620,8 @@ class SetupEVB(Toplevel):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
+            print 'MISSING IMPROPER PARAMETERS'
+            print missing_prms
             for parameterfile in self.prms:
                 found_impropers = False
                 with open(parameterfile, 'r') as prm:
@@ -1627,6 +1660,9 @@ class SetupEVB(Toplevel):
             for imp in missing_prms:
                 self.improper_prm[imp] = ['??', '??']
 
+        print 'HELLO'
+        print nr_type
+        print self.improper_prm
         #Insert imroper types to listbox
         for nr in sorted(nr_type.keys()):
             type_ = nr_type[nr]
@@ -1637,8 +1673,6 @@ class SetupEVB(Toplevel):
                 kt, phase = map(str, self.improper_prm[type_rev][0:])
 
             self.impropertypes_listbox.insert(END, '%3d %6s %6s !%s' % (nr, kt, phase, type_))
-
-        print self.improper_prm
 
     def update_soft_pairs(self):
         """
@@ -4052,7 +4086,6 @@ class SetupEVB(Toplevel):
         del qbonds[qlist.index(q1)]
         del qlist[qlist.index(q1)]
 
-        print qlist
         q3, q4 = qlist[0:]
 
         #Check if improper exist and rearange accordingly:
@@ -4833,6 +4866,389 @@ class SetupEVB(Toplevel):
         self.app.log('info', 'EVB inputfiles written.')
 
         self.files_written = True
+
+    def load_fep(self):
+
+        opls = False
+
+         #Initialize global dictionaries
+        #Keep track of Q-atom nr to atom nr/names/types etc
+        self.q_atom_nr = dict()
+        self.q_atom_res = dict()
+        self.q_atom_name = dict()
+        self.q_notes = dict()
+
+        # {Qi : [type state1, type state2, type state3, type state4]}
+        self.q_atomtypes = dict()
+
+        # {Qi : [state1, state2, state3, state4]}
+        self.q_charges = dict()
+
+        # {Qi : [[state1 Qjs],[state22 Qjs], [state3 Qjs], [state4 Qjs]]}
+        #self.q_bonds = dict()
+
+
+        # {'atom1 atom2':[state1, state2, state3, state4]}
+        #Use atom numbers instead of Q nr to avoid errors upon deleting Q-atoms during session ...
+        self.change_bonds = dict()
+
+        # {'type1 type2 type3 type4': [[Kt, phase, paths], [Kt, phase, paths], [Kt, phase, paths]]}
+        # ==> {'type1 type2 type3 type4': [[min1], [min2], [min3]]
+        self.torsion_prm = dict()
+
+        # {q2 : [q1,q3,q4]}    q1             q1
+        #                      |              ||
+        #                   q3-q2-q4       q3-q2-q4
+        # q2 is sp2 and connected to q1, q3 and q4 <-- This definition makes it easy to use with q_bonds and
+        # connect it to bonds being broken or formed.
+        #self.q_impropers = dict()
+
+        #{'type1 type2 type3 type4': [K, phase]}
+        self.improper_prm = dict()
+
+        #Soft-pair list (for additional pairs added by user)
+        # {Qi : Qj}
+        self.softpairs_added = dict()
+
+        # {'atom1 atom2' : [s1, s2, s3, s4]}
+        self.excluded_pairs = dict()
+
+        # {'q1 q2' : scale}
+        self.qpair_elscale = dict()
+
+        # {1 : [atom_i, atom_j,...], 2:[..], ...}
+        self.monitor_groups = dict()
+
+        # [[group_i, group_j], [group_k, group_l], [..], ...]
+        self.monitor_pairs = list()
+
+        # {'State_i State_j': [Qi, Qj, Aij, uij]}
+        self.offdiagonals = {1: ['1 2', '??', '??', 0.00, 0.00],
+                             2: ['2 3', '??', '??', 0.00, 0.00],
+                             3: ['1 3', '??', '??', 0.00, 0.00],
+                             4: ['3 4', '??', '??', 0.00, 0.00],
+                             5: ['1 4', '??', '??', 0.00, 0.00],
+                             6: ['2 4', '??', '??', 0.00, 0.00]}
+
+
+        fepname = askopenfilename(parent = self, initialdir = self.app.workdir,
+                                  filetypes=(("FEP", "*.fep"),("All files","*.*")))
+
+        if not fepname:
+            return
+
+        else:
+            print 'FEP file %s opened' % fepname
+
+        # {atomnr: atomtype}
+        atomnr_in_pdb = dict()
+        atomnr_qnr = dict()
+
+        found_atoms = False
+        found_charges = False
+        found_atomtypes = False
+        found_change_atoms = False
+        found_soft_pairs = False
+        found_excluded_pairs = False
+        found_elscale = False
+        found_bondtypes = False
+        found_change_bonds = False
+        found_angletypes = False
+        found_torsiontypes = False
+        found_impropertypes = False
+        found_change_impropers = False
+        found_offdiagonals = False
+
+
+        qnr = 0
+        with open(fepname, 'r') as fep:
+            for line in fep:
+                if found_atoms:
+                    if len(line.split()) < 2:
+                        if '[' in line:
+                            found_atoms = False
+                            print 'UPDADING Q-ATOMS'
+                            #Check current PDB file if it matches FEP file description:
+                            with open(self.pdbfile, 'r') as pdb:
+                                for line2 in pdb:
+                                    if len(line2.split()) > 7:
+                                        atomnr = line2.split()[1]
+                                        if atomnr in atomnr_in_pdb.keys():
+                                            atomname = line2[12:17].strip()
+                                            if atomname == atomnr_in_pdb[atomnr]:
+                                                resi = line2[17:27].strip()
+                                                self.q_atom_res[atomnr_qnr[atomnr]] = resi
+                                            else:
+                                                print 'Atomnumber %s in FEP does not match atomname in pdb file' % atomnr
+                                                print 'Expected: %s' % atomnr_in_pdb[atomnr]
+                                                print 'Found:    %s' % atomname
+                                                print '\nABORTING!! '
+                                                break
+                            self.update_q_atoms()
+                            self.read_lib()
+
+
+                    elif line.split()[0].isdigit():
+                        qnr += 1
+                        atomnr = line.split()[1]
+
+                        note = line.split('!')[-1].split('\n')[0]
+                        atomname = note.split()[0]
+
+
+                        self.q_atom_nr[qnr] = int(atomnr)
+                        self.q_atom_name[qnr] = atomname
+                        self.q_notes[qnr] = note
+                        atomnr_in_pdb[atomnr] = atomname
+                        atomnr_qnr[atomnr] = qnr
+
+                if found_charges:
+                    if '[' in line:
+                        found_charges = False
+
+                    if len(line.split()) > 2:
+                        if line.split()[0].isdigit():
+                            qnr = int(line.split()[0])
+                            q1, q2 = line.split()[1:3]
+                            if len(line.split('!')[0].split()) > 3:
+                                q3 = line.split()[3]
+                            else:
+                                q3 = q2
+                            if len(line.split('!')[0].split()) > 4:
+                                q4 = line.split()[4]
+                            else:
+                                q4 = q3
+                            self.q_charges[qnr] = [q1, q2, q3, q4]
+
+                if found_atomtypes:
+                    if '[' in line:
+                        found_atomtypes = False
+                    if len(line.split('!')[0].split()) > 7:
+                        self.atomtype_prm[line.split()[0]] = map(float, line.split('!')[0].split()[1:])
+                        if float(line.split('!')[0].split()[1]) > 100:
+                            self.ff_is_charmm = False
+
+                if found_change_atoms:
+                    if '[' in line:
+                        found_change_atoms = False
+                    if len(line.split()) > 2:
+                        if line.split()[0].isdigit():
+                            qnr = int(line.split()[0])
+                            a1, a2 = line.split()[1:3]
+                            if len(line.split('!')[0].split()) > 3:
+                                a3 = line.split()[3]
+                            else:
+                                a3 = a2
+                            if len(line.split('!')[0].split()) > 4:
+                                a4 = line.split()[4]
+                            else:
+                                a4 = a3
+                            self.q_atomtypes[qnr] = [a1, a2, a3, a4]
+
+                #This might not work if the user has added manually many soft-pairs. TODO ?
+                if found_soft_pairs:
+                    if '[' in line:
+                        found_soft_pairs = False
+                    if len(line.split('!')[0].split()) > 1:
+                        if line.split()[0].isdigit():
+                            q1, q2 = map(int, line.split()[0:2])
+
+                            if q1 not in self.softpairs_added.keys():
+                                self.softpairs_added[q1] = q2
+                            else:
+                                self.softpairs_added[q2] = q1
+
+                if found_excluded_pairs:
+                    if '[' in line:
+                        found_excluded_pairs = False
+
+                    if len(line.split()) > 1:
+                        if line.split()[0].isdigit():
+                            atom1, atom2 = line.split()[0:2]
+                            atompair = '%6d %6d'  % (atom1, atom2)
+                            self.excluded_pairs[atompair] = [0, 0, 0, 0]
+                            get_states = line.split('!')[0].split()[1:]
+                            for i in range(0, len(get_states) + 1):
+                                self.excluded_pairs[atompair][i] = get_states[i]
+
+                if found_elscale:
+                    if '[' in line:
+                        found_elscale = False
+
+                    line = line.split('!')[0]
+                    if len(line.split()) > 2:
+                        q1, q2 = line.split()[0:2]
+                        qpair = '%s %s' % (q1, q2)
+                        self.qpair_elscale[qpair] = line.split()[2:]
+
+                if found_bondtypes:
+                    if '[' in line:
+                        found_bondtypes = False
+                    notnote = line.split('!')[0]
+                    if len(notnote.split()) > 3 and len(line.split('!')[-1].split()) > 1:
+                        type1, type2 = line.split('!')[-1].split()[0:2]
+                        type2.strip('\n')
+                        bond = '%s %s' % (type1, type2)
+
+                        if notnote.split()[0].isdigit():
+                            qnr = int(notnote.split()[0])
+                            try:
+                                self.bond_prm[bond] = map(float, notnote.split()[1:])
+                                kb = 8. * float(notnote.split()[-1])
+                                self.bond_prm[bond].append(kb)
+
+                            except:
+                                #Do not add non-exising parameters
+                                continue
+
+                if found_change_bonds:
+                    if '[' in line:
+                        found_change_bonds = False
+
+                    line = line.split('!')[0]
+                    if len(line.split()) > 3:
+                        get_states = map(int, line.split()[2:])
+
+                        a1, a2 = line.split()[0:2]
+
+                        q1 = atomnr_qnr[a1]
+                        q2 = atomnr_qnr[a2]
+
+                        if q1 not in self.q_bonds.keys():
+                            self.q_bonds[q1] = {0: list(), 1: list(), 2: list(), 3: list()}
+                        if q2 not in self.q_bonds.keys():
+                            self.q_bonds[q2] = {0: list(), 1: list(), 2: list(), 3: list()}
+
+                        #Update Q-atom connectiveties
+                        for i in range(len(get_states)):
+                            if get_states[i] == 0:
+                                if q2 in self.q_bonds[q1][i]:
+                                    del self.q_bonds[q1][i][self.q_bonds[q1][i].index(q2)]
+                                if q1 in self.q_bonds[q2][i]:
+                                    del self.q_bonds[q2][i][self.q_bonds[q2][i].index(q1)]
+                            else:
+                                if q2 not in self.q_bonds[q1][i]:
+                                    self.q_bonds[q1][i].append(q2)
+                                if q1 not in self.q_bonds[q2][i]:
+                                    self.q_bonds[q2][i].append(q1)
+
+                        if 0 in get_states:
+                            pair = '%s %s' % (a1, a2)
+                            # 1 = bond on / 0 = bond off
+                            for i in range(len(get_states)):
+                                if get_states[i] != 0:
+                                    get_states[i] = 1
+                            self.change_bonds[pair] = get_states
+                            for i in range(4 - len(get_states)):
+                                self.change_bonds[pair].append(' ')
+                                if q1 in self.softpairs_added.keys():
+                                    del self.softpairs_added[q1]
+                                if q2 in self.softpairs_added.keys():
+                                    del self.softpairs_added[q2]
+
+                if found_angletypes:
+                    if '[' in line:
+                        found_angletypes = False
+                    if len(line.split()) > 5:
+                        types = line.split('!')[-1].strip('\n')
+                        k, theta = line.split()[1:3]
+                        self.angle_prm[types] = [k, theta]
+
+                if found_torsiontypes:
+                    if '[' in line:
+                        found_torsiontypes = False
+                    if len(line.split()) > 8:
+                        types = line.split('!')[-1].strip('\n')
+                        if types not in self.torsion_prm.keys():
+                            if types not in self.torsion_prm.keys():
+                                self.torsion_prm[types] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
+
+                        k = line.split()[1]
+                        minima = int(line.split()[2])
+                        phase = line.split()[3]
+                        paths = line.split()[4]
+                        self.torsion_prm[types][abs(minima) - 1] = [k, phase, paths]
+
+                if found_impropertypes:
+                    if '[' in line:
+                        found_impropertypes = False
+                    if len(line.split()) > 6:
+                        types = line.split('!')[-1].strip('\n')
+                        self.improper_prm[types] = line.split()[1:3]
+
+                if found_change_impropers:
+                    if '[' in line:
+                        found_change_impropers = False
+                    if len(line.split()) > 5:
+                        a1, a2, a3, a4 = line.split()[0:4]
+                        if a1.isdigit():
+                            q1 = atomnr_qnr[a1]
+                            q2 = atomnr_qnr[a2]
+                            q3 = atomnr_qnr[a3]
+                            q4 = atomnr_qnr[a4]
+                            self.q_impropers[q2] = [q1, q3, q4]
+
+                if found_offdiagonals:
+                    if '[' in line:
+                        found_offdiagonals = False
+                    # {'State_i State_j': [Qi, Qj, Aij, uij]}
+                    if len(line.split()) > 5:
+                        s1, s2 = line.split()[0:2]
+                        states = '%s %s' % (s1, s2)
+                        for i in self.offdiagonals.keys():
+                            if states in self.offdiagonals[i]:
+                                qi, qj, aij, uij = line.split()[2:6]
+                                self.offdiagonals[i] = [states, qi, qj, aij, uij]
+
+                if '[off_diagonals]' in line:
+                    found_offdiagonals = True
+                # Impropers are for some reason written differently in the LIB files for OPLS and charmm
+                # This is just a quick fix for that. Might need adjustments..
+
+                if '[change_impropers]' in line:
+                    found_change_impropers = True
+                    #self.q_impropers = dict()
+
+                if '[improper_types]' in line:
+                    found_impropertypes = True
+
+                if '[torsion_types]' in line:
+                    found_torsiontypes = True
+
+                if '[angle_types]' in line:
+                    found_angletypes = True
+
+                if '[change_bonds]' in line:
+                    found_change_bonds = True
+
+
+                if '[bond_types]' in line:
+                    found_bondtypes = True
+
+                if '[excluded_pairs]' in line:
+                    found_excluded_pairs = True
+
+                if '[el_scale]' in line:
+                    found_elscale = True
+
+                if '[soft_pairs]' in line:
+                    found_soft_pairs = True
+
+                if '[change_atoms]' in line:
+                    found_change_atoms = True
+
+                if '[atom_types]' in line:
+                    found_atomtypes = True
+
+                if '[atoms]' in line:
+                    found_atoms = True
+
+
+                if '[change_charges]' in line:
+                    found_charges = True
+
+        self.update_all()
+
 
     def dialog_window(self):
 
@@ -5829,24 +6245,29 @@ class SetupEVB(Toplevel):
         md = Button(frame4, text='Configure MD', highlightbackground=self.main_color, command=self.config_md)
         md.grid(row=0, column=0, columnspan=4)
 
+        load_fep = Button(frame4, text='Load FEP', highlightbackground=self.main_color, command=self.load_fep)
+        load_fep.grid(row=1, column=0, columnspan=1, sticky='w')
 
-        overwrite_label = Label(frame4, text='Overwrite existing files', bg=self.main_color)
-        overwrite_label.grid(row=2, column=0, columnspan=3)
+        viewfep = Button(frame4, text = 'Edit FEP', highlightbackground=self.main_color, command=self.open_file)
+        viewfep.grid(row=1, column=1)
 
-        overwrite = Checkbutton(frame4, bg=self.main_color, variable=self.check_overwrite)
-        overwrite.grid(row=2,column=3, sticky='w')
+        save_fep = Button(frame4, text='Save FEP', highlightbackground=self.main_color, command=self.write_fep)
+        save_fep.grid(row=1, column=2, columnspan=2, sticky='w')
 
         submit_button = Button(frame4, text='Run', highlightbackground=self.main_color, command=self.run_evb)
-        submit_button.grid(row=1, column=0)
+        submit_button.grid(row=2, column=0)
 
         save_button = Button(frame4, text='Write', highlightbackground=self.main_color,
                              command=lambda: self.write_evb(True))
-        save_button.grid(row=1, column=1)
-
-        viewfep = Button(frame4, text = 'Edit FEP', highlightbackground=self.main_color, command=self.open_file)
-        viewfep.grid(row=1, column=2)
+        save_button.grid(row=2, column=1)
 
         close_button= Button(frame4, text='Close', highlightbackground=self.main_color, command=self.destroy)
-        close_button.grid(row=1, column=3)
+        close_button.grid(row=2, column=2)
+
+        overwrite_label = Label(frame4, text='Overwrite existing files', bg=self.main_color)
+        overwrite_label.grid(row=3, column=0, columnspan=2)
+        overwrite = Checkbutton(frame4, bg=self.main_color, variable=self.check_overwrite)
+        overwrite.grid(row=3, column=2, sticky='w')
+
 
 

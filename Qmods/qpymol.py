@@ -84,9 +84,21 @@ class ViewPyMol(Toplevel):
 
         tmpfile = open(self.app.workdir+'/.tmpfile','wb')
         if 'darwin' in sys.platform:
-            self.session = Popen(["MacPyMol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+            try:
+                self.session = Popen(["pymol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE,
+                                     preexec_fn=os.setsid)
+            except:
+                try:
+                    self.session = Popen(["MacPyMol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE,
+                                     preexec_fn=os.setsid)
+                except:
+                    print 'No pymol version found'
+
         else:
-            self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+            try:
+                self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+            except:
+                print 'No pymol version found'
 
         self.update()
         len_log = 35

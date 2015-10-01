@@ -709,7 +709,7 @@ class EvbCalibration(Toplevel):
         self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
 
         self.dg_plot.plot(self.enegaps, self.dG, 'r-')
-        self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
+        self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8}, numpoints=1)
 
         if self.show_target_lines.get() == 1:
             try:
@@ -868,7 +868,7 @@ class EvbCalibration(Toplevel):
 
         #Frame with plot:
         frame3 = Frame(self.mainframe, bg=self.main_color)
-        frame3.grid(row=1, rowspan=3, column=1)
+        frame3.grid(row=1, rowspan=2, column=1)
         frame_plot= Frame(frame3, bg=self.main_color)
         frame_plot.pack(side=TOP, padx=(10, 10), pady=(10, 0), fill=BOTH)
 
@@ -952,7 +952,7 @@ class EvbCalibration(Toplevel):
 
         listbox_scroll = Scrollbar(frame2)
         listbox_scroll.grid(row = 1, column = 10, sticky = 'nsw', padx=(0,10))
-        self.listbox = Listbox(frame2, yscrollcommand = listbox_scroll.set, width=40, height=25,
+        self.listbox = Listbox(frame2, yscrollcommand = listbox_scroll.set, width=40, height=21,
                                highlightthickness=0, relief=GROOVE, selectmode=BROWSE)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row=1, column = 0, columnspan=9, sticky = 'e')
