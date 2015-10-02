@@ -1,0 +1,237 @@
+*------------------------------------------------
+*
+*Q-FF parameters:  CHARMM32 ether force field  parameters
+*
+*------------------------------------------------
+* CHARMM32 ether force field 
+*Parameters translated for Q with charmm_Q_par.py (Geir V. Isaksen, 2015)
+*________________________________________________
+[options] force-field options
+name            Q CHARMM32 ether force field 
+vdw_rule    arithmetic   ! vdW combination rule (geometric or arithmetic )
+scale_14         1         ! electrostatic 1-4 scaling factor
+switch_atoms  off       ! on = use switch atom; off = use charge group
+improper_definition explicit ! improper representation by 2 or four atoms
+improper_potential      harmonic
+coulomb_constant 332.0716    ! Constant in electrostatic energy calculation; default = 332.
+force_field CHARMM           ! Force Field Type (GROMOS (default), AMBER or CHARMM)
+
+
+[atom_types]
+*-iac------Avdw1------Avdw2-----Bvdw1------Avdw3-----Bvdw2&3----mass---SYBYL-name-old-comment
+HCA1       1.3400     1.3400    0.0450     1.3400    0.0450      1.0080 1 ! alkane,isobutane 1/5/05 viv
+HCA2       1.3400     1.3400    0.0350     1.3400    0.0350      1.0080 1 ! alkane,propane 11/16/04 viv
+HCA3       1.3400     1.3400    0.0240     1.3400    0.0240      1.0080 1 ! alkane, yin and mackerell, 4/98
+HT         0.2245     0.2245    0.0460     0.2245    0.0460      1.0080 1 ! TIP3P water
+CC30A      2.0000     2.0000    0.0320     1.9000    0.0100     12.0110 1 ! from CC31A
+CC31A      2.0000     2.0000    0.0320     1.9000    0.0100     12.0110 1 ! alkane,isobutane 1/5/05 viv
+CC32A      2.0100     2.0100    0.0560     1.9000    0.0100     12.0110 1 ! alkane, 4/98, yin, adm jr.
+CC33A      2.0400     2.0400    0.0780     1.9000    0.0100     12.0110 1 ! alkane, 4/98, yin, adm jr.
+CC326A     2.0100     2.0100    0.0560     1.9000    0.0100     12.0110 1 ! THP, tetrahyropyran, viv
+HCA25A     1.3000     1.3000    0.0350     1.3000    0.0350      1.0080 1 ! CPEN, cyclopentane, 8/06 viv
+CC325A     2.0200     2.0200    0.0600     1.9000    0.0100     12.0110 1 ! CPEN, cyclopentane, 8/06 viv
+CC325B     2.0200     2.0200    0.0600     1.9000    0.0100     12.0110 1 ! CPEN, cyclopentane, 8/06 viv
+OC305A     1.6500     1.6500    0.1000     1.6500    0.1000     15.9994 1 ! THP, tetrahydropyran sng 1/06
+OC30A      1.6500     1.6500    0.1000     1.6500    0.1000     15.9994 1 ! THP, tetrahydropyran sng 1/06
+OT         1.7682     1.7682    0.1521     1.7682    0.1521     15.9994 1 ! TIP3P water
+HE         1.4800     1.4800    0.0213     1.4800    0.0213      4.0026 1 ! helium, experimental pot. energy surface, adm jr., 12/95
+NE         1.5300     1.5300    0.0860     1.5300    0.0860     20.1797 1 ! neon, semiempirical pot. energy surface, adm jr., 12/95
+DUM        0.0000     0.0000    0.0000     0.0000    0.0000      0.0000 1 ! dummy atom
+
+[bonds]
+*iaci  iacj     force.c.    dist.
+*------------------------------------------------
+CC31A  HCA1     618.000     1.111 ! alkanes, 4/98
+CC32A  HCA2     618.000     1.111 ! alkanes, 4/98
+CC33A  HCA3     644.000     1.111 ! alkanes, 4/98
+CC30A  CC32A    445.000     1.538 ! 10/98
+CC30A  CC33A    445.000     1.538 ! 10/98
+CC31A  CC31A    445.000     1.500 ! alkanes, 3/92
+CC31A  CC32A    445.000     1.538 ! alkanes, 3/92
+CC31A  CC33A    445.000     1.538 ! alkanes, 3/92
+CC32A  CC32A    445.000     1.530 ! alkanes, 3/92
+CC32A  CC33A    445.000     1.528 ! alkanes, 3/92
+CC33A  CC33A    445.000     1.530 ! alkanes, 3/92
+CC325A CC325A   390.000     1.548 ! cyclopentane CPEN 10/17/05 viv
+CC325A HCA25A   614.000     1.116 ! cyclopentane CPEN 10/17/05 viv
+CC325B OC305A   700.000     1.425 ! THF, nucleotide CSD/NDB survey, 5/30/06,viv
+CC325B CC325B   390.000     1.518 ! THF, nucleotide CSD/NDB survey, 5/30/06,viv
+CC325B HCA25A   614.000     1.100 ! THF, THF neutron diffr., 5/30/06, viv
+CC325B CC33A    445.000     1.528 ! TF2M, viv
+CC32A  OC30A    720.000     1.415 ! DEET, diethylether, alex
+CC33A  OC30A    720.000     1.415 ! DEET, diethylether, alex
+CC326A HCA2     618.000     1.111 ! THP, viv
+CC326A CC326A   445.000     1.530 ! THP, viv
+CC326A OC30A    720.000     1.415 ! DEET, diethylether, viv
+HT     HT         0.000     1.514 ! TIPS3P GEOMETRY (FOR SHAKE/W PARAM)
+OT     HT       900.000     0.957 ! TIPS3P GEOMETRY
+
+[angles]
+*iaci  iacj   iack      forceK   angle0     forceUB    Stheta
+*------------------------------------------------------------
+HCA1   CC31A  CC31A      69.00    110.1     22.53      2.18 ! alkane, 3/92
+HCA1   CC31A  CC32A      69.00    110.1     22.53      2.18 ! alkane, 3/92
+HCA1   CC31A  CC33A      69.00    110.1     22.53      2.18 ! alkane, 3/92
+HCA2   CC32A  CC30A      53.00    110.1     22.53      2.18 ! alkane, 4/98
+HCA2   CC32A  CC31A      53.00    110.1     22.53      2.18 ! alkane, 4/98
+HCA2   CC32A  CC32A      53.00    110.1     22.53      2.18 ! alkane, 4/98
+HCA2   CC32A  CC33A      69.20    110.1     22.53      2.18 ! alkane, 4/98
+HCA3   CC33A  CC30A      66.86    110.1     22.53      2.18 ! alkane, 4/98
+HCA3   CC33A  CC31A      66.86    110.1     22.53      2.18 ! alkane, 4/98
+HCA3   CC33A  CC32A      69.20    110.1     22.53      2.18 ! alkane, 4/98
+HCA3   CC33A  CC33A      75.00    110.1     22.53      2.18 ! alkane, 4/98
+HCA2   CC32A  HCA2       71.00    109.0      5.40      1.80 ! alkane, 3/92
+HCA3   CC33A  HCA3       71.00    108.4      5.40      1.80 ! alkane, 3/92
+CC30A  CC32A  CC32A     116.70    113.5     11.16      2.56 ! glycerol
+CC30A  CC32A  CC33A     116.70    113.5     11.16      2.56 ! glycerol
+CC31A  CC31A  CC31A     106.70    111.0      8.00      2.56 ! alkane, 3/92
+CC31A  CC31A  CC32A     116.70    113.5     11.16      2.56 ! glycerol
+CC31A  CC31A  CC33A     106.70    108.5      8.00      2.56 ! alkane, 3/92
+CC31A  CC32A  CC31A     116.70    113.5     11.16      2.56 ! glycerol
+CC31A  CC32A  CC32A     116.70    113.5     11.16      2.56 ! glycerol
+CC31A  CC32A  CC33A     116.70    113.5     11.16      2.56 ! glycerol
+CC32A  CC30A  CC32A     116.70    113.5     11.16      2.56 ! glycerol
+CC32A  CC31A  CC32A     116.70    113.5     11.16      2.56 ! glycerol
+CC32A  CC32A  CC32A     116.70    113.6     11.16      2.56 ! alkane, 3/92
+CC32A  CC32A  CC33A     116.00    115.0      8.00      2.56 ! alkane, 3/92
+CC33A  CC30A  CC33A     106.70    114.0      8.00      2.56 ! alkane 3/2/92
+CC33A  CC31A  CC32A     106.70    114.0      8.00      2.56 ! alkane 3/2/92
+CC33A  CC31A  CC33A     106.70    114.0      8.00      2.56 ! alkane 3/2/92 
+CC33A  CC32A  CC33A     106.70    114.0      8.00      2.56 ! alkane 3/2/92
+CC325A CC325A CC325A    116.00    106.0     11.16      2.56 ! CPEN 10/17/05 viv
+HCA25A CC325A CC325A     70.00    111.4     22.53      2.18 ! CPEN 10/17/05 viv
+HCA25A CC325A HCA25A     77.00    106.8      5.40      1.80 ! CPEN 10/17/05 viv
+HCA25A CC325B CC325B     70.00    111.4     22.53      2.18 ! TF2M, viv
+HCA25A CC325B HCA25A     77.00    106.8      5.40      1.80 ! THF, 10/17/05 viv
+CC325B CC325B CC325B    116.00    109.5     11.16      2.56 ! THF, nucleotide CSD/NDB survey, 05/30/06, viv
+OC305A CC325B CC325B     90.00    111.1      0.00      0.00 ! THF 10/21/05, viv
+CC325B OC305A CC325B    190.00    111.0      0.00      0.00 ! THF 10/21/05, viv
+HCA25A CC325B OC305A    140.00    107.3      0.00      0.00 ! THF 10/21/05, viv
+HCA3   CC33A  CC325B     69.20    110.1     22.53      2.18 ! TF2M viv
+CC325B CC325B CC33A     116.00    115.0      8.00      2.56 ! TF2M viv
+HCA25A CC325B CC33A      69.20    110.1     22.53      2.18 ! TF2M viv
+OC305A CC325B CC33A      90.00    111.5      0.00      0.00 ! TF2M, viv
+CC32A  OC30A  CC32A     190.00    109.7      0.00      0.00 ! DEET, diethylether, alex
+CC33A  OC30A  CC32A     190.00    109.7      0.00      0.00 ! DEET, diethylether, alex
+CC33A  OC30A  CC33A     190.00    109.7      0.00      0.00 ! DEET, diethylether, alex
+OC30A  CC32A  CC32A      90.00    111.5      0.00      0.00 ! DEET, diethylether, alex
+OC30A  CC32A  CC33A      90.00    111.5      0.00      0.00 ! DEET, diethylether, alex
+HCA3   CC33A  OC30A     120.00    109.5      0.00      0.00 ! phosphate, alex
+HCA2   CC32A  OC30A     120.00    109.5      0.00      0.00 ! phosphate, alex
+HCA2   CC326A CC326A     69.00    110.1     22.53      2.18 ! THP, sng cyclohexane 12/05
+HCA2   CC326A HCA2       71.00    109.0      5.40      1.80 ! THP, viv
+CC326A CC326A CC326A    116.70    112.0     11.16      2.56 ! THP, sng cyclohexane 12/05
+OC30A  CC326A CC326A     90.00    111.5      0.00      0.00 ! THP, viv
+CC326A OC30A  CC326A    190.00    109.7      0.00      0.00 ! THP, viv
+HCA2   CC326A OC30A      90.00    109.5      0.00      0.00 ! THP, sng 02/06 
+HT     OT     HT        110.00    104.5      0.00      0.00 ! TIP3P GEOMETRY
+
+[torsions]
+*iaci  iacj   iack   iacl      forceK   #minima     phase   #paths
+*-----------------------------------------------------------------
+CC31A  CC30A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+CC32A  CC30A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+CC33A  CC30A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+CC31A  CC30A  CC33A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+CC32A  CC30A  CC32A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+CC33A  CC30A  CC32A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+HCA1   CC31A  CC31A  HCA1       0.200     3.000     0.000     1 ! alkane, 3/92
+CC31A  CC31A  CC31A  HCA1       0.200     3.000     0.000     1 ! alkane, 3/92
+CC32A  CC31A  CC31A  HCA1       0.200     3.000     0.000     1 ! alkane, 3/92
+CC33A  CC31A  CC31A  HCA1       0.200     3.000     0.000     1 ! alkane, 3/92
+HCA1   CC31A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+HCA1   CC31A  CC32A  CC31A      0.200     3.000     0.000     1 ! alkane, 3/92
+HCA1   CC31A  CC32A  CC32A      0.200     3.000     0.000     1 ! alkane, 3/92
+HCA1   CC31A  CC32A  CC33A      0.200     3.000     0.000     1 ! alkane, 3/92
+CC31A  CC31A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+CC32A  CC31A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+CC33A  CC31A  CC32A  HCA2       0.200     3.000     0.000     1 ! alkane, 3/92
+HCA1   CC31A  CC33A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+CC31A  CC31A  CC33A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+CC32A  CC31A  CC33A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+CC33A  CC31A  CC33A  HCA3       0.200     3.000     0.000     1 ! alkane, 3/92
+HCA2   CC32A  CC32A  HCA2       0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC30A  CC32A  CC32A  HCA2       0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC31A  CC32A  CC32A  HCA2       0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC32A  CC32A  CC32A  HCA2       0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC33A  CC32A  CC32A  HCA2       0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+HCA2   CC32A  CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC30A  CC32A  CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC31A  CC32A  CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC32A  CC32A  CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC33A  CC32A  CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+CC33A  CC32A  CC32A  CC33A      0.032    -6.000   180.000     1 ! alkane, c27r klauda et al 2004
+CC33A  CC32A  CC32A  CC33A      0.038     2.000     0.000     1 ! alkane, c27r klauda et al 2004
+CC33A  CC32A  CC32A  CC32A      0.204    -5.000     0.000     1 ! alkane, c27r klauda et al 2004
+CC33A  CC32A  CC32A  CC32A      0.108    -4.000     0.000     1 ! alkane, c27r klauda et al 2004
+CC33A  CC32A  CC32A  CC32A      0.081    -3.000   180.000     1 ! alkane, c27r klauda et al 2004
+CC33A  CC32A  CC32A  CC32A      0.151     2.000     0.000     1 ! alkane, c27r klauda et al 2004
+CC32A  CC32A  CC32A  CC32A      0.113    -5.000     0.000     1 ! alkane, c27r klauda et al 2004
+CC32A  CC32A  CC32A  CC32A      0.095    -4.000     0.000     1 ! alkane, c27r klauda et al.2004
+CC32A  CC32A  CC32A  CC32A      0.150    -3.000   180.000     1 ! alkane, c27r klauda et al 2004
+CC32A  CC32A  CC32A  CC32A      0.065     2.000     0.000     1 ! alkane, c27r klauda et al 2004
+CC33A  CC325A CC325A CC33A      0.160     3.000     0.000     1 !alkane, 4/98, yin and mackerell, cpen, viv
+CC33A  CC325A CC325A CC325A     0.160     3.000     0.000     1 !alkane, 4/98, yin and mackerell, cpen, viv
+CC33A  CC325A CC325A HCA25A     0.160     3.000     0.000     1 !alkane, 4/98, yin and mackerell, cpen, viv
+HCA25A CC325A CC325A HCA25A     0.160     3.000     0.000     1 !alkane, 4/98, yin and mackerell, cpen, viv
+CC325A CC325A CC325A HCA25A     0.160     3.000     0.000     1 !alkane, 4/98, yin and mackerell, cpen, viv
+CC325A CC325A CC325A CC325A     0.410     3.000   180.000     1 ! cpen, cyclopentane, viv 10/4/05 
+CC33A  CC325B CC325B CC33A      0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thf, viv
+CC33A  CC325B CC325B CC325B     0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thf, viv
+CC33A  CC325B CC325B HCA25A     0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thf, viv
+HCA25A CC325B CC325B HCA25A     0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thf, viv
+CC325B CC325B CC325B HCA25A     0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thf, viv
+OC305A CC325B CC325B HCA25A     0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, thf viv
+HCA25A CC325B CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, tf2m viv
+CC325B CC325B CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, tf2m viv
+OC305A CC325B CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, tf2m viv
+CC325B CC325B CC325B CC325B     0.410     3.000   180.000     1 ! CPEN viv 10/4/05
+HCA25A CC325B OC305A CC325B     0.300     3.000     0.000     1 ! THF, 05/30/06, viv
+OC305A CC325B CC325B CC325B     0.000     3.000     0.000     1 ! THF, 05/30/06, viv  
+CC325B CC325B OC305A CC325B     0.500     3.000     0.000     1 ! THF, 05/30/06, viv
+CC33A  CC325B OC305A CC325B     0.300     3.000     0.000     1 ! THF, 05/30/06, viv
+CC33A  CC326A CC326A CC33A      0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thp, viv
+CC33A  CC326A CC326A CC326A     0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thp, viv
+CC33A  CC326A CC326A HCA2       0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thp, viv
+HCA2   CC326A CC326A HCA2       0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thp, viv
+HCA2   CC326A CC326A CC326A     0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thp, viv
+OC30A  CC326A CC326A HCA2       0.190     3.000     0.000     1 !alkane, 4/98, yin and mackerell, thp viv
+HCA2   CC326A CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, me-thp viv
+CC326A CC326A CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, me-thp viv
+OC30A  CC326A CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell, me-thp viv
+CC326A CC326A CC326A CC326A     0.498    -2.000     0.000     1 ! THP, viv
+CC326A CC326A CC326A CC326A    -0.598    -3.000     0.000     1 ! THP, viv
+CC326A CC326A CC326A CC326A     0.417    -4.000     0.000     1 ! THP, viv
+CC326A CC326A CC326A CC326A    -0.248     5.000     0.000     1 ! THP, viv
+OC30A  CC326A CC326A CC326A    -0.192    -1.000     0.000     1 ! THP, sng 1/06
+OC30A  CC326A CC326A CC326A    -1.000    -2.000     0.000     1 ! THP, sng 1/06
+OC30A  CC326A CC326A CC326A     0.595    -3.000     0.000     1 ! THP, sng 1/06
+OC30A  CC326A CC326A CC326A    -0.079     4.000     0.000     1 ! THP, sng 1/06
+HCA3   CC33A  CC33A  HCA3       0.152     3.000     0.000     1 ! ETHA, ethane,  4/98, yin and mackerell
+CC326A OC30A  CC326A CC326A    -0.527    -1.000     0.000     1 ! THP, sng 1/06
+CC326A OC30A  CC326A CC326A     0.683    -2.000     0.000     1 ! THP, sng 1/06
+CC326A OC30A  CC326A CC326A    -0.210    -3.000     0.000     1 ! THP, sng 1/06
+CC326A OC30A  CC326A CC326A     0.150     4.000     0.000     1 ! THP, sng 1/06
+CC326A OC30A  CC326A HCA2       0.284     3.000     0.000     1 ! DMET, viv
+HCA2   CC32A  CC32A  OC30A      0.190     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+OC30A  CC32A  CC33A  HCA3       0.160     3.000     0.000     1 ! alkane, 4/98, yin and mackerell
+HCA2   CC32A  OC30A  CC32A      0.284     3.000     0.000     1 ! DEET, diethylether, alex
+HCA3   CC33A  OC30A  CC32A      0.284     3.000     0.000     1 ! DEET, diethylether, alex
+HCA2   CC32A  OC30A  CC33A      0.284     3.000     0.000     1 ! DEET, diethylether, alex
+HCA3   CC33A  OC30A  CC33A      0.284     3.000     0.000     1 ! DME, viv 
+CC33A  CC32A  OC30A  CC32A      0.400    -1.000     0.000     1 ! diethylether, 2/12/05, ATM
+CC33A  CC32A  OC30A  CC32A      0.490     3.000     0.000     1 ! diethylether
+CC33A  CC32A  OC30A  CC33A      0.400    -1.000     0.000     1 ! diethylether, 2/12/05, ATM, MEE viv
+CC33A  CC32A  OC30A  CC33A      0.490     3.000     0.000     1 ! diethylether, MEE viv
+CC32A  CC32A  OC30A  CC33A      0.570    -1.000     0.000     1 ! 1,2 dimethoxyethane (DME), 2/12/05, ATM
+CC32A  CC32A  OC30A  CC33A      0.290    -2.000     0.000     1 ! 1,2 dimethoxyethane (DME)
+CC32A  CC32A  OC30A  CC33A      0.430     3.000     0.000     1 ! 1,2 dimethoxyethane (DME)
+CC32A  CC32A  OC30A  CC32A      0.570    -1.000     0.000     1 ! 1,2 dimethoxyethane, 2/12/05, ATM
+CC32A  CC32A  OC30A  CC32A      0.290    -2.000     0.000     1 ! 1,2 dimethoxyethane
+CC32A  CC32A  OC30A  CC32A      0.430     3.000     0.000     1 ! 1,2 dimethoxyethane
+OC30A  CC32A  CC32A  OC30A      0.590    -1.000   180.000     1 ! 1,2 dimethoxyethane, Aug 2007, HK Lee
+OC30A  CC32A  CC32A  OC30A      1.160     2.000     0.000     1 ! 1,2 dimethoxyethane
+OC30A  CC32A  CC32A  CC33A      0.160    -1.000   180.000     1 ! methylpropylether, 2/12/05, ATM
+OC30A  CC32A  CC32A  CC33A      0.390     2.000     0.000     1 ! methylpropylether
+OC30A  CC32A  CC32A  CC32A      0.160    -1.000   180.000     1 ! methylpropylether, 2/12/05, ATM
+OC30A  CC32A  CC32A  CC32A      0.390     2.000     0.000     1 ! methylpropylether

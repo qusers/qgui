@@ -1,0 +1,542 @@
+*------------------------------------------------------------------
+* Q fragment library file extracted from:
+*  CHARMM32 ether force field 
+* Converted with charmm_Q_par.py (Geir V. Isaksen, 2015)
+*
+**
+**
+*------------------------------------------------------------------
+{BUTA}            !charge: 0.00 ||  butane
+    [atoms]
+*------------------------------------------------------------------
+{CHEX}            !charge: 0.00 ||  cyclohexane, viv
+    [atoms]
+         1 C1     CC32A       -0.18
+         2 H1A    HCA2         0.09
+         3 H1B    HCA2         0.09
+         4 C2     CC32A       -0.18
+         5 H2A    HCA2         0.09
+         6 H2B    HCA2         0.09
+         7 C3     CC32A       -0.18
+         8 H3A    HCA2         0.09
+         9 H3B    HCA2         0.09
+        10 C4     CC32A       -0.18
+        11 H4A    HCA2         0.09
+        12 H4B    HCA2         0.09
+        13 C5     CC32A       -0.18
+        14 H5A    HCA2         0.09
+        15 H5B    HCA2         0.09
+        16 C6     CC32A       -0.18
+        17 H6A    HCA2         0.09
+        18 H6B    HCA2         0.09
+    [bonds]
+       C1     H1A   
+       C1     H1B   
+       C1     C2    
+       C2     H2A   
+       C2     H2B   
+       C2     C3    
+       C3     H3A   
+       C3     H3B   
+       C3     C4    
+       C4     H4A   
+       C4     H4B   
+       C4     C5    
+       C5     H5A   
+       C5     H5B   
+       C5     C6    
+       C6     H6A   
+       C6     H6B   
+       C6     C1    
+    [charge_groups]
+        C1    H1A   H1B   
+        C2    H2A   H2B   
+        C3    H3A   H3B   
+        C4    H4A   H4B   
+        C5    H5A   H5B   
+        C6    H6A   H6B   
+*------------------------------------------------------------------
+{CPEN}            !charge: 0.00 ||  cyclopentane, viv
+    [atoms]
+         1 C1     CC325A      -0.18
+         2 H1A    HCA25A       0.09
+         3 H1B    HCA25A       0.09
+         4 C2     CC325A      -0.18
+         5 H2A    HCA25A       0.09
+         6 H2B    HCA25A       0.09
+         7 C3     CC325A      -0.18
+         8 H3A    HCA25A       0.09
+         9 H3B    HCA25A       0.09
+        10 C4     CC325A      -0.18
+        11 H4A    HCA25A       0.09
+        12 H4B    HCA25A       0.09
+        13 C5     CC325A      -0.18
+        14 H5A    HCA25A       0.09
+        15 H5B    HCA25A       0.09
+    [bonds]
+       C1     H1A   
+       C1     H1B   
+       C1     C2    
+       C2     H2A   
+       C2     H2B   
+       C2     C3    
+       C3     H3A   
+       C3     H3B   
+       C3     C4    
+       C4     H4A   
+       C4     H4B   
+       C4     C5    
+       C5     H5A   
+       C5     H5B   
+       C5     C1    
+    [charge_groups]
+        C1    H1A   H1B   
+        C2    H2A   H2B   
+        C3    H3A   H3B   
+        C4    H4A   H4B   
+        C5    H5A   H5B   
+*------------------------------------------------------------------
+{DEET}            !charge: 0.00 ||  Diethylether, adm jr.
+    [atoms]
+         1 C1     CC33A       -0.27
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 C2     CC32A       -0.01
+         6 H21    HCA2         0.09
+         7 H22    HCA2         0.09
+         8 O3     OC30A       -0.34
+         9 C4     CC32A       -0.01
+        10 H41    HCA2         0.09
+        11 H42    HCA2         0.09
+        12 C5     CC33A       -0.27
+        13 H51    HCA3         0.09
+        14 H52    HCA3         0.09
+        15 H53    HCA3         0.09
+    [bonds]
+       C1     C2    
+       C2     O3    
+       O3     C4    
+       C4     C5    
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C2     H21   
+       C2     H22   
+       C4     H41   
+       C4     H42   
+       C5     H51   
+       C5     H52   
+       C5     H53   
+    [charge_groups]
+        C1    H11   H12   H13   
+        C2    H21   H22   O3    C4    H41   H42   
+        C5    H51   H52   H53   
+*------------------------------------------------------------------
+{DME}            !charge: 0.00 ||  Dimethoxyethane, adm jr.
+    [atoms]
+         1 C1     CC33A       -0.10
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 O2     OC30A       -0.34
+         6 C3     CC32A       -0.01
+         7 H31    HCA2         0.09
+         8 H32    HCA2         0.09
+         9 C4     CC32A       -0.01
+        10 H41    HCA2         0.09
+        11 H42    HCA2         0.09
+        12 O5     OC30A       -0.34
+        13 C6     CC33A       -0.10
+        14 H61    HCA3         0.09
+        15 H62    HCA3         0.09
+        16 H63    HCA3         0.09
+    [bonds]
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C1     O2    
+       O2     C3    
+       C3     H31   
+       C3     H32   
+       C3     C4    
+       C4     H41   
+       C4     H42   
+       C4     O5    
+       O5     C6    
+       C6     H61   
+       C6     H62   
+       C6     H63   
+    [charge_groups]
+        C1    H11   H12   H13   O2    C3    H31   H32   
+        C4    H41   H42   O5    C6    H61   H62   H63   
+*------------------------------------------------------------------
+{DMET}            !charge: 0.00 ||  Dimethylether, viv
+    [atoms]
+         1 C1     CC33A       -0.10
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 O2     OC30A       -0.34
+         6 C3     CC33A       -0.10
+         7 H31    HCA3         0.09
+         8 H32    HCA3         0.09
+         9 H33    HCA3         0.09
+    [bonds]
+       C1     O2    
+       O2     C3    
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C3     H31   
+       C3     H32   
+       C3     H33   
+    [charge_groups]
+        C1    H11   H12   H13   O2    C3    H31   H32   H33   
+*------------------------------------------------------------------
+{DUM}            !charge: 0.00 ||  DUMMY ATOM
+    [atoms]
+         1 DUM    DUM          0.00
+    [charge_groups]
+        DUM   
+*------------------------------------------------------------------
+{EPET}            !charge: 0.00 ||  Ethylpropylether, viv 
+    [atoms]
+         1 C1     CC33A       -0.27
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 C2     CC32A       -0.01
+         6 H21    HCA2         0.09
+         7 H22    HCA2         0.09
+         8 O3     OC30A       -0.34
+         9 C4     CC32A       -0.01
+        10 H41    HCA2         0.09
+        11 H42    HCA2         0.09
+        12 C5     CC32A       -0.18
+        13 H51    HCA2         0.09
+        14 H52    HCA2         0.09
+        15 C6     CC33A       -0.27
+        16 H61    HCA3         0.09
+        17 H62    HCA3         0.09
+        18 H63    HCA3         0.09
+    [bonds]
+       C1     C2    
+       C2     O3    
+       O3     C4    
+       C4     C5    
+       C5     C6    
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C2     H21   
+       C2     H22   
+       C4     H41   
+       C4     H42   
+       C5     H51   
+       C5     H52   
+       C6     H61   
+       C6     H62   
+       C6     H63   
+    [charge_groups]
+        C1    H11   H12   H13   
+        C2    H21   H22   O3    C4    H41   H42   
+        C5    H51   H52   
+        C6    H61   H62   H63   
+*------------------------------------------------------------------
+{ETHA}            !charge: 0.00 ||  ethane
+    [atoms]
+*------------------------------------------------------------------
+{HE1}            !charge: 0.00 ||  helium 
+    [atoms]
+         1 HE01   HE           0.00
+    [charge_groups]
+        HE01  
+*------------------------------------------------------------------
+{HEPT}            !charge: 0.00 ||  heptane, adm jr.
+    [atoms]
+*------------------------------------------------------------------
+{HEXA}            !charge: 0.00 ||  hexane, adm jr.
+    [atoms]
+*------------------------------------------------------------------
+{IBUT}            !charge: 0.00 ||  Iso-butane
+    [atoms]
+*------------------------------------------------------------------
+{MBET}            !charge: 0.00 ||  Methylbutylether, viv
+    [atoms]
+         1 C1     CC33A       -0.10
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 O2     OC30A       -0.34
+         6 C3     CC32A       -0.01
+         7 H31    HCA2         0.09
+         8 H32    HCA2         0.09
+         9 C4     CC32A       -0.18
+        10 H41    HCA2         0.09
+        11 H42    HCA2         0.09
+        12 C5     CC32A       -0.18
+        13 H51    HCA2         0.09
+        14 H52    HCA2         0.09
+        15 C6     CC33A       -0.27
+        16 H61    HCA3         0.09
+        17 H62    HCA3         0.09
+        18 H63    HCA3         0.09
+    [bonds]
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C1     O2    
+       O2     C3    
+       C3     H31   
+       C3     H32   
+       C3     C4    
+       C4     H41   
+       C4     H42   
+       C4     C5    
+       C5     H51   
+       C5     H52   
+       C5     C6    
+       C6     H61   
+       C6     H62   
+       C6     H63   
+    [charge_groups]
+        C1    H11   H12   H13   O2    C3    H31   H32   
+        C4    H41   H42   
+        C5    H51   H52   
+        C6    H61   H62   H63   
+*------------------------------------------------------------------
+{MEET}            !charge: 0.00 ||  Methylethylether, viv
+    [atoms]
+         1 C1     CC33A       -0.27
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 C2     CC32A       -0.01
+         6 H21    HCA2         0.09
+         7 H22    HCA2         0.09
+         8 O3     OC30A       -0.34
+         9 C4     CC33A       -0.10
+        10 H41    HCA3         0.09
+        11 H42    HCA3         0.09
+        12 H43    HCA3         0.09
+    [bonds]
+       C1     C2    
+       C2     O3    
+       O3     C4    
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C2     H21   
+       C2     H22   
+       C4     H41   
+       C4     H42   
+       C4     H43   
+    [charge_groups]
+        C1    H11   H12   H13   
+        C2    H21   H22   O3    C4    H41   H42   H43   
+*------------------------------------------------------------------
+{MPET}            !charge: 0.00 ||  Methyl Propyl Ether, viv
+    [atoms]
+         1 C1     CC33A       -0.10
+         2 H11    HCA3         0.09
+         3 H12    HCA3         0.09
+         4 H13    HCA3         0.09
+         5 O2     OC30A       -0.34
+         6 C3     CC32A       -0.01
+         7 H31    HCA2         0.09
+         8 H32    HCA2         0.09
+         9 C4     CC32A       -0.18
+        10 H41    HCA2         0.09
+        11 H42    HCA2         0.09
+        12 C5     CC33A       -0.27
+        13 H51    HCA3         0.09
+        14 H52    HCA3         0.09
+        15 H53    HCA3         0.09
+    [bonds]
+       C1     H11   
+       C1     H12   
+       C1     H13   
+       C1     O2    
+       O2     C3    
+       C3     H31   
+       C3     H32   
+       C3     C4    
+       C4     H41   
+       C4     H42   
+       C4     C5    
+       C5     H51   
+       C5     H52   
+       C5     H53   
+    [charge_groups]
+        C1    H11   H12   H13   O2    C3    H31   H32   
+        C4    H41   H42   
+        C5    H51   H52   H53   
+*------------------------------------------------------------------
+{NE1}            !charge: 0.00 ||  neon
+    [atoms]
+         1 NE01   NE           0.00
+*------------------------------------------------------------------
+{NEOP}            !charge: 0.00 ||  Neo-pentane, I. Vorobyov
+    [atoms]
+*------------------------------------------------------------------
+{OCT}            !charge: 0.00 ||  octane, adm jr.
+    [atoms]
+*------------------------------------------------------------------
+{OCT2}            !charge: 0.00 ||  octane, adm jr.
+    [atoms]
+*------------------------------------------------------------------
+{OCTD}            !charge: 0.00 ||  octadecane, Igor Vorobyov
+    [atoms]
+*------------------------------------------------------------------
+{PEGM}            !charge: 0.00 ||  Peg monomer for polymer construction
+    [atoms]
+         1 C1     CC32A       -0.01
+         2 H1B    HCA2         0.09
+         3 H1A    HCA2         0.09
+         4 O1     OC30A       -0.34
+         5 C2     CC32A       -0.01
+         6 H2A    HCA2         0.09
+         7 H2B    HCA2         0.09
+    [bonds]
+       C1     H1A   
+       C1     H1B   
+       C1     O1    
+       O1     C2    
+       C2     H2A   
+       C2     H2B   
+       C1     C2    
+    [charge_groups]
+        C1    H1B   H1A   O1    C2    H2A   H2B   
+*------------------------------------------------------------------
+{PEND}            !charge: 0.00 ||  pentadecane, Igor Vorobyov
+    [atoms]
+*------------------------------------------------------------------
+{PENT}            !charge: 0.00 ||  pentane, adm jr.
+    [atoms]
+*------------------------------------------------------------------
+{PROP}            !charge: 0.00 ||  propane, adm jr.
+    [atoms]
+*------------------------------------------------------------------
+{TF2M}            !charge: 0.00 ||  2-methyl-THF, viv
+    [atoms]
+         1 O1     OC305A      -0.40
+         2 C1     CC325B       0.11
+         3 H1A    HCA25A       0.09
+         4 C2     CC325B      -0.18
+         5 H2A    HCA25A       0.09
+         6 H2B    HCA25A       0.09
+         7 C3     CC325B      -0.18
+         8 H3A    HCA25A       0.09
+         9 H3B    HCA25A       0.09
+        10 C4     CC325B       0.02
+        11 H4A    HCA25A       0.09
+        12 H4B    HCA25A       0.09
+        13 C5     CC33A       -0.27
+        14 H5A    HCA3         0.09
+        15 H5B    HCA3         0.09
+        16 H5C    HCA3         0.09
+    [bonds]
+       O1     C1    
+       C1     H1A   
+       C1     C2    
+       C2     H2A   
+       C2     H2B   
+       C2     C3    
+       C3     H3A   
+       C3     H3B   
+       C3     C4    
+       C4     H4A   
+       C4     H4B   
+       C4     O1    
+       C1     C5    
+       C5     H5A   
+       C5     H5B   
+       C5     H5C   
+    [charge_groups]
+        O1    C1    H1A   C2    H2A   H2B   C3    H3A   H3B   C4    H4A   H4B   C5    H5A   H5B   H5C   
+*------------------------------------------------------------------
+{THF}            !charge: 0.00 ||  Tetrahydrofuran, viv
+    [atoms]
+         1 O1     OC305A      -0.40
+         2 C1     CC325B       0.02
+         3 H1A    HCA25A       0.09
+         4 H1B    HCA25A       0.09
+         5 C2     CC325B      -0.18
+         6 H2A    HCA25A       0.09
+         7 H2B    HCA25A       0.09
+         8 C3     CC325B      -0.18
+         9 H3A    HCA25A       0.09
+        10 H3B    HCA25A       0.09
+        11 C4     CC325B       0.02
+        12 H4A    HCA25A       0.09
+        13 H4B    HCA25A       0.09
+    [bonds]
+       O1     C1    
+       C1     H1A   
+       C1     H1B   
+       C1     C2    
+       C2     H2A   
+       C2     H2B   
+       C2     C3    
+       C3     H3A   
+       C3     H3B   
+       C3     C4    
+       C4     H4A   
+       C4     H4B   
+       C4     O1    
+    [charge_groups]
+        O1    C1    H1A   H1B   C2    H2A   H2B   C3    H3A   H3B   C4    H4A   H4B   
+*------------------------------------------------------------------
+{THP}            !charge: 0.00 ||  Tetrahydro-2H-pyran, viv
+    [atoms]
+         1 O1     OC30A       -0.40
+         2 C1     CC326A       0.02
+         3 H1A    HCA2         0.09
+         4 H1B    HCA2         0.09
+         5 C2     CC326A      -0.18
+         6 H2A    HCA2         0.09
+         7 H2B    HCA2         0.09
+         8 C3     CC326A      -0.18
+         9 H3A    HCA2         0.09
+        10 H3B    HCA2         0.09
+        11 C4     CC326A      -0.18
+        12 H4A    HCA2         0.09
+        13 H4B    HCA2         0.09
+        14 C5     CC326A       0.02
+        15 H5A    HCA2         0.09
+        16 H5B    HCA2         0.09
+    [bonds]
+       O1     C1    
+       C1     H1A   
+       C1     H1B   
+       C1     C2    
+       C2     H2A   
+       C2     H2B   
+       C2     C3    
+       C3     H3A   
+       C3     H3B   
+       C3     C4    
+       C4     H4A   
+       C4     H4B   
+       C4     C5    
+       C5     H5A   
+       C5     H5B   
+       C5     O1    
+    [charge_groups]
+        O1    C1    H1A   H1B   C2    H2A   H2B   C3    H3A   H3B   C4    H4A   H4B   C5    H5A   H5B   
+*------------------------------------------------------------------
+{TIP3}            !charge: 0.000 ||  tip3p water model, generate using noangle nodihedral
+    [atoms]
+         1 OH2    OT         -0.834
+         2 H1     HT          0.417
+         3 H2     HT          0.417
+    [bonds]
+       OH2    H1    
+       OH2    H2    
+    [charge_groups]
+        OH2   H1    H2    
+*------------------------------------------------------------------
+{deca}            !charge: 0.00 ||  decane, Igor Vorobyov
+    [atoms]
+*------------------------------------------------------------------

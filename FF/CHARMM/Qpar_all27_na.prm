@@ -9,12 +9,12 @@
 [options] force-field options
 name            Q  CHARMM27 All-Hydrogen Nucleic Acid Parameter File 
 vdw_rule    arithmetic   ! vdW combination rule (geometric or arithmetic )
-scale_14         1.0         ! electrostatic 1-4 scaling factor
+scale_14         1         ! electrostatic 1-4 scaling factor
 switch_atoms  off       ! on = use switch atom; off = use charge group
 improper_definition explicit ! improper representation by 2 or four atoms
 improper_potential      harmonic
 coulomb_constant 332.0716    ! Constant in electrostatic energy calculation; default = 332.
-force_field charmm           ! Force Field Type (GROMOS (default), AMBER or CHARMM)
+force_field CHARMM           ! Force Field Type (GROMOS (default), AMBER or CHARMM)
 
 
 [atom_types]
