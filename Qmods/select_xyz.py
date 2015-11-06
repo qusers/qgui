@@ -44,6 +44,18 @@ class AtomSelect(Toplevel):
             except:
                 continue
 
+    def listbox_clicked(self, *args):
+        if not self.app.session:
+            return
+
+        selected = int( self.listbox.curselection()[0])
+
+        atom_nr = self.listbox.get(selected).split()[1]
+
+        self.app.session.stdin.write('select none \nhide labels\n')
+        #self.app.session.stdin.write('select id %s\n' % atom_nr )
+        self.app.session.stdin.write('label id %s, name\n' % atom_nr)
+        self.app.session.stdin.write('zoom id %s, buffer=%d\n' % (atom_nr, self.app.pymol_zoom))
 
     def get_selected(self):
         """
@@ -87,3 +99,4 @@ class AtomSelect(Toplevel):
         cancel_button = Button(left_frame, text = 'Cancel', command = self.cancel)
         cancel_button.grid(row=11, column = 6, columnspan = 6, sticky = 'w' )
         cancel_button.config(highlightbackground = self.main_color)
+        self.listbox.bind('<<ListboxSelect>>', self.listbox_clicked)

@@ -9,6 +9,29 @@
 *
 * Standard N- and C- terminals: NRES and CRES
 * Neutral N- and C- terminals: nRES and cRES
+*
+*[toggle_residues] ! This is for topology prepare in Qgui 
+*   QGUI_TOGGLE  ARG  ARN   -H12            radius_to CZ
+*   QGUI_TOGGLE  ARN  ARG   +H12  NH1       radius_to CZ
+*   QGUI_TOGGLE  HIP  HID   -HE2            radius_to CE1
+*   QGUI_TOGGLE  LYS  LYN   -HZ3            radius_to NZ
+*   QGUI_TOGGLE  LYN  LYS   +HZ3  NZ        radius_to NZ
+*   QGUI_TOGGLE  ASP  ASH   +HD2  OD2       radius_to CG
+*   QGUI_TOGGLE  ASH  ASP   -HD2            radius_to CG
+*   QGUI_TOGGLE  GLU  GLH   +HE2  OE2       radius_to CD
+*   QGUI_TOGGLE  GLH  GLU   -HE2            radius_to CD
+*   QGUI_TOGGLE  HID  HIE   -HD1 +HE2 NE2   radius_to CE1
+*   QGUI_TOGGLE  HIE  HIP   +HD1  ND1       radius_to CE1
+*   QGUI_TOGGLE  CYS  CYX   -HG1            radius_to SG
+*   QGUI_TOGGLE  CYX  CYS   +HG1  SG        radius_to SG
+*   QGUI_TOGGLE  SER  SED   -HG1            radius_to OG
+*   QGUI_TOGGLE  SED  SER   +HG1  OG        radius_to OG
+*   !N- and C- terms: only atom to add/delete can be modified!
+*   !If you have something special, use toggle insted.
+*   QGUI_N-TERM  NRES nRES  -HT3            radius_to N
+*   QGUI_N-TERM  nRES NRES  +HT3  N         radius_to N
+*   QGUI_C-TERM  CRES cRES  +HO2  OT2       radius_to C
+*   QGUI_C-TERM  cRES CRES  -HO2            radius_to C
 *------------------------------------------------------------------
 {ALA}            !charge: 0.00 ||  
     [atoms]

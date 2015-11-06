@@ -9,6 +9,27 @@
 *
 * Standard N- and C- terminals: NRES and CRES
 * Neutral N- and C- terminals: nRES and cRES
+*
+*[toggle_residues] ! This is for topology prepare in Qgui 
+*   QGUI_TOGGLE  ARG  ARN   -H12            radius_to CZ
+*   QGUI_TOGGLE  ARN  ARG   +H12  NH1       radius_to CZ
+*   QGUI_TOGGLE  HIP  HID   -HE2            radius_to CE1
+*   QGUI_TOGGLE  LYS  LYN   -HZ3            radius_to NZ
+*   QGUI_TOGGLE  LYN  LYS   +HZ3  NZ        radius_to NZ
+*   QGUI_TOGGLE  ASP  ASH   +HD2  OD2       radius_to CG
+*   QGUI_TOGGLE  ASH  ASP   -HD2            radius_to CG
+*   QGUI_TOGGLE  GLU  GLH   +HE2  OE2       radius_to CD
+*   QGUI_TOGGLE  GLH  GLU   -HE2            radius_to CD
+*   QGUI_TOGGLE  HID  HIE   -HD1 +HE2 NE2   radius_to CE1
+*   QGUI_TOGGLE  HIE  HIP   +HD1  ND1       radius_to CE1
+*   QGUI_TOGGLE  CYS  CYX   -HG1            radius_to SG
+*   QGUI_TOGGLE  CYX  CYS   +HG1  SG        radius_to SG
+*   !N- and C- terms: only atom to add/delete can be modified!
+*   !If you have something special, use toggle insted.
+*   QGUI_N-TERM  NRES nRES  -HT3            radius_to N
+*   QGUI_N-TERM  nRES NRES  +HT3  N         radius_to N
+*   QGUI_C-TERM  CRES cRES  +HO2  OT2       radius_to C
+*   QGUI_C-TERM  cRES CRES  -HO2            radius_to C
 *------------------------------------------------------------------
 {ALA}            !charge: 0.00 ||  
     [atoms]
@@ -103,72 +124,9 @@
         CRP   OR    
         NR    HR    CR    HR1   HR2   HR3   
 *------------------------------------------------------------------
-{ARG}            !charge: 1.00 ||  
-    [atoms]
-         1 N      NH1         -0.47
-         2 HN     H            0.31
-         3 CA     CT1          0.07
-         4 HA     HB           0.09
-         5 CB     CT2         -0.18
-         6 HB1    HA           0.09
-         7 HB2    HA           0.09
-         8 CG     CT2         -0.18
-         9 HG1    HA           0.09
-        10 HG2    HA           0.09
-        11 CD     CT2          0.20
-        12 HD1    HA           0.09
-        13 HD2    HA           0.09
-        14 NE     NC2         -0.70
-        15 HE     HC           0.44
-        16 CZ     C            0.64
-        17 NH1    NC2         -0.80
-        18 HH11   HC           0.46
-        19 HH12   HC           0.46
-        20 NH2    NC2         -0.80
-        21 HH21   HC           0.46
-        22 HH22   HC           0.46
-        23 C      C            0.51
-        24 O      O           -0.51
-    [bonds]
-       CB     CA    
-       CG     CB    
-       CD     CG    
-       NE     CD    
-       CZ     NE    
-       NH2    CZ    
-       N      HN    
-       N      CA    
-       C      CA    
-       C      N     
-       CA     HA    
-       CB     HB1   
-       CB     HB2   
-       CG     HG1   
-       CG     HG2   
-       CD     HD1   
-       CD     HD2   
-       NE     HE    
-       NH1    HH11  
-       NH1    HH12  
-       NH2    HH21  
-       NH2    HH22  
-       O      C     
-       CZ     NH1   
-    [connections]
-        head N     
-        tail C     
-    [impropers]
-         N      -C     CA     HN    
-         C      CA     +N     O     
-         CZ     NH1    NH2    NE    
-    [charge_groups]
-        N     HN    CA    HA    
-        CB    HB1   HB2   
-        CG    HG1   HG2   
-        CD    HD1   HD2   NE    HE    CZ    NH1   HH11  HH12  NH2   HH21  HH22  
-        C     O     
-*------------------------------------------------------------------
-{ARN} !Deprotonated ARG
+{ARN} !Deprotonated arginine!!
+    [info]
+        SYBYLtype  RESIDUE
     [atoms]
          1 N      NH1         -0.470
          2 HN     H            0.310
@@ -233,8 +191,217 @@
         CG   HG1  HG2
         CD   HD1  HD2  NE   HE   CZ   NH1  HH11  NH2  HH21  HH22
         C    O
+*----------------------------------------------------------------------
+{ARG}            !charge: 1.00 ||  
+    [atoms]
+         1 N      NH1         -0.47
+         2 HN     H            0.31
+         3 CA     CT1          0.07
+         4 HA     HB           0.09
+         5 CB     CT2         -0.18
+         6 HB1    HA           0.09
+         7 HB2    HA           0.09
+         8 CG     CT2         -0.18
+         9 HG1    HA           0.09
+        10 HG2    HA           0.09
+        11 CD     CT2          0.20
+        12 HD1    HA           0.09
+        13 HD2    HA           0.09
+        14 NE     NC2         -0.70
+        15 HE     HC           0.44
+        16 CZ     C            0.64
+        17 NH1    NC2         -0.80
+        18 HH11   HC           0.46
+        19 HH12   HC           0.46
+        20 NH2    NC2         -0.80
+        21 HH21   HC           0.46
+        22 HH22   HC           0.46
+        23 C      C            0.51
+        24 O      O           -0.51
+    [bonds]
+       CB     CA    
+       CG     CB    
+       CD     CG    
+       NE     CD    
+       CZ     NE    
+       NH2    CZ    
+       N      HN    
+       N      CA    
+       C      CA    
+       C      N     
+       CA     HA    
+       CB     HB1   
+       CB     HB2   
+       CG     HG1   
+       CG     HG2   
+       CD     HD1   
+       CD     HD2   
+       NE     HE    
+       NH1    HH11  
+       NH1    HH12  
+       NH2    HH21  
+       NH2    HH22  
+       O      C     
+       CZ     NH1   
+    [connections]
+        head N     
+        tail C     
+    [impropers]
+         N      -C     CA     HN    
+         C      CA     +N     O     
+         CZ     NH1    NH2    NE    
+    [charge_groups]
+        N     HN    CA    HA    
+        CB    HB1   HB2   
+        CG    HG1   HG2   
+        CD    HD1   HD2   NE    HE    CZ    NH1   HH11  HH12  NH2   HH21  HH22  
+        C     O     
+*-------------------------------------------------------------
+{CARG}                 ! C-terminal Arginine
+      [info]
+        SYBYLtype  RESIDUE
+    [atoms]
+         1 N      NH1         -0.470
+         2 HN     H            0.310
+         3 CA     CT1          0.070
+         4 HA     HB           0.090
+         5 CB     CT2         -0.180
+         6 HB1    HA           0.090
+         7 HB2    HA           0.090
+         8 CG     CT2         -0.180
+         9 HG1    HA           0.090
+        10 HG2    HA           0.090
+        11 CD     CT2          0.200
+        12 HD1    HA           0.090
+        13 HD2    HA           0.090
+        14 NE     NC2         -0.700
+        15 HE     HC           0.440
+        16 CZ     C            0.640
+        17 NH1    NC2         -0.800
+        18 HH11   HC           0.460
+        19 HH12   HC           0.460
+        20 NH2    NC2         -0.800
+        21 HH21   HC           0.460
+        22 HH22   HC           0.460
+        23 C      CC           0.340
+        24 OT1    OC          -0.670  
+        25 OT1    OC          -0.670  
+    [bonds]
+       CB   CA
+       CG   CB
+       CD   CG
+       NE   CD
+       CZ   NE
+       NH1  CZ
+       NH2  CZ
+       N    HN
+       N    CA
+       CA   HA
+       CB   HB1
+       CB   HB2
+       CG   HG1
+       CG   HG2
+       CD   HD1
+       CD   HD2
+       NE   HE
+       NH1  HH11
+       NH1  HH12
+       NH2  HH21
+       NH2  HH22
+       CA   C
+       C    O
+       C    OXT
+    [build_rules]
+       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
+       torsion HH21 NH2  CZ   NE    0
+    [connections]
+        head     N
+        tail     C
+    [impropers]
+         N     -C     CA     HN
+         C     CA     +N      O
+        CZ    NH1    NH2     NE
+         O    CA     OXT      C
+    [charge_groups]
+        N    HN   CA   HA
+        CB   HB1  HB2
+        CG   HG1  HG2
+        CD   HD1  HD2  NE   HE   CZ   NH1  HH11  HH12  NH2  HH21  HH22
+        C    O    OXT
 *------------------------------------------------------------------
-{ASH}            !charge: -0.0 || Protonated ASP 
+{NARG}                 ! Arginine N-terminal
+      [info]
+        SYBYLtype  RESIDUE
+    [atoms]
+         1 N      NH3         -0.300
+         2 HT1    HC           0.330
+         3 HT2    HC           0.330
+         4 HT3    HC           0.330
+         5 CA     CT1          0.210
+         6 HA     HB           0.100
+         7 CB     CT2         -0.180
+         8 HB1    HA           0.090
+         9 HB2    HA           0.090
+        10 CG     CT2         -0.180
+        11 HG1    HA           0.090
+        12 HG2    HA           0.090
+        13 CD     CT2          0.200
+        14 HD1    HA           0.090
+        15 HD2    HA           0.090
+        16 NE     NC2         -0.700
+        17 HE     HC           0.440
+        18 CZ     C            0.640
+        19 NH1    NC2         -0.800
+        20 HH11   HC           0.460
+        21 HH12   HC           0.460
+        22 NH2    NC2         -0.800
+        23 HH21   HC           0.460
+        24 HH22   HC           0.460
+        25 C      C            0.510
+        26 O      O           -0.510
+    [bonds]
+       N    HT1
+       N    HT2
+       N    HT3
+       N    CA
+       CA   HA
+       CB   CA
+       CG   CB
+       CD   CG
+       NE   CD
+       CZ   NE
+       NH1  CZ
+       NH2  CZ
+       O    C
+       C    CA
+       CB   HB1
+       CB   HB2
+       CG   HG1
+       CG   HG2
+       CD   HD1
+       CD   HD2
+       NE   HE
+       NH1  HH11
+       NH1  HH12
+       NH2  HH21
+       NH2  HH22
+    [build_rules]
+       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
+       torsion HH21 NH2  CZ   NE    0
+    [connections]
+        head     N
+        tail     C
+    [impropers]
+         C     CA     +N      O
+        CZ    NH1    NH2     NE
+    [charge_groups]
+        N    HT1  HT2  HT3  CA   HA
+        CB   HB1  HB2
+        CG   HG1  HG2
+        CD   HD1  HD2  NE   HE   CZ   NH1  HH11  HH12  NH2  HH21  HH22
+        C    O
+*------------------------------------------------------------------
+{ASH}            !charge: -0.0 ||  
     [atoms]
          1 N      NH1         -0.47
          2 HN     H            0.31
@@ -1044,7 +1211,7 @@
         11 CG1    CT2         -0.18
         12 HG11   HA           0.09
         13 HG12   HA           0.09
-        14 CD     CT3         -0.27
+        14 CD1    CT3         -0.27
         15 HD1    HA           0.09
         16 HD2    HA           0.09
         17 HD3    HA           0.09
@@ -2119,7 +2286,7 @@
         11 CG1    CT2         -0.18
         12 HG11   HA           0.09
         13 HG12   HA           0.09
-        14 CD     CT3         -0.27
+        14 CD1    CT3         -0.27
         15 HD1    HA           0.09
         16 HD2    HA           0.09
         17 HD3    HA           0.09
@@ -3073,7 +3240,7 @@
         11 CG1    CT2         -0.18
         12 HG11   HA           0.09
         13 HG12   HA           0.09
-        14 CD     CT3         -0.27
+        14 CD1    CT3         -0.27
         15 HD1    HA           0.09
         16 HD2    HA           0.09
         17 HD3    HA           0.09
@@ -3935,6 +4102,18 @@
        H1     H2    
     [charge_groups]
         OH2   H1    H2    
+*------------------------------------------------------------------
+{HOH}            !charge: 0.000 ||  tip3p water model, generate using noangle nodihedral
+    [atoms]
+         1 O      OT         -0.834
+         2 H1     HT          0.417
+         3 H2     HT          0.417
+    [bonds]
+       O      H1
+       O      H2
+       H1     H2
+    [charge_groups]
+        O     H1    H2
 *------------------------------------------------------------------
 {TP3M}            !charge: 0.000 ||  "mmff" water model, as an analog of tip3p
     [atoms]
@@ -6151,7 +6330,7 @@
         11 CG1    CT2         -0.18
         12 HG11   HA           0.09
         13 HG12   HA           0.09
-        14 CD     CT3         -0.27
+        14 CD1    CT3         -0.27
         15 HD1    HA           0.09
         16 HD2    HA           0.09
         17 HD3    HA           0.09

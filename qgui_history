@@ -1,3 +1,8 @@
+06.11.15 v2.0b
+    Complete remake of the topology prepare tool. This is now independent of
+    forcefield type, and residues that are togglable are defined directly in
+    the library file. Topology prepare now also syncs with PyMOL.
+
 18.09.15 v1.2.0
     Added the long time missing option to load a old FEP file
     in the EVB setup. So now you do not have to redefine everything

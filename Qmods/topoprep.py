@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, Button, Scrollbar, Toplevel, Checkbutton, Listbox, DISABLED, NORMAL, END,  GROOVE, LEFT, RIGHT, IntVar
+from Tkinter import Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, Button, Scrollbar, Toplevel, \
+    Checkbutton, Listbox, DISABLED, NORMAL, END, GROOVE, LEFT, RIGHT, IntVar, PhotoImage
 #from qgui import PDB_COLOR
 
 # -*- coding: utf-8 -*-
@@ -25,7 +26,11 @@ from select_xyz import AtomSelect
 from edit_file import FileEdit
 import time
 import numpy as np
-
+from subprocess import Popen, PIPE
+import copy
+import signal
+import sys
+import linecache
 
 
 class TopologyPrepare(Toplevel):
@@ -46,6 +51,16 @@ class TopologyPrepare(Toplevel):
         self.zvar = StringVar()
         self.qgui_parent = qgui_parent
 
+        #Pymol session:
+        self.sync_pymol = IntVar()
+        self.session = None
+
+        #Size of simulation sphere
+        self.sphere_radius = StringVar()
+
+        #Pymol zoom buffer when residue is clicked:
+        self.pymol_zoom = 10
+
         #Initialize dictionaries:
         self.charge_off = {'AR+': 'ARG', 'NAR+': 'NARG', 'CAR+': 'CARG',
                            'AS-': 'ASP', 'NAS-': 'NASP', 'CAS-': 'CASP',
@@ -61,6 +76,7 @@ class TopologyPrepare(Toplevel):
                           'ASP': 'CG', 'NASP': 'CG', 'CASP': 'CG',
                           'GLU': 'CD', 'NGLU': 'CD', 'CGLU': 'CD',
                           'LYS': 'CD', 'NLYS': 'CD', 'CLYS': 'CD'}
+
 
         if not self.qgui_parent:
             self.app.log = self.app.app.log
@@ -79,7 +95,10 @@ class TopologyPrepare(Toplevel):
 
         #Auto insert name for topology and topology pdb
         self.topology_entry.insert(0.0,self.pdbfile.split('/')[-1].split('.')[0]+'.top')
-        self.topo_pdb_entry.insert(0.0,self.pdbfile.split('/')[-1].split('.')[0]+'_top.pdb')
+        if '_top' not in self.pdbfile.split('/')[-1]:
+            self.topo_pdb_entry.insert(0.0,self.pdbfile.split('/')[-1].split('.')[0]+'_top.pdb')
+        else:
+            self.topo_pdb_entry.insert(0.0, self.pdbfile.split('/')[-1])
 
         #Generate SS?
         self.makeSS = False
@@ -97,9 +116,14 @@ class TopologyPrepare(Toplevel):
         self.sphere_entry.delete(0, END)
         self.sphere_entry.insert(0, '%d' % int(round(system_radius + 5)))
 
+        #If pymol is active, adjust sphere size interactively
+        self.sphere_radius.trace('w', self.adjust_simulation_sphere)
+
+
         #Set default solvation
         self.check_solvation.set(1)
 
+        #TODO change the HIS module!
         #Check if HIS in file and convert to HID:
         self.his = pt.getResnrs(self.pdbfile, 'HIS')
         self.hid = pt.getResnrs(self.pdbfile, 'HID')
@@ -121,9 +145,46 @@ class TopologyPrepare(Toplevel):
         #Library list (get this from .settings)
         self.lib = lib
 
+        #These are filled from self.checkLib
+        #{RES: charge}
         self.res_charge = dict()
+        #{RES:[atoms]}
         self.res_atoms = dict()
-        #Check if residues in pdb file exist in library:
+        #{RES: color}
+        self.res_colors = dict()
+        #{RES: {nr: {x,y,z, dist} } }
+        self.resname_nr_dist = dict()
+        #{RES: ATOM}
+        self.resname_distatom = dict()
+
+        #Default toggle_res. Will be overwritten if [toggle_residues] in lib file:
+        self.toggle_res = {'ARG': 'ARN',
+                           'ARN': 'ARG',
+                           'LYS': 'LYN',
+                           'LYN': 'LYS',
+                           'ASP': 'ASH',
+                           'ASH': 'ASP',
+                           'GLU': 'GLH',
+                           'GLH': 'GLU',
+                           'HIP': 'HID',
+                           'HID': 'HIE',
+                           'HIE': 'HIP',
+                           }
+
+        #Dictionary describing atoms that changes for new residue in toggle residue:
+        self.toggle_res_atoms = {'ARG': '+H12 NH1',
+                                 'ARN': '-H12',
+                                 'LYS': '+HZ3 NZ',
+                                 'LYN': '-HZ3',
+                                 'ASP': '-HD2',
+                                 'ASH': '+HD2 OD2',
+                                 'GLU': '-HE2',
+                                 'GLH': '+HE2 OE2',
+                                 'HIP': '+HD1 ND1',
+                                 'HID': '-HE2',
+                                 'HIE': '-HD2 +HE2 NE2'}
+
+        #Check if residues in pdb file exist in library and generate:
         self.checkLib()
 
         self.set_total_charge()
@@ -145,11 +206,13 @@ class TopologyPrepare(Toplevel):
 
     def simcenter_changed(self, *args):
         """
-        Updates list with chargable residues and radiuses whenever
+        Updates list with chargable residues and radii whenever
         simulation center is changed
         """
         try:
             self.updateList()
+            if self.session:
+                self.update_simulation_sphere()
         except:
             return
 
@@ -159,22 +222,77 @@ class TopologyPrepare(Toplevel):
         """
         status = 'Lib status: OK'
 
+        #Get what atoms to modify upon terminal toggling
+        toggle_term_atom = {'n': '-HT3',
+                            'N': '+HT3 N',
+                            'c': '+HO2 OT2',
+                            'C': '-HO2'}
+
+        #Terminals start with:
+        term_start = ['N','n','C','c']
+
+        #collect all residues potential terminal residues and fix toggle later:
+        term_res = list()
+
+        #Collect temp CRES, cRES, nRES and NRES and delete them when done
+        del_list = list()
+
         #Collect info from lib files
         for lib in self.lib:
             with open(lib, 'r') as lib:
                 found_res = False
                 found_atoms = False
-                charges = []
+                found_toggle_res = False
+
+                charges = list()
                 res = 'Hello'
+
                 for line in lib:
+                    if found_toggle_res:
+                        if ' QGUI_TOGGLE ' in line or ' QGUI_N-TERM ' in line or ' QGUI_C-TERM ' in line:
+                            try:
+                                origial_res = line.split()[2]
+                                new_res = line.split()[3]
+                                atoms = ' '.join(line.split('radius_to')[0].split()[4:])
+                                r_atom = line.split('radius_to')[1].strip('\n\r ')
+
+                                self.toggle_res[origial_res] = new_res
+                                self.toggle_res_atoms[new_res] = atoms
+                                if new_res not in self.resname_distatom:
+                                    self.resname_distatom[new_res] = r_atom
+                                    self.resname_nr_dist[new_res] = dict()
+                            except:
+                                print 'Unexpected line in [toggle_residues]'
+                                print line
+
+                        if ' QGUI_N-TERM ' in line or ' QGUI_C-TERM ' in line:
+                            toggle_term_atom[line.split()[3][0]] = ' '.join(line.split()[4:]).strip('\n')
+                            origial_res = line.split()[2]
+                            new_res = line.split()[3]
+                            for to_remove in [origial_res, new_res]:
+                                if to_remove not in del_list:
+                                    del_list.append(to_remove)
+
                     if found_res:
-                        if '[bonds]' in line or '*-------' in line:
-                            self.res_charge[res] = round(np.sum(charges), 1)
-                            print '%4s: %.1f' % (res, round(np.sum(charges), 1))
+                        if '[bonds]' in line or '*-------' in line or '[charge_groups]' in line:
+                            found_toggle_res = False
+                            tot_charge = float(np.sum(charges))
+                            self.res_charge[res] = round(tot_charge, 1)
+                            print '%4s: %.1f' % (res, round(tot_charge, 1))
+                            if tot_charge > 0.499:
+                                self.res_colors[res] = 'blue'
+                            elif tot_charge < -0.499:
+                                self.res_colors[res] = 'red'
+                            elif res == 'CYX':
+                                self.res_colors[res] = 'yellow'
+                            else:
+                                self.res_colors[res] = 'white'
+
                             found_atoms = False
                             found_res = False
 
                         if found_atoms:
+
                             if len(line.split()) > 3:
                                 if line.split()[0] != '!':
                                     self.res_atoms[res].append(line.split()[1])
@@ -183,39 +301,444 @@ class TopologyPrepare(Toplevel):
                             found_atoms = True
 
                     if '{' in line and '}' in line:
+                        found_toggle_res = False
                         res = line.split('{')[1].split('}')[0]
+
+                        #Check if residue can be a terminal residue:
+                        if res[0] in term_start and len(res) == 4:
+                            if res not in term_res:
+                                term_res.append(res)
+
                         self.res_atoms[res] = list()
                         self.res_charge[res] = 0.0
                         charges = list()
                         found_res = True
+                    if '[toggle_residues]' in line:
+                        print 'Found [toggle_residues] in library file. Original will be overwritten.'
+                        found_toggle_res = True
+                        self.toggle_res = dict()
+
+        #Add N- and C-terminals to toggle_residues
+        for term in term_res:
+            res = term[1:]
+            if res in self.res_charge.keys():
+                if term[0].islower():
+                    toggle_to = term[0].capitalize() + term[1:]
+                else:
+                    toggle_to = term[0].lower() + term[1:]
+
+                self.toggle_res[term] = toggle_to
+                self.toggle_res_atoms[toggle_to] = toggle_term_atom[toggle_to[0]]
+                self.resname_distatom[term] = copy.deepcopy(self.resname_distatom[term[0]+'RES'])
+                self.resname_distatom[toggle_to] = copy.deepcopy(self.resname_distatom[toggle_to[0]+'RES'])
+
+        #Remove temp NRES and CRES definitions for terminals
+        for to_remove in del_list:
+            del self.toggle_res[to_remove]
+            del self.resname_distatom[to_remove]
+            del self.resname_nr_dist[to_remove]
 
         #Get info from pdb file and compare to existing lib entries
+        pdb_atoms = list()
+
+        find_CA = False
+        c_term_found = False
+        create_cterm = False
+        create_nterm = False
+        res = None
+
+        #count line number
+        line_number = 0
+
+        #Comput distance from previous C to current N to check for terminals
+        c_xyz = False
+        n_xyz = False
+
         with open(self.pdbfile, 'r') as pdb:
             res_nr = 0
             for line in pdb:
+                line_number += 1
+
+                #Check for GAP or TER statements (C-terminals)
+                if line.startswith('TER') or 'GAP' in line:
+                    c_term_found = True
+                    create_nterm = True
+
                 if 'ATOM' in line or 'HETATM' in line:
-                    res = line[17:21].strip()
                     atom_name = line[13:17].strip()
+
+                    #collect atom names for given residue:
+                    if res_nr == int(line[21:26]):
+                        pdb_atoms.append(atom_name)
+
+                    #Check if residue is N-terminal:
+                    if atom_name == 'N':
+                        n_xyz = map(float, line[30:].split()[0:3])
+                        if not c_xyz:
+                            create_nterm = True
+
+                        elif c_xyz and n_xyz:
+                            r = np.sqrt((n_xyz[0] - c_xyz[0])**2 + (n_xyz[1] - c_xyz[1])**2 + (n_xyz[2] - c_xyz[2])**2)
+                            if r > 2.2:
+                                c_term_found = True
+                                create_nterm = True
+
+                    #Collect coordinates for carbonyl carbon
+                    elif atom_name == 'C':
+                        c_xyz = map(float, line[30:].split()[0:3])
+
+                    #New residue number starts:
                     if res_nr != int(line[21:26]):
+                        #Check if any heavy atoms in residue are missing in pdb file:
+                        self.check_missing_atoms(res, res_nr, pdb_atoms)
+
+                        #Check if previous residue was potential C-terminal
+                        if c_term_found:
+                            create_cterm = True
+
+                            #Check if C-terminal name is valid or if it is possible to generate one
+                            if len(res) > 3 and res[0].lower() == 'c':
+                                if res in self.toggle_res.keys():
+                                    #Check if C-terminal already has correct residue name:
+                                    if res.lower() == self.toggle_res[res].lower():
+                                        print '%4s %3d is assumed a valid C-terminal' % (res, res_nr)
+                                        #No need to generate it, it is already defined
+                                        create_cterm = False
+                                        #Add the togglable terminal:
+                                        if res not in self.resname_nr_dist.keys():
+                                            self.resname_nr_dist[res] = dict()
+                                        if res_nr not in self.resname_nr_dist[res].keys():
+                                            self.resname_nr_dist[res][res_nr] = dict()
+                                        if res not in self.resname_distatom.keys():
+                                            self.resname_distatom[res] = 'C'
+                                        if c_xyz:
+                                            self.resname_nr_dist[res][res_nr]['x'] = c_xyz[0]
+                                            self.resname_nr_dist[res][res_nr]['y'] = c_xyz[1]
+                                            self.resname_nr_dist[res][res_nr]['z'] = c_xyz[2]
+
+                            elif res not in self.res_atoms.keys():
+                                create_cterm = False
+                            elif len(self.res_atoms[res]) > 6:
+                                if 'C' not in self.res_atoms[res]:
+                                    create_cterm = False
+
+                            c_term_found = False
+
+                        if create_cterm:
+                            cres = self.check_c_term(res, res_nr, line_number)
+                            self.check_missing_atoms(cres, res_nr, pdb_atoms)
+                            c_term_found = False
+                            create_cterm = False
+                            c_xyz = False
+                            if not create_nterm:
+                                n_xyz = False
+
+                        del pdb_atoms[:]
+                        pdb_atoms.append(atom_name)
+                        res = line[17:21].strip()
                         res_nr = int(line[21:26])
+                        find_CA = False
+
+                        if create_nterm:
+                            if res in self.res_atoms.keys():
+                                if len(res) > 3 and res in self.toggle_res.keys():
+                                    print '%4s %3d is assumed a valid N-terminal' % (res, res_nr)
+                                    #Add the togglable terminal:
+                                    if res not in self.resname_nr_dist.keys():
+                                        self.resname_nr_dist[res] = dict()
+                                    if res_nr not in self.resname_nr_dist[res].keys():
+                                        self.resname_nr_dist[res][res_nr] = dict()
+                                        if res not in self.resname_distatom.keys():
+                                            self.resname_distatom[res] = 'N'
+                                        if n_xyz:
+                                            self.resname_nr_dist[res][res_nr]['x'] = n_xyz[0]
+                                            self.resname_nr_dist[res][res_nr]['y'] = n_xyz[1]
+                                            self.resname_nr_dist[res][res_nr]['z'] = n_xyz[2]
+
+                                elif 'N' in self.res_atoms[res]:
+                                    if n_xyz:
+                                        res = self.check_n_term(res, res_nr, n_xyz,
+                                                                 line_number)
+                                        #self.check_missing_atoms(nres, res_nr, pdb_atoms)
+                            create_nterm = False
+                            n_xyz = False
+
+
+
+                        if res == self.toggle_res['CYS']:
+                            if not self.makeSS:
+                                self.check_variable.set(1)
+                                self.makeSS = True
+
                         if not res in self.res_atoms.keys():
                             self.app.log(' ','WARNING: %4s %5d not found in lib entries!\n' % (res, res_nr))
                             if status != 'Lib entries missing':
                                 status = 'Lib entries missing'
 
+                        #Check if residue has atom defined for distance to sim center defined
+                        #Apply default first atom as default. Change to CA if it exist!
+                        if not res in self.resname_nr_dist.keys():
+                            if res in self.res_charge.keys():
+                                if abs(self.res_charge[res]) > 0.4999:
+                                    print 'Added charged residue which is not togglable: %s  ' % res
+                                    self.resname_distatom[res] = atom_name
+                                    self.resname_nr_dist[res] = dict()
+                                    find_CA = True
+
+                        if res in self.resname_nr_dist.keys():
+                            self.resname_nr_dist[res][res_nr] = dict()
+
+                    #Check if atomname matches defined residue in lib file:
                     if res in self.res_atoms.keys():
                         if not atom_name in self.res_atoms[res]:
-                            self.app.log(' ','WARNING: Atomname %4s not found in lib for %4s %5d!\n' %
-                                             (atom_name, res, res_nr))
-                            if status != 'Lib entries missing':
-                                status = 'Lib entries missing'
+                            missing_atom = True
+                            #Check if residue can be toggled and toggle to correct libname
+                            if res in self.toggle_res.keys():
+                                if atom_name in self.res_atoms[self.toggle_res[res]]:
+                                    toggle_res = self.toggle_res[res]
+                                    self.app.log('', 'Changed residue %s to %s (atom %s present\n' %
+                                                     (res, toggle_res, atom_name ))
+                                    missing_atom = False
+                                    #TODO write code for actual change - Thinking about best way to handle...
+                                    #some dictionary with {atom_nr: True/False} ?
+
+                            if missing_atom:
+                                self.app.log(' ','WARNING: Atomname %4s not found in lib for %4s %5d!\n' %
+                                                 (atom_name, res, res_nr))
+                                if status != 'Lib entries missing':
+                                    status = 'Lib entries missing'
+
+                    #Collect x,y,z for residues that can be toggled (compute distances to these):
+                    if res in self.resname_nr_dist.keys():
+                        #Take coordinates of 1st atom in case distance atom is not found:
+                        if 'x' not in self.resname_nr_dist[res][res_nr].keys():
+                            x, y, z = map(float, line[30:].split()[0:3])
+                            self.resname_nr_dist[res][res_nr]['x'] = x
+                            self.resname_nr_dist[res][res_nr]['y'] = y
+                            self.resname_nr_dist[res][res_nr]['z'] = z
+                        #Find x,y,z for distatom
+                        if find_CA:
+                            distatom = 'CA'
+                        else:
+                            distatom = self.resname_distatom[res]
+
+                        #If defined atom to compute distance to is found, add it:
+                        if distatom == atom_name:
+                            x, y, z = map(float, line[30:].split()[0:3])
+                            self.resname_nr_dist[res][res_nr]['x'] = x
+                            self.resname_nr_dist[res][res_nr]['y'] = y
+                            self.resname_nr_dist[res][res_nr]['z'] = z
+
+            else:
+                if res in self.toggle_res.keys():
+                    if res.lower() == self.toggle_res[res].lower():
+                        print 'Valid C-terminal residue name found: %s %3d' % (res, res_nr)
+                    else:
+                        self.check_c_term(res, res_nr, line_number)
+
+                print 'END OF FILE REACHED'
+
+        #If CYX in pdb file, turn on autogenerate S-S bridges:
+        if self.makeSS:
+            self.app.log(' ', '\nFound residue %s in file. Generating S-S bonds:\n'
+                                                  % self.toggle_res['CYS'])
+            self.find_ss_bonds()
 
         self.lib_status.config(state=NORMAL)
         self.lib_status.delete(0.0, END)
         self.lib_status.insert(0.0, status.rjust(19))
         self.lib_status.config(state=DISABLED)
 
+    def check_missing_atoms(self, res, res_nr, pdb_atoms):
+        """
+        Takes a list of atoms (pdb_atoms) found in pdb file for a residue (res) with residue number (res_nr)
+        and checks if there are any atoms defined in the lib entry missing in the pdb file for that residue.
+        """
+        if res in self.res_atoms.keys():
+             for libatom in self.res_atoms[res]:
+                if libatom not in pdb_atoms:
+                    if libatom[0] != 'H':
+                        self.app.log(' ','WARNING: Heavy atom %s missing in %4s %5d \n' % (libatom, res, res_nr))
+
+    def check_n_term(self, res, res_nr, n_xyz, line_number):
+        nterm = 'N'+res
+
+        forward = False
+        if not nterm in self.res_charge.keys():
+            self.app.log(' ', 'WARNING: Could not generate N-terminal from %s %3d\n'  % (res, res_nr))
+            self.app.log(' ', 'Residue %s %3d not defined!\n' % (nterm, res_nr))
+        elif not nterm in self.toggle_res.keys():
+            print 'Could not generate N-terminal from %s %3d\n' % (res, res_nr)
+
+        else:
+            forward = True
+            if nterm not in self.resname_nr_dist.keys():
+                self.resname_nr_dist[nterm] = dict()
+
+            #Check if information exist about distance atom from original residue:
+            if res in self.resname_nr_dist.keys():
+                if res_nr in self.resname_nr_dist[res].keys():
+                    self.resname_nr_dist[nterm][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
+                    print 'Created %s %d' % (nterm, res_nr)
+                    del self.resname_nr_dist[res][res_nr]
+                    print 'Deleted %s %d' % (res, res_nr)
+                    forward = False
+                    res = nterm
+
+            else:
+                print '%s not in dict!!!!!' % res
+
+        if forward:
+            res = nterm
+            self.resname_nr_dist[nterm][res_nr] = dict()
+            #Insert N as distant atom (default).
+            self.resname_nr_dist[nterm][res_nr]['x'] = n_xyz[0]
+            self.resname_nr_dist[nterm][res_nr]['y'] = n_xyz[1]
+            self.resname_nr_dist[nterm][res_nr]['z'] = n_xyz[2]
+
+            #read pdb file and look for toggle atom for sim sphere distance radius:
+            distatom2 = self.resname_distatom[nterm]
+
+            #If defined distance atom is N: no need to read pdb file:
+
+            for i in range(0, 30):
+                pdb_line = linecache.getline(self.pdbfile, (line_number + i))
+
+                if 'ATOM' in pdb_line or 'HETATM' in pdb_line:
+                    print pdb_line
+                    if res_nr != int(pdb_line[21:26]):
+                        break
+
+                    atom_name2 = pdb_line[13:17].strip()
+
+                    if atom_name2 == distatom2:
+                        x, y, z = map(float, pdb_line[30:].split()[0:3])
+                        self.resname_nr_dist[nterm][res_nr]['x'] = x
+                        self.resname_nr_dist[nterm][res_nr]['y'] = y
+                        self.resname_nr_dist[nterm][res_nr]['z'] = z
+
+                        print 'Found correct distance atom for N-term %s' % nterm
+                        break
+
+            print 'I just returned %s for %s' % (res, nterm)
+
+        return res
+
+    def check_c_term(self, res, res_nr, line_number):
+        cterm = 'C'+res
+
+        rewind = False
+        if not cterm in self.res_charge.keys():
+            self.app.log(' ', 'WARNING: Could not generate C-terminal from %s %3d\n'  % (res, res_nr))
+            self.app.log(' ', 'Residue %s %3d not defined!\n' % (cterm, res_nr))
+
+        elif not cterm in self.toggle_res.keys():
+            print 'Could not generate C-terminal from %s %3d\n' % (res, res_nr)
+
+        else:
+            rewind = True
+            if cterm not in self.resname_nr_dist.keys():
+                self.resname_nr_dist[cterm] = dict()
+
+            if res in self.resname_nr_dist.keys():
+                if res_nr in self.resname_nr_dist[res].keys():
+                    self.resname_nr_dist[cterm][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
+                    del self.resname_nr_dist[res][res_nr]
+                    rewind = False
+                    res = cterm
+
+        if rewind:
+            res = cterm
+            self.resname_nr_dist[cterm][res_nr] = dict()
+            #Rewind pdb file and look for toggle atom for sim sphere distance radius:
+            distatom2 = self.resname_distatom[cterm]
+            for i in range(1, 30):
+                pdb_line = linecache.getline(self.pdbfile, (line_number - i))
+
+                if 'ATOM' in pdb_line or 'HETATM' in pdb_line:
+                    if res_nr != int(pdb_line[21:26]):
+                        break
+
+                    atom_name2 = pdb_line[13:17].strip()
+                    print atom_name2
+                    if atom_name2 == distatom2 or atom_name2 == 'C':
+                        x, y, z = map(float, pdb_line[30:].split()[0:3])
+                        self.resname_nr_dist[cterm][res_nr]['x'] = x
+                        self.resname_nr_dist[cterm][res_nr]['y'] = y
+                        self.resname_nr_dist[cterm][res_nr]['z'] = z
+                    if atom_name2 == distatom2:
+                        print 'Found correct distance atom for C-term %s' % cterm
+                        break
+
+        return res
+
+    def write_pdb(self):
+        """
+        Updates the loaded pdb file with the correct modifications made in the topology prepare tool.
+        """
+        old_pdb = open(self.pdbfile, 'r').readlines()
+
+        #Residue numbers to modify:
+        #res nr : resname
+        res_to_mod = dict()
+        for res in self.resname_nr_dist.keys():
+            for nr in self.resname_nr_dist[res].keys():
+                res_to_mod[nr] = res
+
+        #Write new pdb file to existing name:
+        new_pdb = open(self.pdbfile, 'w')
+
+        #Add/delete atoms using:
+        #self.toggle_res_atoms[new_res]
+        atomnr = 0
+        for i in range(len(old_pdb)):
+            try:
+                res_nr = int(old_pdb[i][21:26])
+                orig_res = old_pdb[i][17:21].strip()
+
+                if res_nr in res_to_mod.keys():
+                    new_res = res_to_mod[res_nr]
+                    if new_res != orig_res:
+                        print 'Residue %3d %4s --> %4s' % (res_nr, orig_res, new_res)
+                        atomname = old_pdb[i][12:17].strip()
+                        modatoms = self.toggle_res_atoms[new_res]
+
+                        #So far we only need to delete H-atoms. Qprep will add missing hydrogens.
+                        del_atoms = list()
+                        if '-' in modatoms:
+                            for atom in modatoms.split():
+                                if atom.startswith('-'):
+                                    del_atoms.append(atom.strip('-'))
+
+                        if atomname not in del_atoms:
+                            atomnr += 1
+                            new_pdb.write('%s%5d  %s%4s%s' %
+                                            (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:]))
+                        else:
+                            print del_atoms
+                    else:
+                        atomnr += 1
+                        new_pdb.write('%s%5d  %s' % (old_pdb[i][0:6], atomnr, old_pdb[i][13:]))
+
+                else:
+                    atomnr += 1
+                    new_pdb.write('%s%5d  %s' % (old_pdb[i][0:6], atomnr, old_pdb[i][13:]))
+
+            except:
+                #This must be an empty line, GAP or TER line
+                new_pdb.write(old_pdb[i])
+
+        new_pdb.close()
+        self.app.log('info','PDB file updated from topolgy prepare!')
+
     def writeTopology(self):
+        """
+        Writes the input files for Qprep. If there are several parameter files defined, these will be merged
+        into one file!
+        """
+        self.write_pdb()
+        return
+
         qprepinp_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.inp'
         qprepinp = open(self.app.workdir + '/' + qprepinp_name,'w')
         self.topname = self.topology_entry.get(0.0,END).strip()
@@ -237,6 +760,10 @@ class TopologyPrepare(Toplevel):
 
             merged_name = 'merged.prm'
             merged_file = open('%s/%s' % (self.app.workdir, merged_name), 'w')
+
+            #TODO
+            #Add all types to avoid dublicates
+            types_added = list()
 
             #Go through files and find indices:
             prmfiles = []
@@ -425,28 +952,18 @@ class TopologyPrepare(Toplevel):
         """Gets the overall charge from countCharges() function from prepareTopology
         file. Inserts the charge into total_c_entry field. """
         self.total_charge = 0
-        res_count = dict()
-
-        res_nr = 0
-        with open(self.pdbfile, 'r') as pdb:
-            for line in pdb:
-                if 'ATOM' in line or 'HETATM' in line:
-                    if res_nr != int(line[21:26]):
-                        res_nr = int(line[21:26])
-                        res = line[17:21].strip()
-                        if res in self.res_charge.keys():
-                            self.total_charge += self.res_charge[res]
-                            if abs(self.res_charge[res]) > 0:
-                                if res not in res_count:
-                                    res_count[res] = self.res_charge[res]
-                                else:
-                                    res_count[res] += self.res_charge[res]
-                        else:
-                            print 'Can not set charge for %4s: Residue not in lib!' % res
 
         self.app.log(' ', '\n____________________________________________\n')
-        for res in res_count.keys():
-            self.app.log(' ', '    %4s   %7.2f\n' % (res, res_count[res]))
+        self.app.log(' ', 'Total charge per residue type:')
+        self.app.log(' ', '\n____________________________________________\n')
+        for res in self.resname_nr_dist:
+            if len(self.resname_nr_dist[res]) > 0:
+                charge = self.res_charge[res]
+                sum_charge = (charge * len(self.resname_nr_dist[res]))
+                self.total_charge += sum_charge
+                if abs(sum_charge) > 0:
+                    self.app.log(' ', '    %4s   %7.2f\n' % (res, sum_charge))
+
         self.app.log(' ', '____________________________________________\n')
         self.app.log(' ', 'Sum charge %7.2f\n' % self.total_charge)
         self.app.log(' ', '============================================\n')
@@ -457,35 +974,130 @@ class TopologyPrepare(Toplevel):
         self.total_c_entry.config(state=DISABLED)
 
     def turn_off_charges_button_pressed(self, off=True):
-        """This method is called when the charge_off_button is pressed.
-        Calls for function toggleAllCharges() from prepareTopology file.
-        Will toggle on/off all charges within 5/6r where r is the sim. sphere r."""
+        """This will toggle on/off all charges within 5/6*r where r is the sim. sphere r."""
+        charge_on = True
+
         if off:
-            charge = self.charge_off
-            toggle = 'off'
-        else:
-            charge = self.charge_on
-            toggle = 'on'
+            charge_on = False
 
-        xc = self.center_x_entry.get()
-        yc = self.center_y_entry.get()
-        zc = self.center_z_entry.get()
-        simrad = self.sphere_entry.get()
+        #Residues that are not automatically charged with this function call:
+        no_toggle = ['HIS', 'HID', 'HIP']
 
-        pt.toggleAllCharges(self.pdbfile, charge, self.charg_on_atomtypes, toggle, simrad, xc, yc, zc)
+        xc = float(self.center_x_entry.get())
+        yc = float(self.center_y_entry.get())
+        zc = float(self.center_z_entry.get())
+
+        simrad = float(self.sphere_entry.get()) * 0.85
+
+        #Go through all charged and togglable residues:
+        for res in self.resname_nr_dist.keys():
+            #Is the residue defined to be togglable?
+            if res in self.toggle_res.keys():
+                #Check if residue needs to be toggled:
+                toggle_res = True
+
+                #check if residue is terminal residue:
+                if len(res) == 4 and res not in no_toggle:
+                    if res[0].lower() in ['n','c']:
+                        res = self.toggle_terminal(res, xc, yc, zc, simrad, charge_on)
+
+                if res in no_toggle:
+                    toggle_res = False
+
+                #Turn on all charges?
+                elif charge_on:
+                    if abs(self.res_charge[res]) >= abs(self.res_charge[self.toggle_res[res]]):
+                        toggle_res = False
+                #Turn off all charges?
+                else:
+                    if abs(self.res_charge[res]) <= abs(self.res_charge[self.toggle_res[res]]):
+                        toggle_res = False
+                print res, self.toggle_res[res]
+                print self.res_charge[res], self.res_charge[self.toggle_res[res]]
+
+                #Toggle all residues of the given residue type:
+                if toggle_res:
+                    for res_nr in self.resname_nr_dist[res].keys():
+                        toggle_res_nr = True
+
+                        #If charges on. Check distance to simulation sphere boundary
+                        if charge_on:
+                            x = self.resname_nr_dist[res][res_nr]['x']
+                            y = self.resname_nr_dist[res][res_nr]['y']
+                            z = self.resname_nr_dist[res][res_nr]['z']
+                            r = np.sqrt((x - xc)**2 + (y - yc)**2 + (z - zc)**2)
+
+                            if r > simrad:
+                                toggle_res_nr = False
+
+                        if toggle_res_nr:
+                            new_res = self.toggle_res[res]
+                            if new_res not in self.resname_nr_dist.keys():
+                                self.resname_nr_dist[new_res] = dict()
+                            self.resname_nr_dist[new_res][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
+                            del self.resname_nr_dist[res][res_nr]
+            else:
+                print 'Residue %s could not be toggled!' % res
+                print self.toggle_res.keys()
 
         self.set_total_charge()
         self.updateList()
 
+        self.highlight_charged()
+
+    def toggle_terminal(self, res, xc, yc, zc, simrad, charge_on=False):
+        """
+        Special function to take care of terminal residues with chargable resiudes (arg, lys, asp, glu)
+        """
+        new_res = res
+        org_res = res[1:]
+        terminal = res[0]
+
+        toggle_res = True
+
+        #Is the residue chargable?
+        if org_res in self.toggle_res.keys():
+            #Turn on charges?
+            if charge_on:
+                if abs(self.res_charge[org_res]) >= abs(self.res_charge[self.toggle_res[org_res]]):
+                    toggle_res = False
+            #Turn off charges?
+            else:
+                if abs(self.res_charge[org_res]) <= abs(self.res_charge[self.toggle_res[org_res]]):
+                    toggle_res = False
+        else:
+            toggle_res = False
+
+        if toggle_res:
+            for res_nr in self.resname_nr_dist[res].keys():
+                toggle_res_nr = True
+
+                #If charges on. Check distance to simulation sphere boundary
+                if charge_on:
+                    x = self.resname_nr_dist[res][res_nr]['x']
+                    y = self.resname_nr_dist[res][res_nr]['y']
+                    z = self.resname_nr_dist[res][res_nr]['z']
+                    r = np.sqrt((x - xc)**2 + (y - yc)**2 + (z - zc)**2)
+
+                    if r > simrad:
+                        toggle_res_nr = False
+
+                if toggle_res_nr:
+                    new_res = terminal + self.toggle_res[org_res]
+                    #Double check that new residue actually is defined in LIB, even though it is put in the header to be togglable:
+                    if new_res not in self.res_charge.keys():
+                        self.app.log(' ', 'WARNING: Tried to toggle %s --> %s\n-------> %s not found in LIB!'
+                                          % (res, new_res, new_res))
+                        new_res = res
+                    else:
+                        if new_res not in self.resname_nr_dist.keys():
+                            self.resname_nr_dist[new_res] = dict()
+                        self.resname_nr_dist[new_res][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
+                        del self.resname_nr_dist[res][res_nr]
+
+        return new_res
+
     def toggle_charge_selected(self):
-        charges = False
-        nterm = False
-        cterm = False
-
-
-        neutral = ['ARG','LYS','ASP','GLU']
-        charged = ['AR+','LY+','AS-','GL-']
-        his = ['HID','HIE','HIP']
 
         try:
             list_index = int(self.listbox.curselection()[0])
@@ -494,60 +1106,60 @@ class TopologyPrepare(Toplevel):
 
         oldRes, resnr = self.listbox.get(list_index).split()[0:2]
         radius = self.listbox.get(list_index).split('|')[-1]
-        if '%5s' % resnr in self.nterm_nr:
-            nterm = True
-        if '%5s' % resnr in self.cterm_nr:
-            cterm = True
-        if oldRes in neutral:
-            charges = True
-        if oldRes in charged:
-            charges = True
-        if oldRes in his:
-            charges = True
+        #TODO N/C-terminals with chargable residues (4 options)
+        newRes = self.toggle_res[oldRes]
 
-        if charges:
-            resnr = '%4d' % int(resnr)
-            if oldRes in neutral:
-                old = neutral
-                new = charged
-            elif oldRes in charged:
-                old = charged
-                new = neutral
-            elif oldRes in his:
-                old = his
-                new = his
-            else:
-                return
-            for i in range(len(old)):
-                if oldRes == old[i]:
-                    if old != new:
-                        newRes = new[i]
-                    else:
-                        try:
-                            newRes = new[i+1]
-                        except:
-                            newRes = new[0]
+        resnr = int(resnr)
 
-            pt.convertOldNew(self.pdbfile, resnr, newRes)
-            self.app.log('info','%s %s --> %s %s' % (oldRes,resnr,newRes,resnr))
-            self.listbox.insert(list_index, '%4s   %4d' % (newRes, int(resnr)))
-            self.listbox.delete(list_index + 1 )
-            self.listbox.selection_set(list_index)
+        if newRes not in self.resname_nr_dist.keys():
+            self.resname_nr_dist[newRes] = dict()
 
-        if nterm:
-            resnr = '%5s' % resnr
-            newRes = pt.convertNterminal(self.pdbfile,resnr)
+        self.resname_nr_dist[newRes][resnr] = copy.deepcopy(self.resname_nr_dist[oldRes][resnr])
+        del self.resname_nr_dist[oldRes][resnr]
 
-        if cterm:
-            resnr = '%5s' % resnr
-            newRes = pt.convertCterminal(self.pdbfile, resnr)
-        if not charges:
-            self.app.log('info','%s %s --> %s %s' % (oldRes,resnr,newRes,resnr))
+        #Update pymol window
+        if self.session:
+            self.session.stdin.write('set dot_color, %s, i. %s\n' % (self.res_colors[newRes], resnr))
+
+        self.app.log('info','%s %s --> %s %s' % (oldRes,resnr,newRes,resnr))
         self.listbox.insert(list_index, '%4s %4d    |%5.1f' % (newRes, int(resnr), float(radius)))
         self.listbox.delete(list_index + 1 )
         self.listbox.selection_set(list_index)
 
         self.set_total_charge()
+
+    def find_ss_bonds(self):
+        """
+        This funciton goes through all CYS residues and check for
+        potential S-S bond partners
+        """
+        all_cys = self.resname_nr_dist['CYS'].copy()
+        all_cys.update(self.resname_nr_dist[self.toggle_res['CYS']])
+
+        #S-S bond length is around 2.05 angstrom
+        r_max = 2.1
+
+        self.cys_residues = dict()
+        for nr1 in sorted(all_cys.keys()):
+            for nr2 in sorted(all_cys.keys()):
+                if nr1 != nr2:
+                    x1 = all_cys[nr1]['x']
+                    y1 = all_cys[nr1]['y']
+                    z1 = all_cys[nr1]['z']
+
+                    x2 = all_cys[nr2]['x']
+                    y2 = all_cys[nr2]['y']
+                    z2 = all_cys[nr2]['z']
+
+                    r = float(np.sqrt((x2 -x1)**2 + (y2 -y1)**2 + (z2 -z1)**2))
+
+                    #if SG distance is less than treshold, S-S bond is possible:
+                    if r < r_max:
+                        self.app.log(' ', 'Possible S-S for CYS %3d - CYS %3d  (r = %.2f A)\n' % (nr1, nr2, r))
+
+                        self.cys_residues[nr1] = nr2
+
+            del all_cys[nr1]
 
     def create_ss_bonds_checkbutton_pressed(self):
         """Find potential S-S bridges. Returns:
@@ -560,24 +1172,41 @@ class TopologyPrepare(Toplevel):
         if state == 1:
             self.makeSS = True
 
-        self.sg_atompairs, residues, sg_dist = pt.findSS(self.pdbfile)
-        self.cys_residues = []
+        self.find_ss_bonds()
+
         if self.makeSS:
             print "Create S-S bonds selected:"
-            if len(residues) > 0:
-                pt.convertOldNew(self.pdbfile, residues,'CYX')
-                sg = 0
-                self.app.log('info','Creating S-S bonds for:')
+            if len(self.cys_residues.keys()) > 0:
+
+                self.app.log('info','Generating S-S bonds for:')
                 self.app.log(' ','    -------------------------\n')
-                for cyx in range(len(residues)-1,0, -2):
-                    self.app.log(' ','    CYX%s - CYX%s (%.2f A)\n'
-                    % (residues[cyx-1], residues[cyx], sg_dist[sg]))
-                    sg += 1
-                    tmp = [residues[cyx-1], residues[cyx]]
-                    self.cys_residues.append(tmp)
+
+                for cys1 in sorted(self.cys_residues.keys()):
+                    cys2 = self.cys_residues[cys1]
+
+                    self.app.log(' ','    CYX %3d - CYX %3d\n' % (cys1, cys2))
+
+                    if cys2 in self.resname_nr_dist['CYS'].keys():
+                        self.resname_nr_dist['CYX'][cys2] = copy.deepcopy(self.resname_nr_dist['CYS'][cys2])
+                        del self.resname_nr_dist['CYS'][cys2]
+
+                    if cys1 in self.resname_nr_dist['CYS'].keys():
+                        self.resname_nr_dist['CYX'][cys1] = \
+                            copy.deepcopy(self.resname_nr_dist['CYS'][cys1])
+                        del self.resname_nr_dist['CYS'][cys1]
+
                 self.app.log(' ','    -------------------------\n')
+
         else:
-            pt.convertOldNew(self.pdbfile, residues,'CYS')
+            if 'CYX' in self.resname_nr_dist.keys():
+                for nr in self.resname_nr_dist['CYX'].keys():
+                    self.resname_nr_dist['CYS'][nr] = copy.deepcopy(self.resname_nr_dist['CYX'][nr])
+                    del self.resname_nr_dist['CYX'][nr]
+
+        self.updateList()
+
+        if self.session:
+            self.highlight_charged()
 
     def updateList(self):
         """
@@ -587,113 +1216,25 @@ class TopologyPrepare(Toplevel):
 
         self.listbox.delete(0, END)
 
-        #Get residue numbers for charged residues:
-        arg = pt.getResnrs(self.pdbfile, 'ARG')
-        arg_pos = pt.getResnrs(self.pdbfile, 'AR+')
-        lys = pt.getResnrs(self.pdbfile, 'LYS')
-        lys_pos = pt.getResnrs(self.pdbfile, 'LY+')
-        asp = pt.getResnrs(self.pdbfile, 'ASP')
-        asp_neg = pt.getResnrs(self.pdbfile, 'AS-')
-        glu = pt.getResnrs(self.pdbfile, 'GLU')
-        glu_neg = pt.getResnrs(self.pdbfile, 'GL-')
-        hid = pt.getResnrs(self.pdbfile, 'HID')
-        hie = pt.getResnrs(self.pdbfile, 'HIE')
-        hip = pt.getResnrs(self.pdbfile, 'HIP')
-
-        reslist = [arg,arg_pos,lys,lys_pos,asp,asp_neg,glu,glu_neg,hid,hie,hip]
-
         #Get current x,y,z simulation center:
-        xc = self.center_x_entry.get()
-        yc = self.center_y_entry.get()
-        zc = self.center_z_entry.get()
+        xc = float(self.center_x_entry.get())
+        yc = float(self.center_y_entry.get())
+        zc = float(self.center_z_entry.get())
 
-        #Get radius from center for charged residues (atom NZ, CZ, CG, CD, N, C, CE1)
-        arg_r = []
-        arg_pos_r = []
-        lys_r = []
-        lys_pos_r = []
-        asp_r = []
-        asp_neg_r = []
-        glu_r = []
-        glu_neg_r = []
-        hid_r = []
-        hie_r = []
-        hip_r = []
-
-        atomtype = 'CA'
-
-        for residue in reslist:
-            if residue == arg:
-                radius = arg_r
-                atomtype = 'CZ'
-            elif residue == arg_pos:
-                radius = arg_pos_r
-                atomtype = 'CZ'
-            elif residue == lys:
-                radius = lys_r
-                atomtype = 'NZ'
-            elif residue == lys_pos:
-                radius = lys_pos_r
-                atomtype = 'NZ'
-            elif residue == asp:
-                radius = asp_r
-                atomtype = 'CG'
-            elif residue == asp_neg:
-                radius = asp_neg_r
-                atomtype = 'CG'
-            elif residue == glu:
-                radius = glu_r
-                atomtype = 'CD'
-            elif residue == glu_neg:
-                radius = glu_neg_r
-                atomtype = 'CD'
-            elif residue == hid:
-                radius = hid_r
-                atomtype = 'CE1'
-            elif residue == hie:
-                radius = hie_r
-                atomtype = 'CE1'
-            elif residue == hip:
-                radius = hip_r
-                atomtype = 'CE1'
-
-            for resnr in residue:
-                radius.append(pt.calcDist(self.pdbfile, resnr, atomtype, xc, yc, zc))
-
-        radiuslist = [arg_r,arg_pos_r,lys_r,lys_pos_r,asp_r,asp_neg_r,glu_r,glu_neg_r,hid_r,hie_r,hip_r]
-
-        resnames = ['ARG','AR+','LYS','LY+','ASP','AS-','GLU','GL-','HID','HIE','HIP']
-
-        #Insert residues that can be charged/neutral
-        for residue in range(len(resnames)):
-            if len(reslist[residue]) > 0:
-                for resnr in range(len(reslist[residue])):
-                    self.listbox.insert(END,'%4s %4d    |%5.1f' %
-                                            (resnames[residue], int(reslist[residue][resnr]), radiuslist[residue][resnr]))
-
-        #Find N and C terminals:
+        #Find N and C terminals: #TODO remove global variable when fixed toggle charge!
         self.nterm_nr, self.nterm_res, self.cterm_nr, self.cterm_res = pt.findTerminals(self.pdbfile)
 
-        #Find terminal radius to center:
-        nter_r = []
-        cter_r = []
-        for terminal in [self.nterm_nr, self.cterm_nr]:
-            if terminal == self.nterm_nr:
-                radius = nter_r
-                atomtype = 'N'
-            else:
-                radius = cter_r
-                atomtype = 'C'
-            for resnr in terminal:
-                radius.append(pt.calcDist(self.pdbfile, resnr, atomtype, xc, yc, zc))
+        for residue in sorted(self.toggle_res.keys(), key=lambda s: s.lower()):
+            if residue in self.resname_nr_dist.keys():
+                for nr in sorted(self.resname_nr_dist[residue].keys()):
+                    print residue, nr
+                    x = self.resname_nr_dist[residue][nr]['x']
+                    y = self.resname_nr_dist[residue][nr]['y']
+                    z = self.resname_nr_dist[residue][nr]['z']
+                    r = np.sqrt((xc - x)**2 + (yc - y)**2 + (zc - z)**2)
+                    self.listbox.insert(END, '%4s %4d    |%5.1f' % (residue, nr, r))
 
-        #Insert Terminals:
-        if len(self.nterm_nr) > 0:
-            for i in range(len(self.nterm_nr)):
-                self.listbox.insert(END, '%4s %4d (N)|%5.1f' % (self.nterm_res[i], int(self.nterm_nr[i]), nter_r[i]))
-        if len(self.cterm_nr) > 0:
-            for i in range(len(self.cterm_nr)):
-                self.listbox.insert(END, '%4s %4d (C)|%5.1f' % (self.cterm_res[i], int(self.cterm_nr[i]), cter_r[i]))
+        #TODO write new function to generate terminals. Perhaps a manual option as well?
 
     def open_atom_select(self):
         """
@@ -721,6 +1262,246 @@ class TopologyPrepare(Toplevel):
         self.fileEdit.title('Edit file')
         self.fileEdit.resizable()
 
+    def toggle_pymol(self):
+        """
+        Start/close pymol when checkbutton is toggled
+        """
+        if self.sync_pymol.get() == 1:
+            if self.session:
+                try:
+                    os.killpg(self.session.pid, signal.SIGTERM)
+                except:
+                    pass
+            self.start_pymol()
+
+        elif self.sync_pymol.get() == 0:
+            try:
+                os.killpg(self.session.pid, signal.SIGTERM)
+            except:
+                pass
+
+    def start_pymol(self):
+        """
+        Start syncing of Q-atom selection to pymol
+        """
+        #QPyMol default settings ('set valence, 0.1' removed)
+        self.pymol_settings = ['space cmyk', 'set sphere_scale, 0.4',
+                               'set sphere_transparency, 0.7', 'set sphere_color, lightblue',
+                               'set sphere_quality, 2', 'set stick_radius, 0.17', 'set stick_quality, 10',
+                               'set defer_builds_mode, 3', 'set surface_quality, 1',
+                               'set spec_power, 250', 'set spec_reflect, 2',
+                               'set cartoon_fancy_helices, 1']
+
+        self.app.pymol_running = True
+
+        tmpfile = open(self.app.workdir+'/.tmpfile','wb')
+        if 'darwin' in sys.platform:
+            self.session = Popen(["MacPyMol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+        else:
+            self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+
+        self.update()
+        len_log = 35
+
+        self.session.stdin.flush()
+
+        #Move pymol to workdir
+        self.session.stdin.write('cd %s\n' % self.app.workdir)
+
+        #Load default Q-PyMol settings:
+        for settings in self.pymol_settings:
+            self.session.stdin.write('%s\n' % settings)
+
+        #Color all C-atoms gray:
+        self.session.stdin.write('color gray, name C*\n')
+
+        self.session.stdin.write('show cartoon, all\n')
+        #Remove internal gui
+        self.session.stdin.write('set internal_gui=0\n')
+
+        #Set vdw to 1
+        self.session.stdin.write('alter *, vdw=1\n')
+
+        #Show simulation sphere
+        self.update_simulation_sphere()
+
+        #Show chargable/toggle residues
+        self.highlight_charged()
+
+        while self.session.poll() is None:
+            try:
+                if self.session:
+                    self.update()
+                else:
+                    break
+            except:
+                break
+            lines = 0
+            with open(self.app.workdir + '/.tmpfile', 'r') as pymol_out:
+                for line in pymol_out:
+                    lines += 1
+                    if lines > len_log:
+                        len_log = lines
+                        if 'You clicked' in line:
+                            self.app.log(' ', line)
+                            selected = ' '.join(line.split('/')[-2:])
+                            if '`' in selected:
+                                selected = ' '.join(selected.split('`'))
+                            selected = selected.split('\n')[0]
+                            print selected
+
+                        if 'cmd.id_atom:' in line:
+                            pass
+                            #self.session.stdin.write('select none\n')
+                            #atomnr = line.split()[2].split(')')[0]
+                            #qatoms_list = self.qatoms_listbox.get(0, END)
+                            #for q in range(len(qatoms_list)):
+                            #    if int(atomnr) == int(qatoms_list[q].split()[1]):
+                            #        self.qatoms_listbox.select_set(q)
+                            #        self.list_q_atoms_event()
+                            #        self.qatoms_listbox.yview(q)
+
+            time.sleep(0.2)
+
+        self.sync_pymol.set(0)
+        self.sync_check.update()
+        self.session = None
+        self.app.pymol_running = False
+        try:
+            os.killpg(self.session.pid, signal.SIGTERM)
+        except:
+            pass
+
+    def update_simulation_sphere(self, *args):
+        if not self.session:
+            return
+
+        self.session.stdin.write('delete simsphere\n')
+
+        x = self.center_x_entry.get()
+        y = self.center_y_entry.get()
+        z = self.center_z_entry.get()
+
+        r = self.sphere_entry.get()
+
+        self.session.stdin.write('pseudoatom simsphere, pos=(%s, %s, %s)\n' % (x, y, z))
+        self.session.stdin.write('set nonbonded_transparency, 1, simsphere\n')
+        self.session.stdin.write('alter simsphere, vdw=1\n')
+        self.session.stdin.write('alter simsphere, resi=99999\n')
+        self.session.stdin.write('set sphere_scale, %s, simsphere\n' % r)
+        self.session.stdin.write('show spheres, simsphere\n')
+
+    def adjust_simulation_sphere(self, *args):
+        if not self.session:
+            return
+
+        r = self.sphere_entry.get()
+
+        self.session.stdin.write('set sphere_scale, %s, simsphere\n' % r)
+
+    def highlight_charged(self):
+        """
+        This funciton shows all chargable sidechain as sticks with colored spheres to indicate defined charge.
+        """
+
+        if not self.session:
+            return
+
+        self.session.stdin.write('hide dots\n')
+
+        color_cmd = {'red': 'set dot_color, red,',
+                     'blue': 'set dot_color, blue,',
+                     'white': 'set dot_color, white,',
+                     'yellow': 'set dot_color, yellow,'}
+
+        show_dots = 'show dots,'
+
+        for i in self.listbox.get(0, END):
+            resname = i.split()[0]
+            color = self.res_colors[resname]
+            resnr = i.split()[1]
+
+            color_cmd[color] += ' i. %s or' % resnr
+            show_dots += ' i. %s or' % resnr
+
+        #set dot width
+        self.session.stdin.write('set dot_width, 1\n')
+
+        #set dot density
+        self.session.stdin.write('set dot_density, 3\n')
+
+        #Show dots
+        self.session.stdin.write('%s\n' % show_dots[:-2])
+
+        #Hide dots from backbone
+        self.session.stdin.write('hide dots, name C or name N or name O or name H or name CA\n')
+
+        #Color spheres
+        for col in color_cmd.keys():
+            if len(color_cmd[col].split('i.')) > 1:
+                self.session.stdin.write('%s\n' % color_cmd[col][:-2])
+
+    def zoom_out(self):
+        """
+        Adjust automatic zoom buffer in pymol.
+        """
+        self.pymol_zoom += 1
+
+        print 'PyMOL zoom buffer = %d' % self.pymol_zoom
+
+        if not self.session:
+            return
+
+        selections = map(int, self.listbox.curselection())
+
+        if len(selections) < 1:
+            return
+
+        self.session.stdin.write('zoom i. %s, buffer=%d\n' %
+                                 (self.listbox.get(selections[0]).split()[1], self.pymol_zoom))
+
+    def zoom_in(self):
+        """
+        Adjust automatic zoom buffer in pymol.
+        """
+        self.pymol_zoom -= 1
+
+        if self.pymol_zoom < 0:
+            self.pymol_zoom = 0
+
+        print 'PyMOL zoom buffer = %d' % self.pymol_zoom
+
+        if not self.session:
+            return
+
+        selections = map(int, self.listbox.curselection())
+
+        if len(selections) < 1:
+            return
+
+        self.session.stdin.write('zoom i. %s, buffer=%d\n' %
+                                 (self.listbox.get(selections[0]).split()[1], self.pymol_zoom))
+
+    def listbox_clicked(self, *args):
+        """
+        If pymol is active, zoom selection and display atom names
+        """
+        if not self.session:
+            return
+
+        self.session.stdin.write('select none\n')
+        selections = map(int, self.listbox.curselection())
+
+        self.session.stdin.write('hide labels\n')
+
+        for selected in selections:
+            self.session.stdin.write('label i. %s, name\n' % self.listbox.get(selected).split()[1])
+            #self.session.stdin.write('select i. %s\n' % self.listbox.get(selected).split()[1])
+
+        self.session.stdin.write('orient i. %s\n' % self.listbox.get(selections[0]).split()[1])
+
+        self.session.stdin.write('zoom i. %s, buffer=%d\n' %
+                                 (self.listbox.get(selections[0]).split()[1], self.pymol_zoom))
 
     def dialog_box(self):
         """Defines the outlook of Topology Prepare window.
@@ -743,12 +1524,22 @@ class TopologyPrepare(Toplevel):
         sphere_label.grid(row = 0, column = 0, sticky='e')
         sphere_label.config(background = self.main_color)
 
-        self.sphere_entry = Spinbox(left_frame, width = 5, highlightthickness = 0, relief = GROOVE, from_=1, to=200)
+        self.sphere_entry = Spinbox(left_frame, width = 5, highlightthickness = 0, relief = GROOVE, from_=1, to=200,
+                                    textvariable=self.sphere_radius)
         self.sphere_entry.grid(row = 0, column = 1)
 
         aangstrom_label = Label(left_frame, text='%s' % u'\xc5')
-        aangstrom_label.grid(row = 0, column = 2, sticky='w')
-        aangstrom_label.config(background = self.main_color)
+        aangstrom_label.grid(row=0, column=2, sticky='w')
+        aangstrom_label.config(background=self.main_color)
+
+        #Sync pymol
+        sync_pymol = Label(left_frame, text='PyMOL:')
+        sync_pymol.grid(row=0, column=3)
+        sync_pymol.config(background=self.main_color)
+
+        self.sync_check = Checkbutton(left_frame, variable=self.sync_pymol, command=self.toggle_pymol)
+        self.sync_check.grid(row = 0, column = 4, sticky = 'w')
+        self.sync_check.config(background = self.main_color)
 
         centre_label = Label(left_frame, text = 'Simulation centre:')
         centre_label.grid(row = 1, column = 0, sticky = 'e')
@@ -768,15 +1559,15 @@ class TopologyPrepare(Toplevel):
         self.center_z_entry.grid(row = 1, column = 3)
 
         center_x_label = Label(left_frame, text = 'x')
-        center_x_label.grid(row = 2, column = 1)
+        center_x_label.grid(row = 2, column = 1, sticky='n')
         center_x_label.config(background = self.main_color)
 
         center_y_label = Label(left_frame, text = 'y')
-        center_y_label.grid(row = 2, column = 2)
+        center_y_label.grid(row = 2, column = 2, sticky='n')
         center_y_label.config(background = self.main_color)
 
         center_z_label = Label(left_frame, text = 'z')
-        center_z_label.grid(row = 2, column = 3)
+        center_z_label.grid(row = 2, column = 3, sticky='n')
         center_z_label.config(background = self.main_color)
 
         sim_change_button = Button(left_frame, text = 'Change', command = self.open_atom_select)
@@ -897,12 +1688,26 @@ class TopologyPrepare(Toplevel):
         checklib.grid(row=5, column=4)
         checklib.config(highlightbackground=self.main_color)
 
+        #zoom button
+        zoom_image = PhotoImage(file=self.app.qgui_path+ '/Qmods/zoom-in.gif')
+        zoom_image.img = zoom_image
+
+        zoom_out_image = PhotoImage(file=self.app.qgui_path+ '/Qmods/zoom-out.gif')
+        zoom_out_image.img = zoom_out_image
+
+        zoom_button = Button(left_frame, image=zoom_image, command=self.zoom_in, width=30, height=30)
+        zoom_button.grid(row=7, column=3, sticky='e')
+
+        zoom_out_button = Button(left_frame, image=zoom_out_image, command=self.zoom_out, width=30, height=30)
+        zoom_out_button.grid(row=7, column=4, sticky='w')
+
         listbox_scroll = Scrollbar(left_frame)
         listbox_scroll.grid(row = 8, rowspan = 5, column = 7, sticky = 'nsw')
         self.listbox = Listbox(left_frame, yscrollcommand = listbox_scroll.set, highlightthickness = 0, relief = GROOVE)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 8, rowspan = 5, column = 3, columnspan = 4, sticky = 'e')
         self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.bind('<<ListboxSelect>>', self.listbox_clicked)
 
 
         create_top_button = Button(left_frame, text = 'Write', command = self.writeTopology)

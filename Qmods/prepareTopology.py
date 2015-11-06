@@ -176,7 +176,7 @@ def findTerminals(pdb):
                         cter_res.append(res)
                         new_nter = True
 
-            elif 'GAP' in pdbfile[i]:
+            elif 'GAP' in pdbfile[i] or 'TER' in pdbfile[i]:
                 res = pdbfile[i - 1][17:21].strip()
                 resnr = pdbfile[i - 1][21:26]
                 if res in residues:
@@ -205,7 +205,7 @@ def convertCterminal(pdb, res_nr):
                 'CGLU', 'CGL-', 'CASP', 'CAS-', 'CLYS', 'CLY+', 'CARG', 'CAR+', 'CHID', 'CHIE', 'CHIP', 'CSER', 'CPRO', 'CASN', 'CGLN']
 
     pdbfile = open(pdb, 'r').readlines()
-    newfile = open(pdb, 'w')
+
     residue = []
     oxt_exist = False
 
@@ -286,6 +286,7 @@ def convertCterminal(pdb, res_nr):
                 del residue[i]
 
     #Write new pdbfile:
+    newfile = open(pdb, 'w')
     inserted_terminal = False
     atomnr = 0
     for line in pdbfile:
