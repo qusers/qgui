@@ -112,6 +112,9 @@ def convertPdb(pdb, workdir, atomnr=0, resnr=0):
                         newPdb.write('%s\n' % newline)
                 else:
                     newPdb.write('%s\n' % newline)
+            elif line.startswith('TER'):
+                newPdb.write('%20s\n' % 'GAP')
+
         except:
             continue
 

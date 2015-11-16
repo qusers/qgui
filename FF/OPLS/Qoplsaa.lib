@@ -932,6 +932,79 @@
         CE   HE2  HE3  NZ   HZ1  HZ2  HZ3
         C    O
 *----------------------------------------------------------------------
+{KCX}                 ! KCX: atoms 30 charge -1.0000
+
+[info]
+SYBYLtype RESIDUE
+
+[atoms]
+  1      N       TN       -0.5000
+  2      CA      TCT1      0.1400
+  3      C       TCO4      0.4700
+  4      O       TO       -0.4700
+  5      CB      TCT      -0.1200
+  6      CG      TCT      -0.1200
+  7      CD      TCT      -0.1200
+  8      CE      TCT       0.0320
+  9      NZ      TN       -0.5657
+ 10      CX      TCO3      0.7225
+ 11      OX1     TO2Z     -0.8000
+ 12      OX2     TO2Z     -0.8000
+ 13      H       TH        0.3000
+ 14      HA      THC       0.0600
+ 15      HB3     THC       0.0600
+ 16      HB2     THC       0.0600
+ 17      HG3     THC       0.0600
+ 18      HG2     THC       0.0600
+ 19      HD3     THC       0.0600
+ 20      HD2     THC       0.0600
+ 21      HE3     THC       0.0600
+ 22      HE2     THC       0.0600
+ 23      HZ      TH        0.2912
+
+[bonds]
+N     CA  
+N     H   
+CA    C   
+CA    CB  
+CA    HA  
+C     O   
+CB    CG  
+CB    HB3 
+CB    HB2 
+CG    CD  
+CG    HG3 
+CG    HG2 
+CD    CE  
+CD    HD3 
+CD    HD2 
+CE    NZ  
+CE    HE3 
+CE    HE2 
+NZ    CX  
+NZ    HZ  
+CX    OX1 
+CX    OX2 
+
+[connections]
+   head     N
+   tail      C
+
+[impropers]
+HZ    CE    NZ    CX  
+OX1   NZ    CX    OX2 
+H    N    -C    CA
+O    C    CA    +N
+
+[charge_groups]
+  N    H    CA   HA
+  CB   HB2  HB3
+  CG   HG2  HG3
+  CD   HD2  HD3
+  CE   HE2  HE3  NZ   HZ  CX  OX1  OX2
+  C    O
+
+*----------------------------------------------------------------------
 {LYS} !Deprotonated,  neutral
     [info]
         SYBYLtype  RESIDUE

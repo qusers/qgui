@@ -1,3 +1,8 @@
+15.11.15 v2.01b 
+    Bug fixes and minor improvements to the Topology prepare tool.
+    Removed 'return' statement that hindered the topology input files
+    to be written.
+
 06.11.15 v2.0b
     Complete remake of the topology prepare tool. This is now independent of
     forcefield type, and residues that are togglable are defined directly in

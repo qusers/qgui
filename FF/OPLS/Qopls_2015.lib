@@ -10,13 +10,13 @@
 *  +1    0   +1    0    0   +1    0   -1    0   -1    0
 *
 * Standard N- and C- terminals: NRES and CRES
-* Neutral N- and C- terminals: nRES and cRES
+* ##Neutral N- and C- terminals: nRES and cRES
 *[toggle_residues] ! This is for topology prepare in Qgui 
 *  #QGUI_TOGGLE  ARG  ARN   -H12            radius_to CZ #Netural arg not present in original FF!
 *  #QGUI_TOGGLE  ARN  ARG   +H12  NH1       radius_to CZ #ARN must be added to lib before use!
 *   QGUI_TOGGLE  HIP  HID   -HE2            radius_to CE1
-*   QGUI_TOGGLE  LYS  LYN   -HZ3            radius_to NZ
-*   QGUI_TOGGLE  LYN  LYS   +HZ3  NZ        radius_to NZ
+*  #QGUI_TOGGLE  LYS  LYN   -HZ3            radius_to NZ #Neutral LYS not present in original FF!
+*  #QGUI_TOGGLE  LYN  LYS   +HZ3  NZ        radius_to NZ #LYN must be added to lib before use!
 *   QGUI_TOGGLE  ASP  ASH   +HD2  OD2       radius_to CG
 *   QGUI_TOGGLE  ASH  ASP   -HD2            radius_to CG
 *   QGUI_TOGGLE  GLU  GLH   +HE2  OE2       radius_to CD
@@ -29,8 +29,8 @@
 *   !If you have something special, use toggle insted.
 *   QGUI_N-TERM  NRES nRES  -HT3            radius_to N
 *   QGUI_N-TERM  nRES NRES  +HT3  N         radius_to N
-*   QGUI_C-TERM  CRES cRES  +HO2  OT2       radius_to C
-*   QGUI_C-TERM  cRES CRES  -HO2            radius_to C
+*   ##QGUI_C-TERM  CRES cRES  +HO2  OT2       radius_to C
+*   ##QGUI_C-TERM  cRES CRES  -HO2            radius_to C
 *
 *------------------------------------------------------------------
 {ALA}            !charge: 0.00 ||  
