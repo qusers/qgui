@@ -1,3 +1,7 @@
+20.11.15 v2.02
+    Fixed error caused when no toggle_residue defined in lib.
+
+
 15.11.15 v2.01b 
     Bug fixes and minor improvements to the Topology prepare tool.
     Removed 'return' statement that hindered the topology input files

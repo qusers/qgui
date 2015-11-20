@@ -89,7 +89,7 @@ class ViewPyMol(Toplevel):
                                      preexec_fn=os.setsid)
             except:
                 try:
-                    self.session = Popen(["MacPyMol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE,
+                    self.session = Popen(["pymol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE,
                                      preexec_fn=os.setsid)
                 except:
                     print 'No pymol version found'

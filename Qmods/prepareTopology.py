@@ -66,6 +66,8 @@ def convertPdb(pdb, workdir, atomnr=0, resnr=0):
     current_resletter = 'C'
     previousAtomtype = 'dummy'
 
+    found_ter = False
+
     for line in pdbfile:
         try:
             if 'ATOM' in line.split()[0] or 'HETATM' in line.split()[0]:
@@ -82,20 +84,23 @@ def convertPdb(pdb, workdir, atomnr=0, resnr=0):
                     resnr = int(line[22:26])               #Get residue nr from pdb file
                 else:
                     if current_resnr != int(line[22:26]):
-                    #Check if GAP shoud be inserted:
+                        #Check if GAP shoud be inserted:
                         if current_resnr + 1 != int(line[22:26]) and current_resnr != 0:
                             if atomtype == 'N':
                                 x_n = float(line[28:].split()[0])
                                 y_n = float(line[28:].split()[1])
                                 z_n = float(line[28:].split()[2])
                                 distance = np.sqrt((x_n - x_c) ** 2 + (y_n - y_c) ** 2 + (z_n - z_c) ** 2)
-                                if distance > 1.35:
-                                    newPdb.write('%20s\n' % 'GAP')
-                            elif atomtype != 'O':
-                                newPdb.write('%20s\n' % 'GAP')
+                                if distance > 2.2:
+                                    if not found_ter:
+                                        newPdb.write('%20s\n' % 'GAP')
+
+                            #elif atomtype != 'O':
+                            #    newPdb.write('%20s\n' % 'GAP')
                         current_resnr = int(line[22:26])
                         current_resletter = line[26:27]
                         resnr += 1
+                        found_ter = False
                     elif (current_resletter != line[26:27]) and (current_resletter != 'C'):
                         current_resletter = line[26:27]
                         resnr += 1
@@ -114,6 +119,7 @@ def convertPdb(pdb, workdir, atomnr=0, resnr=0):
                     newPdb.write('%s\n' % newline)
             elif line.startswith('TER'):
                 newPdb.write('%20s\n' % 'GAP')
+                found_ter = True
 
         except:
             continue

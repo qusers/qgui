@@ -61,23 +61,6 @@ class TopologyPrepare(Toplevel):
         #Pymol zoom buffer when residue is clicked:
         self.pymol_zoom = 10
 
-        #Initialize dictionaries:
-        self.charge_off = {'AR+': 'ARG', 'NAR+': 'NARG', 'CAR+': 'CARG',
-                           'AS-': 'ASP', 'NAS-': 'NASP', 'CAS-': 'CASP',
-                           'GL-': 'GLU', 'NGL-': 'NGLU', 'CGL-': 'CGLU',
-                           'LY+': 'LYS', 'NLY+': 'NLYS', 'CLY+': 'CLYS',}
-
-        self.charge_on = {'ARG': 'AR+', 'NARG': 'NAR+', 'CARG': 'CAR+',
-                          'ASP': 'AS-', 'NASP': 'NAS-', 'CASP': 'CAS-',
-                          'GLU': 'GL-', 'NGLU': 'NGL-', 'CGLU': 'CGL-',
-                          'LYS': 'LY+', 'NLYS': 'NLY+', 'CLYS': 'CLY+'}
-
-        self.charg_on_atomtypes = {'ARG': 'CZ', 'NARG': 'CZ', 'CARG': 'CZ',
-                          'ASP': 'CG', 'NASP': 'CG', 'CASP': 'CG',
-                          'GLU': 'CD', 'NGLU': 'CD', 'CGLU': 'CD',
-                          'LYS': 'CD', 'NLYS': 'CD', 'CLYS': 'CD'}
-
-
         if not self.qgui_parent:
             self.app.log = self.app.app.log
             self.app.errorBox = self.app.app.errorBox
@@ -385,11 +368,12 @@ class TopologyPrepare(Toplevel):
                     #collect atom names for given residue:
                     if res_nr == int(line[21:26]):
                         pdb_atoms.append(atom_name)
-                    else:
+                    elif res in self.res_atoms.keys():
                         #Check if the next residue is a aa or not. If not, current res could be C-term:
                         next_res = line[17:21].strip()
-                        if next_res not in self.res_atoms.keys() and res in self.res_atoms.keys():
-                            c_term_found = True
+                        if next_res not in self.res_atoms.keys():
+                            if res in self.res_atoms.keys():
+                                c_term_found = True
                         elif 'N' not in self.res_atoms[next_res] and 'CA' not in self.res_atoms[next_res]:
                             if 'C' in self.res_atoms[res] and 'CA' in self.res_atoms[res]:
                                 c_term_found = True
@@ -466,10 +450,11 @@ class TopologyPrepare(Toplevel):
                             create_nterm = False
                             n_xyz = False
 
-                        if res == self.toggle_res['CYS']:
-                            if not self.makeSS:
-                                self.check_variable.set(1)
-                                self.makeSS = True
+                        if 'CYS' in self.toggle_res.keys():
+                            if res == self.toggle_res['CYS']:
+                                if not self.makeSS:
+                                    self.check_variable.set(1)
+                                    self.makeSS = True
 
                         if not res in self.res_atoms.keys():
                             self.app.log(' ','WARNING: %4s %5d not found in lib entries!\n' % (res, res_nr))
@@ -1114,6 +1099,9 @@ class TopologyPrepare(Toplevel):
         return new_res
 
     def toggle_charge_selected(self):
+        """
+        Function to toggle a selected residue. The toggle must be defined in the header of lib file.
+        """
 
         try:
             list_index = int(self.listbox.curselection()[0])
@@ -1129,6 +1117,10 @@ class TopologyPrepare(Toplevel):
         radius = self.listbox.get(list_index).split('|')[-1]
         #TODO N/C-terminals with chargable residues (4 options)
         newRes = self.toggle_res[oldRes]
+
+        if newRes not in self.res_atoms.keys():
+            self.app.log(' ', 'Residue %s is not defined in lib file!\n' % newRes)
+            return
 
         resnr = int(resnr)
 
@@ -1317,7 +1309,7 @@ class TopologyPrepare(Toplevel):
 
         tmpfile = open(self.app.workdir+'/.tmpfile','wb')
         if 'darwin' in sys.platform:
-            self.session = Popen(["MacPyMol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+            self.session = Popen(["pymol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
         else:
             self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
 
