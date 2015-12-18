@@ -666,7 +666,7 @@ class TopologyPrepare(Toplevel):
                         self.resname_nr_dist[cterm][res_nr]['y'] = y
                         self.resname_nr_dist[cterm][res_nr]['z'] = z
                     if atom_name2 == distatom2:
-                        print 'Found correct distance atom for C-term %s' % cterm
+                        print 'Found correct distance atom for C-term %s (%d)' % (cterm, res_nr)
                         break
 
 
@@ -677,6 +677,7 @@ class TopologyPrepare(Toplevel):
         Updates the loaded pdb file with the correct modifications made in the topology prepare tool.
         """
         old_pdb = open(self.pdbfile, 'r').readlines()
+        print 'Writing new pdb file from toggle'
 
         #Residue numbers to modify:
         #res nr : resname
@@ -708,17 +709,17 @@ class TopologyPrepare(Toplevel):
 
                         #So far we only need to delete H-atoms. Qprep will add missing hydrogens.
                         del_atoms = list()
-                        if '-' in modatoms:
-                            for atom in modatoms.split():
-                                if atom.startswith('-'):
-                                    del_atoms.append(atom.strip('-'))
+                        for atom in modatoms.split():
+                            if '-' in atom:
+                                del_atoms.append(atom.strip('-'))
 
-                        if atomname not in del_atoms:
+                        if atomname in del_atoms:
+                             print 'Atom %s was deleted from %s %d' % (atomname, orig_res, res_nr)
+                        else:
                             atomnr += 1
                             new_pdb.write('%s%5d  %s%4s%s' %
                                             (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:]))
-                        else:
-                            print del_atoms
+
                     else:
                         atomnr += 1
                         new_pdb.write('%s%5d  %s' % (old_pdb[i][0:6], atomnr, old_pdb[i][13:]))

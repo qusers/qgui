@@ -12,15 +12,15 @@
 *       Consequently, they will not be togglable in Qgui topology prepare.
 *
 *[toggle_residues] ! This is for topology prepare in Qgui 
-*   QGUI_TOGGLE  AR+  ARG   -H12            radius_to CZ 
-*   QGUI_TOGGLE  ARG  AR+   +H12  NH1       radius_to CZ 
+*   QGUI_TOGGLE  AR+  ARG   -HH12           radius_to CZ 
+*   QGUI_TOGGLE  ARG  AR+   +HH12  NH1      radius_to CZ 
 *   QGUI_TOGGLE  HIP  HID   -HE2            radius_to CE1
 *   QGUI_TOGGLE  LY+  LYS   -HZ3            radius_to NZ
 *   QGUI_TOGGLE  LYS  LY+   +HZ3  NZ        radius_to NZ
-*   QGUI_TOGGLE  AS-  ASP   +HD2  OD2       radius_to CG
-*   QGUI_TOGGLE  ASP  AS-   -HD2            radius_to CG
-*   QGUI_TOGGLE  GL-  GLU   +HE2  OE2       radius_to CD
-*   QGUI_TOGGLE  GLU  GL-   -HE2            radius_to CD
+*   QGUI_TOGGLE  AS-  ASP   +HD1  OD1       radius_to CG
+*   QGUI_TOGGLE  ASP  AS-   -HD1            radius_to CG
+*   QGUI_TOGGLE  GL-  GLU   +HE1  OE1       radius_to CD
+*   QGUI_TOGGLE  GLU  GL-   -HE1            radius_to CD
 *   QGUI_TOGGLE  HID  HIE   -HD1 +HE2 NE2   radius_to CE1
 *   QGUI_TOGGLE  HIE  HIP   +HD1  ND1       radius_to CE1
 *   QGUI_TOGGLE  CYS  CYX   -HG1            radius_to SG

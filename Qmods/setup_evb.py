@@ -697,6 +697,10 @@ class SetupEVB(Toplevel):
                                                 charge = float(line.split()[3])
                                                 self.q_atomtypes[qi] = [type1, type1, type1, type1]
                                                 self.q_charges[qi] = [charge, charge, charge, charge]
+                                            else:
+                                                print 'Hello!!!!!'
+                                                print 'atomname %s not in' % atomname
+                                                print atomnames
                                     except:
                                         continue
 
@@ -724,7 +728,7 @@ class SetupEVB(Toplevel):
                                 found_res = False
                                 break
 
-                        if '{' in line and res in line:
+                        if '{' in line and line.strip('{').split()[0][:-1] == res:
                             found_res = True
 
 
@@ -1660,7 +1664,6 @@ class SetupEVB(Toplevel):
             for imp in missing_prms:
                 self.improper_prm[imp] = ['??', '??']
 
-        print 'HELLO'
         print nr_type
         print self.improper_prm
         #Insert imroper types to listbox
@@ -3092,12 +3095,13 @@ class SetupEVB(Toplevel):
     def list_q_atoms_event(self, *args):
         """
         Highlight Q-atoms in pymol when Q-atoms are selected
+        Exports selection to other lists as well.
         """
-        if not self.session:
-            return
+        if self.session:
+            self.session.stdin.write('hide spheres\n')
+        atoms = list()
+        q_atoms = list()
 
-        self.session.stdin.write('hide spheres\n')
-        atoms = []
         try:
             selections = map(int, self.qatoms_listbox.curselection())
         except:
@@ -3108,19 +3112,29 @@ class SetupEVB(Toplevel):
             return
 
         for selected in selections:
+            q_atoms.append(int(self.qatoms_listbox.get(selected).split()[0]))
             atoms.append(int(self.qatoms_listbox.get(selected).split()[1]))
 
         pymol_sel_string = ''
 
-        for atom in range(len(atoms)):
-            #Make sure list has not ended:
-            if (atom + 1) != len(atoms):
-                pymol_sel_string += 'id %d or ' % int(atoms[atom])
-            else:
-                #End of atom list reached
-                pymol_sel_string += 'id %d' % int(atoms[atom])
+        #Highligh selections in other lists:
+        lists = [self.changetypes_listbox, self.charge_listbox]
+        for lst in lists:
+            lst.selection_clear(0, END)
+            for qi in q_atoms:
+                 lst.selection_set(qi - 1)
 
-        self.session.stdin.write('show spheres, %s\n' % pymol_sel_string)
+        #Update pymol selection if open
+        if self.session:
+            for atom in range(len(atoms)):
+                #Make sure list has not ended:
+                if (atom + 1) != len(atoms):
+                    pymol_sel_string += 'id %d or ' % int(atoms[atom])
+                else:
+                    #End of atom list reached
+                    pymol_sel_string += 'id %d' % int(atoms[atom])
+
+            self.session.stdin.write('show spheres, %s\n' % pymol_sel_string)
 
     def list_bondform_event(self, *args):
         try:

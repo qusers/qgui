@@ -1,3 +1,11 @@
+16.12.15 v2.03
+    Fixed Topology prepare 'toggle charge' function bug that prevented 
+    removal of atoms as (user) defined in the '[toggle_residues]' in .lib.
+    Qoplsaa.lib and Qopls_2015.lib updated with some bug corrections.
+
+23.11.15 v2.02
+    Fixed weird problem with converting string to integer in edit_evb.py.
+
 20.11.15 v2.02
     Fixed error caused when no toggle_residue defined in lib.
 

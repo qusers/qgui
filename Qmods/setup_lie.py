@@ -45,6 +45,8 @@ class SetupLie(Toplevel):
         self.md_ligand = False
         self.md_complex = False
 
+        self.qgui_path = self.app.qgui_path
+
         self.dialog_window()
         self.app.log('info', 'Setup LIE session started.')
 

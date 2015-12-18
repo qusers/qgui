@@ -1,4559 +1,1051 @@
 *-------------------------------------------------------------
-* Q-library:
-* Qgui version of the OPLS-2001 potential.
 *
-* Name convention on basic and acidic a.a.:
-* AR+, ARG, HIP, HID, HIE, LY+, LYS, AS-, ASP, GL-, GLU
-*  +1    0   +1    0    0   +1    0   -1    0   -1    0
-*
-*  Name conventian on terminal basic and acidic a.a.:
-*  NAR+, NARG, CAR+, CARG 
-*   +2    +1    0     -1
-*  NHIP, NHID, NHIE, CHIP, CHID, CHIE,
-*   +2    +1    +1    0     -1    -1
-*  NLY+, NLYS, CLY+, CLYS
-*   +2    +1    0     -1
-*  NAS-, NASP, CAS-, CASP
-*   0     +1    -2    -1
-*  NGL-, NGLU, CGL-, CGLU
-*   0     +1    -2    -1
-*----------------------------------------------------------------------
-{ALA}                 ! Alanine
-    [info]
-        SYBYLtype  RESIDUE     !SYBYL substructure type
-    [atoms]
-         1 N       N          -0.5000 !At. no., name, type, charge
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1800
-         6 HB1     HC          0.0600
-         7 HB2     HC          0.0600
-         8 HB3     HC          0.0600
-         9 C       C           0.5000
-        10 O       O          -0.5000
-    [bonds]                !connect i -- j
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB1
-       CB   HB2
-       CB   HB3
-       CA   C
-       C    O
-    [connections]   !tail and head connections
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups] !charge groups, with switch atom first
-        N    H    CA    HA
-        CB   HB1  HB2   HB3
-        C    O
-*----------------------------------------------------------------------
-{AR+}                 ! Arginine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.0500
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT          0.1900
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 NE      N2         -0.7000
-        15 HE      H3          0.4400
-        16 CZ      CAr         0.6400
-        17 NH1     N2         -0.8000
-        18 HH11    H3          0.4600
-        19 HH12    H3          0.4600
-        20 NH2     N2         -0.8000
-        21 HH21    H3          0.4600
-        22 HH22    H3          0.4600
-        23 C       C           0.5000
-        24 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   NE
-       NE   HE
-       NE   CZ
-       CZ   NH1
-       NH1  HH11
-       NH1  HH12
-       CZ   NH2
-       NH2  HH21
-       NH2  HH22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
-       torsion HH21 NH2  CZ   NE    0
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        HE   NE   CD    CZ
-        NH2  CZ   NH1   NE
-        HH11 NH1  CZ    HH12
-        HH21 NH2  CZ    HH22
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CZ   CG   HG2  HG3  CD   HD2  HD3  NE   HE   NH1  HH11  HH12  NH2  HH21  HH22
-        C    O
-*----------------------------------------------------------------------
-{ARG} !Deprotonated!!
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT          0.0400
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 NE      NY         -0.6200
-        15 HE      H           0.3800
-        16 CZ      CAr         0.5500
-        17 NH1     NZ         -0.7850
-        18 HH11    H           0.3800
-        19 NH2     NY         -0.7850
-        20 HH21    H           0.3600
-        21 HH22    H           0.3600
-        22 C       C           0.5000
-        23 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   NE
-       NE   HE
-       NE   CZ
-       CZ   NH1
-       NH1  HH11
-       CZ   NH2
-       NH2  HH21
-       NH2  HH22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
-       torsion HH21 NH2  CZ   NE    0
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        HE   NE   CD    CZ
-        NH2  CZ   NH1   NE
-        HH21 NH2  CZ    HH22
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3  NE   HE   CZ   NH1  HH11  NH2  HH21  HH22
-        C    O
-*----------------------------------------------------------------------
-{ASN}                 ! Asparagine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      C2          0.5000
-         9 OD1     O          -0.5000
-        10 ND2     N          -0.7600
-        11 HD21    H           0.3800
-        12 HD22    H           0.3800
-        13 C       C           0.5000
-        14 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   ND2
-       ND2  HD21
-       ND2  HD22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HD21 ND2  CG   OD1   0 !keep amide H in plane
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        HD22 ND2  CG    HD21
-        OD1  CG   CB    ND2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   OD1
-        ND2  HD21  HD22
-        C    O
-*----------------------------------------------------------------------
-{AS-}       ! Aspartate, -1 charge
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.2200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      C2          0.7000
-         9 OD1     O2         -0.8000
-        10 OD2     O2         -0.8000
-        11 C       C           0.5000
-        12 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   OD2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        OD1  CG   CB    OD2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  CG   OD1  OD2
-        C    O
-*----------------------------------------------------------------------
-{ASP} !Protonated, neutral!!
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      C2          0.5200
-         9 OD1     OH         -0.5300
-        10 OD2     O1         -0.4400
-        11 HD1     HO          0.4500
-        12 C       C           0.5000
-        13 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   OD2
-       OD1  HD1
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [build_rules]
-       torsion HD1  OD1  CG   OD2   0
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        OD1  CG   CB    OD2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   OD1  OD2  HD1
-        C    O
-*----------------------------------------------------------------------
-{CYS}                 ! Cysteine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT          0.0600
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 SG      SH         -0.3350
-         9 HG      HS          0.1550
-        10 C       C           0.5000
-        11 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   SG
-       SG   HG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  SG   HG
-        C    O
-*----------------------------------------------------------------------
-{CYX}                 ! Cysteine within S-S Bond
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT          0.0975
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 SG      S          -0.2175
-         9 C       C           0.5000
-        10 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   SG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  SG
-        C    O
-*----------------------------------------------------------------------
-{GLN}                 !Glutamine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC2         0.0600
-         7 HB3     HC2         0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      C21         0.5000
-        12 OE1     O          -0.5000
-        13 NE2     N          -0.7600
-        14 HE21    H           0.3800
-        15 HE22    H           0.3800
-        16 C       C           0.5000
-        17 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   NE2
-       NE2  HE21
-       NE2  HE22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HE21 NE2  CD   OE1   0 !keep amide H in plane
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        HE22 NE2  CD    HE21
-        OE1  CD   CG    NE2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   OE1
-        NE2  HE21  HE22
-        C    O
-*----------------------------------------------------------------------
-{GL-}    !Glutamate    -1 charge
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC1         0.0600
-         7 HB3     HC1         0.0600
-         8 CG      CT         -0.2200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      C2          0.7000
-        12 OE1     O2         -0.8000
-        13 OE2     O2         -0.8000
-        14 C       C           0.5000
-        15 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   OE2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        OE1  CD   CG    OE2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3  CD   OE1  OE2
-        C    O
-*----------------------------------------------------------------------
-{GLU}  !Protonated, (neutral)
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      C2          0.5200
-        12 OE1     OH         -0.5300
-        13 OE2     O          -0.4400
-        14 HE1     HO          0.4500
-        15 C       C           0.5000
-        16 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   OE2
-       OE1  HE1
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [build_rules]
-       torsion HE1  OE1  CD   OE2   0
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        OE1  CD   CG    OE2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   OE1  OE2 HE1
-        C    O
-*----------------------------------------------------------------------
-{GLY}                 !Glycine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0800
-         4 HA2     HC          0.0600
-         5 HA3     HC          0.0600
-         6 C       C           0.5000
-         7 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA2
-       CA   HA3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA2   HA3
-        C    O
-*----------------------------------------------------------------------
-{HIP}                 ! Protonated HIS
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CX          0.2150
-         9 ND1     NA         -0.5400
-        10 HD1     H           0.4600
-        11 CE1     CR          0.3850
-        12 HE1     HA          0.1150
-        13 NE2     NA         -0.5400
-        14 HE2     H           0.4600
-        15 CD2     CX          0.2150
-        16 HD2     HA          0.1150
-        17 C       C           0.5000
-        18 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       ND1  HD1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  HE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        CB   CG   ND1   CD2
-        HD1  ND1  CG    CE1
-        HE1  CE1  ND1   NE2
-        HE2  NE2  CE1   CD2
-        HD2  CD2  NE2   CG
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  CG   ND1  HD1  CE1  HE1  NE2  HE2  CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{HID}                 ! neutral HIS, proton on ND1
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CW          0.0150
-         9 ND1     NA         -0.5700
-        10 HD1     H           0.4200
-        11 CE1     CR          0.2950
-        12 HE1     HA          0.1150
-        13 NE2     NB         -0.4900
-        14 CD2     CV         -0.0150
-        15 HD2     HA          0.1150
-        16 C       C           0.5000
-        17 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       CG   CD2
-       ND1  HD1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        HD1  ND1  CG    CE1
-        CB   CG   ND1   CD2
-        HD2  CD2  NE2   CG
-        HE1  CE1  ND1   NE2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  CG   ND1  HD1  CE1  HE1  NE2  CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{HIE}                 ! neutral HIS, proton on NE1
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CV         -0.0150
-         9 ND1     NB         -0.4900
-        10 CE1     CR          0.2950
-        11 HE1     HA          0.1150
-        12 NE2     NA         -0.5700
-        13 HE2     H           0.4200
-        14 CD2     CW          0.0150
-        15 HD2     HA          0.1150
-        16 C       C           0.5000
-        17 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  HE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        CB   CG   ND1   CD2
-        HE1  CE1  ND1   NE2
-        HD2  CD2  NE2   CG
-        HE2  NE2  CD2   CE1
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  CG   ND1  CE1  HE1  NE2  HE2  CD2  HD2
-        C    O
+* Q-FF params:
+*Translation of OplsAA force field parameters.
+*Use CAREFULLY!!
+*Only natural amino acid parameters have been adopted.
+*-------------------------------------------------------------
+[options] force-field options
+name    Q-OPLSAA
+type    AMBER
+vdw_rule        geometric !vdW combination rule
+scale_14        0.5     !electrostatic 1-4 scaling factor
+switch_atoms    on
+improper_potential      periodic
+improper_definition     explicit
 
-*----------------------------------------------------------------------
-{ILE}                 ! Isoleucine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0600
-         6 HB      HC          0.0600
-         7 CG2     CT         -0.1800
-         8 HG21    HC          0.0600
-         9 HG22    HC          0.0600
-        10 HG23    HC          0.0600
-        11 CG1     CT         -0.1200
-        12 HG12    HC          0.0600
-        13 HG13    HC          0.0600
-        14 CD1     CT         -0.1800
-        15 HD11    HC          0.0600
-        16 HD12    HC          0.0600
-        17 HD13    HC          0.0600
-        18 C       C           0.5000
-        19 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CB   CG1
-       CG1  HG12
-       CG1  HG13
-       CG1  CD1
-       CD1  HD11
-       CD1  HD12
-       CD1  HD13
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB
-        CG2  HG21  HG22  HG23
-        CG1  HG12  HG13
-        CD1  HD11  HD12  HD13
-        C    O
-*----------------------------------------------------------------------
-{LEU}                 ! Leucine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.0600
-         9 HG      HC          0.0600
-        10 CD1     CT         -0.1800
-        11 HD11    HC          0.0600
-        12 HD12    HC          0.0600
-        13 HD13    HC          0.0600
-        14 CD2     CT         -0.1800
-        15 HD21    HC          0.0600
-        16 HD22    HC          0.0600
-        17 HD23    HC          0.0600
-        18 C       C           0.5000
-        19 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG
-       CG   CD1
-       CD1  HD11
-       CD1  HD12
-       CD1  HD13
-       CG   CD2
-       CD2  HD21
-       CD2  HD22
-       CD2  HD23
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG
-        CD1  HD11  HD12  HD13
-        CD2  HD21  HD22  HD23
-        C    O
+[atom_types] atom type definitions
+*tac-----------Avdw1---Avdw2---Bvdw1----Avdw3---Bvdw2&3---mass----SYBYL-name-old-comment
+H	0.00	0.00	0.00	0.00	0.00	1.008	! Peptide
+H2	0.00	0.00	0.00	0.00	0.00	1.008	!
+HA	69.58	69.58	4.91	49.20	3.47	1.008	! Aromatic
+HC	84.57	84.57	5.41	59.80	3.83	1.008	! Nonpolar H
+HC1	84.57	84.57	5.41	59.80	3.83	1.008	! Nonpolar H, GLU - HG1, HG2
+HC2	84.57	84.57	5.41	59.80	3.83	1.008	! Nonpolar H, GLN - HG1, HG2
+HO	0.00	0.00	0.00	0.00	0.00	1.008	! Ser/Thr/Tyr
+HW	0.00	0.00	0.00	0.00	0.00	1.008	! TIP3P
+HS	0.00	0.00	0.00	0.00	0.00	1.008	! CYS
+H3	0.00	0.00	0.00	0.00	0.00	1.008	! Arg
+C	1802.24 1802.24	34.18 1274.38	24.17	12.01	! sp2 carbonyl
+C2	1802.24 1802.24	34.18 1274.38	24.17	12.01	! sp2 carbonyl
+C21     1802.24 1802.24	34.18 1274.38	24.17	12.01	! sp2 carbonyl, GLN
+CA	1059.13 1059.13	23.67	748.92	16.74	12.01	! Aromatic
+CAr	1103.59	1103.59	24.67	780.35	17.44	12.01	! CZ in ARG J Phys Chem B 2004, 108, 16264
+CB	1059.13 1059.13	23.67	748.92	16.74	12.01	! TRP
+CN	1059.13 1059.13	23.67	748.92	16.74	12.01	
+CR	1059.13 1059.13	23.67	748.92	16.74	12.01	! HIS
+Cstar	1059.13 1059.13	23.67	748.92	16.74	12.01	! TRP
+CT	944.52	944.52	22.03	667.88	15.58	12.01	! sp3 nonpolar
+CT1       944.52    0.00   22.03  667.88   15.58  12.010 !for C-alpha in peptide
+CP1	944.52	944.52	22.03	667.88	15.58	12.01	! CD PRO
+CV	1059.13 1059.13	23.67	748.92	16.74	12.01	! HIS
+CW	1059.13 1059.13	23.67	748.92	16.74	12.01	! HIS
+CX	1059.13 1059.13	23.67	748.92	16.74	12.01	! HIS
+N	971.75	971.75	28.31	687.13	20.02	14.01	! Peptide
+NA	971.75	971.75	28.31	687.13	20.02	14.01	! HIS
+NB	971.75	971.75	28.31	687.13	20.02	14.01	! HIS
+N2	971.75	971.75	28.31	687.13	20.02	14.01	! Arg
+N3	971.75	971.75	28.31	687.13	20.02	14.01	! LYS
+O	616.44	616.44	23.77	435.89	16.81	16.00	! Peptide carbonyl
+OA	616.44	616.44	23.77	435.89	16.81	16.00	! ASN/GLN
+OH	760.65	760.65	25.05	537.86	17.71	16.00	! Ser/Thr
+OTY	690.37	690.37	23.86	488.17	16.87	16.00	! Tyr
+OW	762.89	762.89	24.39	539.45	17.25	16.00	! TIP3P
+O2	616.44	616.44	23.77	435.89	16.81	16.00	! ASP/GLU
+O1	616.44	616.44	23.77	435.89	16.81	16.00	! ASH
+OS	616.44	616.44	23.77	435.89	16.81	16.00	!	
+ODE	601.15	601.15	22.27	425.08	15.74	16.00	! ASPH/GLUH 
+S	2001.57 2001.57	44.74 1415.32	31.64	32.06	! Met/CYX
+SH	2001.57 2001.57	44.74 1415.32	31.64	32.06	! CYS
+NY	971.75	971.75	28.31	687.13	20.02	14.01	
+NZ	971.75	971.75	28.31	687.13	20.02	14.01	
+NT	1064.97 1064.97	29.63	753.05	20.96	14.01	
+Na	118.322	118.322	17.32	83.666	12.25   22.99	!Na+
+Ca2	264.10	264.10	18.82	186.75	13.31	40.08	!CA2+
+Cl      5099.06	5099.06	59.16	3605.58	41.83   35.45   !Cl-
+P	2447.79 2447.79	46.79 1730.85	33.09	30.97	!P
+Zn	3518.74 3518.74	59.32 2488.13	41.95	53.37	!Zn2+ 
+HZn        0.00    0.00    0.00    0.00  0.00   1.008
+ON       554.63	554.632	21.38   392.184	15.12   16.00   !Nitro
+NO       971.75	971.75	28.31	687.13	20.02	14.01   !nitro
 
-*----------------------------------------------------------------------
-{LY+}                 !Lysine   +1 charge
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT         -0.1200
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 CE      CT          0.1900
-        15 HE2     HC          0.0600
-        16 HE3     HC          0.0600
-        17 NZ      N3         -0.3000
-        18 HZ1     H3          0.3300
-        19 HZ2     H3          0.3300
-        20 HZ3     H3          0.3300
-        21 C       C           0.5000
-        22 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       NZ   HZ3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2  HZ3
-        C    O
-*----------------------------------------------------------------------
-{LYS} !Deprotonated,  neutral
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT         -0.1200
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 CE      CT          0.0600
-        15 HE2     HC          0.0600
-        16 HE3     HC          0.0600
-        17 NZ      NT         -0.9000
-        18 HZ1     H           0.3600
-        19 HZ2     H           0.3600
-        20 C       C           0.5000
-        21 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2
-        C    O
-*----------------------------------------------------------------------
-{MET}                 !Methionine
-    [info]
-        SYBYLtype  GROUP
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT          0.0975
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 SD      S          -0.4350
-        12 CE      CT          0.0375
-        13 HE1     HC          0.0600
-        14 HE2     HC          0.0600
-        15 HE3     HC          0.0600
-        16 C       C           0.5000
-        17 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   SD
-       SD   CE
-       CE   HE1
-       CE   HE2
-       CE   HE3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   HG2  HG3  SD   CE   HE1  HE2  HE3
-        C    O
+[bonds] bond type definitions
+N3      CT1     734.0   1.471 
+N3      CT      734.00  1.47 !high      147  0   N3  -CT1   ==> CT  -N3
+N3      H       868.00  1.01 !high      175  0   N3  -H     ==> H   -N3
+CT      CT1     536.00  1.529 
+Zn      HZn    1000.00  0.90  aa
+HZn     HZn       0.00  1.46995 aa
+C 	CA 	800.0   1.490 !Bapna
+CA	NO	800.0   1.460 !Bapna
+C	OS	428.0   1.327 !BApna
+NO	ON     1100.0   1.225 !Bapna
+CA	N  	854.0   1.381 !Bapna
+N       CT1     674.00  1.449
+CT1     HC      680.00  1.090
+CT1      C      634.00  1.522
+CA	NT	962.0	1.34	!anilines
+OS	C2	600.0	1.55
+CT	OS	640.0	1.410
+CT      C       634.0   1.52 !high       15  0   CT1 -CO3   ==> C   -CT1   
+CT      O2     1312.0   1.25 !high       21  0   CO3 -O2    ==> C   -O2  
+P	O2	1050.0	1.480
+P	OS	630.0	1.610
+HW	OW	1106.0	0.957
+HW	HW	0.0	1.5183
+H	N	868.0	1.010
+H	NA	868.0	1.010
+H3	N2	868.0	1.010
+H3	N3	868.0	1.010
+Cstar	CB	776.0	1.459
+Cstar	CT	634.0	1.495
+Cstar	CW	1092.0	1.352
+C	CT	634.0	1.522
+C2	CT	634.0	1.522
+C21	CT	634.0	1.522
+C	N	980.0	1.335
+C	O	1140.0	1.229
+C2	N	980.0	1.335
+C21	N	980.0	1.335   !GLN
+C2	O	1140.0	1.229
+C2	O1	1140.0	1.229   !ASH
+C21	O	1140.0	1.229   !GLN
+C	OA	1140.0	1.229	!GLN/ASN
+C	O2	1312.0	1.250
+C2	O2	1312.0	1.250
+C	OH	900.0	1.364
+C2	OH	900.0	1.364
+C2	ODE	900.0	1.364
+CA	CA	938.0	1.400
+CA	CAr	938.0	1.400
+CA	CB	938.0	1.404
+CA	CT	634.0	1.510
+CA	HA	734.0	1.080	
+CA	N2	962.0	1.340
+CAr	N2	962.0	1.340
+CA	OH	900.0	1.364
+CA	OTY	900.0	1.364
+CN	CA	938.0	1.400
+CN	CB	894.0	1.419
+CN	NA	856.0	1.380
+CR	HA	734.0	1.080
+CR	NA	954.0	1.343
+CR	NB	976.0	1.335
+CT	CT	536.0	1.529
+CT	N	674.0	1.449
+CT	N2	674.0	1.463
+CT	N3	734.0	1.471
+CT	OH	640.0	1.410
+CT	S	454.0	1.810
+CT	SH	444.0	1.810
+CP1	CT	536.0	1.529
+CP1	N	674.0	1.449
+CP1	HC	680.0	1.090
+CP1     N3      734.00  1.47 !high      147  0   CT  -N3    ==> CT  -N3
+CV	CT	634.0	1.504
+CV	CW	1040.0	1.370
+CV	HA	734.0	1.080
+CV	NB	820.0	1.394
+CW	CT	634.0	1.504
+CW	HA	734.0	1.080
+CW	NA	854.0	1.381
+CT	CX	634.0	1.504
+CX	NA	854.0	1.381
+CX	HA	734.0	1.080
+CX	CX	1040.0	1.370
+HC	CT	680.0	1.090
+HC1     CT      680.0	1.090  ! GLU: HB1 and HB2
+HC2     CT      680.0	1.090  ! GLN: HB1 and HB2
+HO	OH	1106.0	0.945
+HO	OTY	1106.0	0.945
+HO	ODE	1106.0	0.945
+HS	SH	548.0	1.336
+S	S	332.0	2.038
+NT	H	868.0	1.010
+NY	H2	868.0	1.010
+NY	H	868.0	1.010
+NZ	H	868.0	1.010
+CT	NY	764.0	1.448
+CA	NY	764.0	1.448
+CA	NZ	1000.0	1.261
+CAr	NY	764.0	1.448
+CAr	NZ	1000.0	1.261
+CT	NT	764.0	1.448
+CA	N3	962.0	1.340	!Aniline
 
-*----------------------------------------------------------------------
-{PHE}                 !Phenylalanine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CA         -0.1150
-         9 CD1     CA         -0.1150
-        10 HD1     HA          0.1150
-        11 CE1     CA         -0.1150
-        12 HE1     HA          0.1150
-        13 CZ      CA         -0.1150
-        14 HZ      HA          0.1150
-        15 CE2     CA         -0.1150
-        16 HE2     HA          0.1150
-        17 CD2     CA         -0.1150
-        18 HD2     HA          0.1150
-        19 C       C           0.5000
-        20 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  CE1
-       CE1  HE1
-       CE1  CZ
-       CZ   HZ
-       CZ   CE2
-       CE2  HE2
-       CE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        CB   CG   CD1   CD2
-        HD1  CD1  CE1   CG
-        HE1  CE1  CZ    CD1
-        HZ   CZ   CE2   CE1
-        HE2  CE2  CD2   CZ
-        HD2  CD2  CG    CE2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  CG
-        CD1  HD1
-        CE1  HE1
-        CZ   HZ
-        CE2  HE2
-        CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{PRO}                 !Proline
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.1400
-         2 CD      CP1        -0.0500
-         3 HD2     HC          0.0600
-         4 HD3     HC          0.0600
-         5 CG      CT         -0.1200
-         6 HG2     HC          0.0600
-         7 HG3     HC          0.0600
-         8 CB      CT         -0.1200
-         9 HB2     HC          0.0600
-        10 HB3     HC          0.0600
-        11 CA      CT          0.0100
-        12 HA      HC          0.0600
-        13 C       C           0.5000
-        14 O       O          -0.5000
-    [bonds]
-       N    CD
-       CD   HD2
-       CD   HD3
-       CD   CG
-       CG   HG2
-       CG   HG3
-       CG   CB
-       CB   HB2
-       CB   HB3
-       N    CA
-       CA   HA
-       CA   C
-       C    O
-       CB   CA
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-       -C    N    CA    CD
-        O    C    CA    +N
-    [charge_groups]
-        N    CA   HA   CD   HD2  HD3
-        CB   HB2  HB3
-        CG   HG2  HG3
-        C    O
-*----------------------------------------------------------------------
-{SEB}                 !Serine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT          0.1450
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 OG      OH         -0.6830
-         9 C       C           0.5000
-        10 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   OG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA    HA
-        CB   HB2  HB3   OG
-        C    O
-*----------------------------------------------------------------------
-{SER}                 !Serine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT          0.1450
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 OG      OH         -0.6830
-         9 HG      HO          0.4180
-        10 C       C           0.5000
-        11 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   OG
-       OG   HG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA    HA
-        CB   HB2  HB3   OG   HG
-        C    O
-*----------------------------------------------------------------------
-{THR}                 !Threonine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT          0.2050
-         6 HB      HC          0.0600
-         7 CG2     CT         -0.1800
-         8 HG21    HC          0.0600
-         9 HG22    HC          0.0600
-        10 HG23    HC          0.0600
-        11 OG1     OH         -0.6830
-        12 HG1     HO          0.4180
-        13 C       C           0.5000
-        14 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CB   OG1
-       OG1  HG1
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB   OG1  HG1
-        7    8    9    10 !CG2  HG21  HG22  HG22
-        C    O
-*----------------------------------------------------------------------
-{TRP}                 !Tryptophane
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      Cstar       0.0750
-         9 CD1     CW         -0.1150
-        10 HD1     HA          0.1150
-        11 NE1     NA         -0.5700
-        12 HE1     H           0.4200
-        13 CE2     CN          0.1300
-        14 CZ2     CA         -0.1150
-        15 HZ2     HA          0.1150
-        16 CH2     CA         -0.1150
-        17 HH2     HA          0.1150
-        18 CZ3     CA         -0.1150
-        19 HZ3     HA          0.1150
-        20 CE3     CA         -0.1150
-        21 HE3     HA          0.1150
-        22 CD2     CB         -0.0550
-        23 C       C           0.5000
-        24 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  NE1
-       NE1  HE1
-       NE1  CE2
-       CE2  CZ2
-       CZ2  HZ2
-       CZ2  CH2
-       CH2  HH2
-       CH2  CZ3
-       CZ3  HZ3
-       CZ3  CE3
-       CE3  HE3
-       CE3  CD2
-       CA   C
-       C    O
-       CG   CD2
-       CE2  CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        CB   CG   CD1   CD2
-        HD1  CD1  CG    NE1
-        HE1  NE1  CD1   CE2
-        HZ2  CZ2  CE2   CH2
-        HH2  CH2  CE2   CZ3
-        HZ3  CZ3  CH2   CE3
-        HE3  CE3  CZ3   CD2
-        CE2  CD2  CG    CE3
-        CZ2  CE2  CD2   NE1
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3
-        CG   CD2  CD1  HD1  NE1  HE1  CE2
-        CZ2  HZ2
-        CH2  HH2
-        CZ3  HZ3
-        CE3  HE3
-        C    O
+[angles] angle type definitions
+* iaci iacj iack	forceK angle0
+*-----------------------------------------------------------------------
+N          CT1        CT          160.000 109.700
+CT         CT1        HC           75.000 110.700
+C          CT1        CT          126.000 111.100
+CT1        CT         CA          126.000 114.000 
+CT1        CT         Cstar       126.000 115.600 
+CT1        N3         H3           70.000 109.500
+N3         CT1        HC           70.000 109.500 
+N3         CT1        CT          160.000 111.200 
+N3         CT1        C           160.000 111.200
+CT1        CT         HC           75.000 110.700 
+CT         CT         CT1         116.700 112.700 
+CT1        C          O           160.000 120.400 !Impact uses same as CT-C-O (high)
+CT1        C          N           140.000 116.600 !Impact uses same as CT-C-N (high)
+HZn     Zn      HZn        110.000   109.500 0.000  0.000
+HZn     HZn     Zn         110.000    35.250 0.000  0.000
+HZn     HZn     HZn        110.000    60.000 0.000  0.000
+C 	OS	CT    	166.0   116.9 	0.00	0.000!Bapna
+OS	C 	CT    	162.0   111.4   0.000	0.000!Bapna
+O 	C 	OS    	166.0   123.4   0.000	0.000!Bapna
+OS	C	N     	162.0   111.4	0.000	0.000!Bapna
+CT	OH	C	140.0	125.0	0.00	0.000!Bapna
+N	C	OH	140.0   120.00	0.000	0.000!Bapna
+C  	CA	CA    	170.0   120.    0.000   0.000!Bapna
+CA	C	O     	160.0   120.4   0.000   0.000!Bapna
+CA	C	N     	140.0   115.5   0.000   0.000!Bapna
+C 	N	CA    	100.00  121.9	0.000	0.000!Bapna
+CA	N	H     	70.     119.8	0.000	0.000!Bapna
+CA	CA	N   	140.0   120.0	0.000	0.000!Bapna
+CA	CA	NO 	170.    120.0	0.000	0.000!Bapna
+CA	NO	ON    	160.0   117.5	0.000	0.000!Bapna
+ON	NO	ON    	160.0   125.0 	0.000	0.000!Bapna
+CT1     C       O2      140.000 117.000	0.000	0.000
+C       N       CT1     100.000 121.900 0.000	0.000
+CT1     N       H        76.000 118.400	0.000	0.000
+N       CT1     HC       70.000 109.500	0.000	0.000
+N       CT1     C       126.000 110.100	0.000	0.000
+HC      CT1     HC       66.000 107.800	0.000	0.000
+C       CT1     HC       70.000 109.500	0.000	0.000
+OS	C2	O2	120.000	120.000 0.000	0.000
+OS	C2	CT	120.000	120.000 0.000	0.000
+P	OS	CT	200.000	120.500 0.000	0.000
+OS	CT	HC	70.000	109.500 0.000	0.000
+CT	CT	OS	100.000	109.500 0.000	0.000
+CT	OS	C2	120.000	120.000 0.000	0.000
+O2	P	OS	200.000	108.230 0.000	0.000
+O2	P	O2	240.000	119.900 0.000	0.000
+OS	P	OS	90.000	102.600 0.000	0.000
+CA	CA	N3	140.000	120.100 0.000	0.000 !Aniline
+CA	N3	H3	70.000	111.000 0.000	0.000 !""
+CA	CT	N3	120.000	120.000 0.000	0.000 !BENZYLAMINE
+CA	CAr	N2	140.000	120.000 0.000	0.000 !Benzamidine
+HW	OW	HW	200.000	104.520 0.000	0.000
+HW	HW	OW	0.000	127.740 0.000	0.000
+HC	CT	OH	70.000	109.500 0.000	0.000
+CT	S	S	136.000	103.700 0.000	0.000
+C	CT	N3	160.000	111.200 0.000	0.000
+N2	CA	N2	140.000	120.000 0.000	0.000
+N2	CAr	N2	140.000	120.000 0.000	0.000
+C	CT	N	126.000	110.100 0.000	0.000
+C	CT	CT	126.000	111.100 0.000	0.000
+C2	CT	CT	126.000	111.100 0.000	0.000
+C21	CT	CT	126.000	111.100 0.000	0.000
+CA	CA	CA	126.000	120.000 0.000	0.000
+CA	CA	CAr	126.000	120.000 0.000	0.000
+CA	CA	CT	140.000	120.000 0.000	0.000
+CA	CA	HA	70.000	120.000 0.000	0.000
+CA	CA	OH	140.000	120.000 0.000	0.000
+CA	CA	OTY	140.000	120.000 0.000	0.000
+CA	OH	HO	70.000	113.000 0.000	0.000
+CA	OTY	HO	70.000	113.000 0.000	0.000
+CT	C	O	160.000	120.400 0.000	0.000
+CT	C2	O	160.000	120.400 0.000	0.000
+CT	C2	O1	160.000	120.400 0.000	0.000 !ASH
+CT	C21	O	160.000	120.400 0.000	0.000 !GLN
+CT	C	OA	160.000	120.400 0.000	0.000 !GLN/ASN
+CT	C	O2	140.000	117.000 0.000	0.000
+CT	C2	O2	140.000	117.000 0.000	0.000
+CT	C	N	140.000	116.600 0.000	0.000
+CT	C2	N	140.000	116.600 0.000	0.000
+CT	C21	N	140.000	116.600 0.000	0.000 !GLN
+O2	C	O2	160.000	126.000 0.000	0.000
+O2	C2	O2	160.000	126.000 0.000	0.000
+N	C	O	160.000	122.900 0.000	0.000
+N	C2	O	160.000	122.900 0.000	0.000
+N	C21	O	160.000	122.900 0.000	0.000
+N	C	OA	160.000	122.900 0.000	0.000 !GLN/ASN
+CA	CT	CT	126.000	114.000 0.000	0.000
+CT	CT	CT	116.700	112.700 0.000	0.000
+CT	CT	CW	126.000	114.000 0.000	0.000
+CT	CT	CV	126.000	114.000 0.000	0.000
+CT	CT	N	160.000	109.700 0.000	0.000
+CT	CT	N2	160.000	111.200 0.000	0.000
+CT	CT	N3	160.000	111.200 0.000	0.000
+CT	CT	OH	100.000	109.500 0.000	0.000
+CT	CT	Cstar	126.000	115.600 0.000	0.000
+HC	CT	Cstar	70.000	109.500 0.000	0.000
+CT	Cstar	CW	140.000	125.000 0.000	0.000
+CB	Cstar	CT	140.000	128.600 0.000	0.000
+CA	CN	NA	140.000	132.800 0.000	0.000
+CB	CN	NA	140.000	104.400 0.000	0.000
+Cstar	CW	NA	140.000	108.700 0.000	0.000
+Cstar	CW	HA	70.000	120.000 0.000	0.000
+CN	NA	CW	140.000	111.600 0.000	0.000
+H	NA	CN	70.000	123.100 0.000	0.000
+CB	Cstar	CW	170.000	106.400 0.000	0.000
+HA	CA	CN	70.000	120.000 0.000	0.000
+CA	CA	CN	170.000	120.000 0.000	0.000
+CA	CN	CB	170.000	122.700 0.000	0.000
+CA	CA	CB	126.000	120.000 0.000	0.000
+HA	CA	CB	70.000	120.000 0.000	0.000
+CA	CB	Cstar	126.000	134.900 0.000	0.000
+CA	CB	Cstar	170.000	134.900 0.000	0.000
+CA	CB	CN	170.000	116.200 0.000	0.000
+CN	CB	Cstar	170.000	108.800 0.000	0.000
+CT	CT	S	100.000	114.700 0.000	0.000
+CT	CT	SH	100.000	108.600 0.000	0.000
+HC	CT	CA	70.000	109.500 0.000	0.000
+HC	CT	CV	70.000	109.500 0.000	0.000
+N3	CT	HC	70.000	109.500 0.000	0.000 
+N3      CT      C      160.00   111.20  0.000   0.000 !high      384     0   N3  -CT1 -C     ==> C   -CT  -N3
+N3      CT      CT     160.00   111.20  0.000   0.000 !high      386     0   N3  -CT1 -CT    ==> CT  -CT  -N3
+HA	CR	NA	70.000	120.000 0.000	0.000
+HA	CR	NB	70.000	120.000 0.000	0.000
+NA	CR	NB	140.000	120.000 0.000	0.000
+HA	CV	NB	70.000	120.000 0.000	0.000 !HIS Amber
+NA	CR	NA	140.000	120.000 0.000	0.000 !HIS Amber
+CT	CV	NB	140.000	124.500 0.000	0.000 !HIS Amber
+CT	CV	CW	140.000	130.700 0.000	0.000 !HIS Amber
+CW	CV	NB	140.000	111.000 0.000	0.000 !HIS Amber
+HA	CV	CW	70.000	128.200 0.000	0.000 !HIE Amber (OPLS2002)
+CT	CW	NA	140.000	121.600 0.000	0.000
+CT	CW	CV	140.000	130.700 0.000	0.000
+CV	CW	NA	140.000	106.300 0.000	0.000 !HIS Amber
+HA	CW	CV	70.000	130.700 0.000	0.000 !HIS Amber
+HA	CW	NA	70.000	121.600 0.000	0.000 !HIS Amber
+CT	N	CT     100.000	118.000 0.000	0.000
+CT      CP1     N3     160.00   111.20  0.000   0.000 !high      386     0   CT  -CT  -N3    ==> CT  -CT  -N3
+HC      CP1     N3      70.00   109.50  0.000   0.000 !high      423     0   HC  -CT  -N3    ==> HC  -CT  -N3
+H	N	CT	76.000	118.400 0.000	0.000
+H	N	C	70.000	119.800 0.000	0.000
+H	N	C2	70.000	119.800 0.000	0.000
+H	N	C21	70.000	119.800 0.000	0.000 ! GLN
+H	N	H	70.000	120.000 0.000	0.000
+H	NA	CR	70.000	120.000 0.000	0.000
+H	NA	CW	70.000	120.000 0.000	0.000
+H       N3      CT      70.00   109.50  0.000   0.000 !high      505     0   H   -N3  -CT1   ==> CT  -N3  -H
+H       N3      H       70.00   109.50  0.000   0.000 !high      506     0   H   -N3  -H     ==> H   -N3  -H
+CR	NA	CW	140.000	109.800 0.000	0.000 !HIS Amber
+CR	NB	CV	140.000	110.000 0.000	0.000 !HIS Amber
+H3	N3	CT	70.000	109.500 0.000	0.000
+H3	N3	H3	70.000	109.500 0.000	0.000
+HC	CT	CT	75.000	110.700 0.000	0.000
+HC1     CT      CT      75.000	110.700 0.000	0.000 ! GLU: HB1 HB2
+HC2     CT      CT      75.000	110.700 0.000	0.000 ! GLN: HB1 HB2
+HC	CT	C	70.000	109.500 0.000	0.000
+HC	CT	C2	70.000	109.500 0.000	0.000 ! GLN
+HC	CT	C21	70.000	109.500 0.000	0.000 ! GLN
+HC	CT	HC	66.000	107.800 0.000	0.000
+HC1	CT	HC1	66.000	107.800 0.000	0.000 ! GLU: HB1 HB2
+HC2	CT	HC2	66.000	107.800 0.000	0.000 ! GLN: HB1 HB2
+HC	CT	N2	70.000	109.500 0.000	0.000
+HC	CT	S	70.000	109.500 0.000	0.000
+HC	CT	SH	70.000	109.500 0.000	0.000
+HC	CT	CW	70.000	109.500 0.000	0.000
+H3	N2	CA	70.000	120.000 0.000	0.000
+H3	N2	CAr	70.000	120.000 0.000	0.000
+H3	N2	CT	70.000	118.400 0.000	0.000
+CA	N2	CT	100.000	123.200 0.000	0.000
+CAr	N2	CT	100.000	123.200 0.000	0.000
+H3	N2	H3	70.000	120.000 0.000	0.000
+HO	OH	CT	110.000	108.500 0.000	0.000
+N	CT	HC	70.000	109.500 0.000	0.000
+HS	SH	CT	88.000	96.000 0.000	0.000
+CX	CT	CT	126.000	114.000 0.000	0.000
+CX	CT	HC	70.000	109.500 0.000	0.000
+CT	CX	NA	140.000	121.600 0.000	0.000 !HIS Amber
+CX	NA	H	70.000	120.000 0.000	0.000
+CX	NA	CR	140.000	109.800 0.000	0.000 
+HA	CX	NA	70.000	120.000 0.000	0.000
+CT	CX	CX	140.000	130.700 0.000	0.000 !HIS Amber
+NA	CX	CX	140.000	106.300 0.000	0.000 !HIS Amber
+HA	CX	CX	70.000	130.700 0.000	0.000 !HIS Amber
+CT	S	CT	124.000	98.900 0.000	0.000
+C	N	CT	100.000	121.900 0.000	0.000
+CT	CT	NY	160.000	111.200 0.000	0.000
+HC	CT	NY	70.000	109.500 0.000	0.000
+H2	CT	NY	70.000	109.500 0.000	0.000
+CT	NY	CA	100.000	120.500 0.000	0.000
+CT	NY	CAr	100.000	120.500 0.000	0.000
+H	NY	CA	100.000	112.500 0.000	0.000
+H	NY	CAr	100.000	112.500 0.000	0.000
+H2	NY	CA	100.000	112.500 0.000	0.000
+NY	CA	NY	140.000	111.800 0.000	0.000
+NY	CAr	NY	140.000	111.800 0.000	0.000
+CT	NY	H	70.000	109.500 0.000	0.000
+CT	NY	H2	70.000	109.500 0.000	0.000
+NY	CA	NZ	140.000	124.100 0.000	0.000
+NY	CAr	NZ	140.000	124.100 0.000	0.000
+CA	NZ	H	70.000	112.500 0.000	0.000
+CAr	NZ	H	70.000	112.500 0.000	0.000
+H	NY	H	87.200	106.400 0.000	0.000
+H2	NY	H2	87.200	106.400 0.000	0.000
+CT	C	OH	140.000	117.000 0.000	0.000
+CT	C2	OH	140.000	108.000 0.000	0.000
+CT	C2	ODE	140.000	117.000 0.000	0.000
+O	C	OH	160.000	126.000 0.000	0.000
+O	C2	OH	160.000	121.000 0.000	0.000 
+O1	C2	OH	160.000	121.000 0.000	0.000 ! ASH
+O	C2	ODE	160.000	126.000 0.000	0.000
+HO	OH	C	70.000	113.000 0.000	0.000
+HO	OH	C2	70.000	113.000 0.000	0.000
+HO	ODE	C2	70.000	113.000 0.000	0.000
+CT	CT	NT	112.400	109.470 0.000	0.000
+HC	CT	NT	70.000	109.500 0.000	0.000
+H	NT	CT	70.000	109.500 0.000	0.000
+H	NT	H	87.200	106.400 0.000	0.000
+CA	CT	N	160.0	111.2	0.000	0.000! Amino terminal
+CA	CT	CA	80.0	109.5	0.000	0.000! DIP
+CA	CA	NT	140.0	120.1	0.000	0.000!aniline
+CA	NT	H	70.0	111.0	0.000	0.000! aniline
+C	N	CP1	100.000	121.900	0.000	0.000
+CP1	CT	CT	116.700	112.700	0.000	0.000
+CP1	CT	HC	75.000	110.700	0.000	0.000
+CP1	N	CT	100.000	118.000	0.000	0.000
+CP1     N3      CT      100.00  113.00  0.000   0.000 !high      507     0   CT  -N3  -CT1   ==> CT  -N3  -CT
+CP1     N3      H       70.00   109.50  0.000   0.000 !high      505     0   CT  -N3  -H     ==> CT  -N3  -H
+CT	CP1	HC	75.000	110.700	0.000	0.000
+CT	CP1	N	160.000	109.700	0.000	0.000
+HC	CP1	HC	66.000	107.800	0.000	0.000
+HC	CP1	N	70.000	109.500	0.000	0.000
 
-*----------------------------------------------------------------------
-{TYR}                 !Tyrosine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CA         -0.1150
-         9 CD1     CA         -0.1150
-        10 HD1     HA          0.1150
-        11 CE1     CA         -0.1150
-        12 HE1     HA          0.1150
-        13 CZ      CA          0.1500
-        14 OH      OTY        -0.5850
-        15 HH      HO          0.4350
-        16 CE2     CA         -0.1150
-        17 HE2     HA          0.1150
-        18 CD2     CA         -0.1150
-        19 HD2     HA          0.1150
-        20 C       C           0.5000
-        21 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  CE1
-       CE1  HE1
-       CE1  CZ
-       CZ   OH
-       OH   HH
-       CZ   CE2
-       CE2  HE2
-       CE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-        CB   CG   CD1   CD2
-        HD1  CD1  CE1   CG
-        HE1  CE1  CZ    CD1
-        OH   CZ   CE2   CE1
-        HE2  CE2  CD2   CZ
-        HD2  CD2  CG    CE2
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB2  HB3  CG
-        CD1  HD1
-        CE1  HE1
-        CZ   OH   HH
-        CE2  HE2
-        CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{VAL}                 !Valine
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.1400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0600
-         6 HB      HC          0.0600
-         7 CG1     CT         -0.1800
-         8 HG11    HC          0.0600
-         9 HG12    HC          0.0600
-        10 HG13    HC          0.0600
-        11 CG2     CT         -0.1800
-        12 HG21    HC          0.0600
-        13 HG22    HC          0.0600
-        14 HG23    HC          0.0600
-        15 C       C           0.5000
-        16 O       O          -0.5000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG1
-       CG1  HG11
-       CG1  HG12
-       CG1  HG13
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        O    C    CA    +N
-    [charge_groups]
-        N    H    CA   HA
-        CB   HB
-        CG1  HG11  HG12  HG13
-        CG2  HG21  HG22  HG23
-        C    O
-*----------------------------------------------------------------------
-{NALA}                 ! Alanine in N-term
-    [info]
-        SYBYLtype  RESIDUE     !SYBYL substructure type
-    [atoms]
-         1 N       N3         -0.3000 !At. no., name, type, charge
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1800
-         8 HB1     HC          0.0600
-         9 HB2     HC          0.0600
-        10 HB3     HC          0.0600
-        11 C       C           0.5000
-        12 O       O          -0.5000
-    [bonds]                !connect i -- j
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB1
-       CB   HB2
-       CB   HB3
-       CA   C
-       C    O
-    [connections]   !tail and head connections
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups] !charge groups, with switch atom first
-        N    H1    H2    H3    CA    HA
-        CB   HB1  HB2   HB3
-        C    O
-*----------------------------------------------------------------------
-{NAR+}                 ! Arginine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.0500
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      CT          0.1900
-        14 HD2     HC          0.0600
-        15 HD3     HC          0.0600
-        16 NE      N2         -0.7000
-        17 HE      H3          0.4400
-        18 CZ      CAr         0.6400
-        19 NH1     N2         -0.8000
-        20 HH11    H3          0.4600
-        21 HH12    H3          0.4600
-        22 NH2     N2         -0.8000
-        23 HH21    H3          0.4600
-        24 HH22    H3          0.4600
-        25 C       C           0.5000
-        26 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   NE
-       NE   HE
-       NE   CZ
-       CZ   NH1
-       NH1  HH11
-       NH1  HH12
-       CZ   NH2
-       NH2  HH21
-       NH2  HH22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
-       torsion HH21 NH2  CZ   NE    0
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-        HE   NE   CD    CZ
-        NH2  CZ   NH1   NE
-        HH11 NH1  CZ    HH12
-        HH21 NH2  CZ    HH22
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CZ   CG   HG2  HG3  CD   HD2  HD3  NE   HE   NH1  HH11  HH12  NH2  HH21  HH22
-        C    O
-*----------------------------------------------------------------------
-{NARG} ! Arginine neutral in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.1200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      CT          0.0400
-        14 HD2     HC          0.0600
-        15 HD3     HC          0.0600
-        16 NE      NY         -0.6200
-        17 HE      H           0.3800
-        18 CZ      CAr         0.5500
-        19 NH1     NZ         -0.7850
-        20 HH11    H           0.3800
-        21 NH2     NY         -0.7850
-        22 HH21    H           0.3600
-        23 HH22    H           0.3600
-        24 C       C           0.5000
-        25 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   NE
-       NE   HE
-       NE   CZ
-       CZ   NH1
-       NH1  HH11
-       CZ   NH2
-       NH2  HH21
-       NH2  HH22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
-       torsion HH21 NH2  CZ   NE    0
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        HE   NE   CD    CZ
-        NH2  CZ   NH1   NE
-        HH21 NH2  CZ    HH22
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3  NE   HE   CZ   NH1  HH11  NH2  HH21  HH22
-        C    O
-*----------------------------------------------------------------------
-{NASN}                 ! Asparagine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      C2          0.5000
-        11 OD1     O          -0.5000
-        12 ND2     N          -0.7600
-        13 HD21    H           0.3800
-        14 HD22    H           0.3800
-        15 C       C           0.5000
-        16 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   ND2
-       ND2  HD21
-       ND2  HD22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HD21 ND2  CG   OD1   0 !keep amide H in plane
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        HD22 ND2  CG    HD21
-        OD1  CG   CB    ND2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   OD1
-        ND2  HD21  HD22
-        C    O
-*----------------------------------------------------------------------
-{NAS-}       ! Aspartate, -1 charge in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.2200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      C2          0.7000
-        11 OD1     O2         -0.8000
-        12 OD2     O2         -0.8000
-        13 C       C           0.5000
-        14 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   OD2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        OD1  CG   CB    OD2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  CG   OD1  OD2
-        C    O
-*----------------------------------------------------------------------
-{NASP} ! Aspartic acid, neutral in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      C2          0.5200
-        11 OD1     OH         -0.5300
-        12 OD2     O1         -0.4400
-        13 HD1     HO          0.4500
-        14 C       C           0.5000
-        15 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   OD2
-       OD1  HD1
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [build_rules]
-       torsion HD1  OD1  CG   OD2   0
-    [impropers]
-        O    C    CA    +N
-        OD1  CG   CB    OD2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   OD1  OD2  HD1
-        C    O
-*----------------------------------------------------------------------
-{NCYS}                 ! Cysteine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT          0.0600
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 SG      SH         -0.3350
-        11 HG      HS          0.1550
-        12 C       C           0.5000
-        13 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   SG
-       SG   HG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  SG   HG
-        C    O
-*----------------------------------------------------------------------
-{NCYX}                 ! Cysteine within S-S Bond
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT          0.0975
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 SG      S          -0.2175
-        11 C       C           0.5000
-        12 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   SG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  SG
-        C    O
-*----------------------------------------------------------------------
-{NGLN}                 !Glutamine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC2         0.0600
-         9 HB3     HC2         0.0600
-        10 CG      CT         -0.1200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      C21         0.5000
-        14 OE1     O          -0.5000
-        15 NE2     N          -0.7600
-        16 HE21    H           0.3800
-        17 HE22    H           0.3800
-        18 C       C           0.5000
-        19 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   NE2
-       NE2  HE21
-       NE2  HE22
-       CA   C
-       C    O
-    [build_rules]
-       torsion HE21 NE2  CD   OE1   0 !keep amide H in plane
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        HE22 NE2  CD    HE21
-        OE1  CD   CG    NE2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   OE1
-        NE2  HE21  HE22
-        C    O
-*----------------------------------------------------------------------
-{NGL-}    !Glutamate, -1 charge in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC1         0.0600
-         9 HB3     HC1         0.0600
-        10 CG      CT         -0.2200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      C2          0.7000
-        14 OE1     O2         -0.8000
-        15 OE2     O2         -0.8000
-        16 C       C           0.5000
-        17 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   OE2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        OE1  CD   CG    OE2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3  CD   OE1  OE2
-        C    O
-*----------------------------------------------------------------------
-{NGLU}  !Glutamic acid, neutral in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.1200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      C2          0.5200
-        14 OE1     OH         -0.5300
-        15 OE2     O          -0.4400
-        16 HE1     HO          0.4500
-        17 C       C           0.5000
-        18 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   OE2
-       OE1  HE1
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [build_rules]
-       torsion HE1  OE1  CD   OE2   0
-    [impropers]
-        O    C    CA    +N
-        OE1  CD   CG    OE2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   OE1  OE2 HE1
-        C    O
-*----------------------------------------------------------------------
-{NGLY}                 !Glycine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.1900
-         6 HA2     HC          0.0600
-         7 HA3     HC          0.0600
-         8 C       C           0.5000
-         9 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA2
-       CA   HA3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA2   HA3
-        C    O
-*----------------------------------------------------------------------
-{NHIP}                 ! Histidine protonated, charge +2 in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0050
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CX          0.2150
-        11 ND1     NA         -0.5400
-        12 HD1     H           0.4600
-        13 CE1     CR          0.3850
-        14 HE1     HA          0.1150
-        15 NE2     NA         -0.5400
-        16 HE2     H           0.4600
-        17 CD2     CX          0.2150
-        18 HD2     HA          0.1150
-        19 C       C           0.5000
-        20 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       ND1  HD1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  HE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        CB   CG   ND1   CD2
-        HD1  ND1  CG    CE1
-        HE1  CE1  ND1   NE2
-        HE2  NE2  CE1   CD2
-        HD2  CD2  NE2   CG
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  CG   ND1  HD1  CE1  HE1  NE2  HE2  CD2  HD2
-        C    O
+[torsions] torsion type definitions
+*iaci	iacj	iack	iacl	forceK	minima	phase	paths	comment
+*-----------------------------------------------------------------
+N3         CT1        CT         HC            0.192      3    0.000     1
+HC         CT1        CT         HC            0.150      3    0.000     1 !0 * - hydrocarbon all-atom
+HC         CT1        CT         CT            0.150      3    0.000     1 !0 * - hydrocarbon all-atom
+HC         CT1        CT         C             0.150      3    0.000     1 !0 * - hydrocarbon all-atom
+HC         CT1        C          N             0.000      1    0.000     1 !0 * - Psi peptides AA
+HC         CT1        C          O             0.000      1    0.000     1 !0 * - peptides X Calpha C(O) O
+CT         CT         CT         CT1          -0.025     -2  180.000     1 !0 * - peptide sidechain rzhou 
+CT         CT         CT         CT1           0.100     -3    0.000     1 !0 * - peptide sidechain rzhou 
+CT         CT         CT         CT1           0.650      1    0.000     1 !0 * - peptide sidechain rzhou
+HC         CT         CT         CT1           0.150      3    0.000     1 !0 * - hydrocarbon all-atom
+CT1        C          N          H             2.450      2  180.000     1 !0 * - peptide H or C C(O) N H rzhou
+N          CT1        CT         HC            0.232      3    0.000     1 !0 * - peptide rzhou
+N          CT1        CT         CT            0.422     -1    0.000     1 !0 * - Chi-1 peptides AA, Jay's file
+N          CT1        CT         CT           -0.481     -2  180.000     1 !0 * - Chi-1 peptides AA, Jay's file
+N          CT1        CT         CT            0.356      3    0.000     1 !0 * - Chi-1 peptides AA, Jay's file
+N          CT1        CT         Cstar        -0.481     -2  180.000     1 !0 * - Chi-1 peptides AA
+N          CT1        CT         Cstar         0.422     -1    0.000     1 !0 * - Chi-1 peptides AA
+N          CT1        CT         Cstar         0.356      3    0.000     1 !0 * - Chi-1 peptides AA
+CT         CT1        C          N             0.587     -1    0.000     1 !0 * - Psi' peptides AA
+CT         CT1        C          N             0.095     -2  180.000     1 !0 * - Psi' peptides AA
+CT         CT1        C          N            -0.600      3    0.000     1 !0 * - Psi' peptides AA
+CT         CP1        N3         CT            0.719     -1    0.000     1 !high    867   0   CT  -CT  -N3  -CT1   ==> CT  -CT  -N3  -CT
+CT         CP1        N3         CT           -0.062     -2  180.000     1 !high    867   0   CT  -CT  -N3  -CT1   ==> CT  -CT  -N3  -CT
+CT         CP1        N3         CT            0.132      3    0.000     1 !high    867   0   CT  -CT  -N3  -CT1   ==> CT  -CT  -N3  -CT
+CT         CP1        N3         H             0.173      3    0.000     1 !high    481   0   CT  -CT  -N3  -H     ==> CT  -CT  -N3  -H
+HC         CP1        N3         CT            0.151      3    0.000     1 !high    866   0   HC  -CT  -N3  -CT1   ==> HC  -CT  -N3  -CT
+HC         CP1        N3         H             0.131      3    0.000     1 !high    480   0   HC  -CT  -N3  -H     ==> HC  -CT  -N3  -H
+H          N3         CT         HC            0.131      3    0.000     1 !high    480   0   H   -N3  -CT1 -HC    ==> HC  -CT  -N3  -H
+H          N3         CT         C             0.173      3    0.000     1 !high    482   0   H   -N3  -CT1 -C     ==> C   -CT  -N3  -H
+H          N3         CT         CT            0.173      3    0.000     1 !high    481   0   H   -N3  -CT1 -CT    ==> CT  -CT  -N3  -H
+HC         CT         CT1        C            -0.038      3    0.000     1 !0 * - peptide, aldehyde & ketone
+N3         CT1        CT         CA            0.356     -3    0.000     1 !0 * - Chi-1 peptides AA
+N3         CT1        CT         CA           -0.481     -2  180.000     1 !0 * - Chi-1 peptides AA
+N3         CT1        CT         CA            0.422      1    0.000     1 !0 * - Chi-1 peptides AA
+HC         CT1        CT         Cstar         0.231      3    0.000     1 !0 * - Jay's file
+Cstar      CT         CT1        C            -0.228     -2  180.000     1 !0 * - aldehyde & ketone
+Cstar      CT         CT1        C            -0.848     -1    0.000     1 !0 * - aldehyde & ketone
+Cstar      CT         CT1        C             0.292      3    0.000     1 !0 * - aldehyde & ketone
+C          N          CT1        CT            0.231      2  180.000     1 !0 * - Phi' peptides AA
+CT         CT1        C          O2            0.000      1    0.000     1 !0 * - peptides X Calpha C(O) O
+CT1        CT         Cstar      CB           -0.357      1    0.000     1 !0 * - 3-ethylindole C C C3 C2
+CT1        CT         Cstar      CW           -0.357      1    0.000     1 !0 * - 3-ethylindole C C C3 C2
+N3         CT1        CT         Cstar        -0.481     -2  180.000     1 !0 * - Chi-1 peptides AA
+N3         CT1        CT         Cstar         0.356     -3    0.000     1 !0 * - Chi-1 peptides AA
+N3         CT1        CT         Cstar         0.422      1    0.000     1 !0 * - Chi-1 peptides AA
+N3         CT1        C          N             0.790     -3    0.000     1 !0 * - Psi peptides AA N Ca C(O) N, rzhou
+N3         CT1        C          N             0.908     -1    0.000     1 !0 * - Psi peptides AA N Ca C(O) N, rzhou
+N3         CT1        C          N             0.611      2  180.000     1 !0 * - Psi peptides AA N Ca C(O) N, rzhou
+N3         CT1        C          O             0.000      1    0.000     1 !0 * - peptides X Calpha C(O) O
+N3         CT1        CT         CT            0.356     -3    0.000     1 !0 * - Chi-1 peptides AA, Jay's file
+N3         CT1        CT         CT           -0.481     -2  180.000     1 !0 * - Chi-1 peptides AA, Jay's file
+N3         CT1        CT         CT            0.422      1    0.000     1 !0 * - Chi-1 peptides AA, Jay's file
+CT         CT         CT1        C            -0.848     -1    0.000     1 !0 * - peptide, aldehyde & ketone
+CT         CT         CT1        C             0.292     -3    0.000     1 !0 * - peptide, aldehyde & ketone
+CT         CT         CT1        C            -0.228      2  180.000     1 !0 * - peptide, aldehyde & ketone
+N3         CT1        C          O             0.000      1    0.000     1 !0 * - peptides X Calpha C(O) O
+H3         N3         CT1        ?             0.000      1    0.000     1 !0 * - peptides H N Calpha X
+H3         N3         CT1        C             0.173      3    0.000     1 !0 * - peptides H N Calpha X
+H3         N3         CT1        CT            0.173      3    0.000     1 !0 * - peptides H N Calpha X
+H3         N3         CT1        HC            0.131      3    0.000     1 !0 * - peptides H N Calpha X
+HC         CT1        CT         C             0.150      3    0.000     1 !Impact uses same as CG1-CT-CT1-HC (high)
+OS	CT	CT	N3	0.000	2.000	0.000 1.000
+HC	CT	OS	C2	0.066	3.000	0.000 1.000
+CT	OS	C2	O2	2.562	2.00	180.000 1.000
+CT	OS	C2	CT	2.335	-1.00	0.000 1.000
+CT	OS	C2	CT	2.562	2.00	180.000 1.000
+CT	CT	OS	C2	-0.610	-1.000	0.000 1.000
+CT	CT	OS	C2	-0.063	-2.000	180.000 1.000
+CT	CT	OS	C2	0.211	3.000	0.000 1.000 
+P	OS	CT	HC	0.150	3.000	0.000 1.000
+P	OS	CT	CT	0.000	1.000	0.000 1.000
+OS	CT	CT	HC	0.066	3.000	0.000 1.000
+OS	P	OS	CT	0.000	1.000	0.000 1.000
+O2	P	OS	CT	0.281	3.000	0.000 1.000
+OS	CT	CT	CT	-0.277	3.000	0.000 1.000
+OS	C2	CT	HC	0.066	3.000	0.000 1.000
+OS	C2	CT	CT	-0.277	3.000	0.000 1.000
+OS	CT	CT	OS	-0.275	1.000	0.000 1.000
+CA	CT	N3	H3	1.400	3.000	0.000	1 !BENZYLAMINE
+OA	C	N	H	2.450	2.000	180.000	1
+HC	CT	C2	OH	0.000	1.000	0.000	1
+HC	CT	C2	ODE	0.000	1.000	0.000	1
+CT	CT	C2	OH	0.500   -1.000	0.000	1.000   !096 ASH 
+CT	CT	C2	OH	0.273	-2.000	180.000	1.000   !096 ASH 
+CT	CT	C2	OH	0.225	3.000	0.000	1.000   !096 ASH 
+CT	CT	C2	ODE	0.583	2.000	180.000	1
+HC	CT	CT	HC	0.150	3.000	0.000	1.000	!001 
+HC1	CT	CT	HC      0.150	3.000	0.000	1.000	!001 GLU
+HC2	CT	CT	HC      0.150	3.000	0.000	1.000	!001 GLN
+C2	CT	CT	HC      0.150	3.000	0.000	1.000	!002 ASP/ASH/GLH
+C2	CT	CT	HC1    -0.113	3.000	0.000	1.000	!092 GLU 
+C21	CT	CT	HC2    -0.050	3.000	0.000	1.000	!070  GLN 
+HC	CP1	CT	HC	0.150	3.000	0.000	1.000	!001
+CT	CT	CT	HC	0.150	3.000	0.000	1.000	!002
+CT	CT	CP1	HC	0.150	3.000	0.000	1.000	!002
+CP1	CT	CT	HC	0.150	3.000	0.000	1.000	!002
+CP1     N3      CT      C      -0.869  -1.000   0.000   1.000   !high    996   0   CT  -N3  -CT1 -C     ==> C   -CT1 -N3  -CP1
+CP1     N3      CT      C       0.625  -2.000 180.000   1.000   !high    996   0   CT  -N3  -CT1 -C     ==> C   -CT1 -N3  -CP1
+CP1     N3      CT      C      -1.750   3.000   0.000   1.000   !high    996   0   CT  -N3  -CT1 -C     ==> C   -CT1 -N3  -CP1
+CP1     N3      CT      CT      2.377  -1.000   0.000   1.000   !high    560   0   CT  -N3  -CT1 -CT    ==> CP1 -N3  -CT1 -CT
+CP1     N3      CT      CT     -0.367   2.000 180.000   1.000   !high    560   0   CT  -N3  -CT1 -CT    ==> CP1 -N3  -CT1 -CT
+CP1     N3      CT      HC      0.151   3.000   0.000   1.000   !high    866   0   CT  -N3  -CT1 -HC    ==> HC  -CT  -N3  -CT
+CT	CT	CT	CT	0.650	-1.000	0.000	1.000	!003
+CT	CT	CT	CT	-0.025	-2.000	180.000	1.000	!003
+CT	CT	CT	CT	0.100	3.000	0.000	1.000	!003
+CT	CT	CT	CP1	0.650	-1.000	0.000	1.000	!003
+CT	CT	CT	CP1	-0.025	-2.000	180.000	1.000	!003
+CT	CT	CT	CP1	0.100	3.000	0.000	1.000	!003
+HC	CT	CT	OH	0.234	3.000	0.000	1.000	!005
+HO	OH	CT	HC	0.225	3.000	0.000	1.000	!008
+HO	OH	CT	CT	-0.178	-1.000	0.000	1.000	!009
+HO	OH	CT	CT	-0.087	-2.000	180.000	1.000	!009
+HO	OH	CT	CT	0.246	3.000	0.000	1.000	!009
+CA	CA	CT	HC	0.000	1.000	0.000	1.000	!020
+CV	CW	CT	HC	0.000	1.000	0.000	1.000	!020
+CW	CV	CT	HC	0.000	1.000	0.000	1.000	!020
+CX	CX	CT	HC	0.000	1.000	0.000	1.000	!020
+CT	CT	CA	CA	0.000	1.000	0.000	1.000	!021
+CT	CT	CV	CW	0.000	1.000	0.000	1.000	!021
+CT	CT	CW	CV	0.000	1.000	0.000	1.000	!021
+CT	CT	CX	CX	0.000	1.000	0.000	1.000	!021
+N3	CT	CA	CA	0.000	1.000	0.000	1.000	!021
+CA	CT	CT	HC	0.231	3.000	0.000	1.000	!022
+CV	CT	CT	H	0.231	3.000	0.000	1.000	!022
+CW	CT	CT	H	0.231	3.000	0.000	1.000	!022
+CX	CT	CT	H	0.231	3.000	0.000	1.000	!022
+HC	CT	CT	Cstar	0.231	3.000	0.000	1.000	!022
+HC	CT	CT	CV	0.231	3.000	0.000	1.000	!022
+HC	CT	CT	CW	0.231	3.000	0.000	1.000	!022
+HC	CT	CT	CX	0.231	3.000	0.000	1.000	!022
+CT	S	S	CT	-3.707	-2.000	180.000	1.000	!023
+CT	S	S	CT	0.853	3.000	0.000	1.000	!023
+S	S	CT	HC	0.279	3.000	0.000	1.000	!024
+CT	CT	S	S	0.971	-1.000	0.000	1.000	!025
+CT	CT	S	S	-0.418	-2.000	180.000	1.000	!025
+CT	CT	S	S	0.468	3.000	0.000	1.000	!025
+HS	SH	CT	HC	0.24	3.000	0.000	1.000	!026
+CT	CT	SH	HS	-0.380	-1.000	0.000	1.000	!027
+CT	CT	SH	HS	-0.141	-2.000	180.000	1.000	!027
+CT	CT	SH	HS	0.340	3.000	0.000	1.000	!027
+HC	CT	CT	S	0.226	3.000	0.000	1.000	!028
+HC	CT	CT	SH	0.226	3.000	0.000	1.000	!028
+HC	CT	NT	H	0.2	3.000	0.000	1.000	!030
+HC	CT	CT	NT	-0.507	-1.000	0.000	1.000	!031
+HC	CT	CT	NT	-0.355	-2.000	180.000	1.000	!031
+HC	CT	CT	NT	0.237	3.000	0.000	1.000	!031
+CT	CT	NT	H	-0.095	-1.000	0.000	1.000	!032
+CT	CT	NT	H	-0.209	-2.000	180.000	1.000	!032
+CT	CT	NT	H	0.209	3.000	0.000	1.000	!032
+H	NY	CA	NY	-0.095	-1.000	0.000	1.000	!032
+H	NY	CA	NY	-0.209	-2.000	180.000	1.000	!032
+H	NY	CA	NY	0.209	3.000	0.000	1.000	!032
+H	NY	CAr	NY	-0.095	-1.000	0.000	1.000	!032
+H	NY	CAr	NY	-0.209	-2.000	180.000	1.000	!032
+H	NY	CAr	NY	0.209	3.000	0.000	1.000	!032
+H	NY	CA	NZ	-0.095	-1.000	0.000	1.000	!032
+H	NY	CA	NZ	-0.209	-2.000	180.000	1.000	!032
+H	NY	CA	NZ	0.209	3.000	0.000	1.000	!032
+H	NY	CAr	NZ	-0.095	-1.000	0.000	1.000	!032
+H	NY	CAr	NZ	-0.209	-2.000	180.000	1.000	!032
+H	NY	CAr	NZ	0.209	3.000	0.000	1.000	!032
+H	NY	CT	CT	-0.095	-1.000	0.000	1.000	!032
+H	NY	CT	CT	-0.209	-2.000	180.000	1.000	!032
+H	NY	CT	CT	0.209	3.000	0.000	1.000	!032
+H3	N2	CT	CT	-0.095	-1.000	0.000	1.000	!032
+H3	N2	CT	CT	-0.209	-2.000	180.000	1.000	!032
+H3	N2	CT	CT	0.209	3.000	0.000	1.000	!032
+H3	N2	CAr	CA	-0.095	-1.000	0.000	1.000	!032 Benzamidine
+H3	N2	CAr	CA	-0.209	-2.000	180.000	1.000	!032 Benzamidine
+H3	N2	CAr	CA	0.209	3.000	0.000	1.000	!032 Benzamidine
+CT	CT	CT	NT	1.196	-1.000	0.000	1.000	!033
+CT	CT	CT	NT	-0.337	-2.000	180.000	1.000	!033
+CT	CT	CT	NT	0.275	3.000	0.000	1.000	!033
+CA	CA	OH	HO	0.841	2.000	180.000	1.000	!034
+CA	CA	OTY	HO	0.841	2.000	180.000	1.000	!034
+C	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+C	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+C	CT	CT	N	0.357	3.000	0.000	1.000	!035
+C2	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+C2	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+C2	CT	CT	N	0.357	3.000	0.000	1.000	!035
+CA	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+CA	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+CA	CT	CT	N	0.357	3.000	0.000	1.000	!035
+CT	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+CT	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+CT	CT	CT	N	0.357	3.000	0.000	1.000	!035
+CT	CT	CP1	N	0.423	-1.000	0.000	1.000	!035
+CT	CT	CP1	N	-0.481	-2.000	180.000	1.000	!035
+CT	CT	CP1	N	0.357	3.000	0.000	1.000	!035
+CV	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+CV	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+CV	CT	CT	N	0.357	3.000	0.000	1.000	!035
+CW	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+CW	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+CW	CT	CT	N	0.357	3.000	0.000	1.000	!035
+CX	CT	CT	N	0.423	-1.000	0.000	1.000	!035
+CX	CT	CT	N	-0.481	-2.000	180.000	1.000	!035
+CX	CT	CT	N	0.357	3.000	0.000	1.000	!035
+N	CT	CT	Cstar	0.423	-1.000	0.000	1.000	!035
+N	CT	CT	Cstar	-0.481	-2.000	180.000	1.000	!035
+N	CT	CT	Cstar	0.357	3.000	0.000	1.000	!035
+N3	CT	CT	C	0.423	-1.000	0.000	1.000	!035
+N3	CT	CT	C	-0.481	-2.000	180.000	1.000	!035
+N3	CT	CT	C	0.357	3.000	0.000	1.000	!035
+N3	CT	CT	CA	0.423	-1.000	0.000	1.000	!035
+N3	CT	CT	CA	-0.481	-2.000	180.000	1.000	!035
+N3	CT	CT	CA	0.357	3.000	0.000	1.000	!035
+N3	CT	CT	CV	0.423	-1.000	0.000	1.000	!035
+N3	CT	CT	CV	-0.481	-2.000	180.000	1.000	!035
+N3	CT	CT	CV	0.357	3.000	0.000	1.000	!035
+N3	CT	CT	CW	0.423	-1.000	0.000	1.000	!035
+N3	CT	CT	CW	-0.481	-2.000	180.000	1.000	!035
+N3	CT	CT	CW	0.357	3.000	0.000	1.000	!035
+N3      CP1     CT      CT      1.366  -1.000   0.000   1.000 !high    484   0   N3  -CT  -CT  -CT    ==> CT  -CT  -CT  -N3
+N3      CP1     CT      CT     -0.115  -2.000 180.000   1.000 !high    484   0   N3  -CT  -CT  -CT    ==> CT  -CT  -CT  -N3
+N3      CP1     CT      CT      0.242   3.000   0.000   1.000 !high    484   0   N3  -CT  -CT  -CT    ==> CT  -CT  -CT  -N3
+N3      CP1     CT      HC      0.192   3.000   0.000   1.000 !high    483   0   N3  -CT  -CT  -HC    ==> HC  -CT  -CT  -N3
+N3      CT      C       O       0.000   1.000   0.000   1.000 !high    292   0   N3  -CT1 -C   -O     ==> N3  -CT1 -C   -O
+N3      CT      C       N       0.908  -1.000   0.000   1.000 !high    268   0   N3  -CT1 -C   -N     ==> N3  -CT1 -C   -N
+N3      CT      C       N       0.611  -2.000 180.000   1.000 !high    268   0   N3  -CT1 -C   -N     ==> N3  -CT1 -C   -N
+N3      CT      C       N       0.790   3.000   0.000   1.000 !high    268   0   N3  -CT1 -C   -N     ==> N3  -CT1 -C   -N
+N3      CT      CT      CT      0.422  -1.000   0.000   1.000 !high    232   0   N3  -CT1 -CT  -CT    ==> N3  -CT1 -CT  -CT
+N3      CT      CT      CT     -0.481  -2.000 180.000   1.000 !high    232   0   N3  -CT1 -CT  -CT    ==> N3  -CT1 -CT  -CT
+N3      CT      CT      CT      0.356   3.000   0.000   1.000 !high    232   0   N3  -CT1 -CT  -CT    ==> N3  -CT1 -CT  -CT
+N3      CT      CT      HC      0.192   3.000   0.000   1.000 !high    483   0   N3  -CT1 -CT  -HC    ==> HC  -CT  -CT  -N3
+N3      CT      CT      HC      0.192   3.000   0.000   1.000 !high    483   0   N3  -CT1 -CT  -HC    ==> HC  -CT  -CT  -N3
+C	CT	N	C	-1.183	-1.000	0.000	1.000	!036
+C	CT	N	C	0.456	-2.000	180.000	1.000	!036
+C	CT	N	C	-0.425	3.000	0.000	1.000	!036
+N	C	CT	N	0.908	-1.000	0.000	1.000	!037
+N	C	CT	N	0.611	-2.000	180.000	1.000	!037
+N	C	CT	N	0.791	3.000	0.000	1.000	!037
+N3	CT	C	N	0.908	-1.000	0.000	1.000	!037
+N3	CT	C	N	0.611	-2.000	180.000	1.000	!037
+N3	CT	C	N	0.791	3.000	0.000	1.000	!037
+CT	CT	N	C	0.231	2.000	180.000	1.000	!038
+CT	CP1	N	C	0.231	2.000	180.000	1.000	!038
+CT	CT	C	N	0.587	-1.000	0.000	1.000	!039
+CT	CT	C	N	0.095	-2.000	180.000	1.000	!039
+CT	CT	C	N	-0.6	3.000	0.000	1.000	!039
+HC	CT	N	C	0.000	1.000	0.000	1.000	!040
+HC	CP1	N	C	0.000	1.000	0.000	1.000	!040
+HC	CT	C	N	0.000	1.000	0.000	1.000	!041
+H	N	CT	C	0.000	1.000	0.000	1.000	!042
+H	N	CT	CT	0.000	1.000	0.000	1.000	!042
+H	N	CT	HC	0.000	1.000	0.000	1.000	!042
+CT	CT	C	O	0.000	1.000	0.000	1.000	!043
+HC	CT	C	O	0.000	1.000	0.000	1.000	!043
+N	CT	C	O	0.000	1.000	0.000	1.000	!043
+N3	CT	C	O	0.000	1.000	0.000	1.000	!043
+CT	C2	N	H	2.45	2.000	180.000	1.000	!044
+CT	C21	N	H	2.45	2.000	180.000	1.000	!044 GLN
+CT	C	N	H	2.45	2.000	180.000	1.000	!044
+CA	C	N	H	2.45	2.000	180.000	1.000	!044
+CT	C	N	CT	1.15	-1.000	0.000	1.000	!045
+CT	C	N	CT	3.045	2.000	180.000	1.000	!045
+CA	C	N	CT	1.15	-1.000	0.000	1.000	!045
+CA	C	N	CT	3.045	2.000	180.000	1.000	!045
+CT	C	N	CA	1.15	-1.000	0.000	1.000	!045
+CT	C	N	CA	3.045	2.000	180.000	1.000	!045
+CT	C	N	CP1	3.045	2.000	180.000	1.000	!045
+H	N	C2	O	2.45	2.000	180.000	1.000	!046
+H	N	C21	O	2.45	2.000	180.000	1.000	!046 GLN
+H	N	C	O	2.45	2.000	180.000	1.000	!046
+O	C	N	CA	3.045	2.000	180.000	1.000	!047
+CT	N	C	O	3.045	2.000	180.000	1.000	!047
+CP1	N	C	O	3.045	2.000	180.000	1.000	!047
+CT	N	CT	HC	0.000	1.000	0.000	1.000	!048
+CT	N	CP1	HC	0.000	1.000	0.000	1.000	!048
+CP1	N	CT	HC	0.000	1.000	0.000	1.000	!048
+CT	S	CT	HC	0.324	3.000	0.000	1.000	!051
+CT	CT	CT	S	1.310	-1.000	0.000	1.000	!052
+CT	CT	CT	S	-0.31	-2.000	180.000	1.000	!052
+CT	CT	CT	S	0.129	3.000	0.000	1.000	!052
+CT	S	CT	CT	0.463	-1.000	0.000	1.000	!053
+CT	S	CT	CT	-0.288	-2.000	180.000	1.000	!053
+CT	S	CT	CT	0.339	3.000	0.000	1.000	!053
+N2	CA	N2	H3	1.95	2.000	180.000	1.000	!054
+N2	CAr	N2	H3	1.95	2.000	180.000	1.000	!054
+NY	CA	NZ	H	1.95	2.000	180.000	1.000	!054
+NY	CAr	NZ	H	1.95	2.000	180.000	1.000	!054
+N2	CA	N2	CT	3.968	2.000	180.000	1.000	!055
+N2	CAr	N2	CT	3.968	2.000	180.000	1.000	!055
+CA	N2	CT	HC	0.089	3.000	0.000	1.000	!056
+CAr	N2	CT	HC	0.089	3.000	0.000	1.000	!056
+CA	NY	CT	HC	0.089	3.000	0.000	1.000	!056
+CAr	NY	CT	HC	0.089	3.000	0.000	1.000	!056
+H	NY	CT	HC	0.000	1.000	0.000	1.000	!057
+H3	N2	CT	HC	0.000	1.000	0.000	1.000	!057
+CA	N2	CT	CT	0.915	-1.000	0.000	1.000	!058
+CA	N2	CT	CT	0.122	-2.000	180.000	1.000	!058
+CA	N2	CT	CT	-0.249	3.000	0.000	1.000	!058
+CAr	N2	CT	CT	0.915	-1.000	0.000	1.000	!058
+CAr	N2	CT	CT	0.122	-2.000	180.000	1.000	!058
+CAr	N2	CT	CT	-0.249	3.000	0.000	1.000	!058
+CA	NY	CT	CT	0.915	-1.000	0.000	1.000	!058
+CA	NY	CT	CT	0.122	-2.000	180.000	1.000	!058
+CA	NY	CT	CT	-0.249	3.000	0.000	1.000	!058
+CAr	NY	CT	CT	0.915	-1.000	0.000	1.000	!058
+CAr	NY	CT	CT	0.122	-2.000	180.000	1.000	!058
+CAr	NY	CT	CT	-0.249	3.000	0.000	1.000	!058
+N2	CT	CT	HC	-0.291	3.000	0.000	1.000	!059
+NY	CT	CT	HC	-0.291	3.000	0.000	1.000	!059
+N	CT	CT	HC	0.232	3.000	0.000	1.000	!064
+N	CT	CT	HC1	0.232	3.000	0.000	1.000	!064 GLU
+N	CT	CT	HC2	0.232	3.000	0.000	1.000	!064 GLN
+N	CP1	CT	HC	0.232	3.000	0.000	1.000	!064
+HC	CT	C2	N	0.000	1.000	0.000	1.000	!066
+HC	CT	C21	N	0.000	1.000	0.000	1.000	!066 GLN
+HC	CT	C2	O	0.000	2.000	180.000	1.000	!067 ASH
+HC	CT	C2	O1	0.000	2.000	180.000	1.000	!067 
+HC	CT	C21	O	0.000	2.000	180.000	1.000	!067 GLN
+CT	CT	C2	N	1.625	-1.000	0.000	1.000	!068
+CT	CT	C2	N	-0.201	-2.000	180.000	1.000	!068
+CT	CT	C2	N	-0.068	3.000	0.000	1.000	!068
+CT	CT	C21	N	1.625	-1.000	0.000	1.000	!068 GLN
+CT	CT	C21	N	-0.201	-2.000	180.000	1.000	!068 GLN
+CT	CT	C21	N	-0.068	 3.000	0.000	1.000	!068 GLN
+!CT	CT	C	O	0.583	2.000	180.000	1.000	!069
+N	CT	CT	OH	3.14	-1.000	0.000	1.000	!072
+N	CT	CT	OH	-0.734	-2.000	180.000	1.000	!072
+N	CT	CT	OH	1.015	3.000	0.000	1.000	!072
+N3	CT	CT	OH	3.14	-1.000	0.000	1.000	!072
+N3	CT	CT	OH	-0.734	-2.000	180.000	1.000	!072
+N3	CT	CT	OH	1.015	3.000	0.000	1.000	!072
+C	CT	CT	OH	-3.09	1.000	0.000	1.000	!074
+N	CT	CT	S	0.015	-3	0.000	1.000	!076
+N	CT	CT	S	0.043	-2	180.000	1.000	!076
+N	CT	CT	S	0.714	1	0.000	1.000	!076
+N	CT	CT	SH	0.015	-3	0.000	1.000	!076
+N	CT	CT	SH	0.043	-2	180.000	1.000	!076
+N	CT	CT	SH	0.714	1	0.000	1.000	!076
+N3	CT	CT	S	0.015	-3	0.000	1.000	!076
+N3	CT	CT	S	0.043	-2	180.000	1.000	!076
+N3	CT	CT	S	0.714	1	0.000	1.000	!076
+N3	CT	CT	SH	0.015	-3	0.000	1.000	!076
+N3	CT	CT	SH	0.043	-2	180.000	1.000	!076
+N3	CT	CT	SH	0.714	1	0.000	1.000	!076
+C	CT	CT	S	-2.172	-1.000	0.000	1.000	!078
+C	CT	CT	S	-0.857	-2.000	180.000	1.000	!078
+C	CT	CT	SH	-2.172	-1.000	0.000	1.000	!078
+C	CT	CT	SH	-0.857	-2.000	180.000	1.000	!078
+HC	CT	Cstar	CW	-0.24	3.000	0.000	1.000	!080
+HC	CT	Cstar	CB	0.000	1.000	0.000	1.000	!081
+CT	CT	Cstar	CW	-0.357	1.000	0.000	1.000	!082
+CT	CT	Cstar	CB	0.000	1.000	0.000	1.000	!083
+NA	CW	CT	HC	0.210	3.000	0.000	1.000	!084
+NA	CX	CT	HC	0.210	3.000	0.000	1.000	!084
+NB	CV	CT	HC	0.210	3.000	0.000	1.000	!084
+CT	CT	CA	NA	1.183	-1.000	0.000	1.000	!085
+CT	CT	CA	NA	-0.131	-2.000	180.000	1.000	!085
+CT	CT	CA	NA	0.253	3.000	0.000	1.000	!085
+CT	CT	CV	NB	1.183	-1.000	0.000	1.000	!085
+CT	CT	CV	NB	-0.131	-2.000	180.000	1.000	!085
+CT	CT	CV	NB	0.253	3.000	0.000	1.000	!085
+CT	CT	CW	NA	1.183	-1.000	0.000	1.000	!085
+CT	CT	CW	NA	-0.131	-2.000	180.000	1.000	!085
+CT	CT	CW	NA	0.253	3.000	0.000	1.000	!085
+CT	CT	CX	NA	1.183	-1.000	0.000	1.000	!085
+CT	CT	CX	NA	-0.131	-2.000	180.000	1.000	!085
+CT	CT	CX	NA	0.253	3.000	0.000	1.000	!085
+H3	N3	CT	HC	0.131	3.000	0.000	1.000	!086
+H3	N3	CT	C	0.174	3.000	0.000	1.000	!087
+H3	N3	CT	CT	0.174	3.000	0.000	1.000	!087
+N3	CT	CT	HC	0.192	3.000	0.000	1.000	!088
+N2	CT	CT	CT	1.366	-1.000	0.000	1.000	!089
+N2	CT	CT	CT	-0.115	-2.000	180.000	1.000	!089
+N2	CT	CT	CT	0.243	3.000	0.000	1.000	!089
+N3	CT	CT	CT	1.366	-1.000	0.000	1.000	!089
+N3	CT	CT	CT	-0.115	-2.000	180.000	1.000	!089
+N3	CT	CT	CT	0.243	3.000	0.000	1.000	!089
+NY	CT	CT	CT	1.366	-1.000	0.000	1.000	!089
+NY	CT	CT	CT	-0.115	-2.000	180.000	1.000	!089
+NY	CT	CT	CT	0.243	3.000	0.000	1.000	!089
+HC	CT	C	O2	0.000	1.000	0.000	1.000	!090
+N	CT	C	O2	0.410	2.000	180.000 1.000	!091
+CT	CT	C	O2	0.410	2.000	180.000 1.000	!091
+O2	C2	CT	HC	0.000	1.000	0.000	1.000	!094
+O2	C	CT	HC	0.000	1.000	0.000	1.000	!094
+OH	C	CT	HC	0.000	1.000	0.000	1.000	!094
+CT	CT	C2	O2	0.273	2.000	180.000	1.000	!095 ASP/GLU
+CT	CT	C2	O1	0.273	2.000	180.000	1.000	!095 ASH
+CT	CT	C2	O	0.583 	2.000	180.000	1.000	!069 ASN
+CT	CT	C21	O	0.583 	2.000	180.000	1.000	!069 GLN
+OH	C	CT	CT	0.5	-1.000	0.000	1.000	!096
+OH	C	CT	CT	0.273	-2.000	180.000	1.000	!096
+OH	C	CT	CT	0.225	3.000	0.000	1.000	!096
+O	C2	OH	HO	2.45	2.000	180.000	1.000	!102
+O1	C2	OH	HO	2.75	2.000	180.000	1.000	!102 ASH
+O	C2	ODE	HO	2.45	2.000	180.000	1.000	!102
+CT	C2	OH	HO	0.75	-1.000	0.000	1.000	!103 ASH
+CT	C2	OH	HO	2.75	2.000	180.000	1.000	!103 ASH
+CT	C2	ODE	HO	1.5	-1.000	0.000	1.000	!103
+CT	C2	ODE	HO	2.45	2.000	180.000	1.000	!103
+C	CT	N	CT	-0.869	-1.000	0.000	1.000	!107
+C	CT	N	CT	0.626	-2.000	180.000	1.000	!107
+C	CT	N	CT	-1.751	3.000	0.000	1.000	!107
+C	CT	N	CP1	-0.869	-1.000	0.000	1.000	!107
+C	CT	N	CP1	0.626	-2.000	180.000	1.000	!107
+C	CT	N	CP1	-1.751	3.000	0.000	1.000	!107
+CT	CT	N	CP1	2.377	-1.000	0.000	1.000	!108
+CT	CT	N	CP1	-0.367	2.000	180.000	1.000	!108
+CT	CT	N	CT	1.430	-1.000	0.000	1.000	!109
+CT	CT	N	CT	1.029	-2.000	180.000	1.000	!109
+CT	CT	N	CT	-5.633	3.000	0.000	1.000	!109
+CT	CP1	N	CT	1.430	-1.000	0.000	1.000	!109
+CT	CP1	N	CT	1.029	-2.000	180.000	1.000	!109
+CT	CP1	N	CT	-5.633	3.000	0.000	1.000	!109
+C	CT	CT	HC	-0.038	3.000	0.000	1.000	!115
+C	CT	CT	HC1	-0.038	3.000	0.000	1.000	!115 GLU
+C	CT	CT	HC2	-0.038	3.000	0.000	1.000	!115 GLN
+C	CT	CT	C2	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	C2	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	C2	0.293	3.000	0.000	1.000	!116
+C	CT	CT	CA	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	CA	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	CA	0.293	3.000	0.000	1.000	!116
+C2	CT	CT	CT	-1.593	-1.000	0.000	1.000	!093
+C2	CT	CT	CT	-0.413	-2.000	180.000	1.000	!093
+C2	CT	CT	CT	0.247	3.000	0.000	1.000	!093
+C21	CT	CT	CT	-1.030	-1.000	0.000	1.000	!093 GLN
+C21	CT	CT	CT	-0.157	-2.000	180.000	1.000	!093 GLN
+C21	CT	CT	CT	0.158	3.000	0.000	1.000	!093 GLN
+C	CT	CT	CT	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	CT	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	CT	0.293	3.000	0.000	1.000	!116
+C	CT	CT	Cstar	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	Cstar	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	Cstar	0.293	3.000	0.000	1.000	!116
+C	CT	CT	CV	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	CV	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	CV	0.293	3.000	0.000	1.000	!116
+C	CT	CT	CW	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	CW	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	CW	0.293	3.000	0.000	1.000	!116
+C	CT	CT	CX	-0.849	-1.000	0.000	1.000	!116
+C	CT	CT	CX	-0.228	-2.000	180.000	1.000	!116
+C	CT	CT	CX	0.293	3.000	0.000	1.000	!116
+CA	CA	CA	CA	3.625	2.000	180.000	1.000	!165
+CA	CA	CA	CAr	3.625	2.000	180.000	1.000	!165
+CA	CA	CA	CB	3.625	2.000	180.000	1.000	!165
+CA	CA	CA	HA	3.625	2.000	180.000	1.000	!165
+CAr	CA	CA	HA	3.625	2.000	180.000	1.000	!165
+CA	CA	CA	OH	3.625	2.000	180.000	1.000	!165
+CA	CA	CA	OTY	3.625	2.000	180.000	1.000	!165
+CB	CN	CA	CA	3.625	2.000	180.000	1.000	!165
+CB	CN	CA	HA	3.625	2.000	180.000	1.000	!165
+CN	CA	CA	CA	3.625	2.000	180.000	1.000	!165
+CN	CA	CA	HA	3.625	2.000	180.000	1.000	!165
+CT	CA	CA	CA	3.625	2.000	180.000	1.000	!165
+HA	CA	CA	CB	3.625	2.000	180.000	1.000	!165
+HA	CA	CA	CT	3.625	2.000	180.000	1.000	!165
+HA	CA	CA	HA	3.625	2.000	180.000	1.000	!165
+N	CA	CA	HA	3.625	2.000	180.000	1.000	!165
+NO	CA	CA	HA	3.625	2.000	180.000	1.000	!165
+HA	CA	CA	OH	3.625	2.000	180.000	1.000	!165
+HA	CA	CA	OTY	3.625	2.000	180.000	1.000	!165
+NA	CN	CA	CA	3.625	2.000	180.000	1.000	!165
+NA	CN	CA	HA	3.625	2.000	180.000	1.000	!165
+NT	CA	CA	CA	3.625	2.000	180.000	1.000	!165 aniline
+NT	CA	CA	HA	3.625	2.000	180.000	1.000	!165 aniline
+C	CA	CA	CA	3.625	2.000	180.000	1.000	!165 aniline
+C	CA	CA	HA	3.625	2.000	180.000	1.000	!165 aniline
+NO	CA	CA	CA	3.625	2.000	180.000	1.000	!165 aniline
+N	CA	CA	CA	3.625	2.000	180.000	1.000	!165 aniline
+CR	NA	CW	CT	1.4	2.000	180.000	1.000	!166
+CR	NA	CW	CV	1.4	2.000	180.000	1.000	!166
+CT	CX	NA	CR	1.4	2.000	180.000	1.000	!166
+CT	CX	NA	H	1.4	2.000	180.000	1.000	!166
+CX	CX	NA	CR	1.4	2.000	180.000	1.000	!166
+CX	CX	NA	H	1.4	2.000	180.000	1.000	!166
+H	NA	CW	CT	1.4	2.000	180.000	1.000	!166
+H	NA	CW	CV	1.4	2.000	180.000	1.000	!166
+CW	NA	CR	HA	2.325	2.000	180.000	1.000	!167
+CW	NA	CR	NB	2.325	2.000	180.000	1.000	!167
+CX	NA	CR	HA	2.325	2.000	180.000	1.000	!167
+CX	NA	CR	NA	2.325	2.000	180.000	1.000	!167
+H	NA	CR	HA	2.325	2.000	180.000	1.000	!167
+H	NA	CR	HC	2.325	2.000	180.000	1.000	!167
+H	NA	CR	NA	2.325	2.000	180.000	1.000	!167
+H	NA	CR	NB	2.325	2.000	180.000	1.000	!167
+HA	CR	NB	CV	5	2.000	180.000	1.000	!168
+NA	CR	NB	CV	5	2.000	180.000	1.000	!168
+CR	NB	CV	CT	2.4	2.000	180.000	1.000	!169
+CR	NB	CV	CW	2.4	2.000	180.000	1.000	!169
+CR	NB	CV	HA	2.4	2.000	180.000	1.000	!169
+CT	CW	CV	HA	5.375	2.000	180.000	1.000	!170
+CT	CW	CV	NB	5.375	2.000	180.000	1.000	!170
+CT	CX	CX	HA	5.375	2.000	180.000	1.000	!170
+CT	CX	CX	NA	5.375	2.000	180.000	1.000	!170
+HA	CW	CV	CT	5.375	2.000	180.000	1.000	!170
+HA	CW	CV	NB	5.375	2.000	180.000	1.000	!170
+NA	CW	CV	CT	5.375	2.000	180.000	1.000	!170
+NA	CW	CV	HA	5.375	2.000	180.000	1.000	!170
+NA	CW	CV	NB	5.375	2.000	180.000	1.000	!170
+NA	CX	CX	HA	5.375	2.000	180.000	1.000	!170
+NA	CX	CX	NA	5.375	2.000	180.000	1.000	!170
+CR	NA	CW	HA	1.6	2.000	180.000	1.000	!171
+CR	NA	CX	HA	1.6	2.000	180.000	1.000	!171
+H	NA	CW	HA	1.6	2.000	180.000	1.000	!171
+H	NA	CX	HA	1.6	2.000	180.000	1.000	!171
+CB	Cstar	CW	HA	6.525	2.000	180.000	1.000	!172
+CB	Cstar	CW	NA	6.525	2.000	180.000	1.000	!172
+CT	Cstar	CW	HA	6.525	2.000	180.000	1.000	!172
+CT	Cstar	CW	NA	6.525	2.000	180.000	1.000	!172
+CT	Cstar	CB	CA	1.675	2.000	180.000	1.000	!173
+CT	Cstar	CB	CN	1.675	2.000	180.000	1.000	!173
+CW	Cstar	CB	CA	1.675	2.000	180.000	1.000	!173
+CW	Cstar	CB	CN	1.675	2.000	180.000	1.000	!173
+CA	CA	CB	CN	3.5	2.000	180.000	1.000	!174
+CA	CA	CB	Cstar	3.5	2.000	180.000	1.000	!174
+HA	CA	CB	CN	3.5	2.000	180.000	1.000	!174
+HA	CA	CB	Cstar	3.5	2.000	180.000	1.000	!174
+CA	CB	CN	CA	3	2.000	180.000	1.000	!175
+CA	CB	CN	NA	3	2.000	180.000	1.000	!175
+Cstar	CB	CN	CA	3	2.000	180.000	1.000	!175
+Cstar	CB	CN	NA	3	2.000	180.000	1.000	!175
+CW	NA	CN	CA	1.525	2.000	180.000	1.000	!176
+CW	NA	CN	CB	1.525	2.000	180.000	1.000	!176
+H	NA	CN	CA	1.525	2.000	180.000	1.000	!176
+H	NA	CN	CB	1.525	2.000	180.000	1.000	!176
+Cstar	CW	NA	CN	1.5	2.000	180.000	1.000	!177
+Cstar	CW	NA	H	1.5	2.000	180.000	1.000	!177
+HA	CW	NA	CN	1.5	2.000	180.000	1.000	!177
+CT	C	OS	CT	2.235  -1.000	  0.000	1.000	!181
+CT	C	OS	CT	2.557	2.000	180.000	1.000	!181
+N	C	OS	CT	2.557	2.000	180.000	1.000	!181
+O	C	OS	CT	2.557	2.000	180.000	1.000	!181
+HC	CT	C	OS	0.0660	3.000	  0.000	1.000
+H	N	C	OS	0.0660	3.000	  0.000	1.000
+CA	N	C	OS	0.0660	3.000	  0.000	1.000
+N	CT	C	OS	0.0660	3.000	  0.000	1.000
+CT	CT	OS	C	-0.61	-1.00	0.0000	1.000
+CT	CT	OS	C	-0.063	-2.00	180.00	1.000
+CT	CT	OS	C	0.211	3.00	0.0000	1.000
+HC	CT	OS	C	0.100	3.00	0.0000	1.000
+C	CT	CT	OS	-0.275	3.00	0.0000	1.000
+N	CT	CT	OS	-0.275	3.00	0.0000	1.000
+CT	CT	C	OS	-0.275	3.00	0.0000	1.000
+CA	CA	NO	ON	0.20	2.000	180.000	1.000	!189
+CT	NY	CA	NY	1.826	2.000	180.000	1.000	!191
+CT	NY	CAr	NY	1.826	2.000	180.000	1.000	!191
+CT	NY	CA	NZ	1.826	2.000	180.000	1.000	!191
+CT	NY	CAr	NZ	1.826	2.000	180.000	1.000	!191
+C	N	CA	CA	1.05	2.000	180.000	1.000	!207
+H	N	CA	CA	1.05	2.000	180.000	1.000	!207
+CA	CA	C	O	1.050	2.000	180.000	1.000	!208
+CA	CA	C	N	0.550	2.000	180.000	1.000	!214
+CA	CA	CAr	N2	0.839	2.000	180.000 1.000	!190 Benzamidine
+CA	CA	CA	N3	3.625	2.000	180.000 1.000	!Aniline charged
+CA	CA	N3	H3	1.050	2.000	180.000 1.000	!Aniline charged
+N3	CA	CA	HA	3.625	2.000	180.000	1.000	!165 Aniline
+H	N	CT	CA	0.000	1.000	0.000	1.000	!DIP
+N	CT	CA	CA	0.000	1.000	0.000	1.000	!"
+CA	CT	CA	CA	0.000	1.000	0.000	1.000	!"
+C	N	CT	CA	0.000	1.000	0.000	1.000	!"
+CA	CA	NT	H	1.015	2.000	180.000 1.000	! Aniline
+*adopted from biovitrum
+C2	CT	CT	N3	0.356	-3	0.000	1 !0 * - ASPB,ASNB
+C2	CT	CT	N3	-0.481	-2	180.000	1 !0 * - ASPB,ASNB
+C2	CT	CT	N3	0.422	1.	0.000	1 !0 * - ASPB,ASNB
+H       N       CT1     ?       0.000   1.       0.000	1 
+C       N       CT1     O2      0.000   1      0.000   1
+HC      CT1     C       O2      0.000   1    0.000     1
+N       CT1     C       O2       0.000      1    0.000     1 
+O          C          N          CT1           3.045      2  180.000     1 
+CT1        C          N          CT1           1.150     -1    0.000	 1
+CT         C          N          CT1           3.045      2  180.000	 1
+C          N          CT1        C            -1.183     -1    0.000     1
+C          N          CT1        C             0.456     -2  180.000     1
+C          N          CT1        C            -0.425      3    0.000     1
+C          N          CT1        HC            0.000      1    0.000     1
 
-*----------------------------------------------------------------------
-{NHID}                 ! neutral histidine, proton on ND1, in N-term
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0050
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CW          0.0150
-        11 ND1     NA         -0.5700
-        12 HD1     H           0.4200
-        13 CE1     CR          0.2950
-        14 HE1     HA          0.1150
-        15 NE2     NB         -0.4900
-        16 CD2     CV         -0.0150
-        17 HD2     HA          0.1150
-        18 C       C           0.5000
-        19 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       CG   CD2
-       ND1  HD1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        HD1  ND1  CG    CE1
-        CB   CG   ND1   CD2
-        HD2  CD2  NE2   CG
-        HE1  CE1  ND1   NE2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  CG   ND1  HD1  CE1  HE1  NE2  CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{NHIE}                 ! neutral HIS, proton on NE1, in N-term
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0050
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CV         -0.0150
-        11 ND1     NB         -0.4900
-        12 CE1     CR          0.2950
-        13 HE1     HA          0.1150
-        14 NE2     NA         -0.5700
-        15 HE2     H           0.4200
-        16 CD2     CW          0.0150
-        17 HD2     HA          0.1150
-        18 C       C           0.5000
-        19 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  HE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        CB   CG   ND1   CD2
-        HE1  CE1  ND1   NE2
-        HD2  CD2  NE2   CG
-        HE2  NE2  CD2   CE1
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  CG   ND1  CE1  HE1  NE2  HE2  CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{NILE}                 ! Isoleucine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0600
-         8 HB      HC          0.0600
-         9 CG2     CT         -0.1800
-        10 HG21    HC          0.0600
-        11 HG22    HC          0.0600
-        12 HG23    HC          0.0600
-        13 CG1     CT         -0.1200
-        14 HG12    HC          0.0600
-        15 HG13    HC          0.0600
-        16 CD1     CT         -0.1800
-        17 HD11    HC          0.0600
-        18 HD12    HC          0.0600
-        19 HD13    HC          0.0600
-        20 C       C           0.5000
-        21 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CB   CG1
-       CG1  HG12
-       CG1  HG13
-       CG1  CD1
-       CD1  HD11
-       CD1  HD12
-       CD1  HD13
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB
-        CG2  HG21  HG22  HG23
-        CG1  HG12  HG13
-        CD1  HD11  HD12  HD13
-        C    O
-*----------------------------------------------------------------------
-{NLEU}                 ! Leucine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.0600
-        11 HG      HC          0.0600
-        12 CD1     CT         -0.1800
-        13 HD11    HC          0.0600
-        14 HD12    HC          0.0600
-        15 HD13    HC          0.0600
-        16 CD2     CT         -0.1800
-        17 HD21    HC          0.0600
-        18 HD22    HC          0.0600
-        19 HD23    HC          0.0600
-        20 C       C           0.5000
-        21 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG
-       CG   CD1
-       CD1  HD11
-       CD1  HD12
-       CD1  HD13
-       CG   CD2
-       CD2  HD21
-       CD2  HD22
-       CD2  HD23
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG
-        CD1  HD11  HD12  HD13
-        CD2  HD21  HD22  HD23
-        C    O
-*----------------------------------------------------------------------
-{NLYP}                 !Lysine, +2 charge, in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.1200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      CT         -0.1200
-        14 HD2     HC          0.0600
-        15 HD3     HC          0.0600
-        16 CE      CT          0.1900
-        17 HE2     HC          0.0600
-        18 HE3     HC          0.0600
-        19 NZ      N3         -0.3000
-        20 HZ1     H3          0.3300
-        21 HZ2     H3          0.3300
-        22 HZ3     H3          0.3300
-        23 C       C           0.5000
-        24 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       NZ   HZ3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2  HZ3
-        C    O
-*----------------------------------------------------------------------
-{NLY+}                 !Lysine, +1 charge, in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.1200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      CT         -0.1200
-        14 HD2     HC          0.0600
-        15 HD3     HC          0.0600
-        16 CE      CT          0.1900
-        17 HE2     HC          0.0600
-        18 HE3     HC          0.0600
-        19 NZ      N3         -0.3000
-        20 HZ1     H3          0.3300
-        21 HZ2     H3          0.3300
-        22 HZ3     H3          0.3300
-        23 C       C           0.5000
-        24 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       NZ   HZ3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2  HZ3
-        C    O
-*----------------------------------------------------------------------
-{NLYS} !Lysine Deprotonated,  neutral, in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT         -0.1200
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 CD      CT         -0.1200
-        14 HD2     HC          0.0600
-        15 HD3     HC          0.0600
-        16 CE      CT          0.0600
-        17 HE2     HC          0.0600
-        18 HE3     HC          0.0600
-        19 NZ      NT         -0.9000
-        20 HZ1     H           0.3600
-        21 HZ2     H           0.3600
-        22 C       C           0.5000
-        23 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2
-        C    O
-*----------------------------------------------------------------------
-{NMET}                 !Methionine in N-term
-    [info]
-        SYBYLtype  GROUP
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CT          0.0975
-        11 HG2     HC          0.0600
-        12 HG3     HC          0.0600
-        13 SD      S          -0.4350
-        14 CE      CT          0.0375
-        15 HE1     HC          0.0600
-        16 HE2     HC          0.0600
-        17 HE3     HC          0.0600
-        18 C       C           0.5000
-        19 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   SD
-       SD   CE
-       CE   HE1
-       CE   HE2
-       CE   HE3
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   HG2  HG3  SD   CE   HE1  HE2  HE3
-        C    O
-*----------------------------------------------------------------------
-{NPHE}                 !Phenylalanine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0050
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CA         -0.1150
-        11 CD1     CA         -0.1150
-        12 HD1     HA          0.1150
-        13 CE1     CA         -0.1150
-        14 HE1     HA          0.1150
-        15 CZ      CA         -0.1150
-        16 HZ      HA          0.1150
-        17 CE2     CA         -0.1150
-        18 HE2     HA          0.1150
-        19 CD2     CA         -0.1150
-        20 HD2     HA          0.1150
-        21 C       C           0.5000
-        22 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  CE1
-       CE1  HE1
-       CE1  CZ
-       CZ   HZ
-       CZ   CE2
-       CE2  HE2
-       CE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        CB   CG   CD1   CD2
-        HD1  CD1  CE1   CG
-        HE1  CE1  CZ    CD1
-        HZ   CZ   CE2   CE1
-        HE2  CE2  CD2   CZ
-        HD2  CD2  CG    CE2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  CG
-        CD1  HD1
-        CE1  HE1
-        CZ   HZ
-        CE2  HE2
-        CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{NPRO}                 !Proline in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.2000
-         2 H1      H           0.3100
-         3 H2      H           0.3100
-         4 CD      CP1         0.1700
-         5 HD2     HC          0.0600
-         6 HD3     HC          0.0600
-         7 CG      CT         -0.1200
-         8 HG2     HC          0.0600
-         9 HG3     HC          0.0600
-        10 CB      CT         -0.1200
-        11 HB2     HC          0.0600
-        12 HB3     HC          0.0600
-        13 CA      CT          0.2300
-        14 HA      HC          0.0600
-        15 C       C           0.5000
-        16 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    CD
-       CD   HD2
-       CD   HD3
-       CD   CG
-       CG   HG2
-       CG   HG3
-       CG   CB
-       CB   HB2
-       CB   HB3
-       CB   CA
-       CA   N
-       CA   HA
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-       N    H1   H2   CA   HA   CD   HD2  HD3
-       CB   HB2  HB3
-       CG   HG2  HG3
-       C    O
-*----------------------------------------------------------------------
-{NSER}                 !Serine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT          0.1450
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 OG      OH         -0.6830
-        11 HG      HO          0.4180
-        12 C       C           0.5000
-        13 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   OG
-       OG   HG
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3   CA    HA
-        CB   HB2  HB3   OG   HG
-        C    O
-*----------------------------------------------------------------------
-{NTHR}                 !Threonine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT          0.2050
-         8 HB      HC          0.0600
-         9 CG2     CT         -0.1800
-        10 HG21    HC          0.0600
-        11 HG22    HC          0.0600
-        12 HG23    HC          0.0600
-        13 OG1     OH         -0.6830
-        14 HG1     HO          0.4180
-        15 C       C           0.5000
-        16 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CB   OG1
-       OG1  HG1
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB   OG1   HG1
-        CG2  HG21 HG22  HG22
-        C    O
-*----------------------------------------------------------------------
-{NTRP}                 !Tryptophane in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.1200
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      Cstar       0.0750
-        11 CD1     CW         -0.1150
-        12 HD1     HA          0.1150
-        13 NE1     NA         -0.5700
-        14 HE1     H           0.4200
-        15 CE2     CN          0.1300
-        16 CZ2     CA         -0.1150
-        17 HZ2     HA          0.1150
-        18 CH2     CA         -0.1150
-        19 HH2     HA          0.1150
-        20 CZ3     CA         -0.1150
-        21 HZ3     HA          0.1150
-        22 CE3     CA         -0.1150
-        23 HE3     HA          0.1150
-        24 CD2     CB         -0.0550
-        25 C       C           0.5000
-        26 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  NE1
-       NE1  HE1
-       NE1  CE2
-       CE2  CZ2
-       CZ2  HZ2
-       CZ2  CH2
-       CH2  HH2
-       CH2  CZ3
-       CZ3  HZ3
-       CZ3  CE3
-       CE3  HE3
-       CE3  CD2
-       CA   C
-       C    O
-       CG   CD2
-       CE2  CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        CB   CG   CD1   CD2
-        HD1  CD1  CG    NE1
-        HE1  NE1  CD1   CE2
-        HZ2  CZ2  CE2   CH2
-        HH2  CH2  CE2   CZ3
-        HZ3  CZ3  CH2   CE3
-        HE3  CE3  CZ3   CD2
-        CE2  CD2  CG    CE3
-        CZ2  CE2  CD2   NE1
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3
-        CG   CD2  CD1  HD1  NE1  HE1  CE2
-        CZ2  HZ2
-        CH2  HH2
-        CZ3  HZ3
-        CE3  HE3
-        C    O
-*----------------------------------------------------------------------
-{NTYR}                 !Tyrosine in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0050
-         8 HB2     HC          0.0600
-         9 HB3     HC          0.0600
-        10 CG      CA         -0.1150
-        11 CD1     CA         -0.1150
-        12 HD1     HA          0.1150
-        13 CE1     CA         -0.1150
-        14 HE1     HA          0.1150
-        15 CZ      CA          0.1500
-        16 OH      OTY        -0.5850
-        17 HH      HO          0.4350
-        18 CE2     CA         -0.1150
-        19 HE2     HA          0.1150
-        20 CD2     CA         -0.1150
-        21 HD2     HA          0.1150
-        22 C       C           0.5000
-        23 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  CE1
-       CE1  HE1
-       CE1  CZ
-       CZ   OH
-       OH   HH
-       CZ   CE2
-       CE2  HE2
-       CE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       CG   CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-        CB   CG   CD1   CD2
-        HD1  CD1  CE1   CG
-        HE1  CE1  CZ    CD1
-        OH   CZ   CE2   CE1
-        HE2  CE2  CD2   CZ
-        HD2  CD2  CG    CE2
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB2  HB3  CG
-        CD1  HD1
-        CE1  HE1
-        CZ   OH   HH
-        CE2  HE2
-        CD2  HD2
-        C    O
-*----------------------------------------------------------------------
-{NVAL}                 !Valine  in N-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N3         -0.3000
-         2 H1      H3          0.3300
-         3 H2      H3          0.3300
-         4 H3      H3          0.3300
-         5 CA      CT          0.2500
-         6 HA      HC          0.0600
-         7 CB      CT         -0.0600
-         8 HB      HC          0.0600
-         9 CG1     CT         -0.1800
-        10 HG11    HC          0.0600
-        11 HG12    HC          0.0600
-        12 HG13    HC          0.0600
-        13 CG2     CT         -0.1800
-        14 HG21    HC          0.0600
-        15 HG22    HC          0.0600
-        16 HG23    HC          0.0600
-        17 C       C           0.5000
-        18 O       O          -0.5000
-    [bonds]
-       N    H1
-       N    H2
-       N    H3
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG1
-       CG1  HG11
-       CG1  HG12
-       CG1  HG13
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CA   C
-       C    O
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        O    C    CA    +N
-    [charge_groups]
-        N    H1   H2    H3    CA    HA
-        CB   HB
-        CG1  HG11  HG12  HG13
-        CG2  HG21  HG22  HG23
-        C    O
-*----------------------------------------------------------------------
-{CALA}                 ! Alanine in C-term
-    [info]
-        SYBYLtype  RESIDUE     !SYBYL substructure type
-    [atoms]
-         1 N       N          -0.5000 !At. no., name, type, charge
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1800
-         6 HB1     HC          0.0600
-         7 HB2     HC          0.0600
-         8 HB3     HC          0.0600
-         9 C       C           0.7000
-        10 O       O2         -0.8000
-        11 OXT     O2         -0.8000
-    [bonds]                !connect i -- j
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB1
-       CB   HB2
-       CB   HB3
-       CA   C
-       C    O
-       C    OXT
-    [connections]   !tail and head connections
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups] !charge groups, with switch atom first
-        N    H    CA    HA    C    O    OXT
-        CB   HB1  HB2   HB3
-*----------------------------------------------------------------------
-{CAR+}                 ! Arginine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.0500
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT          0.1900
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 NE      N2         -0.7000
-        15 HE      H3          0.4400
-        16 CZ      CAr         0.6400
-        17 NH1     N2         -0.8000
-        18 HH11    H3          0.4600
-        19 HH12    H3          0.4600
-        20 NH2     N2         -0.8000
-        21 HH21    H3          0.4600
-        22 HH22    H3          0.4600
-        23 C       C           0.7000
-        24 O       O2         -0.8000
-        25 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   NE
-       NE   HE
-       NE   CZ
-       CZ   NH1
-       NH1  HH11
-       NH1  HH12
-       CZ   NH2
-       NH2  HH21
-       NH2  HH22
-       CA   C
-       C    O
-       C    OXT
-    [build_rules]
-       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
-       torsion HH21 NH2  CZ   NE    0
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        HE   NE   CD    CZ
-        NH2  CZ   NH1   NE
-        HH11 NH1  CZ    HH12
-        HH21 NH2  CZ    HH22
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CZ   CG   HG2  HG3  CD   HD2  HD3  NE   HE   NH1  HH11  HH12  NH2  HH21  HH22
-*----------------------------------------------------------------------
-{CARG} ! Arginine Deprotonated in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT          0.0400
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 NE      NY         -0.6200
-        15 HE      H           0.3800
-        16 CZ      CAr         0.5500
-        17 NH1     NZ         -0.7850
-        18 HH11    H           0.3800
-        19 NH2     NY         -0.7850
-        20 HH21    H           0.3600
-        21 HH22    H           0.3600
-        22 C       C           0.7000
-        23 O       O2         -0.8000
-        24 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   NE
-       NE   HE
-       NE   CZ
-       CZ   NH1
-       NH1  HH11
-       CZ   NH2
-       NH2  HH21
-       NH2  HH22
-       CA   C
-       C    O
-       C    OXT
-    [build_rules]
-       torsion HH11 NH1  CZ   NE    0 !keep Hs in plane
-       torsion HH21 NH2  CZ   NE    0
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        HE   NE   CD    CZ
-        NH2  CZ   NH1   NE
-        HH21 NH2  CZ    HH22
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3  NE   HE   CZ   NH1  HH11  NH2  HH21  HH22
-*----------------------------------------------------------------------
-{CASN}                 ! Asparagine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      C2          0.5000
-         9 OD1     O          -0.5000
-        10 ND2     N          -0.7600
-        11 HD21    H           0.3800
-        12 HD22    H           0.3800
-        13 C       C           0.7000
-        14 O       O2         -0.8000
-        15 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   ND2
-       ND2  HD21
-       ND2  HD22
-       CA   C
-       C    O
-       C    OXT
-    [build_rules]
-       torsion HD21 ND2  CG   OD1   0 !keep amide H in plane
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        HD22 ND2  CG    HD21
-        OD1  CG   CB    ND2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   OD1
-        ND2  HD21  HD22
-*----------------------------------------------------------------------
-{CAS-}       ! Aspartate, -2 charge in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.2200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      C2          0.7000
-         9 OD1     O2         -0.8000
-        10 OD2     O2         -0.8000
-        11 C       C           0.7000
-        12 O       O2         -0.8000
-        13 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   OD2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        OD1  CG   CB    OD2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  CG   OD1  OD2
-*----------------------------------------------------------------------
-{CASP} !Aspartic acid, neutral in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      C2          0.5200
-         9 OD1     OH         -0.5300
-        10 OD2     O1         -0.4400
-        11 HD1     HO          0.4500
-        12 C       C           0.7000
-        13 O       O2         -0.8000
-        14 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   OD1
-       CG   OD2
-       OD1  HD1
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [build_rules]
-       torsion HD1  OD1  CG   OD2   0
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        OD1  CG   CB    OD2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   OD1  OD2  HD1
-*----------------------------------------------------------------------
-{CCYS}                 ! Cysteine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT          0.0600
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 SG      SH         -0.3350
-         9 HG      HS          0.1550
-        10 C       C           0.7000
-        11 O       O2         -0.8000
-        12 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   SG
-       SG   HG
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  SG   HG
-*----------------------------------------------------------------------
-{CCYX}                 ! Cysteine within S-S Bond in C-term
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT          0.0975
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 SG      S          -0.2175
-         9 C       C           0.7000
-        10 O       O2         -0.8000
-        11 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   SG
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  SG
-*----------------------------------------------------------------------
-{CGLN}                 !Glutamine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC2         0.0600
-         7 HB3     HC2         0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      C21         0.5000
-        12 OE1     O          -0.5000
-        13 NE2     N          -0.7600
-        14 HE21    H           0.3800
-        15 HE22    H           0.3800
-        16 C       C           0.7000
-        17 O       O2         -0.8000
-        18 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   NE2
-       NE2  HE21
-       NE2  HE22
-       CA   C
-       C    O
-       C    OXT
-    [build_rules]
-       torsion HE21 NE2  CD   OE1   0 !keep amide H in plane
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        HE22 NE2  CD    HE21
-        OE1  CD   CG    NE2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   OE1
-        NE2  HE21  HE22
-*----------------------------------------------------------------------
-{CGL-}    !Glutamate    -1 charge in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC1         0.0600
-         7 HB3     HC1         0.0600
-         8 CG      CT         -0.2200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      C2          0.7000
-        12 OE1     O2         -0.8000
-        13 OE2     O2         -0.8000
-        14 C       C           0.7000
-        15 O       O2         -0.8000
-        16 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   OE2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        OE1  CD   CG    OE2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3  CD   OE1  OE2
-*----------------------------------------------------------------------
-{CGLU}  !Glutamix acid, (neutral) in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      C2          0.5200
-        12 OE1     OH         -0.5300
-        13 OE2     O          -0.4400
-        14 HE1     HO          0.4500
-        15 C       C           0.7000
-        16 O       O2         -0.8000
-        17 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   OE1
-       CD   OE2
-       OE1  HE1
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [build_rules]
-       torsion HE1  OE1  CD   OE2   0
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        OE1  CD   CG    OE2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   OE1  OE2 HE1
-*----------------------------------------------------------------------
-{CGLY}                 !Glycine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT         -0.0200
-         4 HA2     HC          0.0600
-         5 HA3     HC          0.0600
-         6 C       C           0.7000
-         7 O       O2         -0.8000
-         8 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA2
-       CA   HA3
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA2    HA3    C    O   OXT
-*----------------------------------------------------------------------
-{CHIP}                 ! Protonated HIS in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CX          0.2150
-         9 ND1     NA         -0.5400
-        10 HD1     H           0.4600
-        11 CE1     CR          0.3850
-        12 HE1     HA          0.1150
-        13 NE2     NA         -0.5400
-        14 HE2     H           0.4600
-        15 CD2     CX          0.2150
-        16 HD2     HA          0.1150
-        17 C       C           0.7000
-        18 O       O2         -0.8000
-        19 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       CG   CD2
-       ND1  HD1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  HE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        CB   CG   ND1   CD2
-        HD1  ND1  CG    CE1
-        HE1  CE1  ND1   NE2
-        HE2  NE2  CE1   CD2
-        HD2  CD2  NE2   CG
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  CG   ND1  HD1  CE1  HE1  NE2  HE2  CD2  HD2
-
-*----------------------------------------------------------------------
-{CHID}                 ! neutral HIS in C-term, proton on ND1
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CW          0.0150
-         9 ND1     NA         -0.5700
-        10 HD1     H           0.4200
-        11 CE1     CR          0.2950
-        12 HE1     HA          0.1150
-        13 NE2     NB         -0.4900
-        14 CD2     CV         -0.0150
-        15 HD2     HA          0.1150
-        16 C       C           0.7000
-        17 O       O2         -0.8000
-        18 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   ND1
-       CG   CD2
-       ND1  HD1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        HD1  ND1  CG    CE1
-        CB   CG   ND1   CD2
-        HD2  CD2  NE2   CG
-        HE1  CE1  ND1   NE2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  CG   ND1  HD1  CE1  HE1  NE2  CD2  HD2
-*----------------------------------------------------------------------
-{CHIE}                 ! neutral HIS in C-term, proton on NE1
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CV         -0.0150
-         9 ND1     NB         -0.4900
-        10 CE1     CR          0.2950
-        11 HE1     HA          0.1150
-        12 NE2     NA         -0.5700
-        13 HE2     H           0.4200
-        14 CD2     CW          0.0150
-        15 HD2     HA          0.1150
-        16 C       C           0.7000
-        17 O       O2         -0.8000
-        18 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD2
-       CG   ND1
-       ND1  CE1
-       CE1  HE1
-       CE1  NE2
-       NE2  HE2
-       NE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        CB   CG   ND1   CD2
-        HE1  CE1  ND1   NE2
-        HD2  CD2  NE2   CG
-        HE2  NE2  CD2   CE1
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  CG   ND1  CE1  HE1  NE2  HE2  CD2  HD2
-*----------------------------------------------------------------------
-{CILE}                 ! Isoleucine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0600
-         6 HB      HC          0.0600
-         7 CG2     CT         -0.1800
-         8 HG21    HC          0.0600
-         9 HG22    HC          0.0600
-        10 HG23    HC          0.0600
-        11 CG1     CT         -0.1200
-        12 HG12    HC          0.0600
-        13 HG13    HC          0.0600
-        14 CD1     CT         -0.1800
-        15 HD11    HC          0.0600
-        16 HD12    HC          0.0600
-        17 HD13    HC          0.0600
-        18 C       C           0.7000
-        19 O       O2         -0.8000
-        20 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CB   CG1
-       CG1  HG12
-       CG1  HG13
-       CG1  CD1
-       CD1  HD11
-       CD1  HD12
-       CD1  HD13
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB
-        CG2  HG21  HG22  HG23
-        CG1  HG12  HG13
-        CD1  HD11  HD12  HD13
-*----------------------------------------------------------------------
-{CLEU}                 ! Leucine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.0600
-         9 HG      HC          0.0600
-        10 CD1     CT         -0.1800
-        11 HD11    HC          0.0600
-        12 HD12    HC          0.0600
-        13 HD13    HC          0.0600
-        14 CD2     CT         -0.1800
-        15 HD21    HC          0.0600
-        16 HD22    HC          0.0600
-        17 HD23    HC          0.0600
-        18 C       C           0.7000
-        19 O       O2         -0.8000
-        20 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG
-       CG   CD1
-       CD1  HD11
-       CD1  HD12
-       CD1  HD13
-       CG   CD2
-       CD2  HD21
-       CD2  HD22
-       CD2  HD23
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG
-        CD1  HD11  HD12  HD13
-        CD2  HD21  HD22  HD23
-*----------------------------------------------------------------------
-{CLYP}                 !Lysine   +1 charge in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT         -0.1200
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 CE      CT          0.1900
-        15 HE2     HC          0.0600
-        16 HE3     HC          0.0600
-        17 NZ      N3         -0.3000
-        18 HZ1     H3          0.3300
-        19 HZ2     H3          0.3300
-        20 HZ3     H3          0.3300
-        21 C       C           0.7000
-        22 O       O2         -0.8000
-        23 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       NZ   HZ3
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2  HZ3
-*----------------------------------------------------------------------
-{CLY+}                 !Lysine   +1 charge in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT         -0.1200
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 CE      CT          0.1900
-        15 HE2     HC          0.0600
-        16 HE3     HC          0.0600
-        17 NZ      N3         -0.3000
-        18 HZ1     H3          0.3300
-        19 HZ2     H3          0.3300
-        20 HZ3     H3          0.3300
-        21 C       C           0.7000
-        22 O       O2         -0.8000
-        23 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       NZ   HZ3
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2  HZ3
-*----------------------------------------------------------------------
-{CLYS} ! Lysine in C-term,  neutral
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT         -0.1200
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 CD      CT         -0.1200
-        12 HD2     HC          0.0600
-        13 HD3     HC          0.0600
-        14 CE      CT          0.0600
-        15 HE2     HC          0.0600
-        16 HE3     HC          0.0600
-        17 NZ      NT         -0.9000
-        18 HZ1     H           0.3600
-        19 HZ2     H           0.3600
-        20 C       C           0.7000
-        21 O       O2         -0.8000
-        22 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   CD
-       CD   HD2
-       CD   HD3
-       CD   CE
-       CE   HE2
-       CE   HE3
-       CE   NZ
-       NZ   HZ1
-       NZ   HZ2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3
-        CD   HD2  HD3
-        CE   HE2  HE3  NZ   HZ1  HZ2
-*----------------------------------------------------------------------
-{CMET}                 !Methionine in C-term
-    [info]
-        SYBYLtype  GROUP
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CT          0.0975
-         9 HG2     HC          0.0600
-        10 HG3     HC          0.0600
-        11 SD      S          -0.4350
-        12 CE      CT          0.0375
-        13 HE1     HC          0.0600
-        14 HE2     HC          0.0600
-        15 HE3     HC          0.0600
-        16 C       C           0.7000
-        17 O       O2         -0.8000
-        18 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   HG2
-       CG   HG3
-       CG   SD
-       SD   CE
-       CE   HE1
-       CE   HE2
-       CE   HE3
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   HG2  HG3  SD   CE   HE1  HE2  HE3
-*----------------------------------------------------------------------
-{CPHE}                 !Phenylalanine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CA         -0.1150
-         9 CD1     CA         -0.1150
-        10 HD1     HA          0.1150
-        11 CE1     CA         -0.1150
-        12 HE1     HA          0.1150
-        13 CZ      CA         -0.1150
-        14 HZ      HA          0.1150
-        15 CE2     CA         -0.1150
-        16 HE2     HA          0.1150
-        17 CD2     CA         -0.1150
-        18 HD2     HA          0.1150
-        19 C       C           0.7000
-        20 O       O2         -0.8000
-        21 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CG   CD2
-       CD1  HD1
-       CD1  CE1
-       CE1  HE1
-       CE1  CZ
-       CZ   HZ
-       CZ   CE2
-       CE2  HE2
-       CE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        CB   CG   CD1   CD2
-        HD1  CD1  CE1   CG
-        HE1  CE1  CZ    CD1
-        HZ   CZ   CE2   CE1
-        HE2  CE2  CD2   CZ
-        HD2  CD2  CG    CE2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  CG
-        CD1  HD1
-        CE1  HE1
-        CZ   HZ
-        CE2  HE2
-        CD2  HD2
-*----------------------------------------------------------------------
-{CPRO}                 !Proline in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.1400
-         2 CD      CP1        -0.0500
-         3 HD2     HC          0.0600
-         4 HD3     HC          0.0600
-         5 CG      CT         -0.1200
-         6 HG2     HC          0.0600
-         7 HG3     HC          0.0600
-         8 CB      CT         -0.1200
-         9 HB2     HC          0.0600
-        10 HB3     HC          0.0600
-        11 CA      CT          0.0100
-        12 HA      HC          0.0600
-        13 C       C           0.6000
-        14 O       O2         -0.8000
-        15 OXT     O2         -0.8000
-    [bonds]
-       N    CD
-       CD   HD2
-       CD   HD3
-       CD   CG
-       CG   HG2
-       CG   HG3
-       CG   CB
-       CB   HB2
-       CB   HB3
-       CB   CA
-       N    CA
-       CA   HA
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-       -C    N    CA    CD
-    [charge_groups]
-        N    CA   HA   C    O    OXT    CD   HD2  HD3
-        CB   HB2  HB3
-        CG   HG2  HG3
-*----------------------------------------------------------------------
-{CSER}                 !Serine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT          0.1450
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 OG      OH         -0.6830
-         9 HG      HO          0.4180
-        10 C       C           0.7000
-        11 O       O2         -0.8000
-        12 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   OG
-       OG   HG
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA    HA    C    O    OXT
-        CB   HB2  HB3   OG   HG
-*----------------------------------------------------------------------
-{CTHR}                 !Threonine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT          0.2050
-         6 HB      HC          0.0600
-         7 CG2     CT         -0.1800
-         8 HG21    HC          0.0600
-         9 HG22    HC          0.0600
-        10 HG23    HC          0.0600
-        11 OG1     OH         -0.6830
-        12 HG1     HO          0.4180
-        13 C       C           0.7000
-        14 O       O2         -0.8000
-        15 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CB   OG1
-       OG1  HG1
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB   OG1  HG1
-        7    8    9    10 !CG2  HG21  HG22  HG22
-*----------------------------------------------------------------------
-{CTRP}                 !Tryptophane in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.1200
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      Cstar       0.0750
-         9 CD1     CW         -0.1150
-        10 HD1     HA          0.1150
-        11 NE1     NA         -0.5700
-        12 HE1     H           0.4200
-        13 CE2     CN          0.1300
-        14 CZ2     CA         -0.1150
-        15 HZ2     HA          0.1150
-        16 CH2     CA         -0.1150
-        17 HH2     HA          0.1150
-        18 CZ3     CA         -0.1150
-        19 HZ3     HA          0.1150
-        20 CE3     CA         -0.1150
-        21 HE3     HA          0.1150
-        22 CD2     CB         -0.0550
-        23 C       C           0.7000
-        24 O       O2         -0.8000
-        25 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD1
-       CD1  HD1
-       CD1  NE1
-       NE1  HE1
-       NE1  CE2
-       CE2  CZ2
-       CZ2  HZ2
-       CZ2  CH2
-       CH2  HH2
-       CH2  CZ3
-       CZ3  HZ3
-       CZ3  CE3
-       CE3  HE3
-       CE3  CD2
-       CA   C
-       C    O
-       C    OXT
-       CG   CD2
-       CE2  CD2
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        CB   CG   CD1   CD2
-        HD1  CD1  CG    NE1
-        HE1  NE1  CD1   CE2
-        HZ2  CZ2  CE2   CH2
-        HH2  CH2  CE2   CZ3
-        HZ3  CZ3  CH2   CE3
-        HE3  CE3  CZ3   CD2
-        CE2  CD2  CG    CE3
-        CZ2  CE2  CD2   NE1
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3
-        CG   CD2  CD1  HD1  NE1  HE1  CE2
-        CZ2  HZ2
-        CH2  HH2
-        CZ3  HZ3
-        CE3  HE3
-*----------------------------------------------------------------------
-{CTYR}                 !Tyrosine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0050
-         6 HB2     HC          0.0600
-         7 HB3     HC          0.0600
-         8 CG      CA         -0.1150
-         9 CD1     CA         -0.1150
-        10 HD1     HA          0.1150
-        11 CE1     CA         -0.1150
-        12 HE1     HA          0.1150
-        13 CZ      CA          0.1500
-        14 OH      OTY        -0.5850
-        15 HH      HO          0.4350
-        16 CE2     CA         -0.1150
-        17 HE2     HA          0.1150
-        18 CD2     CA         -0.1150
-        19 HD2     HA          0.1150
-        20 C       C           0.7000
-        21 O       O2         -0.8000
-        22 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB2
-       CB   HB3
-       CB   CG
-       CG   CD2
-       CG   CD1
-       CD1  HD1
-       CD1  CE1
-       CE1  HE1
-       CE1  CZ
-       CZ   OH
-       OH   HH
-       CZ   CE2
-       CE2  HE2
-       CE2  CD2
-       CD2  HD2
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail     C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-        CB   CG   CD1   CD2
-        HD1  CD1  CE1   CG
-        HE1  CE1  CZ    CD1
-        OH   CZ   CE2   CE1
-        HE2  CE2  CD2   CZ
-        HD2  CD2  CG    CE2
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB2  HB3  CG
-        CD1  HD1
-        CE1  HE1
-        CZ   OH   HH
-        CE2  HE2
-        CD2  HD2
-*----------------------------------------------------------------------
-{CVAL}                 !Valine in C-term
-    [info]
-        SYBYLtype  RESIDUE
-    [atoms]
-         1 N       N          -0.5000
-         2 H       H           0.3000
-         3 CA      CT          0.0400
-         4 HA      HC          0.0600
-         5 CB      CT         -0.0600
-         6 HB      HC          0.0600
-         7 CG1     CT         -0.1800
-         8 HG11    HC          0.0600
-         9 HG12    HC          0.0600
-        10 HG13    HC          0.0600
-        11 CG2     CT         -0.1800
-        12 HG21    HC          0.0600
-        13 HG22    HC          0.0600
-        14 HG23    HC          0.0600
-        15 C       C           0.7000
-        16 O       O2         -0.8000
-        17 OXT     O2         -0.8000
-    [bonds]
-       N    H
-       N    CA
-       CA   HA
-       CA   CB
-       CB   HB
-       CB   CG1
-       CG1  HG11
-       CG1  HG12
-       CG1  HG13
-       CB   CG2
-       CG2  HG21
-       CG2  HG22
-       CG2  HG23
-       CA   C
-       C    O
-       C    OXT
-    [connections]
-        head     N
-        tail      C
-    [impropers]
-        H    N    -C    CA
-        CA   C    O     OXT
-    [charge_groups]
-        N    H    CA   HA   C    O   OXT
-        CB   HB
-        CG1  HG11  HG12  HG13
-        CG2  HG21  HG22  HG23
-*----------------------------------------------------------------------
-
-{HOH} !TIP3P water
-    [info]
-        solvent 1
-        density 0.0335
-    [atoms]
-         1 O       OW         -0.8340
-         2 H1      HW          0.4170
-         3 H2      HW          0.4170
-    [bonds]
-       O    H1
-       O    H2
-       H1   H2 !for shake
-    [charge_groups]
-       O    H1   H2
-
-*----------------------------------------------------------------------
-{SPC} !SPC water
-    [info]
-        solvent 1
-        density 0.0335
-    [atoms]
-         1 O       O.spc      -0.82
-         2 H1      HW          0.41
-         3 H2      HW          0.41
-    [bonds]
-       O    H1
-       O    H2
-       H1   H2 !for shake
-    [charge_groups]
-       O    H1   H2
-
-*----------------------------------------------------------------------
-{K+} !potassium ion
-    [info]
-        SYBYLtype  GROUP
-    [atoms]
-         1 K      K          1.000
-*----------------------------------------------------------------------
-{Na+} !Sodium ion
-    [info]
-        SYBYLtype  GROUP
-    [atoms]
-         1 Na      Na          1.000
-*----------------------------------------------------------------------
-{Ca2} !Ca2+
-    [atoms]
-!      # name     type     charge
-       1 Ca2     Ca2      2.0000
-    [connections]
-      head Ca2
-*----------------------------------------------------------------------
-{Cl-} !Chlorine ion
-    [info]
-        SYBYLtype  GROUP
-    [atoms]
-         1 Cl     Cl         -1.000
-
-*----------------------------------------------------------------------
-{ZN2} !Zn
-     [atoms]
-!      # name     type     charge
-       1 Zn2      Zn       -0.6
-       2 HZN1     HZn	    0.65
-       3 HZN2	  HZn       0.65
-       4 HZN3     HZn       0.65
-       5 HZN4     HZn       0.65
-      [bonds]
-         HZN1     Zn2
-         HZN2     Zn2
-         HZN3     Zn2
-         HZN4     Zn2
+[impropers] improper type definitions
+*taci	tacj	tack	tacl	forceK	phase
+*-----------------------------------------------------------------
+C          N          H          CT1           1.000  180.000  !
+CT1        C          O2         O2           10.500  180.000 
+N2	CAr	N2	N2	10.5	180.000	!160
+CA	CAr	N2	N2	10.5	180.000	!160
+NY	CAr	NZ	NY	10.5	180.000	!160
+O	C	CT	N	10.5	180.000	!160
+O	C2	CT	N	10.5	180.000	!160
+O	C21	CT	N	10.5	180.000	!160 GLN
+O	C	CT	OH	10.5	180.000	!160
+O	C	CT	N	10.5	180.000	!160
+O2	C	CT	O2	10.5	180.000	!160
+O2	C2	CT	O2	10.5	180.000	!160
+OH	C2	CT	O	10.5	180.000	!160
+OH	C2	CT	O1	10.5	180.000	!160 ASH
+ODE	C2	CT	O	10.5	180.000	!160
+CT	N	C	CT	1	180.000	!161
+H	N	C	CT	1	180.000	!161
+CT	N	C	CP1	1	180.000 !161 PRO
+H	N	C	H	1	180.000	!161
+H	N	C	CA	1	180.000	!161
+H	N	C2	H	1	180.000	!161
+H	N	C21	H	1	180.000	!161 GLN
+H	NA	CA	CX	1	180.000	!161
+H	NA	CR	CW	1	180.000	!161
+H	NA	CW	CN	1	180.000	!161
+H	NA	CW	CR	1	180.000	!161
+H	NA	CX	CA	1	180.000	!161
+H	NA	CR	CX	1	180.000	!161
+H	NA	CX	CR	1	180.000	!161
+H3	N2	CA	H3	1	180.000	!161
+H3	N2	CAr	H3	1	180.000	!161
+H	NY	CA	H	1	180.000	!161
+H	NY	CAr	H	1	180.000	!161
+H3	N2	CT	CA	1	180.000	!161
+H3	N2	CT	CAr	1	180.000	!161
+H	NY	CT	CA	1	180.000	!161
+H	NY	CT	CAr	1	180.000	!161
+CA	CN	CB	NA	1.1	180.000	!162
+CN	CB	CA	Cstar	1.1	180.000	!162
+CT	CA	CA	CA	1.1	180.000	!162
+C	CA	CA	CA	1.1	180.000	!162
+N	CA	CA	CA	1.1	180.000	!162
+CA	NO	ON	ON	1.1	180.000	!162
+CA	CA	N3	CA	1.1	180.000 ! Aniline
+CT	Cstar	CW	CB	1.1	180.000	!162
+CT	CV	NB	CW	1.1	180.000	!162
+CT	CW	NA	CA	1.1	180.000	!162
+CT	CW	NA	CV	1.1	180.000	!162
+CT	CX	NA	CX	1.1	180.000	!162
+HA	CA	CA	CA	1.1	180.000	!162
+HA	CA	CA	CB	1.1	180.000	!162
+HA	CA	CN	CA	1.1	180.000	!162
+HA	CR	NA	NA	1.1	180.000	!162
+HA	CR	NA	NB	1.1	180.000	!162
+HA	CR	NB	NA	1.1	180.000	!162
+HA	CV	NB	CW	1.1	180.000	!162
+HA	CW	Cstar	NA	1.1	180.000	!162
+HA	CW	NA	CV	1.1	180.000	!162
+HA	CX	NA	CX	1.1	180.000	!162
+OH	CA	CA	CA	1.1	180.000	!162
+OTY	CA	CA	CA	1.1	180.000	!162
+CA	CA	NT	CA	1.1	180.000 ! Aniline (neutral)

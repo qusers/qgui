@@ -540,7 +540,7 @@ class EvbReactions(Toplevel):
         self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
 
         for i in range(len(titles)):
-            title = titles[i]
+            title = str(titles[i])
             dG = d_G[i]
             deps = d_eps[i]
             self.dg_plot.plot(deps, dG, '-', linewidth=2.0, label=title)

@@ -284,6 +284,9 @@ class CreatePrmLib(Toplevel):
         self.opls = self.forcefield.get().strip()
         if self.opls == 'OPLS2001':
             version = '11'
+        #OPLS-2011 and up requires special license of course, so...
+        elif self.opls == 'OPLS2011':
+            version = '16'
         else:
             version = '14'
 

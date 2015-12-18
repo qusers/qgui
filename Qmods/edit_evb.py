@@ -154,7 +154,7 @@ class ImportParameters(Toplevel):
                 torsion = '%s %s %s %s' % (t1, t2, t3, t4)
                 torsion_rev = '%s %s %s %s' % (t4, t3, t2, t1)
                 kt = float(prm_line.split()[4])
-                minima = int(prm_line.split()[5])
+                minima = int(float(prm_line.split()[5]))
                 phase = float(prm_line.split()[6])
                 paths = float(prm_line.split()[7])
                 if torsion not in self.app.torsion_prm.keys():
