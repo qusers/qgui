@@ -1,3 +1,7 @@
+08.01.16 v2.04
+    Fixed a latex title error for subscripts in the Analyze evb reaction
+    energies plotting of the reaction free energy profiles.
+
 16.12.15 v2.03
     Fixed Topology prepare 'toggle charge' function bug that prevented 
     removal of atoms as (user) defined in the '[toggle_residues]' in .lib.

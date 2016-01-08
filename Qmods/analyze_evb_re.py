@@ -541,9 +541,21 @@ class EvbReactions(Toplevel):
 
         for i in range(len(titles)):
             title = str(titles[i])
+            nr = 'ave'
+
+            if len(title.split('_')) > 1:
+                if title.split('_')[-1].isdigit():
+                    nr = title.split('_')[-1]
+                    if len(title.split('_')) > 2:
+                        title = '\_'.join(title.split('_')[0:-1])
+                    else:
+                        title = title.split('_')[0]
+                else:
+                    title = '_'.join(title.split('\_'))
+
             dG = d_G[i]
             deps = d_eps[i]
-            self.dg_plot.plot(deps, dG, '-', linewidth=2.0, label=title)
+            self.dg_plot.plot(deps, dG, '-', linewidth=2.0, label=r'%s$_{%s}$' % (title, nr))
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
 
         self.canvas.show()

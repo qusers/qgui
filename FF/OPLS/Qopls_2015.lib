@@ -232,7 +232,7 @@
          OD2    CG     CB     OD1   
     [charge_groups]
         N     H     CA    HA    
-        CB    HB2   HB3   CG    OD1   OD2   HD3   
+        CB    HB2   HB3   CG    OD1   OD2   HD1   
         C     O     
 *------------------------------------------------------------------
 {ASN}            !charge: 0.00 ||  
@@ -456,7 +456,7 @@
     [charge_groups]
         N     H     CA    HA    C     O     OXT
         CB    HB2   HB3   
-        CG    OD1   OD2   HD2   
+        CG    OD1   OD2   HD1   
 *------------------------------------------------------------------
 {CASN}            !charge: -1.1 || ASN C-terminal (standard)
     [atoms]
@@ -654,7 +654,7 @@
     [charge_groups]
         N       H    CA   HA     C     O     OXT
         CB    HB2   HB3   
-        CG    HG2   HG3   CD1   OE1   OE2   HE2   
+        CG    HG2   HG3   CD1   OE1   OE2   HE1   
 *------------------------------------------------------------------
 {CGLN}            !charge: -1.1 || GLN C-terminal (standard)
     [atoms]
@@ -1646,7 +1646,7 @@
     [charge_groups]
         N     H     CA    HA    
         CB    HB2   HB3   
-        CG    HG2   HG3   CD    OE1   OE2   HE2   
+        CG    HG2   HG3   CD    OE1   OE2   HE1   
         C     O     
 *------------------------------------------------------------------
 {GLN}            !charge: 0.00 ||  
@@ -2347,7 +2347,7 @@
          OD2    CG     CB     OD1   
     [charge_groups]
         N     HT1   HT2   HT3   CA    HA    
-        CB    HB2   HB3   CG    OD1   OD2   HD3   
+        CB    HB2   HB3   CG    OD1   OD2   HD1   
         C     O     
 *------------------------------------------------------------------
 {NASN}            !charge: 1.0 || ASN N-terminal (standard)
@@ -2555,7 +2555,7 @@
     [charge_groups]
         N     HT1   HT2   HT3   CA    HA    
         CB    HB2   HB3   
-        CG    HG2   HG3   CD1   OE1   OE2   HE2   
+        CG    HG2   HG3   CD1   OE1   OE2   HE1   
         C     O     
 *------------------------------------------------------------------
 {NGLN}            !charge: 1.0 || GLN N-terminal (standard)
