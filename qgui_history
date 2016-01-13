@@ -1,3 +1,10 @@
+13.01.16 v2.06
+    Improved error handling for the EVB thermodynamic parameters class.
+    
+12.01.16 v2.05
+    Fixed improper sequnce of atoms error in EVB setup that is different
+    defined between OPLS and CHARMM FF.
+
 08.01.16 v2.04
     Fixed a latex title error for subscripts in the Analyze evb reaction
     energies plotting of the reaction free energy profiles.

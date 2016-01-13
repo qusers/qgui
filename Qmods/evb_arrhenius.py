@@ -643,6 +643,17 @@ class EvbArrhenius(Toplevel):
 
         if len(t) < 2:
             print 'Need more than 1 temperature to extract parameters ..'
+            self.titles_parameters[title]['dH'] = 0
+            self.titles_parameters[title]['dS'] = 0
+            self.titles_parameters[title]['COD'] = 0
+            self.titles_parameters[title]['s_dg'] = 0
+            self.titles_parameters[title]['s_dh'] = 0
+            self.titles_parameters[title]['s_ds'] = 0
+            self.titles_parameters[title]['s_r'] = 0
+            self.titles_parameters[title]['SEM_dg'] = 0
+            self.titles_parameters[title]['SEM_dh'] = 0
+            self.titles_parameters[title]['SEM_ds'] = 0
+            self.titles_parameters[title]['sample'] = len(dG)
             return
 
         _y = np.array(dG_T)
@@ -659,7 +670,10 @@ class EvbArrhenius(Toplevel):
         dH = model[0]
         dS = -model[1]
 
-        r2 = r2[0]
+        try:
+            r2 = r2[0]
+        except:
+            pass
 
 
         s2_dg = 0
@@ -688,29 +702,58 @@ class EvbArrhenius(Toplevel):
             # sst += (temp - t_ave) ** 2
 
         #standard error squared of the model (remove 2 degrees of freedom <-- linear regression parameters)
-        s2_dg /= (float(len(dG)) - 2.0)
-        s2_dg2 /= float(len(dG) - 2.0)
+        deg_freedom = 2
+        if len(dG) < 3:
+            print 'Warning: linear regression with only 2 points'
+            print '--> not possible to remove 2 degrees of freedom!'
+            s2_dg = 0
+            s2_dg2 = 0
 
-        #Standard error of the model
-        s_dg = np.sqrt(s2_dg)
-        s_dg2 = np.sqrt(s2_dg2)
+            #Standard error of the model
+            s_dg = 0
+            s_dg2 = 0
 
-        #Standard error of the mean for the model
-        SEM_dg = np.sqrt(s_dg2) / np.sqrt(len(dG))
+            #Standard error of the mean for the model
+            SEM_dg = np.sqrt(s_dg2) / np.sqrt(len(dG))
 
-        #Standard error for the slope (dH)
-        s_dh = (dH / np.sqrt(len(dG) - 2)) * np.sqrt((1.0 / r2) - 1.0)
+            #Standard error for the slope (dH)
+            s_dh = 0
 
-        #Standar error of the mean for the slope (dH)
-        SEM_dh = s_dh / np.sqrt(len(dG))
+            #Standar error of the mean for the slope (dH)
+            SEM_dh = 0
 
-        #Standard error of the intercept (dS)
-        s_ds = s_dg * np.sqrt((1.0 / len(dG)) + (np.average(T_inv) ** 2 / sst))
-        SEM_ds = s_ds / np.sqrt(len(dG))
+            #Standard error of the intercept (dS)
+            s_ds = 0
+            SEM_ds = 0
 
-        #Standard error for the correlation coefficient
-        s_r = np.sqrt((1.0 - r2) / (len(dG) - 2))
-        r = np.sqrt(r2)
+            #Standard error for the correlation coefficient
+            s_r = 0
+            r2 = 1
+            
+        else:
+            s2_dg /= (float(len(dG)) - deg_freedom)
+            s2_dg2 /= (float(len(dG)) - deg_freedom)
+
+            #Standard error of the model
+            s_dg = np.sqrt(s2_dg)
+            s_dg2 = np.sqrt(s2_dg2)
+
+            #Standard error of the mean for the model
+            SEM_dg = np.sqrt(s_dg2) / np.sqrt(len(dG))
+
+            #Standard error for the slope (dH)
+            s_dh = (dH / np.sqrt(len(dG) - deg_freedom)) * np.sqrt((1.0 / r2) - 1.0)
+
+            #Standar error of the mean for the slope (dH)
+            SEM_dh = s_dh / np.sqrt(len(dG))
+
+            #Standard error of the intercept (dS)
+            s_ds = s_dg * np.sqrt((1.0 / len(dG)) + (np.average(T_inv) ** 2 / sst))
+            SEM_ds = s_ds / np.sqrt(len(dG))
+
+            #Standard error for the correlation coefficient
+            s_r = np.sqrt((1.0 - r2) / (len(dG) - deg_freedom))
+            r = np.sqrt(r2)
 
         self.titles_parameters[title]['dH'] = dH
         self.titles_parameters[title]['dS'] = dS

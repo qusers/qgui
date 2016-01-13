@@ -1519,7 +1519,7 @@ class SetupEVB(Toplevel):
         self.q_bonds is checked against each state to verify if bond exist.
 
         ==> self.q_impropers  {q2 : [q1,q3,q4]} --> search for q1 q2 q3 q4 (OPLS)
-                                                --> search for q2 q2 q3 q4 (CHARMM)
+                                                --> search for q2 q1 q3 q4 (CHARMM)
         ==> self.q_bonds
         ==> self.improper_prm
         ==> self.impropertypes_listbox
@@ -1557,8 +1557,6 @@ class SetupEVB(Toplevel):
         #Write change impropers lisbox
         prm_nr = 0
         nr_type = dict()
-        print 'Q impropers'
-        print self.q_impropers
         for q2 in self.q_impropers.keys():
             q1, q3, q4 = self.q_impropers[q2][0:]
             if q1 in q_atoms or q2 in q_atoms or q3 in q_atoms or q4 in q_atoms:
@@ -1566,6 +1564,7 @@ class SetupEVB(Toplevel):
                 for state in range(self.evb_states.get()):
                     bonds_q2 = self.q_bonds[q2][state]
                     print q1,q2,q3,q4
+                    print 'LOOK HERE:'
                     print bonds_q2
                     if q1 not in bonds_q2 or q3 not in bonds_q2 or q4 not in bonds_q2:
                         states[state] = 0
@@ -1585,8 +1584,8 @@ class SetupEVB(Toplevel):
                         t4 = self.q_atomtypes[q4][state]
 
                         if self.ff_is_charmm:
-                            imp_type = '%s %s %s %s' % (t2, t1, t3, t4)
-                            imp_type_rev = '%s %s %s %s' % (t4, t3, t1, t2)
+                            imp_type = '%s %s %s %s' % (t2, t3, t4, t1)
+                            imp_type_rev = '%s %s %s %s' % (t1, t4, t3, t2)
                         else:
                             imp_type = '%s %s %s %s' % (t1, t2, t3, t4)
                             imp_type_rev = '%s %s %s %s' % (t4, t3, t2, t1)
@@ -1609,7 +1608,10 @@ class SetupEVB(Toplevel):
                     a3 = self.q_atom_nr[q3]
                     a4 = self.q_atom_nr[q4]
 
-                    imp_sequence = '%6d %6d %6d %6d' % (a1, a3, a4, a2)
+                    if self.ff_is_charmm:
+                        imp_sequence = '%6d %6d %6d %6d' % (a2, a3, a4, a1)
+                    else:
+                        imp_sequence = '%6d %6d %6d %6d' % (a1, a2, a3, a4)
 
                     self.changeimproper_listbox.insert(END, '%s  %3s %3s %3s %3s' %
                                                    (imp_sequence, s1, s2, s3, s4))
