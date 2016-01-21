@@ -1,3 +1,7 @@
+21.01.16 v2.07
+    Added missing parameters in OPLS-2015 for water model required for
+    SHAKE in Q.
+
 13.01.16 v2.06
     Improved error handling for the EVB thermodynamic parameters class.
     

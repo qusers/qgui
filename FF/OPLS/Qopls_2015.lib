@@ -188,7 +188,6 @@
          O      C      CA     +N
          NH2    CZ     NE     NH1
          HE     NE     CD     CZ
-         HH12   NH1    CZ     HH11
     [charge_groups]
         N     H     CA    HA
         CB    HB2   HB3
@@ -2603,7 +2602,7 @@
     [impropers]
          O      C      CA     +N    
          OE1    CD     CG     NE2   
-         HE22   NE2    CD1    HE21  
+         HE22   NE2    CD     HE21  
     [charge_groups]
         N     HT1   HT2   HT3   CA    HA    
         CB    HB2   HB3   

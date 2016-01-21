@@ -729,7 +729,7 @@ class EvbArrhenius(Toplevel):
             #Standard error for the correlation coefficient
             s_r = 0
             r2 = 1
-            
+
         else:
             s2_dg /= (float(len(dG)) - deg_freedom)
             s2_dg2 /= (float(len(dG)) - deg_freedom)

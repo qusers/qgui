@@ -3886,8 +3886,10 @@ class SetupEVB(Toplevel):
             resnames = []
             res_atoms = []
             tmp_atoms = []
+
             for q in sorted(self.q_atom_res.keys()):
-                if self.q_atom_res[q].split()[0] not in resnames:
+                if int(self.q_atom_res[q].split()[-1]) not in residues:
+                #if self.q_atom_res[q].split()[0] not in resnames:
                     if len(tmp_atoms) > 0:
                         res_atoms.append(tmp_atoms)
                         tmp_atoms = []
@@ -3945,9 +3947,11 @@ class SetupEVB(Toplevel):
             except:
                 pass
 
+        print residues
         pml_select = ' or '.join(residues)
         h_add_string = ' or '.join(h_add_list)
         print h_add_string
+
 
         #Make templates for ffld_server in pymol:
         for state in range(1, self.evb_states.get() + 1):
