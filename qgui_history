@@ -1,6 +1,11 @@
+22.01.16 v2.071
+    Fixed analyze LIE problem to locate correct log files. The problem
+    is due to new header in the log files written by the latest Qdyn 
+    versions.  
+
 21.01.16 v2.07
     Added missing parameters in OPLS-2015 for water model required for
-    SHAKE in Q.
+    SHAKE in Q. Minor fixes to te EVB arrhenius class.
 
 13.01.16 v2.06
     Improved error handling for the EVB thermodynamic parameters class.

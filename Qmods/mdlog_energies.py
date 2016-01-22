@@ -30,8 +30,8 @@ def is_md_log(file_to_test):
     """
     mdlog = False
     logfile = open(file_to_test, 'r')
-    for i in range(0, 5):
-        if 'qdyn' in logfile.readline().lower():
+    for i in range(0, 20):
+        if 'reading input from' in logfile.readline().lower():
             mdlog = True
             break
 
