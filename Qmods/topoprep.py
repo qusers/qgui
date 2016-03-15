@@ -856,8 +856,8 @@ class TopologyPrepare(Toplevel):
         qprepinp.write('readpdb %s\n' % self.pdbfile)
 
         if self.makeSS:
-            for atompair in range(len(self.cys_residues)):
-                qprepinp.write('addbond %s:SG %s:SG\n' % (self.cys_residues[atompair][0], self.cys_residues[atompair][1]))
+            for cys_i in range(len(self.cys_residues)):
+                qprepinp.write('addbond %s:SG %s:SG\n' % (cys_i, self.cys_residues[cys_i]))
 
         radius = self.sphere_entry.get()
 

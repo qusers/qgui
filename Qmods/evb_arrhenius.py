@@ -164,10 +164,7 @@ class EvbArrhenius(Toplevel):
         for t in temperatures:
             #Collect run dirs and break
             temp = float(t.split('/')[-1])
-            self.titles[title][temp] = dict()
-            self.titles_dG[title][temp] = dict()
-            self.titles_ave_act[title][temp] = dict()
-            self.titles_ave_rxn[title][temp] = dict()
+
 
             nr_dir = 1
             while True:
@@ -182,6 +179,12 @@ class EvbArrhenius(Toplevel):
                             else:
                                 break
                     if enefiles:
+                        if not temp in self.titles[title].keys():
+                            self.titles[title][temp] = dict()
+                            self.titles_dG[title][temp] = dict()
+                            self.titles_ave_act[title][temp] = dict()
+                            self.titles_ave_rxn[title][temp] = dict()
+
                         self.titles[title][temp][nr_dir] = subdir
                         self.app.log(' ','...../%s added\n' % '/'.join(subdir.split('/')[-2:]))
                         self.update()

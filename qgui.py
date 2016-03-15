@@ -70,10 +70,7 @@ class QGui(object):
     def __init__(self, root): #receives root from main-method
         self.root = root
         #Path to user settings
-        if 'darwin' in sys.platform:
-            self.settings_path = '/Users/' + getpass.getuser() + '/.qgui'
-        else:
-            self.settings_path = '/home/' + getpass.getuser() + '/.qgui'
+        self.settings_path = os.path.expanduser('~') + '/.qgui'
 
         #Check if settings directory exists, if not create it
         if not os.path.exists(self.settings_path):
@@ -438,6 +435,23 @@ class QGui(object):
             self.top_id = top_id 
             self.log('info', '%s loaded' % self.top_id.split('/')[-1])
             self.main_window.set_topology_entryfield(top_id.split('/')[-1])
+
+            #Check header in topology file for lib and prm files!
+            print self.libs
+
+            with open(self.top_id, 'r') as top:
+                for line in top:
+                    if 'LIB_FILES' in line:
+                        for lib in line.split()[1].split(';'):
+                            if lib not in self.libs:
+                                print lib
+                                if os.path.isfile(lib):
+                                    print 'From topologyfile, %s was added to library files (not in settings).'
+                                    self.libs.append(lib)
+                                else:
+                                    print "Warning: Lib file %s in topology not found!" % lib
+                        break
+
 
     def update_pdb_id_entryfield(self, pdb_id=None):
         """

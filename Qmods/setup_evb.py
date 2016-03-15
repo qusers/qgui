@@ -523,7 +523,6 @@ class SetupEVB(Toplevel):
         res_nr = []
 
         # {'resi': [atomnames]}
-        improper_names = dict()
 
         for q in sorted(self.q_atom_res.keys()):
             resi = self.q_atom_res[q]
@@ -541,6 +540,7 @@ class SetupEVB(Toplevel):
                 if self.q_atom_res[q] == resi:
                     qatoms.append(q)
                     atomnames.append(self.q_atom_name[q])
+
 
             for libfile in self.libs:
                 found_res = False

@@ -1,3 +1,10 @@
+15.03.16 v2.09
+    Fixed a problem with autogenerating disulfid-bridges in topology
+    prepare.
+
+25.01.16 v2.08
+    Updated Qgui to changed Qfep output format in newest versions.
+
 22.01.16 v2.071
     Fixed analyze LIE problem to locate correct log files. The problem
     is due to new header in the log files written by the latest Qdyn 

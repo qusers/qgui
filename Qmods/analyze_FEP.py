@@ -310,7 +310,7 @@ class AnalyzeFEP(Toplevel):
                         part1['sum_dGf'].append(float(line.split()[2]))
                         part1['sum_dGr'].append(float(line.split()[4]))
                         part1['dG'].append(float(line.split()[5]))
-                if '# Part 1' in line:
+                if '# lambda' in line and len(line.split()) > 5:
                     found_part1 = True
 
         return part1
