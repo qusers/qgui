@@ -63,6 +63,9 @@ class EvbArrhenius(Toplevel):
         #{name: {dH, dS, COD}}
         self.titles_parameters = dict()
 
+        #{name: {temp: {act/rxn: [upper, lower]}}}
+        self.dg_upper_lower = dict()
+
         self.dialog_window()
 
         self.selected_frame.set('Show ...')
@@ -82,7 +85,8 @@ class EvbArrhenius(Toplevel):
 
         self.titles_listbox.insert(END, title)
 
-        for i in [self.titles, self.titles_dG, self.titles_parameters, self.titles_ave_act, self.titles_ave_rxn]:
+        for i in [self.titles, self.titles_dG, self.titles_parameters, self.titles_ave_act, self.titles_ave_rxn,
+                  self.dg_upper_lower]:
             i[title] = dict()
 
         #Highlight latest title in listbox
@@ -98,7 +102,8 @@ class EvbArrhenius(Toplevel):
             title = self.titles_listbox.get(selected)
             self.titles_listbox.delete(selected)
             del self.titles[title]
-            for i in [self.titles_dG, self.titles_parameters, self.titles_ave_act, self.titles_ave_rxn]:
+            for i in [self.titles_dG, self.titles_parameters, self.titles_ave_act, self.titles_ave_rxn,
+                      self.dg_upper_lower]:
                 if title in i.keys():
                     del i[title]
 
@@ -184,6 +189,9 @@ class EvbArrhenius(Toplevel):
                             self.titles_dG[title][temp] = dict()
                             self.titles_ave_act[title][temp] = dict()
                             self.titles_ave_rxn[title][temp] = dict()
+                            self.dg_upper_lower[title][temp] = dict()
+                            self.dg_upper_lower[title][temp]['activation'] = [-999999, 999999]
+                            self.dg_upper_lower[title][temp]['reaction'] = [-999999, 9999999]
 
                         self.titles[title][temp][nr_dir] = subdir
                         self.app.log(' ','...../%s added\n' % '/'.join(subdir.split('/')[-2:]))
@@ -564,8 +572,85 @@ class EvbArrhenius(Toplevel):
                     self.titles_dG[title][temp][nr] = [tsE, rE]
                     act.append(tsE)
                     rxn.append(rE)
+
+                    #Update upper_lower:
+                    if tsE > self.dg_upper_lower[title][temp]['activation'][0]:
+                        self.dg_upper_lower[title][temp]['activation'][0] = tsE
+                    if tsE < self.dg_upper_lower[title][temp]['activation'][1]:
+                        self.dg_upper_lower[title][temp]['activation'][1] = tsE
+
+                    if rE > self.dg_upper_lower[title][temp]['reaction'][0]:
+                        self.dg_upper_lower[title][temp]['reaction'][0] = rE
+                    if rE < self.dg_upper_lower[title][temp]['reaction'][1]:
+                        self.dg_upper_lower[title][temp]['reaction'][1] = rE
+
             self.titles_ave_act[title][temp] = [np.average(act), np.std(act) / np.sqrt(len(act))]
             self.titles_ave_rxn[title][temp] = [np.average(rxn), np.std(rxn) / np.sqrt(len(rxn))]
+
+    def compute_ave_dg(self, title, temp):
+        """
+        This is called whenever the user has modified the upper and lower limits of dG.
+        """
+        act = list()
+        rxn = list()
+
+        act_upper = self.dg_upper_lower[title][temp]['activation'][0]
+        act_lower = self.dg_upper_lower[title][temp]['activation'][1]
+        rxn_upper = self.dg_upper_lower[title][temp]['reaction'][0]
+        rxn_lower = self.dg_upper_lower[title][temp]['reaction'][1]
+
+        for nr in sorted(self.titles_dG[title][temp].keys()):
+            tsE, rE = self.titles_dG[title][temp][nr][:]
+
+            #Will only add energies if both activation and reaction energies are withing thresholds
+            if (tsE < act_upper) and (tsE > act_lower):
+                if (rE < rxn_upper) and (rE > rxn_lower):
+                    act.append(tsE)
+                    rxn.append(rE)
+
+        self.titles_ave_act[title][temp] = [np.average(act), np.std(act) / np.sqrt(len(act))]
+        self.titles_ave_rxn[title][temp] = [np.average(rxn), np.std(rxn) / np.sqrt(len(rxn))]
+
+        #Genereate themodynamic parameters
+        self.getParameters(title)
+
+        #update tables
+        self.update_tables()
+
+        self.list_titles_event()
+
+    def set_upper_lower(self):
+        """
+        Takes upper and lower values for dG(act) and dG(rxn) and recomputes parameters.
+        """
+        selections = map(int, self.dg_listbox.curselection())
+
+        if len(selections) != 1:
+            return
+
+        try:
+            title = self.dg_listbox.get(selections[0]).split()[0]
+            temp = int(self.dg_listbox.get(selections[0]).split()[1])
+        except:
+            return
+
+        try:
+            act_upper = float(self.dg_act_upper.get())
+            act_lower = float(self.dg_act_lower.get())
+            rxn_upper = float(self.dg_rxn_upper.get())
+            rxn_lower = float(self.dg_rxn_lower.get())
+        except:
+            print 'Invalid value encountered. Unable to update thermodynamic parameters!'
+            return
+
+        self.dg_upper_lower[title][temp]['activation'][0] = act_upper
+        self.dg_upper_lower[title][temp]['activation'][1] = act_lower
+        self.dg_upper_lower[title][temp]['reaction'][0] = rxn_upper
+        self.dg_upper_lower[title][temp]['reaction'][1] = rxn_lower
+        print 'New upper and lower values set!'
+
+        self.compute_ave_dg(title, temp)
+
 
     def find_dg(self,dG):
         """
@@ -1005,6 +1090,37 @@ class EvbArrhenius(Toplevel):
             return
         pass
 
+    def list_dg_events(self, *args):
+
+        #delete existing values
+        self.dg_act_upper.delete(0, END)
+        self.dg_act_lower.delete(0, END)
+        self.dg_rxn_upper.delete(0, END)
+        self.dg_rxn_lower.delete(0, END)
+
+        selections = map(int, self.dg_listbox.curselection())
+
+        if len(selections) != 1:
+            return
+
+        try:
+            title = self.dg_listbox.get(selections[0]).split()[0]
+            temp = int(self.dg_listbox.get(selections[0]).split()[1])
+
+            act_upper = self.dg_upper_lower[title][temp]['activation'][0]
+            act_lower = self.dg_upper_lower[title][temp]['activation'][1]
+            rxn_upper = self.dg_upper_lower[title][temp]['reaction'][0]
+            rxn_lower = self.dg_upper_lower[title][temp]['reaction'][1]
+
+            self.dg_act_upper.insert(0, act_upper)
+            self.dg_act_lower.insert(0, act_lower)
+            self.dg_rxn_upper.insert(0, rxn_upper)
+            self.dg_rxn_lower.insert(0, rxn_lower)
+
+        except:
+            pass
+
+
     def show_var_frame(self, *args):
         frames = {'Arrhenius Plot': self.plot_frame,
                   'Reaction Free Energies': self.dg_frame,
@@ -1257,13 +1373,43 @@ class EvbArrhenius(Toplevel):
         dg_yscroll.grid(row = 1, rowspan=16, column = 3, sticky = 'nsw', padx=(0,10))
 
         self.dg_listbox = Listbox(self.dg_frame, yscrollcommand = dg_yscroll.set,
-                                      width=82, height=16, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED,
+                                      width=57, height=16, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED,
                                       exportselection=False)
         dg_yscroll.config(command=self.dg_listbox.yview)
-        self.dg_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='e')
+        self.dg_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='w')
         self.dg_listbox.config(font=tkFont.Font(family="Courier", size=12))
-        #self.ae_tot_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
+        self.dg_listbox.bind('<<ListboxSelect>>', self.list_dg_events)
 
+        #### Remover outliers ####
+        upper_label = Label(self.dg_frame, text='upper', bg=self.main_color)
+        upper_label.grid(row=1, column=5)
+
+        lower_label = Label(self.dg_frame, text='lower', bg=self.main_color)
+        lower_label.grid(row=1, column=6)
+
+        dg_act_label = Label(self.dg_frame, text='dG(act)', bg=self.main_color)
+        dg_act_label.grid(row=2, column=4)
+
+        dg_rxn_label = Label(self.dg_frame, text='dG(rxn)', bg=self.main_color)
+        dg_rxn_label.grid(row=3, column=4)
+
+        self.dg_act_upper = Entry(self.dg_frame, width=7, highlightthickness=0)
+        self.dg_act_upper.grid(row=2, column=5)
+
+        self.dg_act_lower = Entry(self.dg_frame, widt=7, highlightthickness=0)
+        self.dg_act_lower.grid(row=2,column=6)
+
+        self.dg_rxn_upper = Entry(self.dg_frame, width=7, highlightthickness=0)
+        self.dg_rxn_upper.grid(row=3, column=5)
+
+        self.dg_rxn_lower = Entry(self.dg_frame, widt=7, highlightthickness=0)
+        self.dg_rxn_lower.grid(row=3,column=6)
+
+        apply_tresh = Button(self.dg_frame, text='Apply', highlightbackground=self.main_color,
+                             command=self.set_upper_lower)
+        apply_tresh.grid(row=4, column=5, columnspan=2)
+
+        ############################
         export_dg = Button(self.dg_frame, text='Export table', highlightbackground=self.main_color,
                            command=lambda: self.export_table(self.dg_listbox))
         export_dg.grid(row=17, column=0, columnspan=3, sticky='e')

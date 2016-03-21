@@ -1,3 +1,8 @@
+21.03.16 v2.1
+    Added functionality to the EVB Arrhenius class. Outliers can be
+    removed and the effect on the thermodynamic activation parameters
+    are updated accordingly.
+
 15.03.16 v2.09
     Fixed a problem with autogenerating disulfid-bridges in topology
     prepare.
