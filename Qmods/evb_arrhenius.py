@@ -629,9 +629,12 @@ class EvbArrhenius(Toplevel):
             return
 
         try:
-            title = self.dg_listbox.get(selections[0]).split()[0]
-            temp = int(self.dg_listbox.get(selections[0]).split()[1])
+            #title = self.dg_listbox.get(selections[0]).split()[0]
+            #temp = int(self.dg_listbox.get(selections[0]).split()[1])
+            title = self.titles_listbox.get(int(self.titles_listbox.curselection()[0]))
+            temp = int(self.dg_listbox.get(selections[0]).split()[1 + (len(title.split()) - 1)])
         except:
+            print('Returned error in "set_upper_lower" function.')
             return
 
         try:
@@ -1104,8 +1107,9 @@ class EvbArrhenius(Toplevel):
             return
 
         try:
-            title = self.dg_listbox.get(selections[0]).split()[0]
-            temp = int(self.dg_listbox.get(selections[0]).split()[1])
+            #title = self.dg_listbox.get(selections[0]).split()[0]
+            title = self.titles_listbox.get(int(self.titles_listbox.curselection()[0]))
+            temp = int(self.dg_listbox.get(selections[0]).split()[1 + (len(title.split()) - 1)])
 
             act_upper = self.dg_upper_lower[title][temp]['activation'][0]
             act_lower = self.dg_upper_lower[title][temp]['activation'][1]

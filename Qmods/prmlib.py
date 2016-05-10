@@ -178,8 +178,6 @@ class CreatePrmLib(Toplevel):
         for i in range(first_atom, last_atom + 1):
             atom_numbers.append(i)
 
-        print atom_numbers
-
         pdbfile = open(self.app.pdb_id, 'r').readlines()
         self.ligname = self.resname.get().strip()
 
@@ -194,6 +192,7 @@ class CreatePrmLib(Toplevel):
         for line in pdbfile:
             if 'ATOM' in line or 'HETATM' in line:
                 if int(line.split()[1]) in atom_numbers:
+                    print line
                     count += 1
                     atom = line[13]
                     if line[14].lower() == 'l':
@@ -972,8 +971,11 @@ class CreatePrmLib(Toplevel):
         forcefield = Label(frame2, text='Force field:', bg=self.main_color)
         forcefield.grid(row=3, rowspan=3, column=5, columnspan=1)
 
-        self.forcefield = Spinbox(frame2, width=9, highlightthickness=0, relief=GROOVE, values=('OPLS2001','OPLS2005'))
+        self.forcefield = Spinbox(frame2, width=9, highlightthickness=0, relief=GROOVE, values=('OPLS2005'))
         self.forcefield.grid(row=3, rowspan=3, column=6,columnspan=2)
+
+        write_pdb_button = Button(frame2, width=7, text='Write pdb', highlightbackground=self.main_color, command=self.create_pdb)
+        write_pdb_button.grid(row=6, column=5, pady=(10,0))
 
         self.run_button = Button(frame2, width=4, text='Run', highlightbackground=self.main_color,
                                  command=self.run_parameterisation)

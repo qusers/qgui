@@ -1,3 +1,13 @@
+10.05.16 v2.3
+    Added option to write PDB file in the parameter generation tool. This
+    is to generate a .mae file from the pdb file with correct bond-orders
+    and formal charges. Makes it easier to get correct parameters.
+ 
+29.04.16 v2.2
+    *Removed OPLS-2001 from selectable parameterlist since it is not
+    possible to use it in shcrodinger ffld_server anymore.
+    *Minor improvements to the removal of outliers in EVB arrhenius.
+
 21.03.16 v2.1
     Added functionality to the EVB Arrhenius class. Outliers can be
     removed and the effect on the thermodynamic activation parameters
