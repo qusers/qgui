@@ -286,6 +286,9 @@ class SetupEVB(Toplevel):
         self.l3_end.trace('w', self.sum_lambda_values)
         self.l4_end.trace('w', self.sum_lambda_values)
 
+        #Boolean to control evb template structures before they are written to pdb and used
+        self.qevb_temp_checked = False
+
         self.update_status()
 
     def evb_states_changed(self, *args):
@@ -3849,203 +3852,220 @@ class SetupEVB(Toplevel):
         """
         Generates structures from pymol (must be enabled) and use ffld_server to get parameters
         """
+
         if self.sync_pymol.get() == 0:
             return
 
-        #Remove tmp pdb and prm files if existing:
-        files_to_delete = ['qevb_org1.pdb','qevb_org2.pdb', 'qevb_org3.pdb', 'qevb_org4.pdb',
-                           'qevb_tmp1.pdb', 'qevb_tmp2.pdb', 'qevb_tmp3.pdb', 'qevb_tmp4.pdb',
-                           'prm_tmp1.out', 'prm_tmp2.out', 'prm_tmp3.out', 'prm_tmp4.out']
-        for tmpfile in files_to_delete:
-            if os.path.isfile(self.app.workdir + '/%s' % tmpfile):
-                os.remove(self.app.workdir + '/%s' % tmpfile)
+        #Generate pymol template structures in first round to verify by user:
+        if not self.qevb_temp_checked:
+            #Remove tmp pdb and prm files if existing:
+            files_to_delete = ['qevb_org1.pdb','qevb_org2.pdb', 'qevb_org3.pdb', 'qevb_org4.pdb',
+                               'qevb_tmp1.pdb', 'qevb_tmp2.pdb', 'qevb_tmp3.pdb', 'qevb_tmp4.pdb',
+                               'prm_tmp1.out', 'prm_tmp2.out', 'prm_tmp3.out', 'prm_tmp4.out']
+            for tmpfile in files_to_delete:
+                if os.path.isfile(self.app.workdir + '/%s' % tmpfile):
+                    os.remove(self.app.workdir + '/%s' % tmpfile)
 
 
-        self.session.stdin.write('set internal_gui=1\n')
+            self.session.stdin.write('set internal_gui=1\n')
 
-        #Auto expand and add H around Q-atom region, or manualy select atoms to be chopped.
-        h_add_all = True
-        if self.select_h.get() == 1:
-            h_add_all = False
+            #Auto expand and add H around Q-atom region, or manualy select atoms to be chopped.
+            h_add_all = True
+            if self.select_h.get() == 1:
+                h_add_all = False
 
+            #Get q-atoms that are changing bonds
+            q_changing = []
+            for pair in self.change_bonds.keys():
+                atom1, atom2 = map(int, pair.split()[0:2])
+                for q in self.q_atom_nr.keys():
+                    if (self.q_atom_nr[q] == atom1) or (self.q_atom_nr[q] == atom2):
+                        q_changing.append(q)
 
-        pdb = open(self.pdbfile, 'r').readlines()
+            h_add_list = []
+            residues = []
+            if h_add_all:
+                #Get Q-atoms and exapand around selection if possible (include entire residue):
+                resnames = []
+                res_atoms = []
+                tmp_atoms = []
 
-        #Get q-atoms that are changin bonds
-        q_changing = []
-        for pair in self.change_bonds.keys():
-            atom1, atom2 = map(int, pair.split()[0:2])
-            for q in self.q_atom_nr.keys():
-                if (self.q_atom_nr[q] == atom1) or (self.q_atom_nr[q] == atom2):
-                    q_changing.append(q)
+                for q in sorted(self.q_atom_res.keys()):
+                    if int(self.q_atom_res[q].split()[-1]) not in residues:
+                    #if self.q_atom_res[q].split()[0] not in resnames:
+                        if len(tmp_atoms) > 0:
+                            res_atoms.append(tmp_atoms)
+                            tmp_atoms = []
+                        resnames.append(self.q_atom_res[q].split()[0])
+                        residues.append('i. %d' % int(self.q_atom_res[q].split()[-1]))
+                    tmp_atoms.append(self.q_atom_nr[q])
+                res_atoms.append(tmp_atoms)
 
-        h_add_list = []
-        residues = []
-        if h_add_all:
-            #Get Q-atoms and exapand around selection if possible (include entire residue):
-            resnames = []
-            res_atoms = []
-            tmp_atoms = []
+                #Go through libraries and find connecting atoms for residues:
+                connect_atoms = []
+                for resname in resnames:
+                    tmp = []
+                    for lib in self.libs:
+                        with open(lib, 'r') as libfile:
+                            found_res = False
+                            found_connections = False
 
-            for q in sorted(self.q_atom_res.keys()):
-                if int(self.q_atom_res[q].split()[-1]) not in residues:
-                #if self.q_atom_res[q].split()[0] not in resnames:
-                    if len(tmp_atoms) > 0:
-                        res_atoms.append(tmp_atoms)
-                        tmp_atoms = []
-                    resnames.append(self.q_atom_res[q].split()[0])
-                    residues.append('i. %d' % int(self.q_atom_res[q].split()[-1]))
-                tmp_atoms.append(self.q_atom_nr[q])
-            res_atoms.append(tmp_atoms)
+                            for line in libfile:
+                                if found_res:
+                                    if found_connections:
+                                        if '[' in line or '*-------' in line:
+                                            found_connections = False
+                                            found_res = False
+                                        elif 'head' in line or 'tail' in line:
+                                            if line.split()[1] not in tmp:
+                                                tmp.append(line.split()[1])
 
-            #Go through libraries and find connecting atoms for residues:
-            connect_atoms = []
-            for resname in resnames:
-                tmp = []
-                for lib in self.libs:
-                    with open(lib, 'r') as libfile:
-                        found_res = False
-                        found_connections = False
+                                    if '[connections]' in line:
+                                        found_connections = True
+                                    if '{' in line and '}' in line:
+                                        break
+                                try:
+                                    if line.split()[0] == '{%s}' % resname:
+                                        found_res = True
+                                except:
+                                    continue
+                    connect_atoms.append(tmp)
 
-                        for line in libfile:
-                            if found_res:
-                                if found_connections:
-                                    if '[' in line or '*-------' in line:
-                                        found_connections = False
-                                        found_res = False
-                                    elif 'head' in line or 'tail' in line:
-                                        if line.split()[1] not in tmp:
-                                            tmp.append(line.split()[1])
-
-                                if '[connections]' in line:
-                                    found_connections = True
-                                if '{' in line and '}' in line:
-                                    break
-                            try:
-                                if line.split()[0] == '{%s}' % resname:
-                                    found_res = True
-                            except:
-                                continue
-                connect_atoms.append(tmp)
-
-            #Generate pml selection string for h_add on terminals that are chopped:
-            for residue in range(len(residues)):
-                if len(connect_atoms[residue]) > 0:
-                    for atom in connect_atoms[residue]:
-                        h_add_list.append('%s and name %s' % (residues[residue], atom))
+                #Generate pml selection string for h_add on terminals that are chopped:
+                for residue in range(len(residues)):
+                    if len(connect_atoms[residue]) > 0:
+                        for atom in connect_atoms[residue]:
+                            h_add_list.append('%s and name %s' % (residues[residue], atom))
 
             #Generate pymol selection strings
+            elif not h_add_all:
+                for q in sorted(self.q_atom_nr.keys()):
+                    residues.append('id %d' % self.q_atom_nr[q])
+                try:
+                    selections = map(int, self.qatoms_listbox.curselection())
+                    for selected in selections:
+                        atomline = self.qatoms_listbox.get(selected)
+                        if len(atomline.split()) > 4:
+                            res_nr = atomline.split()[-1]
+                            atomname = atomline.split()[2].strip('!')
+                            h_add_list.append('(resi %s and name %s)' % (res_nr, atomname))
+                        else:
+                            atomnumber = atomline.split()[1]
+                            h_add_list.append('id %s' % atomnumber)
+                except:
+                    pass
 
 
-        elif not h_add_all:
-            for q in sorted(self.q_atom_nr.keys()):
-                residues.append('id %d' % self.q_atom_nr[q])
-            try:
-                selections = map(int, self.qatoms_listbox.curselection())
-                for selected in selections:
-                    h_add_list.append('id %s' % self.qatoms_listbox.get(selected).split()[1])
-            except:
-                pass
-
-        print residues
-        pml_select = ' or '.join(residues)
-        h_add_string = ' or '.join(h_add_list)
-        print h_add_string
+            pml_select = ' or '.join(residues)
+            h_add_string = ' or '.join(h_add_list)
 
 
-        #Make templates for ffld_server in pymol:
-        for state in range(1, self.evb_states.get() + 1):
-            self.session.stdin.write('create state%d_auto, state%d and (%s) \n' % (state, state, pml_select))
-            if not h_add_all:
-                self.session.stdin.write('fix_chemistry state%d_auto and (%s)\n' % (state, h_add_string))
-            if len(h_add_string) > 0:
-                self.session.stdin.write('h_add state%d_auto and (%s)\n' % (state, h_add_string))
-            if not h_add_all and len(h_add_string) > 0:
-                self.session.stdin.write('clean state%d_auto\n' % state)
 
-            self.session.stdin.write('save qevb_org%d.pdb, state%d_auto\n' % (state, state))
-            self.session.stdin.write('disable state%d\n' % state)
+            #Make templates for ffld_server in pymol:
+            for state in range(1, self.evb_states.get() + 1):
+                self.session.stdin.write('create state%d_auto, state%d and (%s) \n' % (state, state, pml_select))
+                self.session.stdin.write('disable state%d\n' % state)
+                if not h_add_all:
+                    self.session.stdin.write('fix_chemistry state%d_auto and (%s)\n' % (state, h_add_string))
+                if len(h_add_string) > 0:
+                    self.session.stdin.write('h_add state%d_auto and (%s)\n' % (state, h_add_string))
+                #if not h_add_all and len(h_add_string) > 0:
+                #    self.session.stdin.write('clean state%d_auto\n' % state)
 
-        time.sleep(1)
-        self.session.stdin.write('set grid_mode, 1\n')
-        self.session.stdin.write('set internal_gui=0 \n')
+        ############################################################################
+        #Now assuming that the pymol structure is verified by user and ok this round:
+        elif self.qevb_temp_checked:
+            for state in range(1, self.evb_states.get() + 1):
+                self.session.stdin.write('save qevb_org%d.pdb, state%d_auto\n' % (state, state))
 
-        #Create state list with dictionaries for later tracing of coordinates back to original Q-atoms:
-        #[{'x y z' : Qi (s1)}, {'x y z' : Qi (s2}, ...]
+            time.sleep(1)
+            self.session.stdin.write('set grid_mode, 1\n')
+            self.session.stdin.write('set internal_gui=0 \n')
 
-        org_pdb = []
-        for line in pdb:
-            try:
-                if int(line.split()[1]) in self.q_atom_nr.values():
-                    org_pdb.append(line)
-            except:
-                continue
+            #Create state list with dictionaries for later tracing of coordinates back to original Q-atoms:
+            #[{'x y z' : Qi (s1)}, {'x y z' : Qi (s2}, ...]
 
-        cord_q_state = list()
-        for state in range(1, self.evb_states.get() + 1):
-            cord_q = dict()
+            org_pdb = []
+            pdb = open(self.pdbfile, 'r').readlines()
+            for line in pdb:
+                try:
+                    if int(line.split()[1]) in self.q_atom_nr.values():
+                        org_pdb.append(line)
+                except:
+                    continue
 
-            check_count = 0
-            while True:
-                if os.path.isfile('%s/qevb_org%d.pdb' % (self.app.workdir, state)):
-                    break
+            cord_q_state = list()
+            for state in range(1, self.evb_states.get() + 1):
+                cord_q = dict()
+
+                check_count = 0
+                while True:
+                    if os.path.isfile('%s/qevb_org%d.pdb' % (self.app.workdir, state)):
+                        break
+                    else:
+                        check_count += 1
+                        time.sleep(0.1)
+                    if check_count >= 50:
+                        print 'Could not find file'
+                        break
+
+                q_state = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'r').readlines()
+                for line in q_state:
+                    atomtype = line[13:17]
+                    res = line[17:26]
+                    cord = line[26:55].strip()
+                    for orgline in org_pdb:
+                        orgtype = orgline[13:17]
+                        orgres = orgline[17:26]
+                        if orgtype == atomtype and orgres == res:
+                            atomnr = int(orgline.split()[1])
+                            for q in self.q_atom_nr.keys():
+                                if self.q_atom_nr[q] == atomnr:
+                                    cord_q[cord] = q
+
+                cord_q_state.append(cord_q)
+
+                #Rename atoms and insert occupancy and atom and write pdb files for ffld_server
+                response = self.rename_atoms('%s/qevb_org%d.pdb' % (self.app.workdir, state),
+                                              '%s/qevb_tmp%d.pdb' % (self.app.workdir,state), 'QS%d' % state)
+                if not response:
+                    self.app.errorBox('Error', 'Could not translate all atomtypes. Pleas verify pdb file.')
+                    return
+                print 'ffld_server templet qevb_tmp%d.pdb generated' % state
+
+                #Run ffld_server and generate parameter for state
+                ff = 'OPLS'+self.force_field.get()
+
+                #Can use maestro files for ffld if existing (better structure description)
+                if os.path.isfile(self.app.workdir+'/qevb_tmp%d.mae' % state):
+                    ffld_input = 'qevb_tmp%d.mae' % state
+                    print 'Found MAE file. Using this by default.'
                 else:
-                    check_count += 1
-                    time.sleep(0.1)
-                if check_count >= 50:
-                    print 'Could not find file'
-                    break
+                    ffld_input = 'qevb_tmp%d.pdb' % state
 
-            q_state = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'r').readlines()
-            for line in q_state:
-                atomtype = line[13:17]
-                res = line[17:26]
-                cord = line[26:55].strip()
-                for orgline in org_pdb:
-                    orgtype = orgline[13:17]
-                    orgres = orgline[17:26]
-                    if orgtype == atomtype and orgres == res:
-                        atomnr = int(orgline.split()[1])
-                        for q in self.q_atom_nr.keys():
-                            if self.q_atom_nr[q] == atomnr:
-                                cord_q[cord] = q
+                ffld_failed = self.run_ffld_server(ffld_input, ff,
+                                                   '%s/prm_tmp%d.out' % (self.app.workdir, state))
+                if ffld_failed:
+                    self.app.errorBox('Error', 'Parameter assignment with ffld_server failed!')
+                    return
 
-            cord_q_state.append(cord_q)
+            #Bring back original pymol structures again and get parameters
+            for state in range(1, self.evb_states.get() + 1):
+                self.session.stdin.write('enable state%d\n' % state)
+                self.session.stdin.write('delete state%d_auto\n' % state)
+                print 'Now I will get parameters!'
+                self.get_auto_prm(cord_q_state[state - 1], '%s/qevb_tmp%d.pdb' % (self.app.workdir, state),
+                                   '%s/prm_tmp%d.out' % (self.app.workdir, state), state - 1)
 
-            #Rename atoms and insert occupancy and atom and write pdb files for ffld_server
-            response = self.rename_atoms('%s/qevb_org%d.pdb' % (self.app.workdir, state),
-                                          '%s/qevb_tmp%d.pdb' % (self.app.workdir,state), 'QS%d' % state)
-            if not response:
-                self.app.errorBox('Error', 'Could not translate all atomtypes. Pleas verify pdb file.')
-                return
-            print 'ffld_server templet qevb_tmp%d.pdb generated' % state
+            self.update_all()
+            self.app.log('info','Parameter assignment for %d EVB states completed.' % self.evb_states.get())
+            self.app.log(' ', 'Always control and verify parameters. Use with care!\n')
+            self.qevb_temp_checked = False
 
-            #Run ffld_server and generate parameter for state
-            ff = 'OPLS'+self.force_field.get()
+            return
 
-            #Can use maestro files for ffld if existing (better structure description)
-            if os.path.isfile(self.app.workdir+'/qevb_tmp%d.mae' % state):
-                ffld_input = 'qevb_tmp%d.mae' % state
-                print 'Found MAE file. Using this by default.'
-            else:
-                ffld_input = 'qevb_tmp%d.pdb' % state
-
-            ffld_failed = self.run_ffld_server(ffld_input, ff,
-                                               '%s/prm_tmp%d.out' % (self.app.workdir, state))
-            if ffld_failed:
-                self.app.errorBox('Error', 'Parameter assignment with ffld_server failed!')
-                return
-
-        #Bring back original pymol structures again and get parameters
-        for state in range(1, self.evb_states.get() + 1):
-            self.session.stdin.write('enable state%d\n' % state)
-            self.session.stdin.write('delete state%d_auto\n' % state)
-            self.get_auto_prm(cord_q_state[state - 1], '%s/qevb_tmp%d.pdb' % (self.app.workdir, state),
-                               '%s/prm_tmp%d.out' % (self.app.workdir, state), state - 1)
-
-        self.update_all()
-        self.app.log('info','Parameter assignment for %d EVB states completed.' % self.evb_states.get())
-        self.app.log(' ', 'Always control and verify parameters. Use with care!\n')
+        self.app.errorBox('info', 'Inspect template structures and press Auto assign again.')
+        self.qevb_temp_checked = True
 
     def check_imp(self,q1,q2,q3,q4):
         """
@@ -4065,6 +4085,7 @@ class SetupEVB(Toplevel):
         found_q2 = False
         done = False
         while not done:
+            print qlist
             if not found_q2:
                 for i in range(len(qlist)):
                     qi = qlist[i]
@@ -4145,6 +4166,7 @@ class SetupEVB(Toplevel):
         type_nr = 0
         with open(qprm, 'r') as rprm:
             for line in rprm:
+                print line
                 if found_improper:
                     if len(line.split()) < 5:
                         found_improper = False
@@ -4161,6 +4183,7 @@ class SetupEVB(Toplevel):
                                 tmp_dict = {q1: atom1, q2: atom2,
                                             q3: atom3, q4: atom4}
 
+                                #This sometimes causes a problem TODO :
                                 q1, q2, q3, q4 = self.check_imp(q1,q2,q3,q4)
                                 self.q_impropers[q2] = [q1,q3,q4]
 
@@ -4256,7 +4279,6 @@ class SetupEVB(Toplevel):
 
                         type_nr += 1
 
-
                 if '--------------' in line:
                     count += 1
                 if count == 2:
@@ -4273,6 +4295,8 @@ class SetupEVB(Toplevel):
                 if 'improper Torsion' in line:
                     found_torsion = False
                     found_improper = True
+
+        print 'Ok, I am leaving parameters run'
 
     def calcNBpar(self, sigma = 0, epsilon = 0):
         """

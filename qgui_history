@@ -1,3 +1,14 @@
+19.05.16 v2.4
+    Changed the work routine of autogenerating EVB parameters from 
+    template structures that used to be completely automatically
+    created from pymol. Now it is a 2-step thing where the user can
+    in round 1 control and edit the template strcutres before in round 2
+    writing them to disk an using them in ffld_server.
+
+12.05.16 v2.31
+    Improved auto evb parameter generation tool when generating template
+    structures: imrpoved pymol seleciton string for h_add.
+
 10.05.16 v2.3
     Added option to write PDB file in the parameter generation tool. This
     is to generate a .mae file from the pdb file with correct bond-orders

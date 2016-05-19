@@ -702,10 +702,12 @@ class TopologyPrepare(Toplevel):
                     if new_res != orig_res:
                         print 'Residue %3d %4s --> %4s' % (res_nr, orig_res, new_res)
                         atomname = old_pdb[i][12:17].strip()
+
+                        #Get atoms to modify, if some:
                         if new_res in self.toggle_res_atoms.keys():
                             modatoms = self.toggle_res_atoms[new_res]
                         else:
-                            modatoms = list()
+                            modatoms = str()
 
                         #So far we only need to delete H-atoms. Qprep will add missing hydrogens.
                         del_atoms = list()
@@ -717,6 +719,9 @@ class TopologyPrepare(Toplevel):
                              print 'Atom %s was deleted from %s %d' % (atomname, orig_res, res_nr)
                         else:
                             atomnr += 1
+                            print('%s%5d  %s%4s%s' %
+                                            (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:]))
+
                             new_pdb.write('%s%5d  %s%4s%s' %
                                             (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:]))
 
@@ -728,7 +733,8 @@ class TopologyPrepare(Toplevel):
                     atomnr += 1
                     new_pdb.write('%s%5d  %s' % (old_pdb[i][0:6], atomnr, old_pdb[i][13:]))
 
-            except:
+            except Exception as e:
+                print(e)
                 #This must be an empty line, GAP or TER line
                 new_pdb.write(old_pdb[i])
 

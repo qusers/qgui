@@ -27,10 +27,10 @@
 *   QGUI_TOGGLE  CYX  CYS   +HG2  SG        radius_to SG
 *   !N- and C- terms: only atom to add/delete can be modified!
 *   !If you have something special, use toggle insted.
-*   ##QGUI_N-TERM  NRES nRES  -HT3            radius_to N
-*   ##QGUI_N-TERM  nRES NRES  +HT3  N         radius_to N
-*   ##QGUI_C-TERM  CRES cRES  +HO2  OXT       radius_to C
-*   ##QGUI_C-TERM  cRES CRES  -HO2            radius_to C
+*   QGUI_N-TERM  NRES nRES  -HT3            radius_to N
+*   QGUI_N-TERM  nRES NRES  +HT3  N         radius_to N
+*   QGUI_C-TERM  CRES cRES  +HO2  OXT       radius_to C
+*   QGUI_C-TERM  cRES CRES  -HO2            radius_to C
 *
 *------------------------------------------------------------------
 {ALA}            !charge: 0.00 ||  
@@ -1228,7 +1228,7 @@
          2 CD     C245       -0.050
          3 HD2    H140        0.060
          4 HD3    H140        0.060
-         5 CA     C283        0.040
+         5 CA     C283        0.040  
          6 HA     H140        0.060
          7 CB     C136       -0.120
          8 HB2    H140        0.060
@@ -3674,6 +3674,18 @@
     [info]
         solvent 1
         density 0.0335
+    [atoms]
+         1 O      OT         -0.834
+         2 H1     HT          0.417
+         3 H2     HT          0.417
+    [bonds]
+       O      H1
+       O      H2
+       H1     H2
+    [charge_groups]
+        O     H1    H2
+*------------------------------------------------------------------
+{WAT}            !charge: 0.000 ||  tip3p water model, generate using noangle nodihedral
     [atoms]
          1 O      OT         -0.834
          2 H1     HT          0.417
