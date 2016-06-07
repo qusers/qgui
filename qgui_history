@@ -1,3 +1,7 @@
+07.06.16 v2.5
+	Added tool to create a pdb file based on the trajectory atom mask, 
+	for when there is a mismatch between topology and trajectory atoms.
+
 19.05.16 v2.4
     Changed the work routine of autogenerating EVB parameters from 
     template structures that used to be completely automatically

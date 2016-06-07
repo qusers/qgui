@@ -41,6 +41,7 @@ from splash_qgui import SplashScreen
 from pdbpreparewindow import PdbFilePrepare
 from mainwindow import MainWindow
 from topoprep import TopologyPrepare
+from trjmask import TrjMask
 from setup_md import SetupMd
 from setup_lie import SetupLie
 from settings_window import QguiSettings
@@ -220,6 +221,10 @@ class QGui(object):
         self.makeparameters = CreatePrmLib(self, self.root)
         self.makeparameters.configure(bg=self.main_color)
         self.makeparameters.resizable()
+
+    def open_trjmask(self):
+    	self.trjmask = TrjMask(self, self.root)
+    	self.trjmask.configure(background=self.main_color)
 
     def evb_calibration(self):
         """

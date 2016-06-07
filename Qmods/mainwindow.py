@@ -218,6 +218,7 @@ class MainWindow(Frame):
         preparemenu.add_command(label = 'PDB', command = self.app.prepare_pdb)
         preparemenu.add_command(label = 'Topology', command = self.app.prepare_topo)
         preparemenu.add_command(label = 'Parameters', command = self.app.create_parameters)
+        preparemenu.add_command(label = 'Trjmask', command = self.app.open_trjmask)
         menubar.add_cascade(label = 'Prepare', menu = preparemenu)
 
         #Defines the Setup-menu.
