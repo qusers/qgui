@@ -1,15 +1,15 @@
 #!/usr/bin/env python2
 
 __author__ = "Geir Villy Isaksen"
-__copyright__ = "Copyright (C) 2014 University of Tromso / Geir Villy Isaksen"
-__credits__ = ["Bjorn Olav Brandsdal","Laura Liikanen", "Johan Aqvist", "Christoffer Lind"]
+__copyright__ = "Copyright (C) 2016 University of Tromso / Geir Villy Isaksen"
+__credits__ = ["Bjorn Olav Brandsdal","Tor Arne Heim Andberg","Laura Liikanen", "Johan Aqvist", "Christoffer Lind"]
 __license__ = "GPL v3"
-__version__ = "1.0.5"
+__version__ = "2.51"
 __maintainer__ = "Geir Isaksen"
 __email__ = "geir.isaksen@uit.no"
 __status__ = "Production"
 
-# Copyright 2014 Geir Villy Isaksen/University of Tromso, all rights reserved
+# Copyright 2016 Geir Villy Isaksen/University of Tromso, all rights reserved
 
 # This file is part of Qgui.
 
