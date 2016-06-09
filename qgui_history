@@ -1,6 +1,12 @@
+09.06.12 v2.51
+    Nasty fix for a nasty mistake:
+    Fixed critical issue in EVB setup that appears when a bond is
+    off (0) in all states resulting in bonds/angles/torsion ignoring
+    this completely when generating the FEP file. 
+
 07.06.16 v2.5
-	Added tool to create a pdb file based on the trajectory atom mask, 
-	for when there is a mismatch between topology and trajectory atoms.
+    Added tool to create a pdb file based on the trajectory atom mask, 
+    for when there is a mismatch between topology and trajectory atoms.
 
 19.05.16 v2.4
     Changed the work routine of autogenerating EVB parameters from 

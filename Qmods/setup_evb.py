@@ -734,7 +734,6 @@ class SetupEVB(Toplevel):
                         if '{' in line and line.strip('{').split()[0][:-1] == res:
                             found_res = True
 
-
         #Go through self.q_bonds and remove all '+' (Tail symbols)
         for q in self.q_bonds.keys():
             for state in range(4):
@@ -933,6 +932,90 @@ class SetupEVB(Toplevel):
                     if '[bonds]' in line:
                         found_bonds = True
 
+    def get_bonding_atoms(self, qatom):
+        """
+        Returns a set with all atoms defined in FEP/lib as bonded to the given qatom.
+        """
+        bond_to = set()
+        for state in self.q_bonds[qatom]:
+            for qatom2 in state:
+                bond_to.add(int(qatom2))
+
+        return bond_to
+
+    def find_bonds(self, qatom, pairs):
+        """
+        Returns a set of atoms from a list of pairs ['q1 q2'] bonded to qatom
+        """
+        partners = set()
+        for pair in pairs:
+            if str(qatom) in pair.split():
+                a1, a2 = map(int, pair.split())
+                if qatom != a1:
+                    partners.add(a1)
+                else:
+                    partners.add(a2)
+
+        return partners
+
+    def insert_off_angles(self, q1, q2_off, partners):
+        """
+        Writes angles that are off in all states to change angle listbox.
+        q1 and q2 are the bond that is off in all states, and q2_partners
+        is a set of atoms connected to q2.
+        """
+
+        #Get existing angles to avoid duplicates
+        ang_exist = set()
+        for line in self.changeangle_listbox.get(0, END):
+            a1, a2, a3 = line.split()[0:3]
+
+            ang_exist.add('%s %s %s' % (a1, a2, a3))
+            ang_exist.add('%s %s %s' % (a3, a2, a1))
+
+        for partner in partners:
+            angs = [' ', ' ', ' ', ' ']
+            for i in range(self.evb_states.get()):
+                angs[i] = 0
+
+            atom1, atom2, atom3 = map(int, [self.q_atom_nr[q1], self.q_atom_nr[q2_off], self.q_atom_nr[partner]])
+
+            ang = '%s %s %s' % (atom1, atom2, atom3)
+
+            if ang not in ang_exist:
+                self.changeangle_listbox.insert(END, '%6d %6d %6d %2s  %2s %2s  %2s' %
+                                                     (atom1, atom2, atom3, angs[0], angs[1], angs[2], angs[3]))
+
+    def insert_off_torsions(self, q1, q2, q3, partners):
+        """
+        Writes torsions that are off in all states to change angle listbox.
+        q1-q2-q3 and a set with atoms bonded to q3.
+        """
+        #Get existing torsions to avoid duplicates
+        tors_exist = set()
+
+        for line in self.changetorsion_listbox.get(0, END):
+            a1, a2, a3, a4 = line.split()[0:4]
+
+            tors_exist.add('%s %s %s %s' % (a1, a2, a3, a4))
+            tors_exist.add('%s %s %s %s' % (a4, a3, a2, a1))
+
+        for partner in partners:
+            tors = [' ', ' ', ' ', ' ']
+            for i in range(self.evb_states.get()):
+                tors[i] = 0
+
+            atom1, atom2, atom3, atom4 = map(int, [self.q_atom_nr[q1], self.q_atom_nr[q2], self.q_atom_nr[q3],
+                                                   self.q_atom_nr[partner]])
+
+            tors_ = '%s %s %s %s' % (atom1, atom2, atom3, atom4)
+
+            if tors_ not in tors_exist:
+                self.changetorsion_listbox.insert(END, '%6d %6d %6d %6d %3s  %3s  %3s  %3s' %
+                                                       (atom1, atom2, atom3, atom4, str(tors[0]), str(tors[1]),
+                                                        str(tors[2]), str(tors[3])))
+
+
     def update_q_bonds(self):
         """
         Collects all bonds for all states and updates listboxes.
@@ -945,10 +1028,28 @@ class SetupEVB(Toplevel):
 
         self.bondtypes_listbox.delete(0, END)
         self.changebond_listbox.delete(0, END)
+
+        #Go through Form/break bonds and collect bonds that are off in all states!
+        nobonds = list()
+        for line in self.bondchange_listbox.get(0, END):
+            q1, q2 = map(int, line.split()[0:2])
+            if sum(map(int, line.split()[2:])) < 1:
+                nobonds.append('%d %d' % (q1, q2))
+                a1, a2 = self.q_atom_nr[int(q1)], self.q_atom_nr[int(q2)]
+                state_bnds = [' ',' ',' ',' ']
+                for i in range(self.evb_states.get()):
+                    state_bnds[i] = 0
+                bt1, bt2, bt3, bt4 = state_bnds[0:]
+
+                self.changebond_listbox.insert(END, '%6s %6s  %2s  %2s  %2s  %2s' %
+                                                            (a1, a2, bt1, bt2, bt3, bt4))
+
         for q1 in sorted(self.unique_bonds.keys()):
             state_types = [[],[],[],[]]
             state_qbonds = [[],[],[],[]]
-            for state in range(self.evb_states.get()):
+
+            #for state in range(self.evb_states.get()):
+            for state in range(4):
                 for q2 in self.unique_bonds[q1][state]:
                     #Get atomtypes:
                     t1 = self.q_atomtypes[q1][state]
@@ -957,6 +1058,7 @@ class SetupEVB(Toplevel):
                     bond_rev = '%s %s' % (t2, t1)
                     state_types[state].append(bond)
                     state_qbonds[state].append('%d %d' % (q1, q2))
+
                     #Append bondtype with number to bond_prm_nr
                     if bond not in bond_nr_prm.values() and bond_rev not in bond_nr_prm.values():
                         prm_nr += 1
@@ -1092,6 +1194,16 @@ class SetupEVB(Toplevel):
         #List with Q-atoms to include for angle terms
         q_atoms = self.q_atom_nr.keys()
 
+        #Go through Form/break bonds and collect bonds that are off in all states!
+        nobonds = list()
+        nobond_set = set()
+
+        for line in self.bondchange_listbox.get(0, END):
+            q1, q2 = map(int, line.split()[0:2])
+            if sum(map(int, line.split()[2:])) < 1:
+                nobonds.append('%d %d' % (q1, q2))
+                nobond_set.update([q1, q2])
+
         if self.show_changing_angles:
             insert_angle = False
             q_atoms[:] = []
@@ -1122,9 +1234,35 @@ class SetupEVB(Toplevel):
             insert_angle = False
             state_types = [[],[],[],[]]
             state_qangles = [[],[],[],[]]
+
+            #Turn off angles for involved bonds that are off in all states
+            if q1 in nobond_set:
+                #find q2_off atom(s) (no bond in all states, but defined as bond in lib)
+                q2_offs = self.find_bonds(q1, nobonds)
+                if q1 in q2_offs:
+                    q2_offs.remove(q1)
+
+                for q2_off in q2_offs:
+                    #Find all atoms (partners) bonded to q2_off
+                    partners = self.get_bonding_atoms(q2_off)
+                    if q2_off in partners:
+                        partners.remove(q2_off)
+                    if q1 in partners:
+                        partners.remove(q1)
+
+                    #insert all angles that are off, if any
+                    if len(partners) > 0:
+                        self.insert_off_angles(q1, q2_off, partners)
+
             for state in range(self.evb_states.get()):
                 for q2 in self.q_bonds[q1][state]:
                     if q2 != q1:
+                        #Turn off angles for involved bonds that off in all states:
+                        if q2 in nobond_set:
+                            q3_offs = self.find_bonds(q2, nobonds)
+                            if len(q3_offs) > 0:
+                                self.insert_off_angles(q1, q2, q3_offs)
+
                         for q3 in self.q_bonds[q2][state]:
                             if q3 != q2 and q3 != q1:
                                 if [q3, q2, q1] not in q_angles[state] or [q1, q2, q3] not in q_angles[state]:
@@ -1288,6 +1426,16 @@ class SetupEVB(Toplevel):
         #List with Q-atoms to include for angle terms
         q_atoms = self.q_atom_nr.keys()
 
+        #Go through Form/break bonds and collect bonds that are off in all states!
+        nobonds = list()
+        nobond_set = set()
+
+        for line in self.bondchange_listbox.get(0, END):
+            q1, q2 = map(int, line.split()[0:2])
+            if sum(map(int, line.split()[2:])) < 1:
+                nobonds.append('%d %d' % (q1, q2))
+                nobond_set.update([q1, q2])
+
         if self.show_changing_torsion:
             insert_torsion = False
             q_atoms[:] = []
@@ -1319,11 +1467,65 @@ class SetupEVB(Toplevel):
             insert_torsion = False
             state_types = [[],[],[],[]]
             state_qtorsions = [[],[],[],[]]
+
+            #Turn off torsions involving bonds that are off in all states
+            if q1 in nobond_set:
+                q2_offs = self.find_bonds(q1, nobonds)
+                if q1 in q2_offs:
+                    q2_offs.remove(q1)
+
+                for q2_off in q2_offs:
+                    q2_q3s = self.get_bonding_atoms(q2_off)
+
+                    if q1 in q2_q3s:
+                        q2_q3s.remove(q1)
+                    if q2_off in q2_q3s:
+                        q2_q3s.remove(q2_off)
+
+                    for q2_q3 in q2_q3s:
+                        q3_q4s = self.get_bonding_atoms(q2_q3)
+                        if q1 in q3_q4s:
+                            q3_q4s.remove(q1)
+
+                        if q2_off in q3_q4s:
+                            q3_q4s.remove(q2_off)
+
+                        if q2_q3 in q3_q4s:
+                            q3_q4s.remove(q2_q3)
+
+                            self.insert_off_torsions(q1, q2_off, q2_q3, q3_q4s)
+
             for state in range(self.evb_states.get()):
                 for q2 in self.q_bonds[q1][state]:
                     if q2 != q1:
+
+                        #Turn off torsions involving bonds that are off in all states
+                        if q2 in nobond_set:
+                            q3_offs = self.find_bonds(q2, nobonds)
+                            if q1 in q3_offs:
+                                q3_offs.remove(q1)
+                            if q2 in q3_offs:
+                                q3_offs.remove(q2)
+
+                            for q3_off in q3_offs:
+                                q3_q4s = self.get_bonding_atoms(q3_off)
+                                if q3_off in q3_q4s:
+                                    q3_q4s.remove(q3_off)
+                                if q2 in q3_q4s:
+                                    q3_q4s.remove(q2)
+
+                                self.insert_off_torsions(q1, q2, q3_off, q3_q4s)
+
                         for q3 in self.q_bonds[q2][state]:
                             if q3 != q2 and q3 != q1:
+
+                                #Turn off torsions involving bonds that are off in all states
+                                if q3 in nobond_set:
+                                    q4_offs = self.find_bonds(q3, nobonds)
+                                    if q3 in q4_offs:
+                                        q4_offs.remove(q3)
+                                    self.insert_off_torsions(q1, q2, q3, q4_offs)
+
                                 for q4 in self.q_bonds[q3][state]:
                                     if q4 != q3 and q4 != q2 and q4 != q1:
                                         if [q4, q3, q2, q1] not in q_torsions[state] or \
