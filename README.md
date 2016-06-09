@@ -41,7 +41,14 @@ command in the terminal:
 bash-3.2$ python qgui.py
 ```
 
-Or the user can also create an alias in their .cshrc or .bashrc file. For example
+There is also an installation script to automatically set up Qgui on your MAC/LINUX.
+Simply run this by typing the following command in the terminal:
+````bash
+python INSTALL.py
+``` 
+and follow the instructions given therin.
+
+Alternatively, the user can also create an alias in their .cshrc or .bashrc file. For example
 for the case of .bashrc:
 
 ```bash
