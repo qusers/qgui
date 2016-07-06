@@ -288,7 +288,12 @@ class AnalyzeFEP(Toplevel):
 
         for entry in sorted(self.titles[prj_title]):
             if len(self.titles_dg[prj_title][entry]) == 0:
-                self.titles_dg[prj_title][entry] = self.get_part1(self.titles[prj_title][entry])
+                tmpentry = self.get_part1(self.titles[prj_title][entry])
+                if tmpentry: #Error handling: To catch if get_part1 returns None, rather than dictionary. 
+                    self.titles_dg[prj_title][entry] = tmpentry
+                else:
+                    del self.titles_dg[prj_title][entry]
+                    del self.titles[prj_title][entry]
 
         self.update_tables()
 
@@ -302,6 +307,9 @@ class AnalyzeFEP(Toplevel):
         with open('%s/%s' % (path, qfep), 'r') as qfep_out:
             found_part1 = False
             for line in qfep_out:
+                if line == 'Qfep5 terminated abnormally: Failed to read energies.\n':
+                        print ('Qfep failed to read energies in path: %s' % path)
+                        return None
                 if found_part1:
                     if len(line.split()) < 6:
                         break
