@@ -76,17 +76,22 @@ class TrjMask(Toplevel):
 		tmp.communicate()
 		logfile.close()
 
-
+#	def move_file(self, source, destination):
+#		if not os.path.samefile(source,destination): #Checks if filenames are different.
+#			shutil.copyfile(source,destination)		#Copies source file to destination.
 
 	### Main Method
 	def makemask(self,topsource,trjsource,out):
 		inp = self.newname('mask','inp')		#Sets name for input file
 		log = self.newname('mask','log')		#Sets name for log file
-		top = self.newname('mask','top')		#Sets name for top file
-		trj = self.newname('mask','dcd')		#Sets name for trj file
-		shutil.copyfile(topsource,top)			#Copies top file to workdir
-		shutil.copyfile(trjsource,trj)			#Copies trj file to workdir
-		self.makeinp(top,trj,inp,out)			#Creates input file
+		top = self.newname('mask','top')		#Sets name for temporary top file
+		trj = self.newname('mask','dcd')		#Sets name for temporary trj file
+		pdb = self.newname('mask','pdb')		#Sets name for temporary pdb file
+		if pdb == out.split('/')[-1]: #In case user accidentally sets output pdb name the same as temp pdb name.
+			pdb = self.newname('tmp','pdb')
+		shutil.copyfile(topsource,top)				#Copies top file to workdir
+		shutil.copyfile(trjsource,trj)				#Copies trj file to workdir
+		self.makeinp(top,trj,inp,pdb)			#Creates input file
 		try:
 			self.runqprep(inp,log)				#Tries to run Qprep
 		except:
@@ -95,10 +100,13 @@ class TrjMask(Toplevel):
 		self.cleanup(top)						#Removes top file
 		self.cleanup(trj)						#Removes trj file
 		if self.testlog(log): #Checks log file to see if PDB was written, then returns True/False
+			shutil.copyfile(pdb,out) #Copies temporary pdb-file to chosen name and folder
 			self.cleanup(log) #Removes log file
+			self.cleanup(pdb)
 			return True
 		else:
 			self.cleanup(log)
+			self.cleanup(pdb)
 			return False
 
 
@@ -134,7 +142,7 @@ class TrjMask(Toplevel):
 		if self.E1.get() and self.E2.get():
 			opts = {}
 			opts['defaultextension'] = '.pdb'
-			opts['initialfile'] = 'mask.pdb'
+			opts['initialfile'] = 'trjmask.pdb'
 			opts['title'] = 'Choose name for pdb file'
 			opts['parent'] = self
 			opts['initialdir'] = self.workdir

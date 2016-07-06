@@ -1,3 +1,8 @@
+06.07.16 v2.52
+    Added error handling to Analyze FEP module to deal with crashed simulations.
+    Fixed issue with trjmask module resulting from long file names/paths.
+    Fixed unlikely issue in trjmask module if user selects duplicate file name.
+
 09.06.12 v2.51
     Nasty fix for a nasty mistake:
     Fixed critical issue in EVB setup that appears when a bond is
