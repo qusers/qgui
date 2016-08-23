@@ -1,3 +1,6 @@
+23.08.16 v2.53
+    Added option to select nucleic acids in analyse RMSF/RMSD.
+
 06.07.16 v2.52
     Added error handling to Analyze FEP module to deal with crashed simulations.
     Fixed issue with trjmask module resulting from long file names/paths.
