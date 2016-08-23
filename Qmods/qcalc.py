@@ -155,6 +155,21 @@ class AnalyzeQcalc(Toplevel):
             if residues[i].split()[1] in bb:
                 res_atoms.append(i)
 
+    def sel_na(self):
+        """
+        selects entire nucleic acids in listbox
+        """
+
+        resnames = ['UR', 'AD', 'GU', 'CY']
+
+        self.listbox.select_clear(0, END)
+
+        residues = self.listbox.get(0, END)
+
+        for i in range(len(residues)):
+            if residues[i][13:15] in resnames:
+                self.listbox.selection_set(i)
+
     def clear_sel(self):
         """
         Clears atom selection
@@ -618,9 +633,12 @@ class AnalyzeQcalc(Toplevel):
         sc_button = Button(self.setup_frame, text='SC', highlightbackground=self.main_color, command=self.sel_sc)
         sc_button.grid(row=11, column=2)
 
+        na_button = Button(self.setup_frame, text='NA', highlightbackground=self.main_color, command=self.sel_na)
+        na_button.grid(row=12, column=0, columnspan=3)
+
         clear_button = Button(self.setup_frame, text='Clear selection', highlightbackground=self.main_color,
                               command=self.clear_sel)
-        clear_button.grid(row=12, column=0, columnspan=3)
+        clear_button.grid(row=13, column=0, columnspan=3)
 
         #Column 4 --> right frame reserved
         add_label = Label(self.setup_frame, text=self.title_dict[self.qcalc_what], bg=self.main_color)
