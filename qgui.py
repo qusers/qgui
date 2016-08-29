@@ -26,7 +26,7 @@ __status__ = "Production"
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE, Canvas, PhotoImage
+from Tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE
 from tkFileDialog import askopenfilename
 import urllib2
 import os
@@ -59,7 +59,6 @@ from analyze_energies import AnalyzeEnergies
 from qcalc import AnalyzeQcalc
 import prepareTopology as pt
 import cPickle
-from subprocess import call
 import time
 
 class QGui(object):
