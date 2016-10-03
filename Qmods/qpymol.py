@@ -111,6 +111,34 @@ class ViewPyMol(Toplevel):
         #Kill pymol if window is closed... though this does not quite work does it? TODO
         root.protocol('WM_DELETE_WINDOW', self.close_pymol)
 
+    def build_fragment(self):
+        """
+        Triggered when Add button is pressed. Will add atom/fragment to atom 1 with bond length X-1 and
+        with optional angle X-1-2 or torsion X-1-2-3.
+        Changes are temporary saved to tmp1.pdb - tmp20.pdb for undo function to work.
+        """
+        #Fragment or atom?
+
+        #Get fragment/atom-name
+
+
+        #if 0 atoms are selected, XYZ = (0,0,0)
+        if len(self.selected_atoms) == 0:
+            xyz = [0.000, 0.000, 0.000]
+        elif len(self.selected_atoms) == 1:
+            #Get bond length --> build.py
+            pass
+        elif len(self.selected_atoms) == 2:
+            #Get bond length and angle --> build.py
+            pass
+        elif len(self.selected_atoms) == 3:
+            #Get bond, angle and torsion --> build.py
+            pass
+
+        #here I shoud have a dictionary with {atom nr: {'xyz', 'name'}} from build.py
+
+        #insert data in tmp.pdb and update list + pymol
+
     def get_fragments(self):
         """
         :return: dictionary with entries in lib files defined in settings
@@ -127,8 +155,6 @@ class ViewPyMol(Toplevel):
 
             with open(libfile, 'r') as lib:
                 for line in lib:
-
-
 
                     if '[atoms]' in line:
                         found_atoms = True
@@ -198,6 +224,8 @@ class ViewPyMol(Toplevel):
                 build_type = '%5s' % i
 
             self.buildlist.insert(END, build_type)
+
+        self.buildlist.selection_set(0)
 
     def select_mode_changed(self, *args):
         """
