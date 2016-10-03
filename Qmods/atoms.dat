@@ -70,3 +70,23 @@
   82    207.2       Lead     Pb       1.54       1.80       1.47       2.02
   83  208.980    Bismuth     Bi       1.43       1.60       1.46       1.17
   92  238.029    Uranium      U       1.75       1.75       1.86       0.87
+
+# Data for atom radii adapted from http://crystalmaker.com/support/tutorials/crystalmaker/atomic-radii/ where
+# Atomic Radii: values are calculated from:
+# E Clementi, D L Raimondi, W P Reinhardt (1963) J Chem Phys. 38:2686.
+
+# Ionic Radii: these data are taken from an empirical system of unified atomic-ionic radii, 
+# which is suitable for describing anion-cation contacts in ionic structures. 
+# The data were derived by the comparison of bond lengths in over 1200 bond types in ionic, metallic, and covalent crystals and molecules by:
+# J C Slater (1964) J Chem Phys 41:3199
+# J C Slater (1965) Quantum Theory of Molecules and Solids. Symmetry and Bonds in Crystals. Vol 2. McGraw-Hill, New York.
+
+# Note that calculated data have been used for the following elements: He, Ne, Ar, Kr, Xe, At and Rn. These data were taken from:
+# E Clementi, D L Raimondi, W P Reinhardt (1963) J Chem Phys 38:2686
+
+# Covalent Radii: Data given here are taken from WebElements, copyright Mark Winter, University of Sheffield, UK.
+
+#Van-der-Waals Radii: Van der Waals radii are established from contact distances between non-bonding atoms in touching 
+# molecules or atoms. Most data here are from:
+
+# A Bondi (1964) J Phys Chem 68:441
