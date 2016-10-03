@@ -103,6 +103,8 @@ class ViewPyMol(Toplevel):
 
         #Fill atoms in listbox
         self.fill_build_list(self.atom_dict)
+        if edit_mode:
+            self.buildlist.selection_set(0)
 
         self.start_pymol()
 
@@ -166,20 +168,18 @@ class ViewPyMol(Toplevel):
 
         with open(atom_file) as atoms:
             for line in atoms:
-                try:
+                if len(line.split()) > 6 and not line.startswith('#'):
                     atomnumber = int(line.split()[0])
                     mass = float(line.split()[1])
                     name = line.split()[2]
                     symbol = line.split()[3]
+                    cov_r = float(line.split()[6])
 
                     atoms_dict[atomnumber] = dict()
                     atoms_dict[atomnumber]['mass'] = mass
                     atoms_dict[atomnumber]['name'] = name
                     atoms_dict[atomnumber]['symbol'] = symbol
-                except:
-                    print('Could not extract atomic information from line:')
-                    print(line)
-                    continue
+                    atoms_dict[atomnumber]['covalent r'] = cov_r
 
         return atoms_dict
 
