@@ -59,7 +59,7 @@ def translate(p,dv,d):
     dv = dv/np.linalg.norm(dv)
 
     # tranlation
-    q = p + d*dv
+    q = np.array(p) + d*dv
     return q
 
 def measure(v1,v2,v3=None,v4=None):
@@ -71,12 +71,12 @@ def measure(v1,v2,v3=None,v4=None):
         output: scaler"""
     #measure bond lenght
     if (v3 is None) and (v4 is None):
-        return np.linalg.norm((v2-v1))
+        return np.linalg.norm(np.array(v2) - np.array(v1))
 
     #measure v1-v2-v3 angle
     elif (v4 is None):
-        d21 = v1 - v2
-        d23 = v3 - v2
+        d21 = np.array(v1) - np.array(v2)
+        d23 = np.array(v3) - np.array(v2)
         d21 = d21/np.linalg.norm(d21)
         d23 = d23/np.linalg.norm(d23)
         d21Dotd23   = np.dot(d21,d23)
@@ -86,9 +86,9 @@ def measure(v1,v2,v3=None,v4=None):
     #measure v1-v2-v3-v4 torsion (rotation around x-v2-v3-x) in IUPAC 
     #convension (cis=0 and trans=180) between -180 to 180
     else:
-        d12 = v2 - v1
-        d23 = v3 - v2
-        d34 = v4 - v3
+        d12 = np.array(v2) - np.array(v1)
+        d23 = np.array(v3) - np.array(v2)
+        d34 = np.array(v4) - np.array(v3)
         n123 = np.cross(d12,d23)
         n234 = np.cross(d23,d34)
         n123 = n123/np.linalg.norm(n123)
@@ -142,33 +142,21 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
               adjust torsion p1-p2-p3-p4 to phi by moving p1
                                                                     """
 
-    #make sure inputs are float
-    for parm in [p1,p2,p3,p4]:
-        if parm is not None:
-            if not properpoint(parm): return (None,'Bad cartesian coordinate')
-            parm = np.array(parm) + 0.
-    for parm in [d,thetaA,thetaT]:
-            if parm  is not None :
-                    try:
-                        parm = parm + 0.
-                    except (ValueError,TypeError): 
-                        return (None,'Bad scaler parameters')
-
-
     if (flag == 'a') :
+        q = dict()
         # Mode a1: atom addition with one atom specified (p1). The new atom is added to p1 in the defult diretion is (0,0,1).
         if (p2 is None) and (p3 is None) and (p4 is None):
 
             #check the distance
             if d == None or d <= 0:
-                return (None,'Bad bond lenght')
-
-            #input OK then add an atom in the direction of Z axis
+                print 'Bad bond lenght'
+                return None
             else:
                 # transformation
                 dv = np.array((0.,0.,1.0))
-                q  = translate(p1,dv,d)
-                return (q, 'One atom added in the direction of Z axis')
+                q['xyz'] = list(translate(p1['xyz'],dv,d))
+                print 'One atom added in the direction of Z axis'
+                return q 
 
         # Mode a2: atom addition with two atoms specified (p1 ,p2). The new atom is added to p1 with the angle thetaA reletive p2
         # The algle plane is choosen random to avoid any possible runtime error.
@@ -176,21 +164,21 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
             #check the distance and angle
             if d == None or d <= 0 or thetaA is None:
-                return (None,'Bad bond lenght or angle')
+                print 'Bad bond lenght or angle'
+                return None
 
-            #input OK then add an atom in the direction of p1 p2 bond
             else:
-
                 # step 1 add the new atom to p1 in line with p1 and p2
-                dv = p1 - p2
-                q  = translate(p1,dv,d)
+                dv = np.array(p1['xyz']) - np.array(p2['xyz'])
+                q['xyz'] = np.array(translate(p1['xyz'],dv,d))
 
                 #step 2 rotate the q reletive to p1 with angle thetaA reletive to p2
                 # choose a rotation vector at random no plane is defined
                 rv = np.random.rand(3)
                 rv = np.cross(dv,rv)
-                q = rotate(q,p1,rv,(180-thetaA))
-                return (q, 'One atom added with the set angle')
+                q['xyz'] = list(rotate(q['xyz'],p1['xyz'],rv,(180-thetaA)))
+                print 'One atom added with the set angle'
+                return q
 
         # Mode a3: atom addition with three atoms specified (p1 ,p2, p3). The new atom is added to p1 with the angle (q, p1, p2)
         # thetaA and torsion (q, p1, p2, p3) thetaT
@@ -198,28 +186,29 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
             #check the distance and angle
             if d == None or d <= 0 or thetaA is None or thetaT is None:
-                return (None,'Bad bond lenght or angle')
+                print 'Bad bond lenght or angle'
+                return None
 
-            #input OK then add an atom in the direction of p1 p2 bond
             else:
-
                 # step 1 add the new atom to p1 in line with p1 and p2
-                dv = p1 - p2
-                q  = translate(p1,dv,d)
+                dv = np.array(p1['xyz']) - np.array(p2['xyz'])
+                q['xyz']  = np.array(translate(p1['xyz'],dv,d))
 
                 #step 2 rotate the q reletive to p1 with angle thetaA reletive to p2
                 # choose a rotation vector at random no plane is defined
                 rv = np.random.rand(3)
                 rv = np.cross(dv,rv)
-                q  = rotate(q,p1,rv,(180-thetaA))
+                q['xyz']  = rotate(q['xyz'],p1['xyz'],rv,(180-thetaA))
 
                 #step 3 rotate the around the trosron bond. the q should move
-                current_thetaT = measure(v1=q,v2=p1,v3=p2,v4=p3)
+                current_thetaT = measure(v1=q['xyz'],v2=p1['xyz'],v3=p2['xyz'],v4=p3['xyz'])
                 deg2rotate = thetaT - current_thetaT
-                q = rotate(q,p1,dv,(deg2rotate))
-                return (q, 'One atom added with the set angle')
+                q['xyz'] = list(rotate(q['xyz'],p1['xyz'],dv,(deg2rotate)))
+                print 'One atom added with the set angle'
+                return q
         else:
-            return (None, 'Not proper parameters for atom addition')
+            print 'Not proper parameters for atom addition'
+            return None 
 
     # Mode b: adjust a bond the moving atom is p1
     elif (flag == 'b') :
@@ -227,15 +216,18 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
             #check the distance
             if d == None or d <= 0:
-                return (None,'Bad bond lenght')
+                print 'Bad bond lenght'
+                return None
 
             else:
-                dv = p1 - p2
-                current_d = measure(v1=p1,v2=p2)
-                p1  = translate(p1,dv,d-current_d)
-                return (p1, 'bond lenght adjusted')
+                dv = np.array(p1['xyz']) - np.array(p2['xyz'])
+                current_d = measure(v1=p1['xyz'],v2=p2['xyz'])
+                p1['xyz']  = list(translate(p1['xyz'],dv,d-current_d))
+                print 'bond lenght adjusted'
+                return p1
         else :
-            return (None, 'Not proper parameters for bond adjustement')
+            print 'Not proper parameters for bond adjustement'
+            return None
 
     # Mode c: adjust an angle (p1,p2,p3) the center is p2, the moving atom is p1
     elif (flag == 'c') :
@@ -243,19 +235,22 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
             #check the angle
             if thetaA is None:
-                return (None,'Bad angle')
+                print 'Bad angle'
+                return None
 
             #input OK then add an atom in the direction of p1 p2 bond
             else:
                 # the plane is defined by p1,p2,p3 right handed
-                d21 = p1 - p2
-                d23 = p3 - p2
+                d21 = np.array(p1['xyz']) - np.array(p2['xyz'])
+                d23 = np.array(p3['xyz']) - np.array(p2['xyz'])
                 rv = np.cross(d23,d21)
-                current_thetaA = measure(p1,p2,p3)
-                p1  = rotate(p1,p2,rv,(thetaA - current_thetaA))
-                return (p1, 'Angle adjusted')
+                current_thetaA = measure(p1['xyz'],p2['xyz'],p3['xyz'])
+                p1['xyz']  = list(rotate(p1['xyz'],p2['xyz'],rv,(thetaA - current_thetaA)))
+                print 'Angle adjusted'
+                return p1
         else :
-            return (None, 'Not enough parameters for Angle adjustement')
+            print 'Not proper parameters for Angle adjustement'
+            return None 
 
     # Mode d: adjustin torsion (p1,p2,p3,p4) move p1
     if (flag == 'd'):
@@ -263,21 +258,24 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
             #check the angle
             if thetaT is None:
-                return (None,'Torsion angle')
+                print 'Torsion angle'
+                return None 
 
-            #input OK then add an atom in the direction of p1 p2 bond
             else:
                 #rotate around the trosron bond (p2-p3). the p1 should move
-                rv = p2 - p3
-                current_thetaT = measure(v1=p1,v2=p2,v3=p3,v4=p4)
+                rv = np.array(p2['xyz']) - np.array(p3['xyz'])
+                current_thetaT = measure(v1=p1['xyz'],v2=p2['xyz'],v3=p3['xyz'],v4=p4['xyz'])
                 deg2rotate = thetaT - current_thetaT
-                p1 = rotate(p1,p2,rv,(deg2rotate))
-                return (p1, 'Torsion adjusted')
+                p1['xyz'] = rotate(p1['xyz'],p2['xyz'],rv,(deg2rotate))
+                print 'Torsion adjusted'
+                return p1 
         else :
-            return (None, 'Not enough parameters for Torsion adjustement')
+            print 'Not proper parameters for Torsion adjustement'
+            return None
 
     else: #over flags
-        return (None, 'Operation is not defined')
+        print 'Operation is not defined'
+        return None
 
 
 def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,fragname=None,fraglib=None,p1group=None):
@@ -444,7 +442,7 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                 p1group[atom][1:4] = rotate( np.array(map(float,p1group[atom][1:4])) ,p2,rv,(thetaT - current_thetaT))
             return (p1group, 'Torsion fixed')
         else :
-            return (None, 'Not enough parameters for Torsion adjustement')
+            return (None, 'Not proper parameters for Torsion adjustement')
 
 
 if __name__ == '__main__':
@@ -461,230 +459,75 @@ if __name__ == '__main__':
     #         h5       h6             
 
     #define a random point
+    mol = dict()
     c1 = np.random.rand(3)
+    atom = {'atomnr':15, 'xyz':list(c1),'name':'c1','symbol':'c'}
+    mol['1'] = atom
+
     # add c2 in d = 1.5 A
-    c2, statmsg = BuildByAtom("a",p1=c1,d=1.4)
+    mol['2'] = BuildByAtom('a',p1=mol['1'],d=1.5)
+    mol['2']['symbol'] , mol['2']['name'] , mol['2']['atomnr']= 'c', 'c2', 16
+
     # add c3 to c2 with 120 angle fro c3-c2-c1
-    c3, statmsg = BuildByAtom("a",p1=c2,p2=c1,d=1.4,thetaA=120.0)
+    mol['3'] = BuildByAtom('a',p1=mol['2'],p2=mol['1'],d=1.5,thetaA=120.0)
+    mol['3']['symbol'] , mol['3']['name'] , mol['3']['atomnr']= 'c', 'c3', 17
+
     # add c4 to c3 with 120 angle for (c4-c3-c2) and 0 degre torsion for (c4-c3-c2-c1)
-    c4,  statmsg  = BuildByAtom("a",p1=c3,p2=c2,p3=c1,d=1.4,thetaA=120.0,thetaT=0.0)
-    c5,  statmsg  = BuildByAtom("a",p1=c4,p2=c3,p3=c2,d=1.4,thetaA=120.0,thetaT=0.0)
-    c6,  statmsg  = BuildByAtom("a",p1=c5,p2=c4,p3=c3,d=1.4,thetaA=120.0,thetaT=0.0)
-    o4,  statmsg  = BuildByAtom("a",p1=c4,p2=c3,p3=c2,d=1.4,thetaA=120.0,thetaT=180.0)
-    cb,  statmsg  = BuildByAtom("a",p1=c1,p2=c2,p3=c3,d=1.4,thetaA=120.0,thetaT=180.0)
-    hb1, statmsg  = BuildByAtom("a",p1=cb,p2=c1,p3=c2,d=1.0,thetaA=109.5,thetaT=-30.0)
-    hb2, statmsg  = BuildByAtom("a",p1=cb,p2=c1,p3=c2,d=1.0,thetaA=109.5,thetaT=-140.0)
-    h2,  statmsg  = BuildByAtom("a",p1=c2,p2=c3,p3=c4,d=1.0,thetaA=120.0,thetaT=180.0)
-    h3,  statmsg  = BuildByAtom("a",p1=c3,p2=c4,p3=c5,d=1.0,thetaA=120.0,thetaT=180.0)
-    h5,  statmsg  = BuildByAtom("a",p1=c5,p2=c6,p3=c1,d=1.0,thetaA=120.0,thetaT=180.0)
-    h6,  statmsg  = BuildByAtom("a",p1=c6,p2=c5,p3=c4,d=1.0,thetaA=120.0,thetaT=180.0)
-    ho,  statmsg  = BuildByAtom("a",p1=o4,p2=c4,p3=c3,d=1.0,thetaA=109.0,thetaT=90.0)
+    mol['4'] = BuildByAtom("a",p1=mol['3'],p2=mol['2'],p3=mol['1'],d=1.5,thetaA=120.0,thetaT=0.0)
+    mol['4']['symbol'] , mol['4']['name'] , mol['4']['atomnr']= 'c', 'c4', 18
+
+    mol['5'] = BuildByAtom("a",p1=mol['4'],p2=mol['3'],p3=mol['2'],d=1.5,thetaA=120.0,thetaT=0.0)
+    mol['5']['symbol'] , mol['5']['name'] , mol['5']['atomnr']= 'c', 'c5', 19
+
+    mol['6'] = BuildByAtom("a",p1=mol['5'],p2=mol['4'],p3=mol['3'],d=1.5,thetaA=120.0,thetaT=0.0)
+    mol['6']['symbol'] , mol['6']['name'] , mol['6']['atomnr']= 'c', 'c6', 20
+
+    mol['7'] = BuildByAtom("a",p1=mol['4'],p2=mol['3'],p3=mol['2'],d=1.4,thetaA=120.0,thetaT=180.0)
+    mol['7']['symbol'] , mol['7']['name'] , mol['7']['atomnr']= 'o', 'o4', 21
+
+    mol['8'] = BuildByAtom("a",p1=mol['1'],p2=mol['2'],p3=mol['3'],d=1.5,thetaA=120.0,thetaT=180.0)
+    mol['8']['symbol'] , mol['8']['name'] , mol['8']['atomnr']= 'c', 'cb', 22
+
+    mol['9'] = BuildByAtom("a",p1=mol['8'],p2=mol['1'],p3=mol['2'],d=1.0,thetaA=120.0,thetaT=-30.0)
+    mol['9']['symbol'] , mol['9']['name'] , mol['9']['atomnr']= 'h', 'hb1', 23
+
+    mol['10'] = BuildByAtom("a",p1=mol['8'],p2=mol['1'],p3=mol['2'],d=1.0,thetaA=109.0,thetaT=-140.0)
+    mol['10']['symbol'] , mol['10']['name'] , mol['10']['atomnr']= 'h', 'hb1', 24
+
+    mol['11'] = BuildByAtom("a",p1=mol['2'],p2=mol['3'],p3=mol['4'],d=1.0,thetaA=120.0,thetaT=180.0)
+    mol['11']['symbol'] , mol['11']['name'] , mol['11']['atomnr']= 'h', 'h2', 25
+
+    mol['12'] = BuildByAtom("a",p1=mol['3'],p2=mol['4'],p3=mol['5'],d=1.0,thetaA=120.0,thetaT=180.0)
+    mol['12']['symbol'] , mol['12']['name'] , mol['12']['atomnr']= 'h', 'h3', 26
+
+    mol['13'] = BuildByAtom("a",p1=mol['5'],p2=mol['6'],p3=mol['1'],d=1.0,thetaA=120.0,thetaT=180.0)
+    mol['13']['symbol'] , mol['13']['name'] , mol['13']['atomnr']= 'h', 'h5', 27
+
+    mol['14'] = BuildByAtom("a",p1=mol['6'],p2=mol['5'],p3=mol['4'],d=1.0,thetaA=120.0,thetaT=180.0)
+    mol['14']['symbol'] , mol['14']['name'] , mol['14']['atomnr']= 'h', 'h6', 28
+
+    mol['15'] = BuildByAtom("a",p1=mol['7'],p2=mol['4'],p3=mol['3'],d=1.0,thetaA=109.0,thetaT=90.0)
+    mol['15']['symbol'] , mol['15']['name'] , mol['15']['atomnr']= 'h', 'ho', 29
+
+
+
+
 
     with open('01.xyz','w') as f:
-        f.write('15 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',cb[0],cb[1],cb[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',hb1[0],hb1[1],hb1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',hb2[0],hb2[1],hb2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        f.close()
+        f.write('%d \n' %(len(mol)))
+        for key in mol: 
+            print mol[key]
+            f.write('%s %.4f %.4f %.4f \n' %(mol[key]['name'],mol[key]['xyz'][0],mol[key]['xyz'][1],mol[key]['xyz'][2]))
 
     #TEST adjust bond,angle,torsion by atom
-    ho,  statmsg  = BuildByAtom("b",p1=ho,p2=o4,d=1.5)
-    ho,  statmsg  = BuildByAtom("c",p1=ho,p2=o4,p3=c4,thetaA=120.)
-    ho,  statmsg  = BuildByAtom("d",p1=ho,p2=o4,p3=c4,p4=c3,thetaT=0.)
+    mol['15'] = BuildByAtom("b",p1=mol['15'],p2=mol['7'],d=1.5)
+    mol['15'] = BuildByAtom("c",p1=mol['15'],p2=mol['7'],p3=mol['4'],d=1.5,thetaA=120.)
+    mol['15'] = BuildByAtom("d",p1=mol['15'],p2=mol['7'],p3=mol['4'],p4=mol['3'],d=1.5,thetaA=120.,thetaT=0.)
 
     with open('02.xyz','w') as f:
-        f.write('15 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',cb[0],cb[1],cb[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',hb1[0],hb1[1],hb1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',hb2[0],hb2[1],hb2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        f.close()
-
-
-    path = os.path.join(os.getcwd(),'21-fragment.tm')
-    #test BuildByGroup a1 mode add a mthyl group to the cb, newgroup is a dictionary
-    mthyl,  statmsg = BuildByGroup(flag='a',p1=cb,p2=c1,d=1.5,p3=c2,thetaA=109.5,thetaT=90.0, fragname='MTL',fraglib=path)
-    print mthyl,  statmsg 
-    with open('03.xyz','w') as f:
-        f.write('19 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',cb[0],cb[1],cb[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',hb1[0],hb1[1],hb1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',hb2[0],hb2[1],hb2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        for atom in mthyl:
-            f.write('%s %.3f %.3f %.3f \n' %(mthyl[atom][4],mthyl[atom][1],mthyl[atom][2],mthyl[atom][3]))
-        f.close()
-
-
-
-
-    #a group of new methyl and the cb
-    sgroup = mthyl.copy()
-
-    sgroup.update({'5':['CB',cb[0],cb[1],cb[2],'C']})
-    sgroup.update({'6':['HB',hb1[0],hb1[1],hb1[2],'H']})
-    sgroup.update({'7':['HB',hb2[0],hb2[1],hb2[2],'H']})
-    for atom in sgroup:
-        print atom,sgroup[atom]
-
-
-    p1 = np.array(map(float,sgroup['5'][1:4])) 
-
-    #test BuildByGroup b mode change the distance bygroup
-    sgroup,  statmsg = BuildByGroup(flag='b',p1=p1,p1group=sgroup,p2=c1,d=1.7)
-    with open('04.xyz','w') as f:
-        f.write('19 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        for atom in sgroup:
-            f.write('%s %.3f %.3f %.3f \n' %(sgroup[atom][4],sgroup[atom][1],sgroup[atom][2],sgroup[atom][3]))
-        f.close()
-
-    p1 = np.array(map(float,sgroup['5'][1:4])) 
-    #test BuildByGroup c mode 
-    sgroup,  statmsg = BuildByGroup(flag='c',p1=p1,p1group=sgroup,p2=c1,p3=c2,thetaA=120.)
-
-    with open('05.xyz','w') as f:
-        f.write('19 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        for atom in sgroup:
-            f.write('%s %.3f %.3f %.3f \n' %(sgroup[atom][4],sgroup[atom][1],sgroup[atom][2],sgroup[atom][3]))
-        f.close()
-
-    #test BuildByGroup d mode 
-    p1 = np.array(map(float,sgroup['5'][1:4])) 
-    sgroup,  statmsg = BuildByGroup(flag='d',p1=p1,p1group=sgroup,p2=c1,p3=c2,p4=c3,thetaT=90.)
-    with open('06.xyz','w') as f:
-        f.write('19 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        for atom in sgroup:
-            f.write('%s %.3f %.3f %.3f \n' %(sgroup[atom][4],sgroup[atom][1],sgroup[atom][2],sgroup[atom][3]))
-        f.close()
-
-    #lets fix this now
-    p1 = np.array(map(float,sgroup['5'][1:4])) 
-    sgroup,  statmsg = BuildByGroup(flag='c',p1=p1,p1group=sgroup,p2=c1,p3=c2,thetaA=120.)
-    p1 = np.array(map(float,sgroup['5'][1:4])) 
-    sgroup,  statmsg = BuildByGroup(flag='d',p1=p1,p1group=sgroup,p2=c1,p3=c2,p4=c3,thetaT=-180.)
-    print statmsg
-    measure(p1,c1,c2,c3,)
-
-    with open('07.xyz','w') as f:
-        f.write('19 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        for atom in sgroup:
-            f.write('%s %.3f %.3f %.3f \n' %(sgroup[atom][4],sgroup[atom][1],sgroup[atom][2],sgroup[atom][3]))
-        f.close()
-
-    pgroup = sgroup.copy()
-    cb = np.array(map(float,sgroup['5'][1:4])) #keep the previous coordinate
-    p1 = np.array(map(float,sgroup['1'][1:4])) #make the carbon of methyl the hot atom
-    del pgroup['5']
-
-    for atom in pgroup:
-        print atom, pgroup[atom]
-
-    pgroup,  statmsg = BuildByGroup(flag='d',p1=p1,p1group=pgroup,p2=cb,p3=c1,p4=c2,thetaT=-50.)
-    with open('08.xyz','w') as f:
-        f.write('19 \n \n')
-        f.write('%s %.3f %.3f %.3f \n' %('c',c1[0],c1[1],c1[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c2[0],c2[1],c2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c3[0],c3[1],c3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c4[0],c4[1],c4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c5[0],c5[1],c5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',c6[0],c6[1],c6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('o',o4[0],o4[1],o4[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h2[0],h2[1],h2[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h3[0],h3[1],h3[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h5[0],h5[1],h5[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',h6[0],h6[1],h6[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('h',ho[0],ho[1],ho[2]))
-        f.write('%s %.3f %.3f %.3f \n' %('c',cb[0],cb[1],cb[2]))
-        for atom in pgroup:
-            f.write('%s %.3f %.3f %.3f \n' %(pgroup[atom][4],pgroup[atom][1],pgroup[atom][2],pgroup[atom][3]))
-        f.close()
-
-
-
-
-
-
+        f.write('%d \n' %(len(mol)))
+        for key in mol: 
+            print mol[key]
+            f.write('%s %.4f %.4f %.4f \n' %(mol[key]['name'],mol[key]['xyz'][0],mol[key]['xyz'][1],mol[key]['xyz'][2]))
 
 
