@@ -1,5 +1,5 @@
 
-Arg
+#SIDE-CHAIN     ARG     (Arginine +1)
 0  D0     -1.1380    -1.7510     0.0000 Dummy
 1  C1     -2.0246    -1.6049     1.2321 C
 2  H2     -2.7689    -2.4012     1.2414 H
@@ -21,7 +21,7 @@ Arg
 18 H18    -6.3648     3.0797     4.0044 H
 END
 
-MTL
+#GROUP  MTL     (Methyl group -CH3)
 0 D0    -1.7022     0.2055     0.0000 Dummy
 1 C1    -0.6322     0.2055     0.0000 C
 2 H2    -0.2756    -0.8033     0.0000 H
@@ -29,4 +29,5 @@ MTL
 4 H4    -0.2756     0.7099    -0.8737 H
 END
 
-
+#MOLECULE   HOH     (Water H2O)
+END
