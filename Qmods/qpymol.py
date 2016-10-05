@@ -22,6 +22,8 @@ import os
 import signal
 import sys
 import numpy as np
+import shutil
+from copy import deepcopy
 import build as bld
 from tkFileDialog import askopenfilenames
 
@@ -39,7 +41,10 @@ class ViewPyMol(Toplevel):
             self.pdbfile = self.app.pdb_id
         else:
             self.pdbfile = '%s/.new.pdb' % self.app.workdir
-            open(self.pdbfile, 'a').close()
+            #Need to add empty line to avoid pymol complaining about it
+            f = open(self.pdbfile, 'w')
+            f.write('\n')
+            f.close()
             self.pymol_mode.set('Edit')
             edit_mode = True
 
@@ -66,6 +71,13 @@ class ViewPyMol(Toplevel):
         #Keep track of click sequence in edit mode. Max 4 atoms {number: atomnumber}
         self.selected_atoms = list()
 
+        #Keep track of temporary pdb files for undo function TODO
+        self.tmp_pdb = list()
+        #Max number of undo (this in principle means how many temporary pdb files to store):
+        self.max_undo = 20
+        #Store tmp pdb files:
+        self.tmp_pdb_dir = '%s/.tmp_pdb_history/' % self.app.workdir
+
         self.dialog_window()
 
         if edit_mode:
@@ -91,7 +103,7 @@ class ViewPyMol(Toplevel):
         #QpyMol can be launched with additional start commands:
         #self.start_cmd = ['show cartoon', 'hide lines']
 
-        self.add_atoms_to_list()
+        self.add_atoms_to_list(self.pdbfile)
 
 
         #Get atom info from file:
@@ -111,38 +123,259 @@ class ViewPyMol(Toplevel):
         #Kill pymol if window is closed... though this does not quite work does it? TODO
         root.protocol('WM_DELETE_WINDOW', self.close_pymol)
 
-    def build_fragment(self):
+    def get_p_atoms(self):
         """
-        Triggered when Add button is pressed. Will add atom/fragment to atom 1 with bond length X-1 and
+        Get list of atom dictionaries for p1-p4 and return
+        :return: p_atoms = [dict()]
+        """
+
+        p_atoms = [None, None, None, None]
+        if len(self.selected_atoms) < 1:
+            return p_atoms
+
+        pdb_lines = self.get_pdb_atoms(self.selected_atoms)
+
+        for i in range(len(self.selected_atoms)):
+            atomnr = self.selected_atoms[i]
+            xyz = map(float, pdb_lines[i][30:].split()[0:3])
+            name = pdb_lines[i][13:17].strip()
+            residue = pdb_lines[i][17:21].strip()
+            residue_nr = pdb_lines[i][22:26].strip()
+            p_atoms[i] = {'atomnr': int(atomnr),
+                          'xyz': xyz,
+                          'name': name,
+                          'residue': residue,
+                          'residuenr': int(residue_nr)}
+
+        return p_atoms
+
+    def add_build(self):
+        """
+        Triggered when Add button is pressed. Decide if to build by atoms or fragments and go to corresponding
+        function.
+        """
+        bond, angle, torsion = None, None, None
+
+        if len(self.selected_atoms) > 0:
+            #Get bond length
+            try:
+                bond = float(self.bond_new.get())
+            except:
+                self.app.errorBox('Error', 'Invalid bond length value')
+                return
+        if len(self.selected_atoms) > 1:
+            #Get angle
+            try:
+                angle = float(self.angle_new.get())
+            except:
+                self.app.errorBox('Error', 'Invalid angle value')
+                return
+        if len(self.selected_atoms) > 2:
+            #Get torsion
+            try:
+                torsion = self.torsion_new.get()
+            except:
+                self.app.errorBox('Error', 'Invalid dihedral value')
+                return
+
+        #Fragment or atom?
+        if len(self.buildlist.curselection()) > 0:
+            #Get selected fragment/atom
+            fragment = self.buildlist.get(self.buildlist.curselection()[0]).split()[-1]
+            #Get list of p atoms (selected atoms ordered 1 - 4)
+            p_atoms = self.get_p_atoms()
+            if self.atoms_fragments.get() == 'Atoms':
+                self.build_atom(fragment, p_atoms, bond, angle, torsion)
+            else:
+                self.build_fragment(fragment, p_atoms, bond, angle, torsion)
+        else:
+            return
+
+    def undo_build(self):
+        """
+        Unde build moves to the previous pdb strcture
+        :return:
+        """
+        if len(self.tmp_pdb) < 1:
+            return
+
+        #Delete last pdb
+        del self.tmp_pdb[-1]
+
+        if len(self.tmp_pdb) < 1:
+            new = self.pdbfile
+        else:
+            new = self.tmp_pdb[-1]
+
+        self.update_pymol_structure(new)
+        self.add_atoms_to_list(new)
+        self.regulate_edit_controls()
+
+    def write_tmp_pdb(self, group, insert_after_atomnr=None, resnr_add=0):
+        """
+        writes a atom to pdb file, update list and pymol
+        :param group: {atom_nr: {'atomnnr', 'xyz', 'name', 'residue', 'residuenr'}}
+        :return:
+        """
+
+        #Get original/previous pdb file:
+        if len(self.tmp_pdb) < 1:
+            old_pdb = self.pdbfile
+        else:
+            old_pdb = self.tmp_pdb[-1]
+
+        #create new temp pdb file
+        tmp_name = '%s/tmp%03d.pdb' % (self.tmp_pdb_dir, len(self.tmp_pdb))
+        self.tmp_pdb.append(tmp_name)
+
+        #Check that PDB files in history is not exceeding the "max undo"
+        if len(self.tmp_pdb) > self.max_undo:
+            remove_from_history = self.tmp_pdb.pop(0)
+            os.remove(remove_from_history)
+
+        atomnr = 0
+        inserted_fragment = False
+        insert_fragment = False
+
+        if not insert_after_atomnr:
+            insert_fragment = True
+
+        #Write the new pdb file:
+        tmp_pdb = open(tmp_name, 'w')
+        with open(old_pdb, 'r') as old:
+            for line in old:
+                print line
+                if 'ATOM' in line or 'HETATM' in line:
+                    if inserted_fragment:
+                        atomnr += 1
+                        resnr = int(line[22:26]) + resnr_add
+                        tmp_pdb.write('%s%5d%s%5d%s' % (line[0:6], atomnr, line[11:21], resnr, line[26:]))
+                    else:
+                        atomnr = int(line.split()[1])
+                        tmp_pdb.write(line)
+                        if atomnr == insert_after_atomnr:
+                            print 'Found correct atom number'
+                            #insert the new fragment
+                            insert_fragment = True
+
+                if insert_fragment:
+                    #insert the new fragment
+                    for i in sorted(group.keys()):
+                        atomnr += 1
+                        resnr = group[i]['residuenr']
+                        res = group[i]['residue']
+                        x, y, z = group[i]['xyz'][0:]
+                        name = group[i]['name']
+                        tmp_pdb.write('ATOM  %5d  %4s%4s %4d    %8.3f%8.3f%8.3f\n' %
+                                      (atomnr, name.ljust(4), res.ljust(4), resnr, x, y, z))
+                    inserted_fragment = True
+                    insert_fragment = False
+
+        tmp_pdb.close()
+
+        #make selected atoms zero:
+        del self.selected_atoms[:]
+        self.listbox.selection_clear(0, END)
+
+        print self.selected_atoms
+
+        #update pymol with new tmp pdb file
+        self.update_pymol_structure(tmp_name)
+        self.add_atoms_to_list(tmp_name)
+
+    def update_pymol_structure(self, pdb):
+        """
+        updates currens structure in pymol to the given pdb
+        :param pdb:
+        :return: Nada de nada
+        """
+        self.session.stdin.write('load %s, mol, state=1\n' % pdb)
+        self.pymol_highlight_edit(self.selected_atoms)
+
+    def get_new_atomname(self, name, p1_atom):
+        """
+        Decides proper atom name for new atom (f. ex name C would be C1)
+        :param name: atom name of new atom
+        :param p1_atom:
+        :return: new_name
+        """
+        res_nr = p1_atom['residuenr']
+        nr = 1
+
+        atom_len = len(name)
+
+        #Get correct pdb file to read from:
+        pdb_file = self.pdbfile
+        if len(self.tmp_pdb) > 0:
+            pdb_file = self.tmp_pdb[-1]
+
+        found_res = False
+        with open(pdb_file, 'r') as pdb:
+            for line in pdb:
+                if 'ATOM' in line or 'HETATM' in line:
+                    residuenr = int(line[22:26])
+
+                    if residuenr == res_nr:
+                        found_res = True
+
+                    if found_res:
+                        if residuenr != res_nr:
+                            break
+
+                        atom = line[13:13+atom_len]
+                        if atom == name:
+                            nr += 1
+
+        return '%s%d' % (name, nr)
+
+    def build_atom(self, atomname=None, p_atoms=None, bond=None, angle=None, torsion=None):
+        """
+        Will add atom to atom 1 with bond length X-1 and
         with optional angle X-1-2 or torsion X-1-2-3.
         Changes are temporary saved to tmp1.pdb - tmp20.pdb for undo function to work.
+
+        Calls build.py BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
+        p1 = {'atomnnr', 'xyz', 'name'}}
         """
-        #Fragment or atom?
 
-        #Get fragment/atom-name
+        new_atom = dict()
+        if p_atoms[0]:
+            #Adapt properties from p1 atoms:
+            new_atom[1] = deepcopy(p_atoms[0])
+        else:
+            new_atom[1] = {'name':atomname+'1', 'atomnr': 1, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': 1}
 
+        print new_atom
 
-        #if 0 atoms are selected, XYZ = (0,0,0)
         if len(self.selected_atoms) == 0:
-            xyz = [0.000, 0.000, 0.000]
-        elif len(self.selected_atoms) == 1:
-            #Get bond length --> build.py
-            pass
-        elif len(self.selected_atoms) == 2:
-            #Get bond length and angle --> build.py
-            pass
-        elif len(self.selected_atoms) == 3:
-            #Get bond, angle and torsion --> build.py
-            pass
+            self.write_tmp_pdb(new_atom)
+            return
 
-        #here I shoud have a dictionary with {atom nr: {'xyz', 'name'}} from build.py
+        print bond, angle, torsion
+        q = bld.BuildByAtom('a', p_atoms[0], p_atoms[1], p_atoms[2], p_atoms[3], bond, angle, torsion)
+        print q
 
-        #insert data in tmp.pdb and update list + pymol
+        new_atom[1]['xyz'] = q['xyz']
+        new_atom[1]['name'] = self.get_new_atomname(atomname, p_atoms[0])
+
+        self.write_tmp_pdb(new_atom, p_atoms[0]['atomnr'])
+
+
+    def build_fragment(self, fragment=None, p_atoms=None, bond=None, angle=None, torsion=None):
+        #TODO
+        #Insert fragment after P1 residue. Renumber residue number and atom numbers.
+        pass
+
+    def adjust_group(self):
+        #TODO
+        pass
+
 
     def get_fragments(self):
         """
         :return: dictionary with entries in lib files defined in settings
         {resname: {atomnames, types, bonds, head, tail}}
+        #TODO this is only temporary... will read from Qmods/fragments.dat
         """
         fragments = dict()
 
@@ -246,14 +479,14 @@ class ViewPyMol(Toplevel):
         tmpfile = open(self.app.workdir+'/.tmpfile','wb')
         if 'darwin' in sys.platform:
             try:
-                self.session = Popen(["pymol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE,
+                self.session = Popen(["pymol", "-p -x -i"], stdout=tmpfile, stdin=PIPE,
                                      preexec_fn=os.setsid)
             except:
                 print 'pymol not found'
 
         else:
             try:
-                self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+                self.session = Popen(["pymol", "-p"], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
             except:
                 print 'No pymol version found'
 
@@ -264,6 +497,8 @@ class ViewPyMol(Toplevel):
 
         #Update select mode (Atoms, residues)
         self.select_mode_changed()
+
+        self.session.stdin.write('load %s, mol\n' % self.pdbfile)
 
         #Load default Q-PyMol settings:
         for settings in self.pymol_settings:
@@ -322,11 +557,13 @@ class ViewPyMol(Toplevel):
 
         self.app.pymol_running = False
 
-    def add_atoms_to_list(self):
+    def add_atoms_to_list(self, pdbfile):
         """
         Add atoms from pdbfile to selection list.
         """
-        with open(self.pdbfile) as pdb:
+        self.listbox.delete(0, END)
+
+        with open(pdbfile) as pdb:
             for line in pdb:
                 if 'ATOM' in line or 'HETATM' in line:
                     try:
@@ -347,6 +584,10 @@ class ViewPyMol(Toplevel):
         except:
             self.app.pymol_running = False
             self.destroy()
+
+        #Remove pdb temp directory
+        if os.path.exists(self.tmp_pdb_dir):
+            shutil.rmtree(self.tmp_pdb_dir)
 
     def set_selection(self, atoms='all'):
         """
@@ -740,10 +981,15 @@ class ViewPyMol(Toplevel):
         self.listbox.selection_clear(0, END)
 
         if self.pymol_mode.get() == 'Edit':
+            #Create pdb temp directory:
+            if not os.path.exists(self.tmp_pdb_dir):
+                os.makedirs(self.tmp_pdb_dir)
+
             self.select_mode.set('Atoms')
             self.listbox.config(selectmode=MULTIPLE)
             self.regulate_edit_controls()
-            self.buildlist.selection_set(0)
+            if len(self.buildlist.curselection()) == 0:
+                self.buildlist.selection_set(0)
             if self.session:
                 self.session.stdin.write('select none\n')
                 self.session.stdin.write('set label_font_id, 7\nset label_size, -0.5\n')
@@ -769,13 +1015,16 @@ class ViewPyMol(Toplevel):
         for i in range(len(atoms)):
             pdb.append(None)
 
-        with open(self.pdbfile) as pdbfile:
+        pdb_file = self.pdbfile
+        if len(self.tmp_pdb) > 0:
+            pdb_file = self.tmp_pdb[-1]
+
+        with open(pdb_file) as pdbfile:
             for line in pdbfile:
-                if 'ATOM' or 'HETATM' in line:
+                if 'ATOM' in line or 'HETATM' in line:
                     atom = line.split()[1]
                     if atom in atoms:
                         pdb[atoms.index(atom)] = line
-
                 #No need to read the rest of the file if all atoms are found:
                 if not None in pdb:
                     break
@@ -1013,13 +1262,15 @@ class ViewPyMol(Toplevel):
                             from_=-360.00, to=360.00, increment=0.1, format="%.2f")
         self.torsion_new.grid(in_=add_frame_label, column=4, row=3)
 
-        self.addbutton = Button(self.edit_frame, text='Add', highlightbackground=self.main_color, command=None)
+        self.addbutton = Button(self.edit_frame, text='Add', highlightbackground=self.main_color,
+                                command=self.add_build)
         self.addbutton.grid(in_=add_frame_label, row=4, column=4, columnspan=1)
 
         self.deletebutton = Button(self.edit_frame, text='Delete', highlightbackground=self.main_color, command=None)
         self.deletebutton.grid(in_=exist_frame_label, row=4, column=2, columnspan=1)
 
-        self.undobutton = Button(self.edit_frame, text='Undo', highlightbackground=self.main_color, command=None)
+        self.undobutton = Button(self.edit_frame, text='Undo', highlightbackground=self.main_color,
+                                 command=self.undo_build)
         self.undobutton.grid(in_=exist_frame_label, row=4, column=3, columnspan=1)
 
 
