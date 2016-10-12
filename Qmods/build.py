@@ -195,7 +195,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                 return None
             else:
                 # transformation
-                dv = np.array((0.,0.,1.0))
+                dv = np.array((1.,0.,0.0))
                 q['xyz'] = list(translate(p1['xyz'],dv,d))
 
             # Mode a2: atom addition with two atoms specified (p1 ,p2). 
@@ -214,7 +214,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                     rv = np.cross(d21,dq1)
                     #in case atoms are linear
                     if np.linalg.norm(rv) == 0 : 
-                        rv = np.cross(np.random.rand(3),d21)
+                        rv = np.cross(np.random.rand(3), d21)
                     current_thetaA = measure(q['xyz'],p1['xyz'],p2['xyz'])
                     q['xyz']  = list(rotate(q['xyz'],p1['xyz'],rv,(thetaA - current_thetaA)))
 

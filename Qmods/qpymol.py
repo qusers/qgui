@@ -173,7 +173,7 @@ class ViewPyMol(Toplevel):
         if len(self.selected_atoms) > 2:
             #Get torsion
             try:
-                torsion = self.torsion_new.get()
+                torsion = float(self.torsion_new.get())
             except:
                 self.app.errorBox('Error', 'Invalid dihedral value')
                 return
@@ -1082,7 +1082,7 @@ class ViewPyMol(Toplevel):
             self.update_spinbox_silent(self.angle_new, angle)
 
         if len(atoms) > 2:
-            torsion = 10.00
+            torsion = 180.00
             self.update_spinbox_silent(self.torsion_new, torsion)
 
     def update_spinbox_silent(self, spinbox, value):
