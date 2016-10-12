@@ -351,7 +351,11 @@ class TopologyPrepare(Toplevel):
 
                     #Check if residue is N-terminal:
                     if atom_name == 'N':
-                        n_xyz = map(float, line[30:].split()[0:3])
+                        n_xyz = list()
+                        #n_xyz = map(float, line[30:].split()[0:3])
+                        n_xyz.append(float(line[30:38]))
+                        n_xyz.append(float(line[38:46]))
+                        n_xyz.append(float(line[46:54]))
                         if not c_xyz:
                             create_nterm = True
 
@@ -363,7 +367,11 @@ class TopologyPrepare(Toplevel):
 
                     #Collect coordinates for carbonyl carbon
                     elif atom_name == 'C':
-                        c_xyz = map(float, line[30:].split()[0:3])
+                        c_xyz = list()
+                        #c_xyz = map(float, line[30:].split()[0:3])
+                        c_xyz.append(float(line[30:38]))
+                        c_xyz.append(float(line[38:46]))
+                        c_xyz.append(float(line[46:54]))
 
                     #collect atom names for given residue:
                     if res_nr == int(line[21:26]):
@@ -507,7 +515,10 @@ class TopologyPrepare(Toplevel):
                     if res in self.resname_nr_dist.keys():
                         #Take coordinates of 1st atom in case distance atom is not found:
                         if 'x' not in self.resname_nr_dist[res][res_nr].keys():
-                            x, y, z = map(float, line[30:].split()[0:3])
+                            #x, y, z = map(float, line[30:].split()[0:3])
+                            x = float(line[30:38])
+                            y = float(line[38:46])
+                            z = float(line[46:54])
                             self.resname_nr_dist[res][res_nr]['x'] = x
                             self.resname_nr_dist[res][res_nr]['y'] = y
                             self.resname_nr_dist[res][res_nr]['z'] = z
@@ -522,7 +533,10 @@ class TopologyPrepare(Toplevel):
 
                         #If defined atom to compute distance to is found, add it:
                         if distatom == atom_name:
-                            x, y, z = map(float, line[30:].split()[0:3])
+                            #x, y, z = map(float, line[30:].split()[0:3])
+                            x = float(line[30:38])
+                            y = float(line[38:46])
+                            z = float(line[46:54])
                             self.resname_nr_dist[res][res_nr]['x'] = x
                             self.resname_nr_dist[res][res_nr]['y'] = y
                             self.resname_nr_dist[res][res_nr]['z'] = z
@@ -610,7 +624,10 @@ class TopologyPrepare(Toplevel):
                     atom_name2 = pdb_line[13:17].strip()
 
                     if atom_name2 == distatom2:
-                        x, y, z = map(float, pdb_line[30:].split()[0:3])
+                        #x, y, z = map(float, pdb_line[30:].split()[0:3])
+                        x = float(pdb_line[30:38])
+                        y = float(pdb_line[38:46])
+                        z = float(pdb_line[46:54])
                         self.resname_nr_dist[nterm][res_nr]['x'] = x
                         self.resname_nr_dist[nterm][res_nr]['y'] = y
                         self.resname_nr_dist[nterm][res_nr]['z'] = z
