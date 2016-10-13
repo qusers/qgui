@@ -949,7 +949,7 @@ class ViewPyMol(Toplevel):
             return
 
         for dcd in dcd_files:
-            self.session.stdin.write('load_traj %s, %s\n' % (dcd, self.pdbfile.split('/')[-1].split('.')[0]))
+            self.session.stdin.write('load_traj %s, %s\n' % (dcd, 'mol' )) #self.pdbfile.split('/')[-1].split('.')[0]))
 
         self.session.stdin.write('set internal_gui, 1\n')
 
