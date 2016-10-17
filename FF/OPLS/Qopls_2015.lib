@@ -752,11 +752,11 @@
         CB    HB2   HB3   
         CG    HG2   HG3   CD1    OE1   OE2   
 *------------------------------------------------------------------
-{CGLY}            !charge: -1.1 || GLY C-terminal (standard)
+{CGLY}            !charge: -1.0 || GLY C-terminal (standard)
     [atoms]
          1 N      N238       -0.500
          2 H      H241        0.300
-         3 CA     C283        0.040
+         3 CA     C285       -0.020
          4 HA1    H140        0.060
          5 HA2    H140        0.060
          6 C      C271        0.700
@@ -2658,10 +2658,10 @@
         CG    HG2   HG3   CD    OE1   OE2   
         C     O     
 *------------------------------------------------------------------
-{NGLY}            !charge: 1.1 || GLY N-terminal (standard)
+{NGLY}            !charge: 1.0 || GLY N-terminal (standard)
     [atoms]
          1 N      N287       -0.300
-         2 CA     C293        0.250
+         2 CA     C292        0.190
          3 HA1    H140        0.060
          4 HA2    H140        0.060
          5 C      C235        0.500
