@@ -1,0 +1,92 @@
+#nr.   #mass    #name     #symbol   #atom r    #ionic r    #cov. r    #vdW r     
+   1   1.0079   Hydrogen      H       0.53       0.25       0.37       1.20
+   2   4.0026     Helium     He       0.31       0.31       0.32       1.40
+   3    6.941    Lithium     Li       1.67       1.45       1.34       1.82
+   4   9.0122  Beryllium     Be       1.12       1.05       0.90       0.41
+   5   10.811      Boron      B       0.87       0.85       0.82       0.25
+   6  12.0107     Carbon      C       0.67       0.70       0.77       1.70
+   7  14.0067   Nitrogen      N       0.56       0.65       0.75       1.55
+   8  15.9994     Oxygen      O       0.48       0.60       0.73       1.52
+   9  18.9984   Fluorine      F       0.42       0.50       0.71       1.47
+  10  20.1797       Neon     Ne       0.38       0.38       0.69       1.54
+  11  22.9897     Sodium     Na       1.90       1.80       1.54       2.27
+  12   24.305  Magnesium     Mg       1.45       1.50       1.30       1.73
+  13  26.9815   Aluminum     Al       1.18       1.25       1.18       0.53
+  14  28.0855    Silicon     Si       1.11       1.10       1.11       2.10
+  15  30.9738 Phosphorus      P       0.98       1.00       1.06       1.80
+  16   32.065     Sulfur      S       0.88       1.00       1.02       1.80
+  17   35.453   Chlorine     Cl       0.79       1.00       0.99       1.75
+  18   39.948      Argon     Ar       0.71       0.71       0.97       1.88
+  19  39.0983  Potassium      K       2.43       2.20       1.96       2.75
+  20   40.078    Calcium     Ca       1.94       1.80       1.74       1.14
+  21  44.9559   Scandium     Sc       1.84       1.60       1.44       0.89
+  22   47.867   Titanium     Ti       1.76       1.40       1.36       0.75
+  23  50.9415   Vanadium      V       1.71       1.35       1.25       0.68
+  24  51.9961   Chromium     Cr       1.66       1.40       1.27       0.76
+  25   54.938  Manganese     Mn       1.61       1.40       1.39       0.81
+  26   55.845       Iron     Fe       1.56       1.40       1.25       0.69
+  27  58.9332     Cobalt     Co       1.52       1.35       1.26       0.54
+  28  58.6934     Nickel     Ni       1.49       1.35       1.21       1.63
+  29   63.546     Copper     Cu       1.45       1.35       1.38       1.40
+  30    65.39       Zinc     Zn       1.42       1.35       1.31       1.39
+  31   69.723    Gallium     Ga       1.36       1.30       1.26       1.87
+  32    72.64  Germanium     Ge       1.25       1.25       1.22       0.53
+  33  74.9216    Arsenic     As       1.14       1.15       1.19       1.85
+  34    78.96   Selenium     Se       1.03       1.15       1.16       1.90
+  35   79.904    Bromine     Br       0.94       1.15       1.14       1.85
+  36     83.8    Krypton     Kr       0.88       0.88       1.10       2.02
+  37  85.4678   Rubidium     Rb       2.65       2.35       2.11       1.66
+  38    87.62  Strontium     Sr       2.19       2.00       1.92       1.32
+  39  88.9059    Yttrium      Y       2.12       1.85       1.62       1.04
+  40   91.224  Zirconium     Zr       2.06       1.55       1.48       0.86
+  41  92.9064    Niobium     Nb       1.98       1.45       1.37       0.78
+  42    95.94 Molybdenum     Mo       1.90       1.45       1.45       0.79
+  43       98 Technetium     Tc       1.83       1.35       1.56       0.79
+  44   101.07  Ruthenium     Ru       1.78       1.30       1.26       0.82
+  45  102.905    Rhodium     Rh       1.73       1.35       1.35       0.81
+  46   106.42  Palladium     Pd       1.69       1.40       1.31       1.63
+  47  107.868     Silver     Ag       1.65       1.60       1.53       1.72
+  48  112.411    Cadmium     Cd       1.61       1.55       1.48       1.58
+  49  114.818     Indium     In       1.56       1.55       1.44       1.93
+  50   118.71        Tin     Sn       1.45       1.45       1.41       2.17
+  51   121.76   Antimony     Sb       1.33       1.45       1.38       0.90
+  52    127.6  Tellurium     Te       1.23       1.40       1.35       2.06
+  53  126.905     Iodine      I       1.15       1.40       1.33       1.98
+  54  131.293      Xenon     Xe       1.08       1.08       1.30       2.16
+  55  132.906     Cesium     Cs       2.98       2.60       2.25       1.81
+  56  137.327     Barium     Ba       2.53       2.15       1.98       1.49
+  57  138.906  Lanthanum     La       1.95       1.95       1.69       1.36
+  71  174.967   Lutetium     Lu       2.17       1.75       1.60       1.00
+  72   178.49    Hafnium     Hf       2.08       1.55       1.50       0.85
+  73  180.948   Tantalum     Ta       2.00       1.45       1.38       0.78
+  74   183.84   Tungsten      W       1.93       1.35       1.46       0.74
+  75  186.207    Rhenium     Re       1.88       1.35       1.59       0.77
+  76   190.23     Osmium     Os       1.85       1.30       1.28       0.77
+  77  192.217    Iridium     Ir       1.80       1.35       1.37       0.77
+  78  195.078   Platinum     Pt       1.77       1.35       1.28       1.75
+  79  196.967       Gold     Au       1.74       1.35       1.44       1.66
+  80   200.59    Mercury     Hg       1.71       1.50       1.49       1.55
+  81  204.383   Thallium     Tl       1.56       1.90       1.48       1.96
+  82    207.2       Lead     Pb       1.54       1.80       1.47       2.02
+  83  208.980    Bismuth     Bi       1.43       1.60       1.46       1.17
+  92  238.029    Uranium      U       1.75       1.75       1.86       0.87
+
+# Data for atom radii adapted from http://crystalmaker.com/support/tutorials/crystalmaker/atomic-radii/ where
+# Atomic Radii: values are calculated from:
+# E Clementi, D L Raimondi, W P Reinhardt (1963) J Chem Phys. 38:2686.
+
+# Ionic Radii: these data are taken from an empirical system of unified atomic-ionic radii, 
+# which is suitable for describing anion-cation contacts in ionic structures. 
+# The data were derived by the comparison of bond lengths in over 1200 bond types in ionic, metallic, and covalent crystals and molecules by:
+# J C Slater (1964) J Chem Phys 41:3199
+# J C Slater (1965) Quantum Theory of Molecules and Solids. Symmetry and Bonds in Crystals. Vol 2. McGraw-Hill, New York.
+
+# Note that calculated data have been used for the following elements: He, Ne, Ar, Kr, Xe, At and Rn. These data were taken from:
+# E Clementi, D L Raimondi, W P Reinhardt (1963) J Chem Phys 38:2686
+
+# Covalent Radii: Data given here are taken from WebElements, copyright Mark Winter, University of Sheffield, UK.
+
+#Van-der-Waals Radii: Van der Waals radii are established from contact distances between non-bonding atoms in touching 
+# molecules or atoms. Most data here are from:
+
+# A Bondi (1964) J Phys Chem 68:441

@@ -222,8 +222,8 @@ class QGui(object):
         self.makeparameters.resizable()
 
     def open_trjmask(self):
-    	self.trjmask = TrjMask(self, self.root)
-    	self.trjmask.configure(background=self.main_color)
+        self.trjmask = TrjMask(self, self.root)
+        self.trjmask.configure(background=self.main_color)
 
     def evb_calibration(self):
         """
@@ -478,15 +478,12 @@ class QGui(object):
         self.top_id = new_top
 
     def view_pymol(self):
-        if self.pdb_id:
-            self.pymol_session = ViewPyMol(self, self.root)
-            self.pymol_session.configure(background=self.main_color)
-            self.pymol_session.resizable()
 
-            self.pymol_running = True
+        self.pymol_session = ViewPyMol(self, self.root)
+        self.pymol_session.configure(background=self.main_color)
+        self.pymol_session.resizable()
 
-        else:
-            self.errorBox('Error', 'No structure loaded for pymol to display')
+        self.pymol_running = True
 
     def exit(self):
         """This method is called from the mainwindow menubar->filemenu->Close is chosen."""
