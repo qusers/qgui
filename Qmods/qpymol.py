@@ -211,27 +211,81 @@ class ViewPyMol(Toplevel):
         self.add_atoms_to_list(new)
         self.regulate_edit_controls()
 
-    def write_tmp_pdb(self, group, insert_after_atomnr=None, resnr_add=0):
+    def delete_atoms(self):
         """
-        writes a atom to pdb file, update list and pymol
-        :param group: {atom_nr: {'atomnnr', 'xyz', 'name', 'residue', 'residuenr'}}
-        :return:
+        Deletes selected pdb atoms and create new tmp pdb file.
         """
+        if len(self.selected_atoms) < 1:
+            return
 
+        old_pdb, new_pdb = self.get_old_new_pdb_name()
+
+        #Add new pdb file to history
+        self.add_pdb_history(new_pdb)
+
+        new = open(new_pdb, 'w')
+        i = 0
+        with open(old_pdb, 'r') as old:
+            for line in old:
+                if 'ATOM' in line or 'HETATM' in line:
+                    atomnr = line.split()[1]
+                    if atomnr not in self.selected_atoms:
+                        i += 1
+                        new.write('%s%5d%s' % (line[0:6], i, line[11:]))
+
+        #If nothing has been written to file, add empty line to avoid pymol complaining!
+        if i < 1:
+            new.write('\n')
+
+        new.close()
+
+        #make selected atoms zero:
+        del self.selected_atoms[:]
+        self.listbox.selection_clear(0, END)
+
+        #update pymol with new tmp pdb file
+        self.update_pymol_structure(new_pdb)
+        self.add_atoms_to_list(new_pdb)
+
+    def get_old_new_pdb_name(self):
+        """
+        Decide what the current PDB file is and name of new pdb file
+        :return: old_pdb new_pdb
+        """
         #Get original/previous pdb file:
         if len(self.tmp_pdb) < 1:
             old_pdb = self.pdbfile
         else:
             old_pdb = self.tmp_pdb[-1]
 
-        #create new temp pdb file
-        tmp_name = '%s/tmp%03d.pdb' % (self.tmp_pdb_dir, len(self.tmp_pdb))
-        self.tmp_pdb.append(tmp_name)
+        new_pdb = '%s/tmp%03d.pdb' % (self.tmp_pdb_dir, len(self.tmp_pdb))
+
+        return old_pdb, new_pdb
+
+    def add_pdb_history(self, pdb):
+        """
+        Adds pdb file to history (for undo function) and controls that history does not exceed the max undo
+        :param pdb:
+        """
+        #Add pdb to history
+        self.tmp_pdb.append(pdb)
 
         #Check that PDB files in history is not exceeding the "max undo"
         if len(self.tmp_pdb) > self.max_undo:
             remove_from_history = self.tmp_pdb.pop(0)
             os.remove(remove_from_history)
+
+    def write_tmp_pdb(self, group, insert_after_atomnr=None, resnr_add=0):
+        """
+        writes a atom to pdb file, update list and pymol
+        :param group: {atom_nr: {'atomnnr', 'xyz', 'name', 'residue', 'residuenr'}}
+        :return:
+        """
+        #Get the current pdb file and name for new pdb file
+        old_pdb, tmp_name = self.get_old_new_pdb_name()
+
+        #Add new pdb file to history
+        self.add_pdb_history(tmp_name)
 
         atomnr = 0
         inserted_fragment = False
@@ -276,8 +330,6 @@ class ViewPyMol(Toplevel):
         #make selected atoms zero:
         del self.selected_atoms[:]
         self.listbox.selection_clear(0, END)
-
-        print self.selected_atoms
 
         #update pymol with new tmp pdb file
         self.update_pymol_structure(tmp_name)
@@ -345,15 +397,12 @@ class ViewPyMol(Toplevel):
         else:
             new_atom[1] = {'name':atomname+'1', 'atomnr': 1, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': 1}
 
-        print new_atom
-
         if len(self.selected_atoms) == 0:
             self.write_tmp_pdb(new_atom)
             return
 
-        print bond, angle, torsion
+        #Get xyx dict from build
         q = bld.BuildByAtom('a', p_atoms[0], p_atoms[1], p_atoms[2], p_atoms[3], bond, angle, torsion)
-        print q
 
         new_atom[1]['xyz'] = q['xyz']
         new_atom[1]['name'] = self.get_new_atomname(atomname, p_atoms[0])
@@ -434,29 +483,24 @@ class ViewPyMol(Toplevel):
                     symbol = line.split()[3]
                     cov_r = float(line.split()[6])
 
-                    atoms_dict[atomnumber] = dict()
-                    atoms_dict[atomnumber]['mass'] = mass
-                    atoms_dict[atomnumber]['name'] = name
-                    atoms_dict[atomnumber]['symbol'] = symbol
-                    atoms_dict[atomnumber]['covalent r'] = cov_r
+                    atoms_dict[symbol] = dict()
+                    atoms_dict[symbol]['mass'] = mass
+                    atoms_dict[symbol]['name'] = name
+                    atoms_dict[symbol]['atomnumber'] = atomnumber
+                    atoms_dict[symbol]['covalent r'] = cov_r
 
         return atoms_dict
 
     def fill_build_list(self, fragment_dict):
         """
         Fill self.buildlist with atoms or fragments.
-        :param: dictionary with integers as keys {atomnumber: {mass, name, symbol}} or {number:{symbol, atoms}}
+        :param: dictionary with integers as keys {name: {atomnumber, mass, name, symbol}} or {number:{symbol, atoms}}
         :return: nothing
         """
         self.buildlist.delete(0, END)
 
         for i in sorted(fragment_dict.keys()):
-            if self.atoms_fragments.get() == 'Atoms':
-                build_type = '%3d %5s' % (i, fragment_dict[i]['symbol'])
-            else:
-                build_type = '%5s' % i
-
-            self.buildlist.insert(END, build_type)
+            self.buildlist.insert(END, '%5s' % i)
 
         self.buildlist.selection_set(0)
 
@@ -1048,7 +1092,6 @@ class ViewPyMol(Toplevel):
         #Get bond
         r = bld.measure(xyz[0], xyz[1])
 
-        print 'RADIUS = %f' % r
         self.update_spinbox_silent(self.bond_exist, r)
 
         if len(xyz) > 2:
@@ -1063,17 +1106,62 @@ class ViewPyMol(Toplevel):
         if len(xyz) < 4:
             self.suggest_buld(atoms, xyz)
 
+    def guess_atom_type(self, pdbline):
+        """
+        Takes a line from a pdb file, reads the pdb atomname and returns the atom type (H, C, N... etc.)
+        """
+        atomtype = False
+
+        atom = ''.join(i for i in pdbline[13:17].strip() if not i.isdigit())
+
+        #If atom symbol consist of two letters, convert first to capital and second to lower.
+        if len(atom) > 1:
+            atom = atom[0].upper()+atom[1].lower()
+
+        #Check if atom exist:
+        if atom not in self.atom_dict.keys():
+            if atom[0] in self.atom_dict.keys():
+                atomtype = atom[0]
+
+        elif atom in self.atom_dict.keys():
+            atomtype = atom
+
+        return atomtype
+
+    def suggest_bond_length(self):
+        """
+        Based on atoms connected, suggest a proper bond lenth
+        self.atoms_dict[atomsymbol]['covalent r'] = cov_r
+        """
+
+        pdb_lines = self.get_pdb_atoms(self.selected_atoms)
+        p1_atom = self.guess_atom_type(pdb_lines[0])
+
+        p1_r = self.atom_dict[p1_atom]['covalent r']
+
+        #Get new atom bonding to p1
+        if self.atoms_fragments.get() == 'Atoms':
+            new_atom = self.buildlist.get(self.buildlist.curselection()).strip()
+
+        else:
+            #TODO read from fragment list dummy atom type and get atom
+            new_atom = 'C'
+
+        new_atom_r = self.atom_dict[new_atom]['covalent r']
+
+        bond = p1_r + new_atom_r
+
+        return bond
+
     def suggest_buld(self, atoms, xyz):
         #TODO based on connectivety of atoms 1(-2-3) suggest values for bond/angle/torsion
         #need bond/angle/torsion list (dict) for atoms
         #need to think about how to handle fragments... not all can be grown, so they must be placed fex.
 
-        #temporary bond_length dict (just for writing the code)
-
         #Get selected
         if len(atoms) > 0:
             #Suggest bond-length (X-1-2)
-            bond = 1.40
+            bond = self.suggest_bond_length()
             self.update_spinbox_silent(self.bond_new, bond)
 
         if len(atoms) > 1:
@@ -1096,6 +1184,13 @@ class ViewPyMol(Toplevel):
 
         #turn on trace TODO
 
+    def fragmenlist_event(self, *args):
+        """
+        Update suggestions for bond/angle/torsion when atom or fragment is changed
+        """
+        if len(self.selected_atoms) > 0:
+            self.regulate_edit_controls()
+            self.suggest_buld(self.selected_atoms, [])
 
     def atomlist_event(self, *args):
         """
@@ -1220,6 +1315,7 @@ class ViewPyMol(Toplevel):
         buildlist_scroll.config(command=self.buildlist.yview)
         self.buildlist.grid(row=1, rowspan=5, column=0, sticky='e')
         self.buildlist.config(font=tkFont.Font(family="Courier", size=12))
+        self.buildlist.bind('<<ListboxSelect>>', self.fragmenlist_event)
 
         #information about existing atoms:
         exist_frame_label = LabelFrame(self.edit_frame, text='Existing', bg=self.main_color)
@@ -1266,7 +1362,8 @@ class ViewPyMol(Toplevel):
                                 command=self.add_build)
         self.addbutton.grid(in_=add_frame_label, row=4, column=4, columnspan=1)
 
-        self.deletebutton = Button(self.edit_frame, text='Delete', highlightbackground=self.main_color, command=None)
+        self.deletebutton = Button(self.edit_frame, text='Delete', highlightbackground=self.main_color,
+                                   command=self.delete_atoms)
         self.deletebutton.grid(in_=exist_frame_label, row=4, column=2, columnspan=1)
 
         self.undobutton = Button(self.edit_frame, text='Undo', highlightbackground=self.main_color,
