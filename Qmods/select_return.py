@@ -22,7 +22,7 @@ class SelectReturn(Toplevel):
     """General class to select one element from a list
     and return selection to parent class"""
 
-    def __init__(self, app, root, elements=[], select_title='select', Entry=None):         #Receives app and root from parent-class.
+    def __init__(self, app, root, elements=list(), select_title='select', Entry=None):         #Receives app and root from parent-class.
         Toplevel.__init__(self, root)
         self.app = app
         self.main_color = self.app.main_color
