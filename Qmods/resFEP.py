@@ -43,11 +43,13 @@ class ResFEP(Toplevel):
 
 
         #Check if a topology is loaded in main window
-        if self.app.top.id:
+        if self.app.top_id:
             self.topolgy_start = self.app.top_id
 
         #Trace stuff
         self.selected_topology.trace('w', self.topology_changed)
+
+        self.dialog_window()
 
     def insert_topology_name(self):
         """
@@ -101,7 +103,7 @@ class ResFEP(Toplevel):
         select_topology.grid(row=0, column=0)
 
         #Load topology button
-        load_topology = Button(frame1, text ='Load', highlightbackground=self.main_color, command=self.load_topolgy)
+        load_topology = Button(frame1, text ='Load', highlightbackground=self.main_color, command=self.load_topology)
         load_topology.grid(row=0, column=1)
 
         #topology name
