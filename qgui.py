@@ -49,7 +49,7 @@ from prmlib import CreatePrmLib
 from analyze_LIE import AnalyzeLie
 from setup_evb import SetupEVB
 from setup_FEP import SetupFEP
-from setup_resFEP import ResFEP
+from resFEP import ResFEP
 from evb_rrc import EvbCalibration
 from analyze_evb_re import EvbReactions
 from aboutQ import AboutQ
