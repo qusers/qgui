@@ -49,6 +49,7 @@ from prmlib import CreatePrmLib
 from analyze_LIE import AnalyzeLie
 from setup_evb import SetupEVB
 from setup_FEP import SetupFEP
+from setup_resFEP import ResFEP
 from evb_rrc import EvbCalibration
 from analyze_evb_re import EvbReactions
 from aboutQ import AboutQ
@@ -302,6 +303,15 @@ class QGui(object):
         else:
             self.log('info', 'Please load master structure and topology before setting up FEP.')
             self.errorBox('Error','Please load master structure and topolgy before setting up FEP')
+
+    def setup_resfep(self):
+        """
+        Open the FEP residue mutation window (resFEP) that utilizes the predefined FEP protocol
+        :return:
+        """
+        self.resfep_setup = ResFEP(self, self.root)
+        self.resfep_setup.configure(background=self.main_color)
+        self.log('info', 'Setup residue FEP session started')
 
     def analyze_lie(self):
         """
