@@ -15,7 +15,6 @@
 
 from Tkinter import Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, Button, Scrollbar, Toplevel, \
     Checkbutton, Listbox, DISABLED, NORMAL, END, GROOVE, LEFT, RIGHT, IntVar, PhotoImage
-#from qgui import PDB_COLOR
 
 # -*- coding: utf-8 -*-
 

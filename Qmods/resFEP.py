@@ -16,6 +16,8 @@
 from Tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
     OptionMenu, StringVar, Spinbox, SINGLE, LabelFrame, MULTIPLE
 from tkFileDialog import askopenfilename
+import qgui_functions as qf
+from select_return import SelectReturn
 from subprocess import Popen, PIPE
 import tkFont
 import time
@@ -87,9 +89,6 @@ class ResFEP(Toplevel):
         filename = askopenfilename(parent=self, initialdir=self.app.workdir,
                                    filetypes=(("TOP", "*.top"), ("All files", '*.*')))
         if filename != '':
-            #entry.delete(0,END)
-            #entry.insert(0, filename.split('/')[-1])
-
             if self.selected_topology.get() == 'Topology start':
                 self.topology_start = filename
             else:
@@ -99,10 +98,23 @@ class ResFEP(Toplevel):
 
     def add_residue(self):
         """
-        Select a residue and add it to mutation list!
-        :return:
+        Opens a new window to select residue to mutate
+
         """
-        pass
+
+        self.select_res = SelectReturn(self, self.root, elements=list(), select_title='select residue',
+                                       Entry=self.reslist)
+        self.select_res.configure(bg=self.main_color)
+        self.select_res.title('Select residue to mutate')
+        self.select_res.resizable()
+
+    def mutate_residue(self, residue):
+        """
+        :param residue: RES 123
+        Checks if RES exist in FEP library and loads FEP files. Abort if not existing!
+        """
+        resname = residue.split()[0]
+        #TODO
 
     def del_residue(self):
         """

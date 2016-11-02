@@ -69,6 +69,10 @@ class SelectReturn(Toplevel):
             for item in items_selected:
                 self.app.unique_logs.append(item)
             self.app.get_energies(self.select_title.split()[0])
+        #resFEP
+        elif 'Select residue to mutate' in self.select_title:
+            for item in items_selected:
+                self.app.mutate_residue(item)
 
         self.destroy()
 

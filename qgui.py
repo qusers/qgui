@@ -140,6 +140,7 @@ class QGui(object):
         try:
             self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
         except:
+            #TODO change this stupid list for q_settings to a readable dictionary!
             self.q_settings = [
                 'default',
                 [],
