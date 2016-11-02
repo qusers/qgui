@@ -118,6 +118,62 @@ class ResFEP(Toplevel):
         """
         self.reslist.insert(END,'TYR193 > ALA193')
 
+    def view_fep(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def duplicate_fepfile(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def add_fepfile(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def delete_fepfile(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def move_fep(self, i=0):
+        """
+        Moves FEP file in listbox from position j to j + i
+        :param value:
+        :return:
+        """
+        pass
+
+    def configure_md(self):
+        """
+        Opens the MD settings module!
+        :return:
+        """
+        pass
+
+    def write_inputfiles(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def run_fep(self):
+        """
+
+        :return:
+        """
+        pass
 
     def reslist_event(self, *args):
         """
@@ -138,9 +194,13 @@ class ResFEP(Toplevel):
         frame1 = Frame(mainframe, bg=self.main_color)
         frame1.grid(row=0, column=0)
 
-        #Frame with residues to mutate
+        #Frame with residues to mutate and FEP files
         frame2 = Frame(mainframe, bg=self.main_color)
         frame2.grid(row=1, column=0)
+
+        #Frame with configure MD /write/save/close etc.
+        frame3 = Frame(mainframe, bg=self.main_color)
+        frame3.grid(row=2, column=0)
 
         #Dropdown menu for topology selection
         select_topology = OptionMenu(frame1, self.selected_topology, 'Topology start', 'Topology end')
@@ -161,11 +221,11 @@ class ResFEP(Toplevel):
 
         #Listbox with selected residues to mutate:
         reslist_scroll = Scrollbar(frame2)
-        reslist_scroll.grid(row=1, rowspan=5, column=1, sticky='nsw')
+        reslist_scroll.grid(row=1, rowspan=3, column=1, sticky='nsw')
         self.reslist = Listbox(frame2, yscrollcommand=reslist_scroll.set, width=17, height=4,
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=False)
         reslist_scroll.config(command=self.reslist.yview)
-        self.reslist.grid(row=1, rowspan=5, column=0, sticky='nse')
+        self.reslist.grid(row=1, rowspan=3, column=0, sticky='nse')
         self.reslist.config(font=tkFont.Font(family="Courier", size=12))
         self.reslist.bind('<<ListboxSelect>>', self.reslist_event)
 
@@ -184,7 +244,7 @@ class ResFEP(Toplevel):
         self.mutate_from_menu.grid(row=2, column=2)
 
         #right arrow:
-        arrow_label = Label(frame2, text='>', bg=self.main_color)
+        arrow_label = Label(frame2, text='%1s' % u'\u2192', bg=self.main_color)
         arrow_label.grid(row=2, column=3)
 
         #Mutate to dropdown menu
@@ -196,4 +256,60 @@ class ResFEP(Toplevel):
         update_res_mutation = Button(frame2, text='Update', highlightbackground=self.main_color,
                                      command=self.update_residue_mutation)
         update_res_mutation.grid(row=3, column=2, columnspan=3)
+
+        #FEP files label
+        feps_label = Label(frame2, text='FEP file(s):', bg=self.main_color)
+        feps_label.grid(row=4, column=0, columnspan=3, pady=(10,0), sticky='w')
+
+        #Listbox for FEP files
+        feplist_scroll = Scrollbar(frame2)
+        feplist_scroll.grid(row=5, rowspan=5, column=1, sticky='nsw')
+        self.feplist = Listbox(frame2, yscrollcommand=feplist_scroll.set, width=17, height=8,
+                                 highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=False)
+        feplist_scroll.config(command=self.feplist.yview)
+        self.feplist.grid(row=5, rowspan=5, column=0, sticky='nse')
+        self.feplist.config(font=tkFont.Font(family="Courier", size=12))
+        #self.feplist.bind('<<ListboxSelect>>', self.reslist_event)
+
+        #View FEP file button
+        view_fep = Button(frame2, text='View', highlightbackground=self.main_color, command=self.view_fep)
+        view_fep.grid(row=5, column=2)
+
+        #Duplicate selected FEP file:
+        duplicate_fepfile = Button(frame2, text='Duplicate', highlightbackground=self.main_color,
+                                   command=self.duplicate_fepfile)
+        duplicate_fepfile.grid(row=5, column=3, columnspan=2)
+
+        #Add a new/blank FEP file
+        add_fepfile = Button(frame2, text='Add', highlightbackground=self.main_color, command=self.add_fepfile)
+        add_fepfile.grid(row=6, column=2)
+
+        #Delete selected FEP file
+        del_fepfile = Button(frame2, text='Delete', highlightbackground=self.main_color, command=self.delete_fepfile)
+        del_fepfile.grid(row=6, column=3, columnspan=2)
+
+        #Move FEP file up
+        move_up = Button(frame2, text=u'\u2191', highlightbackground=self.main_color, command=lambda: self.move_fep(-1))
+        move_up.grid(row=7, column=2, sticky='e')
+
+        #Move FEP file down
+        move_down = Button(frame2, text=u'\u2193', highlightbackground=self.main_color,
+                           command=lambda: self.move_fep(1))
+        move_down.grid(row=7, column=3, columnspan=2, sticky='w')
+
+        #Configure MD
+        config_md = Button(frame3, text='Configure MD', highlightbackground=self.main_color, command=self.configure_md)
+        config_md.grid(row=0, column=0, columnspan=3)
+
+        #Write inputfiles
+        write_inp = Button(frame3, text='Write', highlightbackground=self.main_color, command=self.write_inputfiles)
+        write_inp.grid(row=1, column=0)
+
+        #Run FEP calculation
+        run_fep = Button(frame3, text='Run', highlightbackground=self.main_color, command=self.run_fep)
+        run_fep.grid(row=1, column=1)
+
+        #Close resFEP gui
+        close_resfep = Button(frame3, text='close', highlightbackground=self.main_color, command=self.destroy)
+        close_resfep.grid(row=1, column=2)
 
