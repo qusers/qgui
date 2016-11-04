@@ -37,7 +37,7 @@ class SelectReturn(Toplevel):
         self.update_list()
 
     def update_list(self):
-        for line in sorted(self.elements):
+        for line in self.elements:
             self.listbox.insert(END, line)
 
     def get_selected(self):

@@ -36,12 +36,16 @@ class ResFEP(Toplevel):
         self.main_color = self.app.main_color
         self.root = root
 
-        self.topology_start = None
-        self.topology_end = None
+        #Todo: remove this
+        #self.topology_start = None
+        #self.topology_end = None
 
+        #Store topologies 1..N:
+        self.topology_paths = dict()
 
         self.selected_topology = StringVar()
-        self.selected_topology.set('Topology start')
+        self.selected_topology.set('Topology 1')
+        self.topology_paths['Topology 1'] = '*.top'
 
         self.mutate_to = StringVar()
         self.mutate_from = StringVar()
@@ -49,30 +53,25 @@ class ResFEP(Toplevel):
         self.mutate_from.set('start')
         self.mutate_to.set('end')
 
-
-
         #Check if a topology is loaded in main window
         if self.app.top_id:
-            self.topolgy_start = self.app.top_id
+            self.topology_paths['Topology 1'] = self.app.top_id
 
         #Trace stuff
         self.selected_topology.trace('w', self.topology_changed)
 
         self.dialog_window()
 
+        #Collect predifined FEP protocols {res_wt: {res_mut: path}}
+        self.feps = self.get_fep_protocols()
+
     def insert_topology_name(self):
         """
         Write topology name on screen
         """
-        topname = '*.top'
 
-        if self.selected_topology.get() == 'Topology end':
-            topology = self.topology_end
-        else:
-            topology = self.topology_start
-
-        if topology:
-            topname = topology.split('/')[-1]
+        topology = self.topology_paths[self.selected_topology.get()]
+        topname = topology.split('/')[-1]
 
         self.topology_label.config(text=topname)
 
@@ -89,20 +88,63 @@ class ResFEP(Toplevel):
         filename = askopenfilename(parent=self, initialdir=self.app.workdir,
                                    filetypes=(("TOP", "*.top"), ("All files", '*.*')))
         if filename != '':
-            if self.selected_topology.get() == 'Topology start':
-                self.topology_start = filename
-            else:
-                self.topology_end = filename
+            self.topology_paths[self.selected_topology.get()] = filename
 
             self.insert_topology_name()
 
+    def add_topology(self):
+        """
+        Add a new topology
+        :return:
+        """
+        top_nr = 'Topology %d' % (len(self.topology_paths.keys()) + 1)
+
+        self.topology_paths[top_nr] = '*.top'
+        self.selected_topology.set(top_nr)
+        self.update_topology_menu()
+
+    def del_topology(self):
+        """
+        Remove selected topology
+        :return:
+        """
+        del self.topology_paths[self.selected_topology.get()]
+        self.update_topology_menu()
+
+    def update_topology_menu(self):
+        menu = self.select_topology['menu']
+        menu.delete(0, END)
+
+        for top in sorted(self.topology_paths.keys()):
+            menu.add_command(label=top, command=lambda v=top: self.selected_topology.set(v))
+
+    def dict_to_list(self, adict):
+        """
+        Converts the keys and values of a dictionary to a list with ['value  key']
+        :param adict:
+        :return: list
+        """
+        new_list = list()
+        for i in sorted(adict.keys()):
+            v = adict[i]
+            i = str(i)
+            new_list.append('%8s  %8s' % (v.ljust(8), i))
+
+        return new_list
+
     def add_residue(self):
         """
-        Opens a new window to select residue to mutate
+        Opens a new window to select residue(s) to mutate
 
         """
 
-        self.select_res = SelectReturn(self, self.root, elements=list(), select_title='select residue',
+        #Get topology residues
+        residues = qf.read_topology(self.topology_paths[self.selected_topology.get()])[1]
+
+        #Make dict to list to be read by selector window:
+        residues = self.dict_to_list(residues)
+
+        self.select_res = SelectReturn(self, self.root, elements=residues, select_title='select residue',
                                        Entry=self.reslist)
         self.select_res.configure(bg=self.main_color)
         self.select_res.title('Select residue to mutate')
@@ -114,7 +156,43 @@ class ResFEP(Toplevel):
         Checks if RES exist in FEP library and loads FEP files. Abort if not existing!
         """
         resname = residue.split()[0]
-        #TODO
+
+        #Check if resname exist in FEP protocols
+        if not resname in self.feps.keys():
+            print('Found no FEP protocol for residue: %s' % resname)
+            return
+
+        
+
+    def get_fep_protocols(self):
+        """
+        Get all posible mutations from OPLS/FEP and OPLS/.FEP
+        :return: {res: [res]}
+        """
+        fep_paths = ['%s/FF/OPLS/FEP/' % self.app.qgui_path, '%s/FF/OPLS/.FEP/' % self.app.qgui_path]
+
+        res_feps = dict()
+
+        for place in fep_paths:
+            for fep in os.listdir(place):
+                fepdir = '%s/%s' % (place, fep)
+                if os.path.isdir(fepdir):
+                    try:
+                        res_wt = fep.split('_')[0]
+                        res_mut = ' '.join(fep.split('_')[1:])
+                        if not res_wt in res_feps:
+                            res_feps[res_wt] = dict()
+                        else:
+                            print('Found duplicate FEP protocol for %s!' % fep)
+                            print('Default version of %s will be used' % fep)
+                        res_feps[res_wt][res_mut] = fepdir
+                    except:
+                        print('Failed to read %s' % fepdir)
+
+        if len(res_feps) < 1:
+            print('Found no FEP protocols in /QGUI/FF/OPLS/FEP')
+
+        return res_feps
 
     def del_residue(self):
         """
@@ -215,17 +293,27 @@ class ResFEP(Toplevel):
         frame3.grid(row=2, column=0)
 
         #Dropdown menu for topology selection
-        select_topology = OptionMenu(frame1, self.selected_topology, 'Topology start', 'Topology end')
-        select_topology.config(bg=self.main_color, highlightbackground=self.main_color, width=20)
-        select_topology.grid(row=1, column=0)
+        self.select_topology = OptionMenu(frame1, self.selected_topology, *self.topology_paths.keys())
+        self.select_topology.config(bg=self.main_color, highlightbackground=self.main_color, width=15)
+        self.select_topology.grid(row=1, column=0)
 
         #Load topology button
         load_topology = Button(frame1, text ='Load', highlightbackground=self.main_color, command=self.load_topology)
         load_topology.grid(row=1, column=1)
 
+        #Add a topology button
+        add_topology = Button(frame1, text ='Add', highlightbackground=self.main_color, command=self.add_topology)
+        add_topology.grid(row=1, column=2)
+
+        #Delete a topology
+        del_topology = Button(frame1, text ='Del', highlightbackground=self.main_color, command=self.del_topology)
+        del_topology.grid(row=1, column=3)
+
+
+
         #topology name
         self.topology_label = Label(frame1, text='*.top', bg=self.main_color)
-        self.topology_label.grid(row=0, column=0, columnspan=2)
+        self.topology_label.grid(row=0, column=0, columnspan=3)
 
         #Residues label
         res_label = Label(frame2, text='Mutate residue(s):', bg=self.main_color)

@@ -43,6 +43,14 @@ shutil.copy2('%s/qgui.py' % org_path, '%s/Qgui' % install_path)
 for f in os.listdir('Qmods'):
     shutil.copy2('%s/Qmods/%s' % (org_path, f), '%s/Qmods/%s' % (install_path, f)) 
 
+if not os.path.isdir('%s/FF' % install_path):
+    os.makedirs('%s/FF' % install_path)
+
+for f in os.listdir('FF'):
+    if os.path.exists('%s/FF/%s' % (install_path, f)):
+        shutil.rmtree('%s/FF/%s' % (install_path, f))
+    shutil.copytree('%s/FF/%s' % (org_path, f), '%s/FF/%s' % (install_path, f))
+
 #Write to bash file so that Qgui can be started from command line.
 if os.path.isfile(bashfile):
     oldfile = open(bashfile, 'r').readlines()

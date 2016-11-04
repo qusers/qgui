@@ -21,7 +21,7 @@ Collection of functions commonly used by the different Qgui Classes.
 """
 
 import numpy as np
-import sys
+import os
 import re
 
 def read_topology(topology, libfiles=list()):
@@ -49,7 +49,10 @@ def read_topology(topology, libfiles=list()):
             if 'LIB_FILES' in line:
                 for lib in line.split()[1].split(';'):
                     if lib not in libfiles:
-                        libfiles.append(lib)
+                        if os.path.isfile(lib):
+                            libfiles.append(lib)
+                        else:
+                            print 'Warning: Did not find library file: %s' % lib
 
             #Coordinates ends here:
             if 'No. of integer atom codes' in line:
@@ -87,6 +90,74 @@ def read_topology(topology, libfiles=list()):
 
         return atomnr_xyz, resnr_res, libfiles
 
+def create_pdb_from_topology(topology, libfiles=list()):
+    """
+    :param topology:
+    :param libfiles:
+    :return: pdbfile (list)
+    """
+    pdbfile = list()
 
+    #Get atoms coordinates, atom nr and residues from topology
+    atommr_xyz, resnr_res, libs = read_topology(topology)
+
+    for lib in libs:
+        if lib not in libfiles:
+            libfiles.append(lib)
+
+    #Get a dictionary for all defined residues in library:
+    lib = dict()
+    for libfile in libfiles:
+        lib.update(read_library(libfile))
+
+    #go through residue list and create pdb file based on library and xyz
+    atomnr = 0
+    for resnr in sorted(resnr_res.keys()):
+        residue = resnr_res[resnr]
+        for nr in sorted(lib[residue].keys()):
+            atomnr += 1
+            atom = lib[residue][nr]['atom name']
+            x,y,z = atommr_xyz[atomnr][:]
+
+            pdbfile.append('ATOM  %5d  %4s%4s %4d    %8.3f%8.3f%8.3f\n' %
+                           (atomnr, atom.ljust(4), residue.ljust(4), resnr, x, y, z))
+
+    return pdbfile
+
+
+def read_library(libfile):
+    """
+    :param libfile:
+    :return: {res: {nr: {atom name, atom type, atom charge}}}
+    """
+    libdict = dict()
+    res = None
+
+    found_atoms = False
+    with open(libfile, 'r') as lib:
+        for line in lib:
+            if re.search('{.*}', line):
+                found_atoms = False
+                res = re.search('{.*}', line).group(0).strip('{*}')
+                libdict[res] = dict()
+                atomnr = 0
+            if found_atoms:
+                if re.search('[.*]', line):
+                    found_atoms = False
+
+            if found_atoms:
+                if len(line.split()) > 3:
+                    nr, name,atomtype,charge = line.split()[0:4]
+                    nr = int(nr)
+                    libdict[res][nr] = dict()
+
+                    libdict[res][nr]['atom name'] = name
+                    libdict[res][nr]['atom type'] = atomtype
+                    libdict[res][nr]['atom charge'] = float(charge)
+
+            if '[atoms]' in line:
+                found_atoms = True
+
+    return libdict
 
 
