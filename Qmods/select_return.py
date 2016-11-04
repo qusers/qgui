@@ -54,8 +54,6 @@ class SelectReturn(Toplevel):
         for item in selected:
             items_selected.append(self.listbox.get(item))
 
-        print items_selected
-
         if 'ligand' in self.select_title:
             #LIE
             for item in items_selected:

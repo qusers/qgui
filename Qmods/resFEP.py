@@ -36,10 +36,6 @@ class ResFEP(Toplevel):
         self.main_color = self.app.main_color
         self.root = root
 
-        #Todo: remove this
-        #self.topology_start = None
-        #self.topology_end = None
-
         #Store topologies 1..N:
         self.topology_paths = dict()
 
@@ -53,9 +49,14 @@ class ResFEP(Toplevel):
         self.mutate_from.set('start')
         self.mutate_to.set('end')
 
+        #remember residue numbers to mutate in topologies
+        self.topology_mutation = dict()
+        self.topology_mutation['Topology 1'] = dict()
+
         #Check if a topology is loaded in main window
         if self.app.top_id:
             self.topology_paths['Topology 1'] = self.app.top_id
+
 
         #Trace stuff
         self.selected_topology.trace('w', self.topology_changed)
@@ -69,7 +70,6 @@ class ResFEP(Toplevel):
         """
         Write topology name on screen
         """
-
         topology = self.topology_paths[self.selected_topology.get()]
         topname = topology.split('/')[-1]
 
@@ -80,6 +80,9 @@ class ResFEP(Toplevel):
         Update values in window when topology is toggeld
         """
         self.insert_topology_name()
+        self.refresh_residue_list()
+
+
 
     def load_topology(self):
         """
@@ -100,6 +103,8 @@ class ResFEP(Toplevel):
         top_nr = 'Topology %d' % (len(self.topology_paths.keys()) + 1)
 
         self.topology_paths[top_nr] = '*.top'
+        self.topology_mutation[top_nr] = dict()
+
         self.selected_topology.set(top_nr)
         self.update_topology_menu()
 
@@ -137,6 +142,9 @@ class ResFEP(Toplevel):
         Opens a new window to select residue(s) to mutate
 
         """
+        if self.topology_paths[self.selected_topology.get()] == '*.top':
+            print('No topology loaded for %s' % self.selected_topology.get())
+            return
 
         #Get topology residues
         residues = qf.read_topology(self.topology_paths[self.selected_topology.get()])[1]
@@ -144,11 +152,28 @@ class ResFEP(Toplevel):
         #Make dict to list to be read by selector window:
         residues = self.dict_to_list(residues)
 
-        self.select_res = SelectReturn(self, self.root, elements=residues, select_title='select residue',
+        self.select_res = SelectReturn(self, self.root, elements=residues, select_title='Select residue to mutate',
                                        Entry=self.reslist)
         self.select_res.configure(bg=self.main_color)
         self.select_res.title('Select residue to mutate')
         self.select_res.resizable()
+
+    def del_residue(self):
+        """
+        Delete selected residue from mutation list
+        :return:
+        """
+        selection = self.reslist.curselection()
+        if len(selection) < 1:
+            return
+
+        for i in selection:
+            res_nr = int(self.reslist.get(i).split()[1])
+            del self.topology_mutation[self.selected_topology.get()][res_nr]
+
+            self.reslist.delete(i)
+
+        self.refresh_residue_list()
 
     def mutate_residue(self, residue):
         """
@@ -157,12 +182,64 @@ class ResFEP(Toplevel):
         """
         resname = residue.split()[0]
 
+        res_nr = int(residue.split()[-1])
+
         #Check if resname exist in FEP protocols
         if not resname in self.feps.keys():
             print('Found no FEP protocol for residue: %s' % resname)
             return
 
-        
+        mutate_from = [resname]
+
+        mutate_to = list()
+
+        for res in self.feps[resname].keys():
+            mutate_to.append(res)
+
+        self.topology_mutation[self.selected_topology.get()][res_nr] = [resname, mutate_to[0]]
+
+        self.mutate_to.set(mutate_to[0])
+        self.mutate_from.set(resname)
+
+        self.update_mutate_to_options(mutate_to)
+        self.update_mutate_from_options(mutate_from)
+
+        self.refresh_residue_list()
+
+    def refresh_residue_list(self):
+        """
+        Update residues with mutation in listbox for selected topology
+        :return:
+        """
+        self.reslist.delete(0, END)
+
+        for res_nr in sorted(self.topology_mutation[self.selected_topology.get()].keys()):
+            resname = self.topology_mutation[self.selected_topology.get()][res_nr][0]
+            mutate_to = self.topology_mutation[self.selected_topology.get()][res_nr][1]
+            self.reslist.insert(END, u'%s %d \u2192 %s' % (resname, res_nr, mutate_to))
+
+    def update_mutate_from_options(self, mut_from):
+        """
+        :param mut_from: list with residues to mutate from
+        :return: updated optionmenu for mutate from
+        """
+        menu = self.mutate_from_menu['menu']
+        menu.delete(0, END)
+
+        for res in sorted(mut_from):
+            menu.add_command(label=res, command=lambda v=res: self.mutate_from.set(v))
+
+    def update_mutate_to_options(self, mutate_to):
+        """
+        :param mut_to: list with residues to mutate to
+        :return: updated optionmenu for mutate to
+        """
+        menu = self.mutate_to_menu['menu']
+        menu.delete(0, END)
+
+        for res in sorted(mutate_to):
+            menu.add_command(label=res, command=lambda v=res: self.mutate_to.set(v))
+
 
     def get_fep_protocols(self):
         """
@@ -194,19 +271,29 @@ class ResFEP(Toplevel):
 
         return res_feps
 
-    def del_residue(self):
-        """
-        Delete selected residue from mutation list
-        :return:
-        """
-        pass
 
     def update_residue_mutation(self):
         """
         Update mutation from --> to in listbox
         :return:
         """
-        self.reslist.insert(END,'TYR193 > ALA193')
+        #Get selected residue in listbox:
+        selection = self.reslist.curselection()
+        if len(selection) == 0:
+            return
+
+        selected = self.reslist.get(selection[0])
+
+        res_nr = int(selected.split()[1])
+
+        self.reslist.delete(selection[0])
+
+        mut_from = self.mutate_from.get()
+        mut_to = self.mutate_to.get()
+
+        self.topology_mutation[self.selected_topology.get()][res_nr] = [mut_from, mut_to]
+        self.refresh_residue_list()
+
 
     def view_fep(self):
         """
@@ -270,8 +357,18 @@ class ResFEP(Toplevel):
         :param args:
         :return:
         """
-        pass
+        #Get selected residue and update option menu and FEP files!
+        selection = self.reslist.curselection()
+        if len(selection) == 0:
+            return
 
+        selected = self.reslist.get(selection[0])
+
+        res_wt = selected.split()[0]
+        res_nr = int(selected.split()[1])
+        res_mut = selected.split()[3]
+
+        print res_wt
 
     def dialog_window(self):
 
