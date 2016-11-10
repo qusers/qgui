@@ -751,7 +751,8 @@ class TopologyPrepare(Toplevel):
 
             except Exception as e:
                 print(e)
-                #This must be an empty line, GAP or TER line
+                print('Oups! I just tried to magically convert nothing to something')
+                print('...this was probably just an empty line, GAP or TER line. Nothing to worry about!\n')
                 new_pdb.write(old_pdb[i])
 
         new_pdb.close()
