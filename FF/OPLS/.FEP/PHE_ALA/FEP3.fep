@@ -2,7 +2,7 @@
 
 [FEP]
 states 2
-offset 21
+offset 0
 softcore_use_max_potential on
 
 [atoms]				
