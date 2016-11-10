@@ -1,4 +1,5 @@
-!GLU-->ALA
+!GLU+Cl-->ALA+Cl
+!charge -1+0-->0+-1
 
 [FEP]
 states 2

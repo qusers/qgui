@@ -1,5 +1,5 @@
-!GLU+Cl-->ALA+Cl
-!charge -1+0-->0+-1
+!GLU-->ALA
+!charge -1-->0
 
 [FEP]
 states 2
@@ -15,7 +15,6 @@ offset 0
 7 7      !CD
 8 8      !OE1
 9 9      !OE2					
-10 28    !Cl-
 	     
 [change_charges]
 1  -0.1200 -0.1200
@@ -27,6 +26,5 @@ offset 0
 7   0.7000  0
 8  -0.8000  0
 9  -0.8000  0
-10  0.0000 -1.0
 
 

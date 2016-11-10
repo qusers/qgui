@@ -1,5 +1,5 @@
-!GLU+Cl-->ALA+Cl
-!charge -1+0-->0+-1
+!GLU-->ALA
+!charge -1-->0
 
 [FEP]
 states 2
@@ -16,7 +16,6 @@ softcore_use_max_potential on
 7 7      !CD
 8 8      !OE1
 9 9      !OE2
-10 28    !Cl-
  
 [change_charges]
 1   0   0
@@ -25,10 +24,9 @@ softcore_use_max_potential on
 4   0   0
 5   0   0
 6   0   0
-7   0 	0
+7   0   0
 8   0   0
 9   0   0
-10 -1  -1
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass
@@ -47,23 +45,20 @@ Cl-     5099.06 59.16   0       0       3605.58 41.83   35.450
 2   HC  HC
 3   HC  HC
 4   CT  CT 
-5   HC  HC 
-6   HC  HC 
-7   C2  C2 
-8   O2  ODUM 
-9   O2  ODUM
-10  Cl-  Cl-
+5   HC  HDUM 
+6   HC  HDUM 
+7   C2  CDUM 
+8   ODUM  ODUM 
+9   ODUM  ODUM
 
 [softcore]
 1   0   0 
 2   0   0
 3   0   0
-4   0   0
-5   0   20
-6   0   20
-7   0   20
-8  20   0
-9  20   0
-10  0   0
-
+4   0  20
+5  20   0
+6  20   0
+7  20   0
+8   0   0
+9   0   0
 
