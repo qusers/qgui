@@ -1,10 +1,9 @@
-!ASP+Cl-->ALA+Cl
-!charge -1+0-->0+-1
+!ASP-->ALA
+!charge -1-->0
 
 [FEP]
 states 2
 offset  0
-softcore_use_max_potential on
 
 [atoms]
 1 1	 ! CB  				
@@ -13,16 +12,14 @@ softcore_use_max_potential on
 4 4	 ! CG  becomes HC 			
 5 5	 ! OD1  disappear			
 6 6	 ! OD2  disappear
-7 34  ! CL- maintains charge
   
 [change_charges]
-1 	0 	0
-2	0	0
-3	0	0
-4 	0	0
+1 	0 	-0.18
+2	0	0.06
+3	0	0.06
+4 	0	0.06
 5 	0	0
 6  	0 	0
-7    -1      -1
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass
@@ -40,19 +37,9 @@ Cl-     5099.06 59.16   0       0       3605.58 41.83   35.450
 1   CT		CT
 2   HC		HC
 3   HC		HC
-4   C2		HC
+4   HC		HC
 5   ODUM	ODUM
 6   ODUM	ODUM
-7   Cl-         Cl-
-
-[softcore]
-1 	0 	0 
-2       0	0
-3  	0	0
-4  	20	0
-5  	0	0
-6  	0	0
-7       0       0
 
 [shake_constraints]
-1 	4	1.522	1.090	! CT 	C2  -> CT	HC
+1 	4	1.090	1.090	! CT	HC  -> CT	HC
