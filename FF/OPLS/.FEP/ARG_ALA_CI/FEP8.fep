@@ -1,4 +1,5 @@
-!ARG-->ALA
+!ARG+Na-->ALA+Na
+!charge 1+0-->0+1
 
 [FEP]
 states 2

@@ -1,5 +1,5 @@
-!ARG+Na-->ALA+Na
-!charge 1+0-->0+1
+!ARG-->ALA
+!charge 1-->0
 
 [FEP]
 states 2
@@ -24,7 +24,6 @@ offset 0
 16 16 ! NH2     	     
 17 17 ! HH21    	     
 18 18 ! HH22    	     
-19 49   ! Na+     	
 		
 [change_charges]
 1    -0.1200  -0.1200 
@@ -45,5 +44,4 @@ offset 0
 16	-0.8000		0
 17	 0.4600 	0
 18	 0.4600 	0
-19     0      1.0
 

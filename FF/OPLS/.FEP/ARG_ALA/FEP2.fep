@@ -1,9 +1,10 @@
-!ARG+Na-->ALA+Na
-!charge 1+0-->0+1
+!ARG-->ALA
+!charge 1-->0
 
 [FEP]
 states 2
 offset 0
+softcore_use_max_potential on
 
 [atoms]
 1  1  ! CB  
@@ -24,12 +25,11 @@ offset 0
 16 16 ! NH2     	     
 17 17 ! HH21    	     
 18 18 ! HH22    	   
-19 49 ! Na
 
 [change_charges]
-1     0   0 
-2     0   0
-3     0   0
+1    -0.1200  -0.1200 
+2     0.0600   0.0600
+3     0.0600   0.0600
 4     0   0
 5     0   0 
 6     0   0
@@ -45,7 +45,6 @@ offset 0
 16	 0	0
 17	 0 	0
 18	 0 	0
-19  1.0  1.0
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass
@@ -69,40 +68,38 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 2  HC  HC 
 3  HC  HC 
 4  CT  CT 
-5  HC  HDUM 
-6  HC  HDUM 
-7  CT  CDUM 
-8  HDUM  HDUM 
-9  HDUM  HDUM 
-10 NDUM  NDUM 
-11 HDUM  HDUM 
-12 CDUM  CDUM
-13 NDUM  NDUM 
-14 HDUM  HDUM 
-15 HDUM  HDUM 
-16 NDUM  NDUM 
-17 HDUM  HDUM 
-18 HDUM  HDUM 
-19 Na   Na
+5  HC  HC 
+6  HC  HC 
+7  CT  CT 
+8  HC  HC 
+9  HC  HC 
+10 N   N 
+11 H   H 
+12 C2  C2
+13 N   N  
+14 H   H  
+15 H   H  
+16 N   N  
+17 H   H  
+18 H   H  
 
 [softcore]
 1 	0	0 
 2   0	0
 3 	0	0
 4 	0	0
-5 	20	0
-6 	20	0
-7 	20	0
+5 	0	0
+6 	0	0
+7 	0	0
 8 	0	0
 9 	0	0
 10	0	0
 11	0	0
 12  0	0 
 13  0	0
-14  0	0
-15  0	0
+14  0	20
+15  0	20
 16  0	0
-17  0	0
-18  0	0
-19  0   0
+17  0	20
+18  0	20
 
