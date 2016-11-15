@@ -1,0 +1,6 @@
+Save custom FEP protocols for resFEP in this directory. 
+
+Name your protocol directories containing FEP1.fep...FEPn.fep
+as RES1_RES2. This will be read by Qgui as a protocol mutating
+RES1 to RES2. 
+

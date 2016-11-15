@@ -22,7 +22,7 @@ class SelectReturn(Toplevel):
     """General class to select one element from a list
     and return selection to parent class"""
 
-    def __init__(self, app, root, elements=[], select_title='select', Entry=None):         #Receives app and root from parent-class.
+    def __init__(self, app, root, elements=list(), select_title='select', Entry=None):         #Receives app and root from parent-class.
         Toplevel.__init__(self, root)
         self.app = app
         self.main_color = self.app.main_color
@@ -37,7 +37,7 @@ class SelectReturn(Toplevel):
         self.update_list()
 
     def update_list(self):
-        for line in sorted(self.elements):
+        for line in self.elements:
             self.listbox.insert(END, line)
 
     def get_selected(self):
@@ -54,8 +54,6 @@ class SelectReturn(Toplevel):
         for item in selected:
             items_selected.append(self.listbox.get(item))
 
-        print items_selected
-
         if 'ligand' in self.select_title:
             #LIE
             for item in items_selected:
@@ -69,6 +67,10 @@ class SelectReturn(Toplevel):
             for item in items_selected:
                 self.app.unique_logs.append(item)
             self.app.get_energies(self.select_title.split()[0])
+        #resFEP
+        elif 'Select residue to mutate' in self.select_title:
+            for item in items_selected:
+                self.app.mutate_residue(item)
 
         self.destroy()
 

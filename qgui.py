@@ -49,6 +49,7 @@ from prmlib import CreatePrmLib
 from analyze_LIE import AnalyzeLie
 from setup_evb import SetupEVB
 from setup_FEP import SetupFEP
+from resFEP import ResFEP
 from evb_rrc import EvbCalibration
 from analyze_evb_re import EvbReactions
 from aboutQ import AboutQ
@@ -139,6 +140,7 @@ class QGui(object):
         try:
             self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
         except:
+            #TODO change this stupid list for q_settings to a readable dictionary!
             self.q_settings = [
                 'default',
                 [],
@@ -222,8 +224,8 @@ class QGui(object):
         self.makeparameters.resizable()
 
     def open_trjmask(self):
-    	self.trjmask = TrjMask(self, self.root)
-    	self.trjmask.configure(background=self.main_color)
+        self.trjmask = TrjMask(self, self.root)
+        self.trjmask.configure(background=self.main_color)
 
     def evb_calibration(self):
         """
@@ -302,6 +304,15 @@ class QGui(object):
         else:
             self.log('info', 'Please load master structure and topology before setting up FEP.')
             self.errorBox('Error','Please load master structure and topolgy before setting up FEP')
+
+    def setup_resfep(self):
+        """
+        Open the FEP residue mutation window (resFEP) that utilizes the predefined FEP protocol
+        :return:
+        """
+        self.resfep_setup = ResFEP(self, self.root)
+        self.resfep_setup.configure(background=self.main_color)
+        self.log('info', 'Setup residue FEP session started')
 
     def analyze_lie(self):
         """
@@ -478,15 +489,12 @@ class QGui(object):
         self.top_id = new_top
 
     def view_pymol(self):
-        if self.pdb_id:
-            self.pymol_session = ViewPyMol(self, self.root)
-            self.pymol_session.configure(background=self.main_color)
-            self.pymol_session.resizable()
 
-            self.pymol_running = True
+        self.pymol_session = ViewPyMol(self, self.root)
+        self.pymol_session.configure(background=self.main_color)
+        self.pymol_session.resizable()
 
-        else:
-            self.errorBox('Error', 'No structure loaded for pymol to display')
+        self.pymol_running = True
 
     def exit(self):
         """This method is called from the mainwindow menubar->filemenu->Close is chosen."""

@@ -26,11 +26,11 @@ bashfile='%s/%s' % (os.path.expanduser("~"), bashfile)
 
 if not os.path.isdir(install_path):
     os.makedirs(install_path)
-    print 'Created Qgui directory: %s' % install_path
+    print('Created Qgui directory: %s' % install_path)
 else:
-    print 'Install path %s exists' % install_path
-    print 'Existing files will be overwritten!\n'
-    print 'Press Y to continue or N to cancel:'
+    print('Install path %s exists' % install_path)
+    print('Existing files will be overwritten!\n')
+    print('Press Y to continue or N to cancel:')
     if raw_input().lower() != 'y':
         sys.exit()
 
@@ -43,12 +43,20 @@ shutil.copy2('%s/qgui.py' % org_path, '%s/Qgui' % install_path)
 for f in os.listdir('Qmods'):
     shutil.copy2('%s/Qmods/%s' % (org_path, f), '%s/Qmods/%s' % (install_path, f)) 
 
+if not os.path.isdir('%s/FF' % install_path):
+    os.makedirs('%s/FF' % install_path)
+
+for f in os.listdir('FF'):
+    if os.path.exists('%s/FF/%s' % (install_path, f)):
+        shutil.rmtree('%s/FF/%s' % (install_path, f))
+    shutil.copytree('%s/FF/%s' % (org_path, f), '%s/FF/%s' % (install_path, f))
+
 #Write to bash file so that Qgui can be started from command line.
 if os.path.isfile(bashfile):
     oldfile = open(bashfile, 'r').readlines()
 else:
     oldfile = list()
-    print '%s created' % bashfile
+    print('%s created' % bashfile)
 
 newfile = open(bashfile, 'w')
 
@@ -68,7 +76,8 @@ if not export_exist:
     newfile.write('export PATH\n')
 
 newfile.close()
-print '%s updated' % bashfile
+print('%s updated' % bashfile)
 
-print '\nInstallation successful!'
-print 'Restart terminal and type "Qgui" to launch'
+print('\nInstallation successful!')
+print('Restart terminal and type "Qgui" to launch')
+
