@@ -4565,7 +4565,7 @@ class SetupEVB(Toplevel):
 
         ffld_failed = False
 
-        ffld_path = self.app.q_settings[6]
+        ffld_path = self.app.q_settings[ 'schrodinger path' ]
 
         print ff
 
@@ -4740,9 +4740,9 @@ class SetupEVB(Toplevel):
 
         #Open submission script and write head:
         self.submit = 'run.sh'
-        self.submitcommand = q_settings[4][1]
+        self.submitcommand = q_settings[ 'subscript' ][1]
         submitfile = open(self.submit,'w')
-        if int(q_settings[4][0]) == 1:
+        if int(q_settings[ 'subscript' ][0]) == 1:
             if os.path.isfile(self.app.settings_path + '/qsubmit'):
                 submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
@@ -4757,7 +4757,7 @@ class SetupEVB(Toplevel):
                     submitfile.write(line)
 
         #Check if Qdyn is MPI run or not:
-        qdyn = q_settings[5][1]
+        qdyn = q_settings[ 'executables' ][1]
         if qdyn[-1] == 'p':
             qdyn = 'mpirun %s' % qdyn
 
@@ -4802,31 +4802,31 @@ class SetupEVB(Toplevel):
         base_name = 'eq'
         random_seed = 'SEED_VAR'
         count = 0
-        for i in range(len(q_settings[3])):
+        for i in range(len(q_settings[ 'equilibration' ])):
             count += 1
             inputfile =  base_name + '%d.inp' % count
             logfile =  base_name + '%d.log' % count
             eq_file = open(inputfile, 'w')
 
-            if q_settings[3][i][0] == 'End':
+            if q_settings[ 'equilibration' ][i][0] == 'End':
                 temp = md_temp
             else:
-                temp = q_settings[3][i][0]
+                temp = q_settings[ 'equilibration' ][i][0]
 
-            if int(q_settings[4][0]) == 1:
+            if int(q_settings[ 'subscript' ][0]) == 1:
                 inputfile = base_name + '%d.inp' % count
                 logfile = base_name + '%d.log' % count
 
             submitfile.write('%s %s > %s\n' % (qdyn, inputfile, logfile))
 
             eq_file.write('[MD]\n')
-            eq_file.write('%25s %s\n' % ('steps'.ljust(25), q_settings[3][i][5]))
-            eq_file.write('%25s %s\n' % ('stepsize'.ljust(25), q_settings[3][i][4]))
+            eq_file.write('%25s %s\n' % ('steps'.ljust(25), q_settings[ 'equilibration' ][i][5]))
+            eq_file.write('%25s %s\n' % ('stepsize'.ljust(25), q_settings[ 'equilibration' ][i][4]))
             eq_file.write('%25s %s\n' % ('temperature'.ljust(25), temp))
-            eq_file.write('%25s %s\n' % ('bath_coupling'.ljust(25), q_settings[3][i][1]))
+            eq_file.write('%25s %s\n' % ('bath_coupling'.ljust(25), q_settings[ 'equilibration' ][i][1]))
             if count == 1:
                 eq_file.write('%25s %s\n' % ('random_seed'.ljust(25), random_seed))
-                eq_file.write('%25s %s\n' % ('initial_temperature'.ljust(25), q_settings[3][i][0]))
+                eq_file.write('%25s %s\n' % ('initial_temperature'.ljust(25), q_settings[ 'equilibration' ][i][0]))
                 eq_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), 'on'))
             if count > 1:
                 eq_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), shake_solvent))
@@ -4859,7 +4859,7 @@ class SetupEVB(Toplevel):
             eq_file.write('%25s %s\n' % ('non_bond'.ljust(25), non_bond_int))
 
             eq_file.write('\n[files]\n')
-            if int(q_settings[4][0]) == 1:
+            if int(q_settings[ 'subscript' ][0]) == 1:
                 topology = self.topology.split('/')[-1]
                 fepname = fepname.split('/')[-1]
             else:
@@ -4879,14 +4879,14 @@ class SetupEVB(Toplevel):
             eq_file.write('%s\n' % ' '.join(lambda_list[0].split()[1:]))
 
             eq_file.write('\n[sequence_restraints]\n')
-            force = float(q_settings[3][i][3])
-            if q_settings[3][i][2] != 'None':
-                if q_settings[3][i][2] == 'All':
+            force = float(q_settings[ 'equilibration' ][i][3])
+            if q_settings[ 'equilibration' ][i][2] != 'None':
+                if q_settings[ 'equilibration' ][i][2] == 'All':
                     atomlist = all_atoms
                     #eq_file.write(' not excluded  %4.1f 0  0\n' % force)
-                elif q_settings[3][i][2] == 'Solute':
+                elif q_settings[ 'equilibration' ][i][2] == 'Solute':
                     atomlist = solute
-                elif q_settings[3][i][2] == 'Solvent':
+                elif q_settings[ 'equilibration' ][i][2] == 'Solvent':
                     atomlist = solvent
                 try:
                     atom_i = atomlist[0]
@@ -4966,7 +4966,7 @@ class SetupEVB(Toplevel):
             md_file.write('%25s %s\n' % ('non_bond'.ljust(25), non_bond_int))
 
             md_file.write('\n[files]\n')
-            if int(q_settings[4][0]) == 1:
+            if int(q_settings[ 'subscript' ][0]) == 1:
                 topology = self.topology.split('/')[-1]
                 fepname = fepname.split('/')[-1]
             else:
@@ -5007,7 +5007,7 @@ class SetupEVB(Toplevel):
             md_file.close()
 
         #If use submission script, check for end statements (comes after #Qdyn I/O):
-        if int(q_settings[4][0]) == 1:
+        if int(q_settings[ 'subscript' ][0]) == 1:
             write_end = False
             submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             for k in range(len(submissionscipt)):
@@ -5070,7 +5070,7 @@ class SetupEVB(Toplevel):
 
                 start = last_run + 1
                 end += last_run
-            submitfile.write('for i in {%d..%d}\ndo\ncd %s/$i\n%s run.sh\n' % (start, end, T,self.app.q_settings[4][1]))
+            submitfile.write('for i in {%d..%d}\ndo\ncd %s/$i\n%s run.sh\n' % (start, end, T,self.app.q_settings[ 'subscript' ][1]))
             submitfile.write('cd ../../\ndone')
             for run in range(start, end + 1):
                 print 'T=%s   run=%d' % (T, run)

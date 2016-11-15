@@ -382,7 +382,7 @@ class AnalyzeQcalc(Toplevel):
         """
         writes input submission script file for qcalc (.sh) and creatin Qcalc input file(s)
         """
-        qcalc = self.app.q_settings[5][3]
+        qcalc = self.app.q_settings[ 'executables' ][3]
         script_name = '%s/%s.sh' % (self.app.workdir, self.qcalc_what)
         sub_script = open(script_name, 'w')
         if submit:

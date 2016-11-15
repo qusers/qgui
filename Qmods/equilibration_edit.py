@@ -66,11 +66,11 @@ class EditEq(Toplevel):
                    self.ss_entry.get().strip(),
                    self.steps_entry.get().strip()]
 
-        if int(self.nr_entry.get()) <= len(self.app.q_settings[3]):
-            del self.app.q_settings[3][eq_index]
-            self.app.q_settings[3].insert(eq_index, eq_list)
+        if int(self.nr_entry.get()) <= len(self.app.q_settings[ 'equilibration' ]):
+            del self.app.q_settings[ 'equilibration' ][eq_index]
+            self.app.q_settings[ 'equilibration' ].insert(eq_index, eq_list)
         else:
-            self.app.q_settings[3].append(eq_list)
+            self.app.q_settings[ 'equilibration' ].append(eq_list)
 
         self.app.updateSettings()
         self.destroy()

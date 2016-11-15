@@ -68,9 +68,9 @@ class MainWindow(Frame):
                                    initialdir = self.app.workdir)
 
         if new_workdir == '':
-            new_workdir = self.app.q_settings[0]
+            new_workdir = self.app.q_settings[ 'workdir' ]
         self.app.workdir = new_workdir
-        self.app.q_settings[0] = self.app.workdir
+        self.app.q_settings[ 'workdir' ] = self.app.workdir
         self.app.saveSettings()
 
         print self.app.workdir

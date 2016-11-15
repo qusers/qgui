@@ -31,7 +31,7 @@ class CreatePrmLib(Toplevel):
         self.main_color = self.app.main_color
         self.root = root
         self.q_settings = cPickle.load(open(self.app.settings_path + '/' + 'Qsettings','rb'))
-        self.ffld_path = self.app.q_settings[6]
+        self.ffld_path = self.app.q_settings[ 'schrodinger path' ]
         if not self.ffld_path:
             self.app.errorBox('Error', 'Schrodinger path not in settings.')
             self.destroy()

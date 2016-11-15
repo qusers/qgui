@@ -100,7 +100,9 @@ class QGui(object):
         self.pdb_id = None 
         self.log('info', 'Welcome! Starting a new QGui session')
         self.log('info', 'To downloaded a PDB file, click the Load-button.')
+        
         self.getSettings()
+        
         self.checkUpdates()
 
         #Check for workdir key upon launce (-p)
@@ -109,7 +111,7 @@ class QGui(object):
             if this_dir == '-p':
                 new_workdir = os.getcwd()
                 print '\nWorkdir: %s\n' % new_workdir
-                self.q_settings[0] = new_workdir
+                self.q_settings[ 'workdir' ] = new_workdir
                 self.workdir = new_workdir
                 self.saveSettings()
 
@@ -139,41 +141,56 @@ class QGui(object):
         """
         try:
             self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
+            
+            if type( self.q_settings ) == list:
+                Keys = [ 'workdir', 'parameter', 'library', 'equilibration', 'subscript', 'executables', 'schrodinger path' ]
+                new_settings = {}
+
+                map( lambda K: new_settings.update({ Keys[K[0]] : K[1] }), enumerate( self.q_settings ) )
+
+                self.q_settings = new_settings
+                
+                print self.q_settings
+
+                cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
+
         except:
-            #TODO change this stupid list for q_settings to a readable dictionary!
-            self.q_settings = [
-                'default',
-                [],
-                [],
-                [
+
+            self.q_settings = {
+                'workdir'        :   'default',
+                'parameter'      :   [],
+                'library'        :   [],
+                'equilibration' :   [
                     [1, 0.2,'All',10.0, 0.1, 10000 ],
                     [50, 1.0,'All',10.0, 1.0, 10000 ],
                     [150, 1.0,'All',5.0, 1.0, 10000 ],
                     [275, 1.0,'All',5.0, 1.0, 10000 ],
                     ['End', 10.0,'None',0, 1.0, 100000]
-                ],
-                [1, './'],
-                ['Qprep5','Qdyn5','Qfep5','Qcalc5'],
-                None
-            ]
+                    ],
+                'subscript'       :  [1, './'],
+                'executables'     :  ['Qprep5','Qdyn5','Qfep5','Qcalc5'],
+                'schrodinger path':  None
+
+                }
+
 
             cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
         #Get workdirectory:
-        if self.q_settings[0] == 'default':
+        if self.q_settings[ 'workdir' ] == 'default':
             #self.workdir = os.path.dirname(os.path.abspath(__file__))
             if 'darwin' in sys.platform:
                 self.workdir = '/Users/' + getpass.getuser()
             else:
                 self.workdir = '/home/' + getpass.getuser()
         else:
-            self.workdir = self.q_settings[0]
+            self.workdir = self.q_settings[ 'workdir' ]
 
         #Get parameter file(s) for force field:
-        self.prms = self.q_settings[1]
+        self.prms = self.q_settings[ 'parameter' ]
 
         #Get Libaray file(s):
-        self.libs = self.q_settings[2]
+        self.libs = self.q_settings[ 'library' ]
 
     def saveSettings(self):
         """

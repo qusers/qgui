@@ -396,7 +396,7 @@ class EvbReactions(Toplevel):
         Calls Qfep with qfep_inp and produces qfep.out
         """
         #Get Qfep executable
-        qfep = self.app.q_settings[5][2]
+        qfep = self.app.q_settings[ 'executables' ][2]
         #Move to path and run Qfep
         self.app.log(' ','Running Qfep in ../%s\n' % '/'.join(path.split('/')[-3:]))
         os.chdir(path)

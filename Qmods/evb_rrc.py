@@ -211,7 +211,7 @@ class EvbCalibration(Toplevel):
             return
 
         #Get qfep command from settings
-        qfep = self.app.q_settings[5][2]
+        qfep = self.app.q_settings[ 'executables' ][2]
 
         #Change directory to tempdir:
         os.chdir(tempdir)

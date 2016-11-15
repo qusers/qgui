@@ -25,7 +25,7 @@ from edit_file import FileEdit
 
 class QguiSettings(Toplevel):
     """
-    self.q_settings = [0' workdir',1[prm],2[lib],3[equilibration],4[use sub script (1/0), command], 5[executables],6'schrodinger path']
+    self.q_settings = ['workdir',[parameter],[library],[equilibration],[sub script[1/0,cmd]], [executables],'schrodinger path']
     """
 
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
@@ -42,13 +42,13 @@ class QguiSettings(Toplevel):
 
     def close(self):
         self.submitcommand.config(state=NORMAL)
-        self.q_settings[4][1] = self.submitcommand.get().strip()
-        self.q_settings[5][0] = self.qprep.get().strip()
-        self.q_settings[5][1] = self.qdyn.get().strip()
-        self.q_settings[5][2] = self.qfep.get().strip()
-        self.q_settings[5][3] = self.qcalc.get().strip()
+        self.q_settings[ 'subscript' ][1] = self.submitcommand.get().strip()
+        self.q_settings[ 'executables' ][0] = self.qprep.get().strip()
+        self.q_settings[ 'executables' ][1] = self.qdyn.get().strip()
+        self.q_settings[ 'executables' ][2] = self.qfep.get().strip()
+        self.q_settings[ 'executables' ][3] = self.qcalc.get().strip()
         self.schrodinger_path.config(state=NORMAL)
-        self.q_settings[6] = self.schrodinger_path.get().strip()
+        self.q_settings[ 'schrodinger path' ] = self.schrodinger_path.get().strip()
 
 
         cPickle.dump(self.q_settings, open(self.app.settings_path + '/Qsettings','wb'))
@@ -108,34 +108,34 @@ class QguiSettings(Toplevel):
         self.qsettings = ['workdir',[prm],[lib]]
         """
 
-        if self.q_settings[0] == 'default':
+        if self.q_settings[ 'workdir' ] == 'default':
             self.workdir = os.path.dirname(os.path.abspath(__file__))
         else:
-            self.workdir = self.q_settings[0]
+            self.workdir = self.q_settings[ 'workdir' ]
 
         #Get parameter file(s) for force field and update prm list:
         self.prm_list.delete(0,END)
-        for prmfile in self.q_settings[1]:
+        for prmfile in self.q_settings[ 'parameter' ]:
             self.prm_list.insert(END, '.../%s/%s' % (prmfile.split('/')[-2], prmfile.split('/')[-1]))
 
         #Get Libaray file(s) and update lib list:
         self.lib_list.delete(0,END)
-        for libraryfile in self.q_settings[2]:
+        for libraryfile in self.q_settings[ 'library' ]:
             self.lib_list.insert(END,'.../%s/%s' % (libraryfile.split('/')[-2], libraryfile.split('/')[-1]))
 
         #Get equilibration procedure and update list:
         self.eq_list.delete(0,END)
         self.eq_list.insert(END,'%3s %4s %4s %8s %4s %10s %8s' % ('# ',' T ','Bath', 'Restr.',' F ','st. size', 'Steps'))
 
-        for i in range(len(self.q_settings[3])):
-            temp, bath, atoms, force, stepsize, steps = self.q_settings[3][i][0:]
+        for i in range(len(self.q_settings[ 'equilibration' ])):
+            temp, bath, atoms, force, stepsize, steps = self.q_settings[ 'equilibration' ][i][0:]
             self.eq_list.insert(END, '%3s %4s %4s %7s %6s %8s %10s' % ((i+1), temp, bath, atoms, force, stepsize, steps))
 
         self.submitcommand.config(state=NORMAL)
         self.submitcommand.delete(0, END)
-        self.submitcommand.insert(0, self.q_settings[4][1])
+        self.submitcommand.insert(0, self.q_settings[ 'subscript' ][1])
 
-        submit = int(self.q_settings[4][0])
+        submit = int(self.q_settings[ 'subscript' ][0])
         self.submit_check.set(submit)
 
         self.qprep.delete(0, END)
@@ -143,14 +143,14 @@ class QguiSettings(Toplevel):
         self.qfep.delete(0, END)
         self.qcalc.delete(0, END)
 
-        self.qprep.insert(0, self.q_settings[5][0])
-        self.qdyn.insert(0, self.q_settings[5][1])
-        self.qfep.insert(0, self.q_settings[5][2])
-        self.qcalc.insert(0, self.q_settings[5][3])
+        self.qprep.insert(0, self.q_settings[ 'executables' ][0])
+        self.qdyn.insert(0, self.q_settings[ 'executables' ][1])
+        self.qfep.insert(0, self.q_settings[ 'executables' ][2])
+        self.qcalc.insert(0, self.q_settings[ 'executables' ][3])
 
         #Get schrodinger path if it exists:
-        if self.q_settings[6]:
-            path = self.q_settings[6]
+        if self.q_settings[ 'schrodinger path' ]:
+            path = self.q_settings[ 'schrodinger path' ]
         else:
             path = 'NA'
         self.schrodinger_path.config(state=NORMAL)
@@ -165,7 +165,7 @@ class QguiSettings(Toplevel):
         Use submission script or not..
         """
         submit = self.submit_check.get()
-        self.q_settings[4][0] = submit
+        self.q_settings[ 'subscript' ][0] = submit
 
         if submit == 0:
             self.edit_file.config(state=DISABLED)
@@ -179,26 +179,26 @@ class QguiSettings(Toplevel):
         """
         Removes selected item in prm list from q_settings list and saves .q_settings file
         """
-        if len(self.q_settings[1]) > 0:
+        if len(self.q_settings[ 'parameter' ]) > 0:
             try:
                 selected_index = int(self.prm_list.curselection()[0])
             except:
                 return
             self.prm_list.delete(selected_index)
-            del self.q_settings[1][selected_index]
+            del self.q_settings[ 'parameter' ][selected_index]
 
 
     def remove_from_lib(self):
         """
         Removes selected item in prm list from q_settings list and saves Qsettings file
         """
-        if len(self.q_settings[2]) > 0:
+        if len(self.q_settings[ 'library' ]) > 0:
             try:
                 selected_index = int(self.lib_list.curselection()[0])
             except:
                 return
             self.lib_list.delete(selected_index)
-            del self.q_settings[2][selected_index]
+            del self.q_settings[ 'library' ][selected_index]
 
 
 
@@ -209,9 +209,9 @@ class QguiSettings(Toplevel):
         libfile = askopenfilename(parent = self, initialdir = self.workdir,
                                   filetypes=(("Library", "*.lib"),("All files","*.*")))
 
-        if libfile not in self.q_settings[2]:
+        if libfile not in self.q_settings[ 'library' ]:
             if len(libfile) > 4:
-                self.q_settings[2].append(libfile)
+                self.q_settings[ 'library' ].append(libfile)
         else:
             self.app.errorBox('Warning','A library with the same name already exist.')
 
@@ -224,9 +224,9 @@ class QguiSettings(Toplevel):
         prmfile = askopenfilename(parent = self, initialdir = self.workdir,
                                   filetypes=(("Parameters", "*.prm"),("All files","*.*")))
 
-        if prmfile not in self.q_settings[1]:
+        if prmfile not in self.q_settings[ 'parameter' ]:
             if len(prmfile) > 4:
-                self.q_settings[1].append(prmfile)
+                self.q_settings[ 'parameter' ].append(prmfile)
         else:
             self.app.errorBox('Warning','A parameter file with the same name already exist.')
 
@@ -248,7 +248,7 @@ class QguiSettings(Toplevel):
         try:
             list_index = int(self.eq_list.curselection()[0])
         except:
-            list_index = len(self.q_settings[3])
+            list_index = len(self.q_settings[ 'equilibration' ])
         if list_index != 0:
             nr = list_index + 1
             self.edit_eq(nr)
@@ -268,14 +268,14 @@ class QguiSettings(Toplevel):
         Removes selected equilibration step
         """
 
-        if len(self.q_settings[3]) > 0:
+        if len(self.q_settings[ 'equilibration' ]) > 0:
             try:
                 selected_index = int(self.eq_list.curselection()[0])
             except:
                 return
             if selected_index != 0:
                 self.eq_list.delete(selected_index)
-                del self.q_settings[3][selected_index - 1]
+                del self.q_settings[ 'equilibration' ][selected_index - 1]
 
     def select_path(self):
         """
@@ -283,10 +283,10 @@ class QguiSettings(Toplevel):
         """
         schrodinger = askdirectory(parent=self, mustexist=False, title='Set Schrodinger path', initialdir = self.app.workdir)
         if schrodinger != '':
-            self.q_settings[6] = schrodinger
+            self.q_settings[ 'schrodinger path' ] = schrodinger
         else:
-            if self.q_settings[6]:
-                schrodinger = self.q_settings[6]
+            if self.q_settings[ 'schrodinger path' ]:
+                schrodinger = self.q_settings[ 'schrodinger path' ]
             else:
                 schrodinger = 'NA'
 

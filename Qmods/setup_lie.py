@@ -163,8 +163,8 @@ class SetupLie(Toplevel):
             self.add_title = 'ligand'
             pdb = self.ligand_pdb
 
-        prms = self.app.q_settings[1]
-        libs = self.app.q_settings[2]
+        prms = self.app.q_settings[ 'parameter' ]
+        libs = self.app.q_settings[ 'library' ]
 
         self.topo_prepare = TopologyPrepare(self, self.root, pdb, prms, libs, False)
         self.topo_prepare.configure(background = self.main_color)
@@ -221,7 +221,7 @@ class SetupLie(Toplevel):
                 except:
                     print 'Equilibration file with random seed not found!'
                 submitfile.write('cd %s/%d\n' % (dir_, i))
-                submitfile.write('%s %srun.sh\n' % (self.app.q_settings[4][1], basename))
+                submitfile.write('%s %srun.sh\n' % (self.app.q_settings[ 'subscript' ][1], basename))
                 submitfile.write('cd ../../\n')
         submitfile.close()
 

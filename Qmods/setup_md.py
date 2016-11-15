@@ -267,7 +267,7 @@ class SetupMd(Toplevel):
     def writeInputs(self, message = True):
         """
         Write eq and md input files
-        self.q_settings = ['workdir',[prm],[lib],[equilibration],[use sub script (1/0), command], [executables]]
+        self.q_settings = ['workdir',[prm],[lib],[equilibration],[sub (script[1/0, cmd)], [executables]]
         """
         #Control that Q-atoms is selected!
         if not self.run_md and not self.fep:
@@ -371,9 +371,9 @@ class SetupMd(Toplevel):
 
         #Open submission script:
         self.submit = base_name + 'run.sh'
-        self.submitcommand = q_settings[4][1]
+        self.submitcommand = q_settings[ 'subscript' ][1]
         submitfile = open(self.app.workdir + '/' + self.submit,'w')
-        if int(q_settings[4][0]) == 1:
+        if int(q_settings[ 'subscript' ][0]) == 1:
             if os.path.isfile(self.app.settings_path + '/qsubmit'):
                 submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
@@ -388,7 +388,7 @@ class SetupMd(Toplevel):
                     submitfile.write(line)
 
         #Check if Qdyn is MPI run or not:
-        qdyn = q_settings[5][1]
+        qdyn = q_settings[ 'executables' ][1]
         if qdyn[-1] == 'p':
             qdyn = 'mpirun %s' % qdyn
 
@@ -399,17 +399,17 @@ class SetupMd(Toplevel):
             self.app.log('info','Writing MD equilibration input files ...')
             random_seed = random.randrange(1000, 9999)
             count = 0
-            for i in range(len(q_settings[3])):
+            for i in range(len(q_settings[ 'equilibration' ])):
                 count += 1
                 inputfile = self.app.workdir + '/' + base_name + '_eq%d.inp' % count
                 logfile = self.app.workdir + '/' + base_name + '_eq%d.log' % count
                 eq_file = open(inputfile, 'w')
 
-                if q_settings[3][i][0] == 'End':
+                if q_settings[ 'equilibration' ][i][0] == 'End':
                     temp = self.temperature.get()
                 else:
-                    temp = q_settings[3][i][0]
-                if int(q_settings[4][0]) == 1:
+                    temp = q_settings[ 'equilibration' ][i][0]
+                if int(q_settings[ 'subscript' ][0]) == 1:
                     inputfile = base_name + '_eq%d.inp' % count
                     logfile = base_name + '_eq%d.log' % count
 
@@ -418,13 +418,13 @@ class SetupMd(Toplevel):
                 #self.app.main_window.update_txt('%s\n' % inputfile)
                 self.app.log(' ','%s\n' % inputfile)
                 eq_file.write('[MD]\n')
-                eq_file.write('%25s %s\n' % ('steps'.ljust(25), q_settings[3][i][5]))
-                eq_file.write('%25s %s\n' % ('stepsize'.ljust(25), q_settings[3][i][4]))
+                eq_file.write('%25s %s\n' % ('steps'.ljust(25), q_settings[ 'equilibration' ][i][5]))
+                eq_file.write('%25s %s\n' % ('stepsize'.ljust(25), q_settings[ 'equilibration' ][i][4]))
                 eq_file.write('%25s %s\n' % ('temperature'.ljust(25), temp))
-                eq_file.write('%25s %s\n' % ('bath_coupling'.ljust(25), q_settings[3][i][1]))
+                eq_file.write('%25s %s\n' % ('bath_coupling'.ljust(25), q_settings[ 'equilibration' ][i][1]))
                 if count == 1:
                     eq_file.write('%25s %d\n' % ('random_seed'.ljust(25), random_seed))
-                    eq_file.write('%25s %s\n' % ('initial_temperature'.ljust(25), q_settings[3][i][0]))
+                    eq_file.write('%25s %s\n' % ('initial_temperature'.ljust(25), q_settings[ 'equilibration' ][i][0]))
                     eq_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), 'on'))
                 if count > 1:
                     eq_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), shake_solvent))
@@ -458,7 +458,7 @@ class SetupMd(Toplevel):
                 eq_file.write('%25s %s\n' % ('non_bond'.ljust(25), non_bond_int))
 
                 eq_file.write('\n[files]\n')
-                if int(q_settings[4][0]) == 1:
+                if int(q_settings[ 'subscript' ][0]) == 1:
                     topology = self.topology.split('/')[-1]
                     fepname = fepname.split('/')[-1]
                 else:
@@ -483,15 +483,15 @@ class SetupMd(Toplevel):
 
 
                 eq_file.write('\n[sequence_restraints]\n')
-                force = float(q_settings[3][i][3])
-                if q_settings[3][i][2] != 'None':
-                    if q_settings[3][i][2] == 'All':
+                force = float(q_settings[ 'equilibration' ][i][3])
+                if q_settings[ 'equilibration' ][i][2] != 'None':
+                    if q_settings[ 'equilibration' ][i][2] == 'All':
                         atomlist = all_atoms
                         #not excluded does not work for this section. TODO! (implement in Q)
                         #eq_file.write(' not excluded  %4.1f 0  0\n' % force)
-                    elif q_settings[3][i][2] == 'Solute':
+                    elif q_settings[ 'equilibration' ][i][2] == 'Solute':
                         atomlist = solute
-                    elif q_settings[3][i][2] == 'Solvent':
+                    elif q_settings[ 'equilibration' ][i][2] == 'Solvent':
                         atomlist = solvent
 
                     try:
@@ -532,7 +532,7 @@ class SetupMd(Toplevel):
             inputfile = self.app.workdir + '/' + base_name + '_md%03d.inp' % count
             logfile = self.app.workdir + '/' + base_name + '_md%03d.log' % count
             md_file = open(inputfile, 'w')
-            if int(q_settings[4][0]) == 1:
+            if int(q_settings[ 'subscript' ][0]) == 1:
                 inputfile = base_name + '_md%03d.inp' % count
                 logfile = base_name + '_md%03d.log' % count
 
@@ -576,7 +576,7 @@ class SetupMd(Toplevel):
             md_file.write('%25s %s\n' % ('non_bond'.ljust(25), non_bond_int))
 
             md_file.write('\n[files]\n')
-            if int(q_settings[4][0]) == 1:
+            if int(q_settings[ 'subscript' ][0]) == 1:
                 topology = self.topology.split('/')[-1]
                 fepname = fepname.split('/')[-1]
             else:
@@ -621,7 +621,7 @@ class SetupMd(Toplevel):
             md_file.close()
 
         #If use submission script, check for end statements (comes after #Qdyn I/O):
-        if int(q_settings[4][0]) == 1:
+        if int(q_settings[ 'subscript' ][0]) == 1:
             write_end = False
             submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             for k in range(len(submissionscipt)):
