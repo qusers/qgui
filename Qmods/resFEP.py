@@ -39,6 +39,17 @@ class ResFEP(Toplevel):
         #Store topologies 1..N:
         self.topology_paths = dict()
 
+        #Store total FEP files for all mutations in each topology
+        # [topology][nr] = fepdict <-- see read_fepfile in qgui_functions.py for info on fepdict
+        self.topology_fep = dict()
+
+        #Store individual FEP files for every residual mutation in each topology
+        # [toplogy][res_nr] = fepdict
+        self.topology_res_fep = dict()
+
+        #Remember the order of how Residues are added
+        self.topology_res_order = dict()
+
         self.selected_topology = StringVar()
         self.selected_topology.set('Topology 1')
         self.topology_paths['Topology 1'] = '*.top'
@@ -49,13 +60,14 @@ class ResFEP(Toplevel):
         self.mutate_from.set('start')
         self.mutate_to.set('end')
 
-        #remember residue numbers to mutate in topologies
+        #remember residue numbers to mutate in topologies [topology][resnr] = [WT,MUT]
         self.topology_mutation = dict()
         self.topology_mutation['Topology 1'] = dict()
 
         #Check if a topology is loaded in main window
         if self.app.top_id:
             self.topology_paths['Topology 1'] = self.app.top_id
+            self.insert_topology_name()
 
 
         #Trace stuff
@@ -73,6 +85,9 @@ class ResFEP(Toplevel):
         topology = self.topology_paths[self.selected_topology.get()]
         topname = topology.split('/')[-1]
 
+        if not self.selected_topology.get() in self.topology_fep.keys():
+            self.topology_fep[self.selected_topology.get()] = dict()
+
         self.topology_label.config(text=topname)
 
     def topology_changed(self, *args):
@@ -81,7 +96,16 @@ class ResFEP(Toplevel):
         """
         self.insert_topology_name()
         self.refresh_residue_list()
+        self.refresh_feplist()
 
+    def refresh_feplist(self):
+        """
+        Show FEP files for selected topology in FEP file(s) listbox
+        """
+        self.feplist.delete(0, END)
+
+        for fep in sorted(self.topology_fep[self.selected_topology.get()]):
+            self.feplist.insert(END, 'FEP%d' % fep)
 
 
     def load_topology(self):
@@ -92,6 +116,8 @@ class ResFEP(Toplevel):
                                    filetypes=(("TOP", "*.top"), ("All files", '*.*')))
         if filename != '':
             self.topology_paths[self.selected_topology.get()] = filename
+            self.topology_fep[self.selected_topology.get()] = dict()
+            self.topology_res_fep[self.selected_topology.get()] = dict()
 
             self.insert_topology_name()
 
@@ -104,6 +130,9 @@ class ResFEP(Toplevel):
 
         self.topology_paths[top_nr] = '*.top'
         self.topology_mutation[top_nr] = dict()
+        self.topology_res_fep[top_nr] = dict()
+        self.topology_res_order[top_nr] = dict()
+
 
         self.selected_topology.set(top_nr)
         self.update_topology_menu()
@@ -180,31 +209,186 @@ class ResFEP(Toplevel):
         :param residue: RES 123
         Checks if RES exist in FEP library and loads FEP files. Abort if not existing!
         """
+        top = self.selected_topology.get()
         resname = residue.split()[0]
 
         res_nr = int(residue.split()[-1])
 
+        #Keeping mutate from as a list() in case we later decide to expand some unforseen options here...
+        mutate_from = list()
+        mutate_to_options = list()
+        mutate_to = None
+
         #Check if resname exist in FEP protocols
-        if not resname in self.feps.keys():
+        for fepfrom in self.feps.keys():
+            if fepfrom == resname:
+                mutate_from.append(fepfrom)
+                for fepto in self.feps[fepfrom].keys():
+                    mutate_to_options.append(fepto)
+                    if not '+' in fepto:
+                        mutate_to = fepto
+
+        if len(mutate_from) < 1:
             print('Found no FEP protocol for residue: %s' % resname)
             return
 
-        mutate_from = [resname]
+        if not mutate_to:
+            mutate_to = mutate_to_options[0]
 
-        mutate_to = list()
+        if not top in self.topology_res_order.keys():
+            self.topology_res_order[top] = dict()
 
-        for res in self.feps[resname].keys():
-            mutate_to.append(res)
+        self.topology_res_order[top][len(self.topology_res_order[top].keys())+1] = res_nr
 
-        self.topology_mutation[self.selected_topology.get()][res_nr] = [resname, mutate_to[0]]
+        self.topology_mutation[self.selected_topology.get()][res_nr] = [resname, mutate_to]
 
-        self.mutate_to.set(mutate_to[0])
+        #Get FEP files for default mutation
+        self.get_fep_files(resname, mutate_to, res_nr)
+
+        self.mutate_to.set(mutate_to)
         self.mutate_from.set(resname)
 
-        self.update_mutate_to_options(mutate_to)
+        self.update_mutate_to_options(mutate_to_options)
         self.update_mutate_from_options(mutate_from)
 
         self.refresh_residue_list()
+
+    def check_fep_top(self, fepfile, res_nr):
+        """
+        :param fepfile:
+        :param topolgy:
+        :param res_nr:
+        :return:
+        """
+        pdb_atoms_order = list()
+        pdb_atomnumbers_order = list()
+
+        #Get residue atom names and atom number from pdb file:
+        pdb_res = qf.get_pdb_resnr(qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()]),
+                                   res_nr)
+
+        for line in pdb_res:
+            if 'ATOM' in line:
+                atom_nr = int(line.split()[1])
+                atom_name = line[12:17].strip()
+                pdb_atoms_order.append(atom_name)
+                pdb_atomnumbers_order.append(atom_nr)
+
+        #atom nr and atom names from FEP file
+        q_atomnr, q_atomname = qf.get_fep_atoms(fepfile)
+
+        #Remove atoms from pdb that is not present in FEP file:
+        for i in range(len(pdb_atoms_order) - 1, -1, -1):
+            if pdb_atoms_order[i] not in q_atomname.values():
+                pdb_atoms_order.pop(i)
+                pdb_atomnumbers_order.pop(i)
+
+        missing_atoms = dict()
+        wrong_order = False
+
+        #{atomnumber in FEP file: offset value making it the same as TOP atom nr}
+        atomoffset = dict()
+
+        #Time to make every Q-atom nr correspond to the actual atom nr in *.top! (also check if something is wrong)
+        i = 0
+
+        for q in sorted(q_atomnr.keys()):
+            atomtype = q_atomname[q]
+
+            if atomtype == pdb_atoms_order[i]:
+                atomoffset[q_atomnr[q]] = int(pdb_atomnumbers_order[i]) - q_atomnr[q]
+            else:
+                if not wrong_order:
+                    #Get the atom order in FEP file
+                    fep_atoms_order = list()
+                    for qi in sorted(q_atomname.keys()):
+                        fep_atoms_order.append(q_atomname[qi])
+                    print 'FEP atoms order VS topology atoms order:'
+                    print(fep_atoms_order)
+                    print(pdb_atoms_order)
+                    print('This will most likely be handled by Qgui, but verify final FEP files!')
+
+                wrong_order = True
+                if not atomtype in pdb_atoms_order:
+                    missing_atoms[q] = atomtype
+                else:
+                    #Find atom number for atomtype
+                    for j in range(len(pdb_atoms_order)):
+                        if pdb_atoms_order[j] == atomtype:
+                            atomoffset[q_atomnr[q]] = int(pdb_atomnumbers_order[j]) - q_atomnr[q]
+                            break
+            i += 1
+
+        if len(missing_atoms.keys()) > 0:
+            self.app.errorBox('warning', 'Could not find all atoms defined in FEP in topology!')
+            for q in sorted(missing_atoms.keys()):
+                print('Q-atom %d with atom name %s not found in topolgy.' % (q, missing_atoms[q]))
+                self.app.log('', 'Q-atom %d with atom name %s not found in topolgy.\n' % (q, missing_atoms[q]))
+
+            return None
+
+        if wrong_order:
+            self.app.errorBox('warning', 'Atom order in FEP file and topology does not match!')
+            #Todo make some translateion dictionary insted of using offset to handle this
+
+        return atomoffset
+
+
+    def get_fep_files(self, rest_wt, res_mut, res_nr):
+        """
+        Gets FEP file for mutation res_wt-->res_mut for residue nr res_nr
+        :param rest_wt:
+        :param res_mut:
+        :return: nothing, but updates self.topology_res_fep dictionary
+        """
+        feps = dict()
+        top = self.selected_topology.get()
+
+        checked_pdb = False
+        atomoffset = None
+
+        for fepfile in os.listdir(self.feps[rest_wt][res_mut]):
+            if fepfile.endswith('.fep'):
+                nr = int(filter(str.isdigit, fepfile))
+                fepfile = '%s/%s' % (self.feps[rest_wt][res_mut], fepfile)
+                #Check atom numebers from pdb
+                if not checked_pdb:
+                    atomoffset = self.check_fep_top(fepfile, res_nr)
+                    if not atomoffset:
+                        return
+                    checked_pdb = True
+
+                feps[nr] = qf.read_fep(fepfile, qoffset=0, atomoffset=atomoffset)
+
+        self.topology_res_fep[top][res_nr] = feps
+
+        #Make FEP for topology in total:
+        self.topology_fep[top] = self.make_topology_fep(self.topology_res_fep[top], self.topology_res_order)
+        self.refresh_feplist()
+
+    def make_topology_fep(self, res_fep, res_order):
+        """
+        :param: res_fep {res nr: fep nr: nr: section: stuff}
+        :param: res_order {nr: res nr}
+        :return: fep_tot
+        """
+
+        #Order to merge FEP files:
+        merge_sequence = list()
+        for nr in sorted(res_order[self.selected_topology.get()].keys()):
+            merge_sequence.append(nr)
+
+        #Initialize FEP with first residue
+        res = res_order[self.selected_topology.get()][merge_sequence.pop(0)]
+        fep_tot = res_fep[res]
+
+        #Check if any existing mutations are added. If so, we need to merge FEP protocols:
+        if len(res_fep.keys()) > 1:
+            while len(merge_sequence) != 0:
+                res = res_order[self.selected_topology.get()][merge_sequence.pop(0)]
+                fep_tot.update(qf.merge_fep_dicts(fep_tot, res_fep[res]))
+
+        return fep_tot
 
     def refresh_residue_list(self):
         """
@@ -250,19 +434,24 @@ class ResFEP(Toplevel):
 
         res_feps = dict()
 
+        print('Reading FEP protocols:')
         for place in fep_paths:
             for fep in os.listdir(place):
                 fepdir = '%s/%s' % (place, fep)
                 if os.path.isdir(fepdir):
                     try:
                         res_wt = fep.split('_')[0]
-                        res_mut = ' '.join(fep.split('_')[1:])
+                        res_mut = fep.split('_')[1]
+                        if len(fep.split('_')) > 2:
+                            res_mut += '+' + '+'.join(fep.split('_')[2:])
+
                         if not res_wt in res_feps:
                             res_feps[res_wt] = dict()
-                        else:
+                        if res_mut in res_feps[res_wt].keys():
                             print('Found duplicate FEP protocol for %s!' % fep)
                             print('Default version of %s will be used' % fep)
                         res_feps[res_wt][res_mut] = fepdir
+                        print('%s-->%s' % (res_wt, res_mut))
                     except:
                         print('Failed to read %s' % fepdir)
 
@@ -280,6 +469,7 @@ class ResFEP(Toplevel):
         #Get selected residue in listbox:
         selection = self.reslist.curselection()
         if len(selection) == 0:
+            print('Nothing selected in Residue(s) to mutate!')
             return
 
         selected = self.reslist.get(selection[0])
@@ -290,8 +480,18 @@ class ResFEP(Toplevel):
 
         mut_from = self.mutate_from.get()
         mut_to = self.mutate_to.get()
+        print(mut_from, mut_to)
 
         self.topology_mutation[self.selected_topology.get()][res_nr] = [mut_from, mut_to]
+
+        del self.topology_res_fep[self.selected_topology.get()][res_nr]
+
+        #Get FEP files for default mutation
+        self.get_fep_files(mut_from, mut_to, res_nr)
+
+        self.mutate_to.set(mut_to)
+        self.mutate_from.set(mut_from)
+
         self.refresh_residue_list()
 
 
@@ -300,7 +500,18 @@ class ResFEP(Toplevel):
 
         :return:
         """
-        pass
+        selection = self.feplist.curselection()
+
+        if len(selection) == 0:
+            return
+
+        fepfile = self.feplist.get(selection[0])
+
+        nr = int(filter(str.isdigit, fepfile))
+
+        fep = self.topology_fep[self.selected_topology.get()][nr]
+
+        qf.write_fepdict(fep, path=self.app.workdir, printfep=True)
 
     def duplicate_fepfile(self):
         """

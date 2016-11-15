@@ -124,6 +124,25 @@ def create_pdb_from_topology(topology, libfiles=list()):
 
     return pdbfile
 
+def get_pdb_resnr(pdbfile, res_nr):
+    """
+    :param pdbfile:
+    :param resnr:
+    :return: list of pdb lines for given residue number
+    """
+    found_res = False
+    pdb_res = list()
+
+    for line in pdbfile:
+            if 'ATOM' in line:
+                if found_res and int(line[22:26]) != int(res_nr):
+                    break
+                if int(line[22:26]) == int(res_nr):
+                    found_res = True
+                    pdb_res.append(line)
+
+    return pdb_res
+
 
 def read_library(libfile):
     """
@@ -142,12 +161,12 @@ def read_library(libfile):
                 libdict[res] = dict()
                 atomnr = 0
             if found_atoms:
-                if re.search('[.*]', line):
+                if re.search('\[.*\]', line):
                     found_atoms = False
 
             if found_atoms:
-                if len(line.split()) > 3:
-                    nr, name,atomtype,charge = line.split()[0:4]
+                if len(line.split()) > 3 and not line.startswith('!'):
+                    nr, name, atomtype, charge = line.split()[0:4]
                     nr = int(nr)
                     libdict[res][nr] = dict()
 
@@ -159,5 +178,375 @@ def read_library(libfile):
                 found_atoms = True
 
     return libdict
+
+
+def get_fep_atoms(fepfile):
+    """
+    Simple function to get Q nr - atom nr - atom name from FEP file
+    :param fepfile:
+    :return: qnr_atomnr and qnr_atomname dicts
+    """
+    qnr_atomnr = dict()
+    qnr_atomname = dict()
+
+    found_atoms = False
+
+    with open(fepfile, 'r') as fep:
+        for line in fep:
+            if found_atoms:
+                if re.search('\[.*\]', line):
+                    return qnr_atomnr, qnr_atomname
+            if found_atoms and len(line.split()) > 1:
+                q_nr = int(line.split()[0])
+                atom_nr = int(line.split()[1])
+                atom_name = line.split('!')[1].split()[0]
+
+                qnr_atomnr[q_nr] = atom_nr
+                qnr_atomname[q_nr] = atom_name
+
+            if '[atoms]' in line:
+                found_atoms = True
+
+    return qnr_atomnr, qnr_atomname
+
+
+def read_fep(fepfile, qoffset=0, atomoffset=None):
+    """
+    :param fepfile:
+    :return: dictionary with all FEP info
+    """
+    #if atomsoffset is None, fill it with 0! {qnr: atomnumber offset}
+    if not atomoffset:
+        atomoffset=dict()
+        for i in range(0,9999):
+            atomoffset[i] = 0
+
+    #TODO check that no terms are forgotten here!
+    #Intitialize dictionary:
+    fepdict = dict()
+
+    #What part are we reading in the FEP file?
+    section = None
+    #Give ordered numbers to sections so that we can print in the same order as read!
+    sectionnr = 0
+
+    #Give ordered numbers to no_key sections so that we can print in the same order as read
+    keynr = 0
+
+    #sections without atomnumber(s)/Q number(s) etc.
+    no_key = ['!info', '[angle_couplings]', '[torsion_couplings]', '[soft_pairs]']
+
+    #How to handle keys if fepdict when modifying the: (nr of elements in key, type of modification to apply)
+    key_type = {'[FEP]': (1, 'name'),
+                '[atoms]': (1, qoffset),
+                '[atom_types]': (1, 'name'),
+                '[change_atoms]': (1, qoffset),
+                '[change_charges]': (1, qoffset),
+                '[bond_types]': (1, keynr),
+                '[angle_types]': (1, keynr),
+                '[torsion_types]': (1, keynr),
+                '[improper_types]': (1, keynr),
+                '[softcore]': (1, qoffset),
+                '[el_scale]': (2, qoffset),
+                '[change_bonds]': (2, atomoffset),
+                '[changle_angles]': (3, atomoffset),
+                '[change_torsions]': (4, atomoffset),
+                '[change_impropers]': (4, atomoffset),
+                '[excluded_pairs]': (2, atomoffset),
+                '[soft_pairs]': (2, qoffset),
+                '[torsion_couplings]': (2, keynr),
+                '[angle_couplings]': (2, keynr)}
+
+
+
+    #Now read the FEP file and insert stuff to fepdict
+    with open(fepfile, 'r') as fep:
+        for line in fep:
+            #New section?
+            if re.search('\[.*]', line):
+                sectionnr += 1
+                section = line.split()[0]
+                fepdict[sectionnr] = dict()
+                fepdict[sectionnr][section] = dict()
+                keynr = 0
+
+            elif section and len(line.split()) >= 2 and not line.startswith('!'):
+                keymod = key_type[section][1]
+
+                if section in no_key:
+                    keynr += 1
+                    _key = keynr
+                    _val = modify_fepline(keymod, line.split()[0:key_type[section][0]], section, key_type, qoffset)
+                else:
+                    _key = modify_fepline(keymod, line.split()[0:key_type[section][0]], section, key_type, qoffset)
+
+                    if section == '[atoms]':
+                        _val = [str(modify_fepline(atomoffset, line.split()[1:2], section, key_type, qoffset))] + \
+                               line.split()[2:]
+                    else:
+                        _val = line.split()[key_type[section][0]:]
+
+                fepdict[sectionnr][section][_key] = _val
+
+            elif not section and len(line.strip('\n')) > 0:
+                #Read info in top of file (if any):
+                if not sectionnr in fepdict.keys():
+                    fepdict[sectionnr] = dict()
+                if not '!info' in fepdict[sectionnr].keys():
+                    fepdict[sectionnr]['!info'] = dict()
+
+                keynr += 1
+                fepdict[sectionnr]['!info'][keynr] = [line]
+
+    return fepdict
+
+def modify_fepline(keymod, modify, section, key_type, qoffset):
+    """
+    :param keymod: dictionary, integer or string
+    :param modify: listelement from FEP file to modify
+    :param section: section in FEP file f.ex [bonds]
+    :param key_type: dictionary with info on FEP sections (see read_fep)
+    :param qoffset: integer for qoffset
+    :return: modify (modified line) as string or integer
+    """
+    #Make modefication to atomnumbers and Q numbers
+    if isinstance(keymod, dict):
+
+        if len(modify) == 1:
+            modify = int(modify[0]) + keymod[int(modify[0])]
+        else:
+            modify = ' '.join(str(int(i) + keymod[int(i)]) for i in modify)
+
+    elif isinstance(keymod, basestring):
+        modify = ' '.join(modify)
+
+    elif keymod == qoffset:
+        if key_type[section][0] == 1:
+            modify = int(modify[0]) + qoffset
+        else:
+            modify = ' '.join(str(int(i) + qoffset) for i in modify)
+
+    return modify
+
+
+def write_fepdict(fep, path=None, printfep=False):
+    """
+    Takes FEP dictionary and writes a regular FEP file to path
+    :param fep: a dictionary in the format described in function read_fep in this file
+    :param path: path to where the FEP file will be written
+    :param printfep: print FEP=True/False. If True, file will not be written only printed.
+    :return: True/False maybe?
+    """
+
+    if not printfep:
+        fepout = open(path, 'w')
+
+    #Some of the FEP sections are printed without the key (key is only for ordering in these cases)
+    no_key = ['!info', '[angle_couplings]', '[torsion_couplings]', '[soft_pairs]']
+
+    for nr in sorted(fep.keys()):
+        #The nr is just for printing the sections in the "correct" order
+        for section in sorted(fep[nr].keys()):
+            if printfep:
+                print('\n%s' % section)
+                for _key in sorted(fep[nr][section].keys()):
+                    _val = fep[nr][section][_key]
+                    if section in no_key:
+                        if printfep:
+                            print ' '.join(['%7s' % w.ljust(7) for w in _val])
+                        else:
+                            fepout.write(' '.join(['%7s' % w.ljust(7) for w in _val]))
+                    else:
+                        if printfep:
+                            print '%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % w.ljust(7) for w in _val]))
+                        else:
+                            fepout.write('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % w.ljust(7) for w in _val])))
+    if not printfep:
+        fepout.close()
+
+def extend_fep_length(fep, nr_feps):
+    """
+    Takes a fepdict of lenth N, and extends the length to nr_feps by setting the end state (N) to all new steps.
+    :param fep: fep dictionary
+    :param nr_feps: how many steps should the FEP protocol be
+    :return: fep
+    """
+    #sections to extend final state of final FEP to new FEP files (s1-->s2 in FEP6 becomes s2-->s2 in FEP7 f.ex)
+    get_state = ['[change_atoms]', '[change_charges]', '[softcore]', '[el_scale]', '[change_bonds]', '[change_angles]',
+                 '[change_torsions]', '[change_impropers]']
+
+    #Last FEP step in existing dictionary:
+    n = len(fep.keys())
+    #New number for new FEP protocols
+    i = n
+
+    #Find how many states FEP is:
+    s = None
+    while not s:
+        for order_nr in sorted(fep[n].keys()):
+            for section in sorted(fep[n][order_nr].keys()):
+                if section == '[FEP]':
+                    s = int(fep[n][order_nr][section]['states'][0])
+
+    while len(fep.keys()) < nr_feps:
+        i += 1
+        #Create new FEP file
+        fep[i] = dict()
+
+        for order_nr in sorted(fep[n].keys()):
+            fep[i][order_nr] = dict()
+            for section in fep[n][order_nr].keys():
+                print(section)
+                fep[i][order_nr][section] = dict()
+                for _key in sorted(fep[n][order_nr][section].keys()):
+                    _val = fep[n][order_nr][section][_key]
+                    if section in get_state:
+                        final_val = fep[n][order_nr][section][_key][s - 1]
+                        for alter in range(s):
+                            _val[alter] = final_val
+                    fep[i][order_nr][section][_key] = _val
+                    print(_key, _val)
+
+
+    return fep
+
+def get_offset(org, appending):
+    """
+    takes the section parts of two FEP dictinaries (feks [atoms]), and creates a translation dictionary for the
+    appending FEP dictionary - for merging two FEPs.
+    :param org: original FEP section
+    :param appending: the FEP section that is being appended
+    :return: offset: dictionary {old nr: new nr}
+    """
+    #{original nr: new nr}
+    offset = dict()
+
+    new_key = max(org.keys())
+
+    for _key in sorted(appending.keys()):
+        #Does value exist in org FEP section?
+        if appending[_key] in org.values():
+            #OK, find original key for that value then
+            for org_key in sorted(org.keys()):
+                if org[org_key] == appending[_key]:
+                    offset[_key] = org_key
+                    break
+        else:
+            new_key += 1
+            offset[_key] = new_key
+
+    return offset
+
+
+def merge_fep_dicts(fep1, fep2):
+    """
+    Will add fep2 to fep1 with modified Q nrs to depending on what is in fep1.
+    :param fep1: dict with fepfiles {nr: stuff}
+    :param fep2: dict with feofiles {nr: stuff}
+    :return: fepdict
+    merges two fep dictionaries so that nr of FEP files becomes equal!
+    """
+    #Check length of FEP protocols and make them equal in length
+    if len(fep1.keys()) > len(fep2.keys()):
+        fep2 = extend_fep_length(fep2, len(fep1.keys()))
+    elif len(fep1.keys()) < len(fep2.keys()):
+        fep1 = extend_fep_length(fep1, len(fep2.keys()))
+
+
+    #How to handle keys if fepdict when modifying the: (nr of elements in key, type of modification to apply)
+    key_type = {'[atoms]': ([0], ['q_offset']),
+                '[change_atoms]': ([0], ['q_offset']),
+                '[change_charges]': ([0], ['q_offset']),
+                '[bond_types]': ([0], ['bonds_offset']),
+                '[angle_types]': ([0], ['angles_offset']),
+                '[torsion_types]': ([0], ['torsions_offset']),
+                '[improper_types]': ([0], ['impropers_offset']),
+                '[softcore]': ([0], ['q_offset']),
+                '[el_scale]': ([0, 1], ['q_offset', 'q_offset']),
+                }
+
+    #How to handle values in fepdict when modifying ...
+    val_type = {'[change_bonds]': ([0, 1], ['bonds_offset', 'bonds_offset']),
+                '[changle_angles]': ([0, 1], ['angles_offset', 'angles_offset']),
+                '[change_torsions]': ([0, 1], ['torsions_offset', 'torsions_offset']),
+                '[change_impropers]': ([0, 1], ['impropers_offset', 'impropers_offset']),
+                '[soft_pairs]': ([0, 1], ['q_offset']),
+                '[torsion_couplings]': ([0, 1], ['bonds_offset', 'torsions_offset']),
+                '[angle_couplings]': ([0, 2], ['bonds_offset', 'angles_offset'])}
+
+    for fep in sorted(fep2.keys()):
+        #(re)-initialize translation dictionaries for FEP2
+        offsets = {'q_offset': None,
+               'bonds_offset': None,
+               'angles_offset': None,
+               'torsions_offset': None,
+               'impropers_offset': None}
+        for order_nr in sorted(fep2[fep].keys()):
+            for section in sorted(fep2[fep][order_nr].keys()):
+                for _key in sorted(fep2[fep][order_nr][section].keys()):
+                    _val = fep2[fep][order_nr][section][_key]
+
+                    #Modify key?
+                    if section in key_type.keys():
+                        new_key = list()
+                        for i in range(len(key_type[section][0])):
+
+                            #Do we have the correct offset for this section for this FEP file?
+                            if not offsets[key_type[section][1][i]]:
+                                appending = fep2[fep][order_nr][section]
+                                org = None
+                                #find section in in fep1
+                                for order_nr1 in sorted(fep1[fep].keys()):
+                                    for section_1 in sorted(fep1[fep][order_nr1].keys()):
+                                        if section_1 == section:
+                                            org = fep1[fep][order_nr1][section_1]
+                                            break
+                                if not org:
+                                    org = appending
+                                offsets[key_type[section][1][i]] = get_offset(org, appending)
+
+                            if len(key_type[section][0]) > 1:
+                                new_key.append(offsets[key_type[section][1][i]][_key.split()[key_type[section][0][i]]])
+                            else:
+                                new_key.append(offsets[key_type[section][1][i]][_key])
+
+                        if len(new_key) > 1:
+                            _key = ' '.join(str(int(i)) for i in new_key)
+                        else:
+                            _key = new_key[0]
+
+                    #Modify value?
+                    elif section in val_type.keys():
+                        new_val = list()
+                        for i in range(len(val_type[section][0])):
+
+                            #Do we have the correct offset for this section for this FEP file?
+                            if not offsets[val_type[section][1][i]]:
+                                appending = fep2[fep][order_nr][section]
+                                org = None
+                                #Find section in fep1
+                                for order_nr1 in sorted(fep1[fep].keys()):
+                                    for section_1 in sorted(fep1[fep][order_nr1].keys()):
+                                        if section_1 == section:
+                                            org = fep1[fep][order_nr1][section_1]
+                                            break
+                                if not org:
+                                    org = appending
+
+                                offsets[val_type[section][1][i]] = get_offset(org, appending)
+
+                            new_val.append(offsets[val_type[section][1][i]][_val.split()[key_type[section][0][i]]])
+
+                        #Check if additional stuff exist in val part
+                        if len(_val) > new_val:
+                            for j in range(len(new_val), len(_val)):
+                                new_val.append(_val[j])
+
+                        _val = ' '.join(str(i) for i in new_val)
+
+                    fep1[fep][order_nr][section][_key] = _val
+
+    return fep1
+
 
 
