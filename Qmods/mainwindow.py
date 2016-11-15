@@ -227,7 +227,6 @@ class MainWindow(Frame):
         setupmenu.add_command(label = 'MD', command = self.app.setup_md)
         setupmenu.add_command(label = 'LIE', command = self.app.setup_lie)
         setupmenu.add_command(label = 'FEP', command = self.app.setup_fep)
-        setupmenu.add_command(label = 'resFEP', command=self.app.setup_resfep)
         setupmenu.add_command(label = 'EVB', command = self.app.setup_evb)
         menubar.add_cascade(label = 'Setup', menu = setupmenu)
 

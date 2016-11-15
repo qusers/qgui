@@ -87,12 +87,9 @@ def convertPdb(pdb, workdir, atomnr=0, resnr=0):
                         #Check if GAP shoud be inserted:
                         if current_resnr + 1 != int(line[22:26]) and current_resnr != 0:
                             if atomtype == 'N':
-                                #x_n = float(line[28:].split()[0])
-                                x_n = float(line[30:38])
-                                #y_n = float(line[28:].split()[1])
-                                y_n = float(line[38:46])
-                                #z_n = float(line[28:].split()[2])
-                                z_n = float(line[46:54])
+                                x_n = float(line[28:].split()[0])
+                                y_n = float(line[28:].split()[1])
+                                z_n = float(line[28:].split()[2])
                                 distance = np.sqrt((x_n - x_c) ** 2 + (y_n - y_c) ** 2 + (z_n - z_c) ** 2)
                                 if distance > 2.2:
                                     if not found_ter:
@@ -107,12 +104,10 @@ def convertPdb(pdb, workdir, atomnr=0, resnr=0):
                     elif (current_resletter != line[26:27]) and (current_resletter != 'C'):
                         current_resletter = line[26:27]
                         resnr += 1
-                #xcord = float(line[28:].split()[0])
-                xcord = float(line[30:38])
-                #ycord = float(line[28:].split()[1])
-                ycord = float(line[38:46])
-                #zcord = float(line[28:].split()[2])
-                zcord = float(line[46:54])
+                xcord = float(line[28:].split()[0])
+                ycord = float(line[28:].split()[1])
+                zcord = float(line[28:].split()[2])
+
                 if atomtype == 'C':
                     x_c, y_c, z_c = xcord, ycord, zcord
                 newline = '%6s%5d  %4s%4s%5d    %8.3f%8.3f%8.3f' % ('ATOM  ', atomnr, atomtype.ljust(4), resname.ljust(4), resnr, xcord, ycord, zcord )
@@ -663,12 +658,9 @@ def centerofmass(pdb, use_mass=False):
                     else:
                         mass = 12.011
                     masses.append(mass)
-                #x.append(float(line[28:].split()[0]))
-                x.append(float(line[30:38]))
-                #y.append(float(line[28:].split()[1]))
-                y.append(float(line[38:46]))
-                #z.append(float(line[28:].split()[2]))
-                z.append(float(line[46:54]))
+                x.append(float(line[28:].split()[0]))
+                y.append(float(line[28:].split()[1]))
+                z.append(float(line[28:].split()[2]))
         except:
             continue
     tot_mass = np.sum(masses)
