@@ -384,9 +384,9 @@ class ResFEP(Toplevel):
 
         #Check if any existing mutations are added. If so, we need to merge FEP protocols:
         if len(res_fep.keys()) > 1:
-            while len(merge_sequence) != 0:
+            while len(merge_sequence) > 0:
                 res = res_order[self.selected_topology.get()][merge_sequence.pop(0)]
-                fep_tot.update(qf.merge_fep_dicts(fep_tot, res_fep[res]))
+                fep_tot = qf.merge_fep_dicts(fep_tot, res_fep[res])
 
         return fep_tot
 

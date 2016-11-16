@@ -133,46 +133,54 @@ class QGui(object):
 
             os.system('rm %s' % self.settings_path + '/qupdate')
 
+    def set_default_qsettings(self):
+        """
+        Sets q_settings to default
+        :return: q_settings dictionary
+        """
+        q_settings = {'workdir': 'default',
+                      'parameter': [],
+                      'library': [],
+                      'equilibration': [
+                          [1, 0.2,'All',10.0, 0.1, 10000 ],
+                          [50, 1.0,'All',10.0, 1.0, 10000 ],
+                          [150, 1.0,'All',5.0, 1.0, 10000 ],
+                          [275, 1.0,'All',5.0, 1.0, 10000 ],
+                          ['End', 10.0,'None',0, 1.0, 100000]
+                      ],
+                      'subscript': [1, './'],
+                      'executables': ['Qprep5','Qdyn5','Qfep5','Qcalc5'],
+                      'schrodinger path':  None}
+
+        return q_settings
+
+
     def getSettings(self):
         """
         Reads settings and returns workdir, [prm] and [lib]
 
-        self.q_settings = ['workdir',[prm],[lib],[equilibration],[use sub script (1/0), command], [executables],'schrodinger path']
+        self.q_settings = dict()
         """
         try:
             self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
-            
+
             if type( self.q_settings ) == list:
                 Keys = [ 'workdir', 'parameter', 'library', 'equilibration', 'subscript', 'executables', 'schrodinger path' ]
                 new_settings = {}
 
-                map( lambda K: new_settings.update({ Keys[K[0]] : K[1] }), enumerate( self.q_settings ) )
+                map(lambda K: new_settings.update({ Keys[K[0]] : K[1] }), enumerate( self.q_settings ) )
 
                 self.q_settings = new_settings
-                
-                print self.q_settings
+
+                print('Converted old Q-settings format to new format.')
+                print(self.q_settings)
+                print('Please see too that you settings are they way you set it up to be.')
 
                 cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
         except:
 
-            self.q_settings = {
-                'workdir'        :   'default',
-                'parameter'      :   [],
-                'library'        :   [],
-                'equilibration' :   [
-                    [1, 0.2,'All',10.0, 0.1, 10000 ],
-                    [50, 1.0,'All',10.0, 1.0, 10000 ],
-                    [150, 1.0,'All',5.0, 1.0, 10000 ],
-                    [275, 1.0,'All',5.0, 1.0, 10000 ],
-                    ['End', 10.0,'None',0, 1.0, 100000]
-                    ],
-                'subscript'       :  [1, './'],
-                'executables'     :  ['Qprep5','Qdyn5','Qfep5','Qcalc5'],
-                'schrodinger path':  None
-
-                }
-
+            self.q_settings = self.set_default_qsettings()
 
             cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 

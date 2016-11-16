@@ -277,6 +277,7 @@ def read_fep(fepfile, qoffset=0, atomoffset=None):
                     keynr += 1
                     _key = keynr
                     _val = modify_fepline(keymod, line.split()[0:key_type[section][0]], section, key_type, qoffset)
+
                 else:
                     _key = modify_fepline(keymod, line.split()[0:key_type[section][0]], section, key_type, qoffset)
 
@@ -296,7 +297,7 @@ def read_fep(fepfile, qoffset=0, atomoffset=None):
                     fepdict[sectionnr]['!info'] = dict()
 
                 keynr += 1
-                fepdict[sectionnr]['!info'][keynr] = [line]
+                fepdict[sectionnr]['!info'][keynr] = [line.strip('\n')]
 
     return fepdict
 
@@ -349,18 +350,19 @@ def write_fepdict(fep, path=None, printfep=False):
         for section in sorted(fep[nr].keys()):
             if printfep:
                 print('\n%s' % section)
-                for _key in sorted(fep[nr][section].keys()):
-                    _val = fep[nr][section][_key]
-                    if section in no_key:
-                        if printfep:
-                            print ' '.join(['%7s' % w.ljust(7) for w in _val])
-                        else:
-                            fepout.write(' '.join(['%7s' % w.ljust(7) for w in _val]))
+            for _key in sorted(fep[nr][section].keys()):
+                _val = fep[nr][section][_key]
+                if section in no_key:
+                    if printfep:
+                        print ' '.join(['%7s' % w.ljust(7) for w in _val])
                     else:
-                        if printfep:
-                            print '%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % w.ljust(7) for w in _val]))
-                        else:
-                            fepout.write('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % w.ljust(7) for w in _val])))
+                        fepout.write(' '.join(['%7s' % w.ljust(7) for w in _val]))
+                else:
+                    if printfep:
+                        print '%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val]))
+
+                    else:
+                        fepout.write('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val])))
     if not printfep:
         fepout.close()
 
@@ -381,12 +383,10 @@ def extend_fep_length(fep, nr_feps):
     i = n
 
     #Find how many states FEP is:
-    s = None
-    while not s:
-        for order_nr in sorted(fep[n].keys()):
-            for section in sorted(fep[n][order_nr].keys()):
-                if section == '[FEP]':
-                    s = int(fep[n][order_nr][section]['states'][0])
+    order_nr = get_fepdict_order_nr(fep[n], '[FEP]')
+    s = int(fep[n][order_nr]['[FEP]']['states'][0])
+    if s is None:
+        s = 2
 
     while len(fep.keys()) < nr_feps:
         i += 1
@@ -396,16 +396,17 @@ def extend_fep_length(fep, nr_feps):
         for order_nr in sorted(fep[n].keys()):
             fep[i][order_nr] = dict()
             for section in fep[n][order_nr].keys():
-                print(section)
                 fep[i][order_nr][section] = dict()
                 for _key in sorted(fep[n][order_nr][section].keys()):
                     _val = fep[n][order_nr][section][_key]
+
+                    #Append final state
                     if section in get_state:
                         final_val = fep[n][order_nr][section][_key][s - 1]
                         for alter in range(s):
                             _val[alter] = final_val
+
                     fep[i][order_nr][section][_key] = _val
-                    print(_key, _val)
 
 
     return fep
@@ -437,6 +438,22 @@ def get_offset(org, appending):
 
     return offset
 
+def get_fepdict_order_nr(fep, section):
+    """
+    Function that returns the order nr for a given section in fepdict
+    :param fep1:
+    :return: order_nr
+    """
+    order_nr = None
+
+    for nr in sorted(fep.keys()):
+        for sect in sorted(fep[nr].keys()):
+            if sect == section:
+                order_nr = nr
+                break
+
+    return order_nr
+
 
 def merge_fep_dicts(fep1, fep2):
     """
@@ -463,6 +480,7 @@ def merge_fep_dicts(fep1, fep2):
                 '[improper_types]': ([0], ['impropers_offset']),
                 '[softcore]': ([0], ['q_offset']),
                 '[el_scale]': ([0, 1], ['q_offset', 'q_offset']),
+                '!info': ([0], ['info_offset'])
                 }
 
     #How to handle values in fepdict when modifying ...
@@ -470,9 +488,9 @@ def merge_fep_dicts(fep1, fep2):
                 '[changle_angles]': ([0, 1], ['angles_offset', 'angles_offset']),
                 '[change_torsions]': ([0, 1], ['torsions_offset', 'torsions_offset']),
                 '[change_impropers]': ([0, 1], ['impropers_offset', 'impropers_offset']),
-                '[soft_pairs]': ([0, 1], ['q_offset']),
+                '[soft_pairs]': ([0, 1], ['q_offset', 'q_offset']),
                 '[torsion_couplings]': ([0, 1], ['bonds_offset', 'torsions_offset']),
-                '[angle_couplings]': ([0, 2], ['bonds_offset', 'angles_offset'])}
+                '[angle_couplings]': ([0, 1], ['bonds_offset', 'angles_offset'])}
 
     for fep in sorted(fep2.keys()):
         #(re)-initialize translation dictionaries for FEP2
@@ -480,11 +498,28 @@ def merge_fep_dicts(fep1, fep2):
                'bonds_offset': None,
                'angles_offset': None,
                'torsions_offset': None,
-               'impropers_offset': None}
+               'impropers_offset': None,
+               'info_offset': None}
+
         for order_nr in sorted(fep2[fep].keys()):
             for section in sorted(fep2[fep][order_nr].keys()):
+                #Ensure that section exists in fep1, it may not when merging different FEPs!
+                insert_nr = get_fepdict_order_nr(fep1[fep], section)
+                #Maybe this section did not exist in fep1
+                if insert_nr is None:
+                    if not order_nr in fep1[fep].keys():
+                        insert_nr = order_nr
+                    else:
+                        insert_nr = max(fep1[fep].keys()) + 1
+                    fep1[fep][insert_nr] = dict()
+                    fep1[fep][insert_nr][section] = dict()
+
                 for _key in sorted(fep2[fep][order_nr][section].keys()):
                     _val = fep2[fep][order_nr][section][_key]
+
+                    #info section?
+                    #if section == '!info':
+                    #    _key = len(fep1[fep][insert_nr][section].keys()) + 1
 
                     #Modify key?
                     if section in key_type.keys():
@@ -494,15 +529,12 @@ def merge_fep_dicts(fep1, fep2):
                             #Do we have the correct offset for this section for this FEP file?
                             if not offsets[key_type[section][1][i]]:
                                 appending = fep2[fep][order_nr][section]
-                                org = None
                                 #find section in in fep1
-                                for order_nr1 in sorted(fep1[fep].keys()):
-                                    for section_1 in sorted(fep1[fep][order_nr1].keys()):
-                                        if section_1 == section:
-                                            org = fep1[fep][order_nr1][section_1]
-                                            break
-                                if not org:
+                                org = fep1[fep][insert_nr][section]
+
+                                if len(org.keys()) < 1:
                                     org = appending
+
                                 offsets[key_type[section][1][i]] = get_offset(org, appending)
 
                             if len(key_type[section][0]) > 1:
@@ -523,28 +555,26 @@ def merge_fep_dicts(fep1, fep2):
                             #Do we have the correct offset for this section for this FEP file?
                             if not offsets[val_type[section][1][i]]:
                                 appending = fep2[fep][order_nr][section]
-                                org = None
+
                                 #Find section in fep1
-                                for order_nr1 in sorted(fep1[fep].keys()):
-                                    for section_1 in sorted(fep1[fep][order_nr1].keys()):
-                                        if section_1 == section:
-                                            org = fep1[fep][order_nr1][section_1]
-                                            break
-                                if not org:
+                                org = fep1[fep][insert_nr][section]
+
+                                if len(org.keys()) < 1:
                                     org = appending
 
                                 offsets[val_type[section][1][i]] = get_offset(org, appending)
 
-                            new_val.append(offsets[val_type[section][1][i]][_val.split()[key_type[section][0][i]]])
+                            new_val.append(offsets[val_type[section][1][i]][int(_val[val_type[section][0][i]])])
 
                         #Check if additional stuff exist in val part
                         if len(_val) > new_val:
                             for j in range(len(new_val), len(_val)):
                                 new_val.append(_val[j])
 
-                        _val = ' '.join(str(i) for i in new_val)
+                        #_val = ' '.join(str(i) for i in new_val)
+                        _val = new_val
 
-                    fep1[fep][order_nr][section][_key] = _val
+                    fep1[fep][insert_nr][section][_key] = _val
 
     return fep1
 
