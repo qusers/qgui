@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import EXTENDED, MULTIPLE, Button, Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
+from Tkinter import EXTENDED, StringVar, Button, Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
 
 import tkFont
 
@@ -22,7 +22,7 @@ class SelectReturn(Toplevel):
     """General class to select one element from a list
     and return selection to parent class"""
 
-    def __init__(self, app, root, elements=list(), select_title='select', Entry=None):         #Receives app and root from parent-class.
+    def __init__(self, app, root, elements=list(), select_title='select', Entry=None):
         Toplevel.__init__(self, root)
         self.app = app
         self.main_color = self.app.main_color
@@ -30,6 +30,9 @@ class SelectReturn(Toplevel):
         self.elements = elements
         #Parent variable becomes selected element in list:
         self.parent_entry = Entry
+
+        #If parent is to wait for value from this clss:
+        self.return_var = StringVar()
 
         self.select_title = select_title
 
@@ -54,23 +57,26 @@ class SelectReturn(Toplevel):
         for item in selected:
             items_selected.append(self.listbox.get(item))
 
-        if 'ligand' in self.select_title:
-            #LIE
-            for item in items_selected:
+        for item in items_selected:
+            if 'ligand' in self.select_title:
+                #LIE
                 self.app.lig_unique_log.append(item)
-        elif 'complex' in self.select_title:
-            #LIE
-            for item in items_selected:
+            elif 'complex' in self.select_title:
+                #LIE
                 self.app.comp_unique_log.append(item)
-        elif 'MD logfiles' in self.select_title:
-            #ANALYSE TRAJECTORY ENERGIES
-            for item in items_selected:
+            elif 'MD logfiles' in self.select_title:
+                #ANALYSE TRAJECTORY ENERGIES
                 self.app.unique_logs.append(item)
-            self.app.get_energies(self.select_title.split()[0])
-        #resFEP
-        elif 'Select residue to mutate' in self.select_title:
-            for item in items_selected:
+
+            #resFEP select residue
+            elif 'residue to mutate' in self.select_title:
                 self.app.mutate_residue(item)
+            #resFEP add missing atoms
+            elif 'atom' in self.select_title:
+                self.return_var = item.split()[1]
+
+        if 'MD logfiles' in self.select_title:
+            self.app.get_energies(self.select_title.split()[0])
 
         self.destroy()
 
@@ -80,6 +86,11 @@ class SelectReturn(Toplevel):
         elif 'complex' in self.select_title:
             self.app.comp_unique_log.append('cancel')
         self.destroy()
+
+    def show(self):
+        self.deiconify()
+        self.wait_window()
+        return self.return_var
 
     def dialog_box(self):
         """Defines the outlook of Setup MD window.

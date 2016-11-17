@@ -50,6 +50,9 @@ class ResFEP(Toplevel):
         #Remember the order of how Residues are added
         self.topology_res_order = dict()
 
+        #Atoms added manually to residue mutations (f.ex counterions) {topology: res nr: atomname: atomnr}
+        self.added_atoms = dict()
+
         self.selected_topology = StringVar()
         self.selected_topology.set('Topology 1')
         self.topology_paths['Topology 1'] = '*.top'
@@ -104,7 +107,7 @@ class ResFEP(Toplevel):
         """
         self.feplist.delete(0, END)
 
-        for fep in sorted(self.topology_fep[self.selected_topology.get()]):
+        for fep in sorted(self.topology_fep[self.selected_topology.get()].keys()):
             self.feplist.insert(END, 'FEP%d' % fep)
 
 
@@ -126,7 +129,7 @@ class ResFEP(Toplevel):
         Add a new topology
         :return:
         """
-        top_nr = 'Topology %d' % (len(self.topology_paths.keys()) + 1)
+        top_nr = 'Topology %d' % (int(self.selected_topology.get().split()[1]) + 1)
 
         self.topology_paths[top_nr] = '*.top'
         self.topology_mutation[top_nr] = dict()
@@ -142,8 +145,18 @@ class ResFEP(Toplevel):
         Remove selected topology
         :return:
         """
-        del self.topology_paths[self.selected_topology.get()]
-        self.update_topology_menu()
+        top = self.selected_topology.get()
+
+        del self.topology_paths[top]
+        del self.topology_res_fep[top]
+        del self.topology_mutation[top]
+        del self.topology_res_order[top]
+        nr = int(top.split()[1]) - 1
+
+        if nr < 1:
+            self.add_topology()
+        else:
+            self.update_topology_menu()
 
     def update_topology_menu(self):
         menu = self.select_topology['menu']
@@ -196,13 +209,25 @@ class ResFEP(Toplevel):
         if len(selection) < 1:
             return
 
+        top = self.selected_topology.get()
         for i in selection:
             res_nr = int(self.reslist.get(i).split()[1])
-            del self.topology_mutation[self.selected_topology.get()][res_nr]
+            del self.topology_mutation[top][res_nr]
+            del self.topology_res_fep[top][res_nr]
+            for nr in sorted(self.topology_res_order[top].keys()):
+                if self.topology_res_order[top][nr] == res_nr:
+                    del self.topology_res_order[top][nr]
 
             self.reslist.delete(i)
 
+        #Need to create res_fep again, because nr of FEP files might have changed.
+
+        #Make FEP for topology in total:
+        self.topology_fep[top] = self.make_topology_fep(self.topology_res_fep[top], self.topology_res_order)
+        self.refresh_feplist()
+
         self.refresh_residue_list()
+        self.refresh_feplist()
 
     def mutate_residue(self, residue):
         """
@@ -285,6 +310,38 @@ class ResFEP(Toplevel):
 
         missing_atoms = dict()
         wrong_order = False
+
+        #Check if additional atoms (f.ex counter ions) are missing.
+        top = self.selected_topology.get()
+
+        if len(pdb_atoms_order) != len(q_atomname.keys()):
+            residues = qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()],
+                                               self.app.q_settings['library'])
+            for q in q_atomname.keys():
+                atomtype = q_atomname[q]
+
+                if atomtype not in pdb_atoms_order:
+                    #Let us add the missing atom to this FEP residue
+                    #TODO we probably do not need self.added_atoms ... delete it later if so!
+                    if not top in self.added_atoms.keys():
+                        self.added_atoms[top] = dict()
+                    if not res_nr in self.added_atoms[top].keys():
+                        self.added_atoms[top][res_nr] = dict()
+                    self.added_atoms[top][res_nr][atomtype] = False
+
+                    #atomnr = self.select_missing_atom(atomtype)
+                    print('Q atom %d %s not found in residue %d ' % (q, atomtype, res_nr))
+                    self.app.log(' ', 'Q atom %d %s not found in residue %d \n' % (q, atomtype, res_nr))
+                    self.app.log(' ', 'Select atom %s from topology.' % atomtype)
+                    atomnr = SelectReturn(self, self.root, elements=residues,
+                                       select_title='atom %s for FEP' % atomtype, Entry=self.reslist).show()
+                    if not atomnr:
+                        print()
+
+                    self.added_atoms[top][res_nr][atomtype] = atomnr
+                    pdb_atomnumbers_order.append(self.added_atoms[top][res_nr][atomtype])
+                    pdb_atoms_order.append(atomtype)
+
 
         #{atomnumber in FEP file: offset value making it the same as TOP atom nr}
         atomoffset = dict()
@@ -378,9 +435,12 @@ class ResFEP(Toplevel):
         for nr in sorted(res_order[self.selected_topology.get()].keys()):
             merge_sequence.append(nr)
 
+        if len(merge_sequence) < 1:
+            return
+
         #Initialize FEP with first residue
         res = res_order[self.selected_topology.get()][merge_sequence.pop(0)]
-        fep_tot = res_fep[res]
+        fep_tot = deepcopy(res_fep[res])
 
         #Check if any existing mutations are added. If so, we need to merge FEP protocols:
         if len(res_fep.keys()) > 1:
@@ -493,6 +553,23 @@ class ResFEP(Toplevel):
         self.mutate_from.set(mut_from)
 
         self.refresh_residue_list()
+
+    def select_missing_atom(self, atomtype):
+        """
+        Select a atom that will be added to
+        :return:
+        """
+        #Get topology residues
+        residues = qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()],
+                                               self.app.q_settings['library'])
+
+        self.select_res = SelectReturn(self, self.root, elements=residues,
+                                       select_title='Select atom %s for FEP' % atomtype, Entry=self.reslist).show()
+        self.select_res.configure(bg=self.main_color)
+        self.select_res.title('Select atom %s for FEP' % atomtype)
+        self.select_res.resizable()
+
+        return self.select_res
 
 
     def view_fep(self):

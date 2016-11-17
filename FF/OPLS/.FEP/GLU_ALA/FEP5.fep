@@ -1,4 +1,5 @@
-!D659A
+!GLU-->ALA
+!charge -1-->0
 
 [FEP]
 states 2
