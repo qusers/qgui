@@ -28,7 +28,7 @@ class SetupMd(Toplevel):
     """Implements a dialog-box when Setup -> MD is chosen from menubar.
     Has got methods to generate input files for MD simuations with Qdyn"""
 
-    def __init__(self, app, root, pdbfile, topology, run_md=True, fep=False): #Receives app and root from Qgui-class.
+    def __init__(self, app, root, pdbfile, topology, run_md=True, fep=False, fep_states=0):
         Toplevel.__init__(self, root)
         self.app = app
         self.main_color = self.app.main_color
@@ -38,6 +38,7 @@ class SetupMd(Toplevel):
         self.fep = fep
         self.run_md = run_md
         self.restart_file = None
+        self.fep_states = fep_states
 
         self.simtimeVar = StringVar()
         self.simfilesVar = StringVar()
@@ -128,9 +129,6 @@ class SetupMd(Toplevel):
             self.distance_restraints = self.app.md_settings['dist_rest']
             self.wall_restraints = self.app.md_settings['wall_rest']
 
-            #Get FEP states (use this in restraints setup)
-            self.fep_states = self.app.evb_states.get()
-
 
         self.inputfiles_entry.delete(0,END)
         #Check if default MD settings exist, and use values from there:
@@ -208,36 +206,20 @@ class SetupMd(Toplevel):
                 self.q_atoms.set(1)
             self.q_atom_check.config(state=DISABLED)
 
-
         self.check_qatoms()
+
         self.check_topology()
 
     def check_topology(self):
         """
-        Checks that pdb file and topology matches.
-        Get solvent radius and insert as default
+        Get solvent radius from topology and insert as default
         """
         topology = open(self.topology, 'r').readlines()
-        pdb = open(self.pdbfile, 'r').readlines()
-
-        #Atoms in pdb file
-        atoms_pdb = 0
-
-        #atoms defined in topology
-        atoms_top = 0
 
         #solvent radius from topology
-        solv_r = 0
+        solv_r = None
 
-        #Find number of atoms in pdb file:
-        for line in pdb:
-            try:
-                if 'ATOM' in line.split()[0] or 'HETATM' in line.split()[1]:
-                    atoms_pdb += 1
-            except:
-                pass
-
-        # Find number of atoms defined in topology and solvent radius
+        # Find solvent radius in topology
         for i in range(len(topology)):
             if 'END        of header' in topology[i]:
                 atoms_top = topology[i + 1].split()[0]
@@ -247,24 +229,15 @@ class SetupMd(Toplevel):
                 except:
                     pass
 
-        #Check if atom numbers match:
-        if int(atoms_top) != int(atoms_pdb):
-            self.app.errorBox('Warning', 'Found %d atoms in %s, but %s specifies %d atoms.\n'
-                                         'This is not important for the simulation, but you can not'
-                                         'use %s for visualizing the final trajectory because it does not'
-                                         'match the topology.' %
-                                         (int(atoms_pdb), self.pdbfile.split('/')[-1], self.topology.split('/')[-1],
-                                          int(atoms_top), self.pdbfile.split('/')[-1]))
-
         #If solvent radius in top, insert it. If not, use radius of system - 3.
-        if solv_r != 0:
+        if solv_r:
             self.shell_radius.insert(0, '%.1f' % (float(float(solv_r) * 0.85)))
             print solv_r
         else:
             system_radius = pt.findRadius(self.pdbfile)
             self.shell_radius.insert(0, '%d' % int(round(system_radius - 3)))
 
-    def writeInputs(self, message = True):
+    def writeInputs(self, message=True):
         """
         Write eq and md input files
         self.q_settings = ['workdir',[prm],[lib],[equilibration],[sub (script[1/0, cmd)], [executables]]
@@ -373,7 +346,7 @@ class SetupMd(Toplevel):
         self.submit = base_name + 'run.sh'
         self.submitcommand = q_settings[ 'subscript' ][1]
         submitfile = open(self.app.workdir + '/' + self.submit,'w')
-        if int(q_settings[ 'subscript' ][0]) == 1:
+        if int(q_settings['subscript' ][0]) == 1:
             if os.path.isfile(self.app.settings_path + '/qsubmit'):
                 submissionscipt = open(self.app.settings_path + '/qsubmit','r').readlines()
             elif os.path.isfile(self.app.workdir + '/' + 'qsubmit'):
@@ -388,7 +361,7 @@ class SetupMd(Toplevel):
                     submitfile.write(line)
 
         #Check if Qdyn is MPI run or not:
-        qdyn = q_settings[ 'executables' ][1]
+        qdyn = q_settings['executables'][1]
         if qdyn[-1] == 'p':
             qdyn = 'mpirun %s' % qdyn
 
@@ -786,6 +759,7 @@ class SetupMd(Toplevel):
         """
         opens dialog to add restraints
         """
+        new_window = None
         if newtitle == 'sequence': 
             new_window = AddSequenceRestraints
         elif newtitle == 'atom':

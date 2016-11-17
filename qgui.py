@@ -306,29 +306,29 @@ class QGui(object):
         """
         Opens window to configure MD/FEP/EVB simuations
         """
-        if self.pdb_id and self.top_id:
+        if self.top_id:
             self.evb_setup = SetupEVB(self, self.root)
             self.evb_setup.configure(background=self.main_color)
             self.evb_setup.title('Setup EVB')
             self.evb_setup.resizable()
             self.log('info','Setup EVB session started.')
         else:
-            self.log('info', 'Please load and prepare structure and topology before setting up EVB.')
-            self.errorBox('Error','Please load and prepare structure and topolgy before setting up EVB')
+            self.log('info', 'Please load topology before setting up EVB.')
+            self.errorBox('Error','Please load topolgy before setting up EVB')
 
     def setup_fep(self):
         """
         Opens window to prepare and setup FEP
         """
-        if self.pdb_id and self.top_id:
+        if self.top_id:
             self.fep_setup = SetupFEP(self, self.root)
             self.fep_setup.configure(background=self.main_color)
             self.fep_setup.title('Setup FEP')
             self.fep_setup.resizable()
             self.log('info','Setup FEP session started.')
         else:
-            self.log('info', 'Please load master structure and topology before setting up FEP.')
-            self.errorBox('Error','Please load master structure and topolgy before setting up FEP')
+            self.log('info', 'Please load topology before setting up FEP.')
+            self.errorBox('Error','Please load topolgy before setting up FEP')
 
     def setup_resfep(self):
         """

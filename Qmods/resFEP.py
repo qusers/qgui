@@ -18,6 +18,8 @@ from Tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar,
 from tkFileDialog import askopenfilename
 import qgui_functions as qf
 from select_return import SelectReturn
+from setup_md import SetupMd
+from edit_file import FileEdit
 from subprocess import Popen, PIPE
 import tkFont
 import time
@@ -50,9 +52,6 @@ class ResFEP(Toplevel):
         #Remember the order of how Residues are added
         self.topology_res_order = dict()
 
-        #Atoms added manually to residue mutations (f.ex counterions) {topology: res nr: atomname: atomnr}
-        self.added_atoms = dict()
-
         self.selected_topology = StringVar()
         self.selected_topology.set('Topology 1')
         self.topology_paths['Topology 1'] = '*.top'
@@ -71,6 +70,10 @@ class ResFEP(Toplevel):
         if self.app.top_id:
             self.topology_paths['Topology 1'] = self.app.top_id
             self.insert_topology_name()
+
+        #Keep track of what what FEP files are edited or not:
+        self.fep_written = dict()
+        self.fep_written['Topology 1'] = dict()
 
 
         #Trace stuff
@@ -225,6 +228,8 @@ class ResFEP(Toplevel):
         #Make FEP for topology in total:
         self.topology_fep[top] = self.make_topology_fep(self.topology_res_fep[top], self.topology_res_order)
         self.refresh_feplist()
+        #Set all FEP files written to False
+        self.update_fep_written()
 
         self.refresh_residue_list()
         self.refresh_feplist()
@@ -322,24 +327,16 @@ class ResFEP(Toplevel):
 
                 if atomtype not in pdb_atoms_order:
                     #Let us add the missing atom to this FEP residue
-                    #TODO we probably do not need self.added_atoms ... delete it later if so!
-                    if not top in self.added_atoms.keys():
-                        self.added_atoms[top] = dict()
-                    if not res_nr in self.added_atoms[top].keys():
-                        self.added_atoms[top][res_nr] = dict()
-                    self.added_atoms[top][res_nr][atomtype] = False
-
-                    #atomnr = self.select_missing_atom(atomtype)
                     print('Q atom %d %s not found in residue %d ' % (q, atomtype, res_nr))
                     self.app.log(' ', 'Q atom %d %s not found in residue %d \n' % (q, atomtype, res_nr))
                     self.app.log(' ', 'Select atom %s from topology.' % atomtype)
                     atomnr = SelectReturn(self, self.root, elements=residues,
                                        select_title='atom %s for FEP' % atomtype, Entry=self.reslist).show()
                     if not atomnr:
-                        print()
+                        print('Not all atoms for FEP protocol added. Aborting...')
+                        return
 
-                    self.added_atoms[top][res_nr][atomtype] = atomnr
-                    pdb_atomnumbers_order.append(self.added_atoms[top][res_nr][atomtype])
+                    pdb_atomnumbers_order.append(atomnr)
                     pdb_atoms_order.append(atomtype)
 
 
@@ -385,11 +382,9 @@ class ResFEP(Toplevel):
             return None
 
         if wrong_order:
-            self.app.errorBox('warning', 'Atom order in FEP file and topology does not match!')
-            #Todo make some translateion dictionary insted of using offset to handle this
+            self.app.log(' ', 'Atom order in FEP file and topology does not match.')
 
         return atomoffset
-
 
     def get_fep_files(self, rest_wt, res_mut, res_nr):
         """
@@ -421,6 +416,7 @@ class ResFEP(Toplevel):
 
         #Make FEP for topology in total:
         self.topology_fep[top] = self.make_topology_fep(self.topology_res_fep[top], self.topology_res_order)
+        self.update_fep_written()
         self.refresh_feplist()
 
     def make_topology_fep(self, res_fep, res_order):
@@ -449,6 +445,18 @@ class ResFEP(Toplevel):
                 fep_tot = qf.merge_fep_dicts(fep_tot, res_fep[res])
 
         return fep_tot
+
+    def update_fep_written(self):
+        """
+        When make topolgy FEP has been run, set all FEP files written=FALSE. This is to keep track of files manually
+        edited by user.
+        :return:
+        """
+         #Set all FEP files as unedited:
+        if not self.selected_topology.get() in self.fep_written.keys():
+            self.fep_written[self.selected_topology] = dict()
+        for nr in sorted(self.topology_fep[self.selected_topology.get()].keys()):
+            self.fep_written[self.selected_topology.get()][nr] = False
 
     def refresh_residue_list(self):
         """
@@ -590,23 +598,60 @@ class ResFEP(Toplevel):
 
         qf.write_fepdict(fep, path=self.app.workdir, printfep=True)
 
-    def duplicate_fepfile(self):
+    def edit_fepfile(self):
         """
 
         :return:
         """
-        pass
+        #Get selected FEP file
+        selection = self.feplist.curselection()
+        if len(selection) == 0:
+            return
+        fepfile = self.feplist.get(selection[0])
+        fepnr = int(filter(str.isdigit, fepfile))
+
+
+        #Get current Topology
+        top = self.selected_topology.get()
+
+        #Path to write stuff for this topology
+        top_path = '%s/%s_%s' % (self.app.workdir, int(filter(str.isdigit, top)), self.topology_label.cget("text"))
+        if not os.path.isdir(top_path):
+            os.makedirs(top_path)
+
+        inputfiles_path = '%s/inputfiles' % top_path
+        #Check if inputfiles directory exist
+        if not os.path.exists(inputfiles_path):
+            os.makedirs(inputfiles_path)
+
+        #path to FEP file
+        fep_path = '%s/%s.fep' % (inputfiles_path, fepfile)
+
+        if not self.fep_written[top][fepnr]:
+            qf.write_fepdict(self.topology_fep[top][fepnr], fep_path)
+            self.fep_written[top][fepnr] = True
+
+        if not os.path.isfile(fep_path):
+            print('Oups, I think I wrote the FEP file too slow for my own good!')
+
+        self.app.log(' ', 'Editing FEP file: \n'
+                          'Saved changes will be overwritten if new residues are added or deleted in resFEP\n')
+
+        self.fileEdit = FileEdit(self, fep_path)
+        self.fileEdit.config(bg=self.main_color)
+        self.fileEdit.title('Edit FEP file %d' % fepnr)
+        self.fileEdit.resizable()
 
     def add_fepfile(self):
         """
-
+        Add empty fepfile with Q atoms in it.
         :return:
         """
         pass
 
     def delete_fepfile(self):
         """
-
+        Delete the selected FEP file
         :return:
         """
         pass
@@ -624,7 +669,36 @@ class ResFEP(Toplevel):
         Opens the MD settings module!
         :return:
         """
-        pass
+        topology = self.topology_paths[self.selected_topology.get()]
+
+        #Create a pdbfile in workdir/.tmp
+        pdbpath = '%s/.tmp' % self.app.workdir
+        if not os.path.exists(pdbpath):
+            os.mkdir(pdbpath)
+        pdbname = '%s.pdb' % self.topology_label.cget("text")
+        #pdbname = '%s.pdb' % self.selected_topology.get().split('.')[0]
+        qf.write_top_pdb(topology, pdbname, pdbpath, self.app.q_settings['library'])
+
+        pdbfile = '%s/%s' % (pdbpath, pdbname)
+
+        self.md_settings = qf.get_md_settings(for_what='resFEP')
+        self.q_atom_nr = qf.get_qnr_atomnr(self.topology_fep[self.selected_topology.get()][1])
+
+        setup_md_ = SetupMd(self,self.root, pdbfile, topology, False, fep=True, fep_states=self.get_fep_states())
+        setup_md_.configure(background = self.main_color)
+        setup_md_.title('Configure MD settings for resFEP')
+
+    def get_fep_states(self):
+        """
+        How many FEP states are defined in FEP file?
+        :return: fep_states: integer
+        """
+        top = self.selected_topology.get()
+        nr = qf.get_fepdict_order_nr(self.topology_fep[top][1], '[FEP]')
+
+        fep_states = self.topology_fep[top][1][nr]['[FEP]']['states'][0]
+
+        return int(fep_states)
 
     def write_inputfiles(self):
         """
@@ -757,12 +831,12 @@ class ResFEP(Toplevel):
         #self.feplist.bind('<<ListboxSelect>>', self.reslist_event)
 
         #View FEP file button
-        view_fep = Button(frame2, text='View', highlightbackground=self.main_color, command=self.view_fep)
+        view_fep = Button(frame2, text='Print', highlightbackground=self.main_color, command=self.view_fep)
         view_fep.grid(row=5, column=2)
 
         #Duplicate selected FEP file:
-        duplicate_fepfile = Button(frame2, text='Duplicate', highlightbackground=self.main_color,
-                                   command=self.duplicate_fepfile)
+        duplicate_fepfile = Button(frame2, text='Edit', highlightbackground=self.main_color,
+                                   command=self.edit_fepfile)
         duplicate_fepfile.grid(row=5, column=3, columnspan=2)
 
         #Add a new/blank FEP file

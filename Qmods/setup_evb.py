@@ -44,7 +44,7 @@ class SetupEVB(Toplevel):
         self.root = root
 
         self.topology = self.app.top_id
-        self.pdbfile = self.app.pdb_id
+        self.pdbfile = self.create_pdb()
 
         #Forcefields availiable in ffld_server
         self.forcefields = ('2005', '2001')
@@ -261,14 +261,6 @@ class SetupEVB(Toplevel):
         self.lambdastep.set(0.02)
 
         self.dialog_window()
-        if self.app.pdb_id:
-            self.pdbfile = self.app.pdb_id
-            self.qstatus['Topology pdb'] = 'OK'
-            self.sync_check.config(state=NORMAL)
-        else:
-            self.pdbfile = None
-            self.qstatus['Topology pdb'] = 'No topology PDB file loaded'
-            self.sync_check.config(state=DISABLED)
 
         #Insert default lambda-step values
         self.update_lambdasteps()
@@ -290,6 +282,21 @@ class SetupEVB(Toplevel):
         self.qevb_temp_checked = False
 
         self.update_status()
+
+    def create_pdb(self):
+        """
+        Create a pdb file from the topology loaded!
+        :return: pdbfile path
+        """
+        pdb_name = '%s_top.pdb' % self.topology.split('/')[-1].split('.')[0]
+        pdb_path = '%s/.tmp/' % (self.app.workdir)
+
+        if not os.path.isdir(pdb_path):
+            os.makedirs('%s/.tmp')
+
+        qf.write_top_pdb(self.topology, pdb_name, pdb_path, self.app.q_settings['library'])
+
+        return '%s/%s' % (pdb_path, pdb_name)
 
     def evb_states_changed(self, *args):
         """
@@ -4655,7 +4662,8 @@ class SetupEVB(Toplevel):
         self.fileEdit.resizable()
 
     def config_md(self):
-        setup_md_ = SetupMd(self,self.root, self.pdbfile, self.topology, False, fep=True)
+        setup_md_ = SetupMd(self,self.root, self.pdbfile, self.topology, False, fep=True,
+                            fep_states=self.evb_states.get())
         setup_md_.configure(background = self.main_color)
         setup_md_.title('Configure MD settings for EVB')
 

@@ -124,6 +124,27 @@ def create_pdb_from_topology(topology, libfiles=list()):
 
     return pdbfile
 
+def write_top_pdb(topology, pdbname, pdbpath, libfiles=list()):
+    """
+    Creates PDB file from topology file and writes it to pdbpath/pdbname.pdb
+    :param topology: path to topology file
+    :param pdbname: name of PDB file to write
+    :param pdbpath: path to write PDB file
+    :param libfiles: optional, libfiles (can be that libfiles defined in topology has been moved/deleted)
+    :return: Nothing
+    """
+
+    pdb = create_pdb_from_topology(topology, libfiles)
+
+    pdbout = open('%s/%s' % (pdbpath, pdbname), 'w')
+
+    for line in pdb:
+        pdbout.write(line)
+
+    pdbout.close()
+    print('%s written to %s' % (pdbname, pdbpath))
+
+
 def get_pdb_resnr(pdbfile, res_nr):
     """
     :param pdbfile:
@@ -333,6 +354,7 @@ def modify_fepline(keymod, modify, section, key_type, qoffset):
 def write_fepdict(fep, path=None, printfep=False):
     """
     Takes FEP dictionary and writes a regular FEP file to path
+    :rtype : object
     :param fep: a dictionary in the format described in function read_fep in this file
     :param path: path to where the FEP file will be written
     :param printfep: print FEP=True/False. If True, file will not be written only printed.
@@ -350,6 +372,11 @@ def write_fepdict(fep, path=None, printfep=False):
         for section in sorted(fep[nr].keys()):
             if printfep:
                 print('\n%s' % section)
+            else:
+                if section != '!info':
+                    fepout.write('\n')
+                fepout.write('%s\n' % section)
+
             for _key in sorted(fep[nr][section].keys()):
                 _val = fep[nr][section][_key]
                 if section in no_key:
@@ -357,12 +384,14 @@ def write_fepdict(fep, path=None, printfep=False):
                         print ' '.join(['%7s' % w.ljust(7) for w in _val])
                     else:
                         fepout.write(' '.join(['%7s' % w.ljust(7) for w in _val]))
+                        fepout.write('\n')
                 else:
                     if printfep:
                         print '%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val]))
 
                     else:
                         fepout.write('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val])))
+                        fepout.write('\n')
     if not printfep:
         fepout.close()
 
@@ -578,5 +607,57 @@ def merge_fep_dicts(fep1, fep2):
 
     return fep1
 
+def get_md_settings(for_what='MD'):
+    """
+    :param: forwhat: keyword MD/FEP/EVB/resFEP/LIE used to invoke special settings
+    :return:
+    """
+    #Molecular dynamics settings:
+    md_settings = {'simtime': 0.01,
+                   'stepsize': 1.0,
+                   'inputfiles': 51,
+                   'bath_coupling': 10,
+                   'shake_solvent': 1,
+                   'shake_solute': 0,
+                   'shake_hydrogens': 0,
+                   'lrf': 1,
+                   'solute_solute_cut': 10,
+                   'solute_solvent_cut': 10,
+                   'solvent_solvent_cut': 10,
+                   'q_atoms_cut': 99,
+                   'lrf_cut': 99,
+                   'shell_force': 10.0,
+                   'shell_rad': 30.0,
+                   'radial_force': 60.0,
+                   'polarisation': 1,
+                   'pol_force': 20.0,
+                   'nonbond_list': 25,
+                   'ene_summary': 5,
+                   'ene_file': 10,
+                   'trajectory': 100,
+                   'trajectory atoms': 'not excluded',
+                   'seq_rest': [],
+                   'atom_rest': [],
+                   'dist_rest': [],
+                   'wall_rest': []}
 
+    if for_what == 'resFEP':
+        md_settings['shake_hydrogens'] = 1
+
+    return md_settings
+
+def get_qnr_atomnr(fepdict):
+    """
+    Creates a dictionary {Q nr : atom nr} from fepdict
+    :param fepdict:
+    :return:
+    """
+    qnr_atomnr = dict()
+
+    order_nr = get_fepdict_order_nr(fepdict, '[atoms]')
+
+    for qnr in sorted(fepdict[order_nr]['[atoms]'].keys()):
+        qnr_atomnr[qnr] = int(fepdict[order_nr]['[atoms]'][qnr][0])
+
+    return qnr_atomnr
 

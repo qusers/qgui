@@ -18,6 +18,7 @@ from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, E
 
 from select_atoms import AtomSelectRange
 from edit_file import FileEdit
+import qgui_functions as qf
 from edit_evb import EditEvbNotes, ImportParameters, EditParameters, EditBondParameters, EditAngleParameters, \
     EditTorsionParameters, EditImproperParameters
 from setup_md import SetupMd
@@ -44,14 +45,15 @@ class SetupFEP(Toplevel):
         self.root = root
 
         self.topology = self.app.top_id
-        self.pdbfile = self.app.pdb_id
+        #Create pdb file from topology:
+        self.pdbfile = self.create_pdb()
 
         #Mass dictionary
         self.massDict = {'H': 1.008, 'C': 12.01, 'N': 14.01,'O': 16.00,'F': 19.00,'Na': 22.98, 'Mg': 24.305, 'P': 30.97,
                         'S': 32.07, 'Cl': 35.45, 'Ca': 40.078, 'Fe':55.847, 'Zn': 65.38, 'Br':79.90,'I':126.90}
 
-        #Forcefields availiable in ffld_server
-        self.forcefields = ('2005', '2001')
+        #Forcefields availiable in ffld_server, 2001 is no longer available..
+        self.forcefields = ('2005')
 
         #Control if new inputfiles are to be made and old overwritten or not
         self.overwrite = True
@@ -257,14 +259,6 @@ class SetupFEP(Toplevel):
         self.lambdastep.set(0.02)
 
         self.dialog_window()
-        if self.app.pdb_id:
-            self.pdbfile = self.app.pdb_id
-            self.qstatus['Topology pdb'] = 'OK'
-            self.sync_check.config(state=NORMAL)
-        else:
-            self.pdbfile = None
-            self.qstatus['Topology pdb'] = 'No topology PDB file loaded'
-            self.sync_check.config(state=DISABLED)
 
         #Insert default lambda-step values
         self.update_lambdasteps()
@@ -283,6 +277,22 @@ class SetupFEP(Toplevel):
         self.l4_end.trace('w', self.sum_lambda_values)
 
         self.update_status()
+
+    def create_pdb(self):
+        """
+        Create a pdb file from the topology loaded!
+        :return: pdbfile path
+        """
+        pdb_name = '%s_top.pdb' % self.topology.split('/')[-1].split('.')[0]
+        pdb_path = '%s/.tmp/' % (self.app.workdir)
+
+        if not os.path.isdir(pdb_path):
+            os.makedirs('%s/.tmp')
+
+        qf.write_top_pdb(self.topology, pdb_name, pdb_path, self.app.q_settings['library'])
+
+        return '%s/%s' % (pdb_path, pdb_name)
+
 
     def evb_states_changed(self, *args):
         """
@@ -4525,7 +4535,8 @@ class SetupFEP(Toplevel):
         self.fileEdit.resizable()
 
     def config_md(self):
-        setup_md_ = SetupMd(self,self.root, self.pdbfile, self.topology, False, fep=True)
+        setup_md_ = SetupMd(self,self.root, self.pdbfile, self.topology, False, fep=True,
+                            fep_states=self.evb_states.get())
         setup_md_.configure(background = self.main_color)
         setup_md_.title('Configure MD settings for FEP')
 
