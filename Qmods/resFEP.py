@@ -66,23 +66,46 @@ class ResFEP(Toplevel):
         self.topology_mutation = dict()
         self.topology_mutation['Topology 1'] = dict()
 
-        #Check if a topology is loaded in main window
-        if self.app.top_id:
-            self.topology_paths['Topology 1'] = self.app.top_id
-            self.insert_topology_name()
 
         #Keep track of what what FEP files are edited or not:
         self.fep_written = dict()
         self.fep_written['Topology 1'] = dict()
 
+        self.dialog_window()
+
+        #Get general md settings
+        self.md_settings = qf.get_md_settings('FEP')
+
+        #Check if a topology is loaded in main window
+        if self.app.top_id:
+            self.topology_paths[self.selected_topology.get()] = self.app.top_id
+            self.topology_fep[self.selected_topology.get()] = dict()
+            self.topology_res_fep[self.selected_topology.get()] = dict()
+            self.insert_topology_name()
 
         #Trace stuff
         self.selected_topology.trace('w', self.topology_changed)
 
-        self.dialog_window()
-
         #Collect predifined FEP protocols {res_wt: {res_mut: path}}
         self.feps = self.get_fep_protocols()
+
+    def update_md_setting(self):
+        """
+        Updates Temperature, lambda steps and runs in md_settings dictionary
+        :return:
+        """
+        try:
+            lambda_step = float(self.lambda_step.get())
+
+            self.md_settings['temperature'] = float(self.lambda_step.get())
+            self.md_settings['inputfiles'] = \
+                int(((1.0/lambda_step) + 1) * len(self.topology_fep[self.selected_topology.get()].keys()))
+
+        except Exception as e:
+            print(e)
+            print('Invalid value!')
+
+        return
 
     def insert_topology_name(self):
         """
@@ -671,17 +694,18 @@ class ResFEP(Toplevel):
         """
         topology = self.topology_paths[self.selected_topology.get()]
 
+        self.update_md_setting()
+
         #Create a pdbfile in workdir/.tmp
         pdbpath = '%s/.tmp' % self.app.workdir
         if not os.path.exists(pdbpath):
             os.mkdir(pdbpath)
-        pdbname = '%s.pdb' % self.topology_label.cget("text")
+        pdbname = '%s_top.pdb' % self.topology_label.cget("text").split('.')[0]
         #pdbname = '%s.pdb' % self.selected_topology.get().split('.')[0]
         qf.write_top_pdb(topology, pdbname, pdbpath, self.app.q_settings['library'])
 
         pdbfile = '%s/%s' % (pdbpath, pdbname)
 
-        self.md_settings = qf.get_md_settings(for_what='resFEP')
         self.q_atom_nr = qf.get_qnr_atomnr(self.topology_fep[self.selected_topology.get()][1])
 
         setup_md_ = SetupMd(self,self.root, pdbfile, topology, False, fep=True, fep_states=self.get_fep_states())
@@ -702,10 +726,166 @@ class ResFEP(Toplevel):
 
     def write_inputfiles(self):
         """
-
+        Write butten funciton - uses write_md_inputfiles and write_fep_files to write all files for MD/FEP sim. with Q.
         :return:
         """
-        pass
+        for top in self.topology_fep.keys():
+            top_name = self.topology_paths[top].split('/')[-1]
+            top_path = '%s/%s_%s' % (self.app.workdir, int(filter(str.isdigit, top)), top_name.split('.top')[0])
+            if not os.path.isdir(top_path):
+                os.makedirs(top_path)
+
+            input_dir = '%s/%s' % (top_path, 'inputfiles/')
+            if not os.path.isdir(input_dir):
+                os.makedirs(input_dir)
+
+            #Copy the topology file to inputfiles
+            shutil.copy(self.topology_paths[top], input_dir)
+
+            #Write FEP files to inputfiles
+            self.write_fep_files(input_dir, top)
+
+            #Write MD inputs to inputfiles
+            self.write_md_inputfiles(input_dir, top)
+
+            #write multifep run script:
+            self.write_multifep_submitscript(top_path)
+
+    def write_multifep_submitscript(self, workdir):
+        """
+        Writes a bash script that is used to submit the FEP jobs in /inputfiles
+        :param: topology: key in dictionary (Topology 1, Topology 2, ...etc.)
+        :return:
+        """
+        submitname = '%s/resFEP_submit.sh' % workdir
+        submitfile = open(submitname, 'w')
+
+        submitfile.write('#! /bin/bash\n\n'
+                         'temperatures=(%s)\n'
+                         'runs=%s\n'
+                         'restartfile=md_0000_1000.re\n'
+                         'submitfile=inputfiles/run.sh\n\n' % (self.temperature.get(), self.runs.get()))
+
+        submitfile.write('sed -i s/finalMDrestart=.*/finalMDrestart="$restartfile"/g $submitfile\n'
+                         'for temp in ${temperatures[*]};do\n'
+                         'sed -i s/temperature=.*/temperature="$temp"/g $submitfile\n'
+                         'for i in $(seq 1 $runs);do\n'
+                         'sed -i s/run=.*/run="$i"/g $submitfile\n'
+                         '%s $submitfile\n'
+                         'done\n'
+                         'done\n\n' % self.app.q_settings['subscript'][1])
+
+        submitfile.close()
+
+        print('Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
+
+    def add_multifep_runscript(self, runsript, fepfiles, inputfiles_path):
+        """
+        Adds names of FEP files, run, temperature etc to specialised runscript!
+        :param runsript: original runscript defined by user
+        :param fepfiles: list of names for FEP files
+        :param workdir: path to directory where you have /inputfiles (not inside inputfiles!)
+        :return:
+        """
+        new_script = list()
+        workdir = '/'.join(inputfiles_path.split('/')[0:-1])
+        for line in runsript:
+            #Write stuff that needs to come right before the Qdyn commands
+            if '#Qdyn I/O' in line:
+                new_script.append('fepfiles=(%s)\n' % ' '.join(fepfiles))
+                new_script.append('temperature=%s\n' % self.temperature.get())
+                new_script.append('run=1\n')
+                new_script.append('finalMDrestart=md_0000_1000.re\n\n')
+                new_script.append('workdir=%s\n' % workdir)
+                new_script.append('inputfiles=%s\n' % inputfiles_path)
+                new_script.append('length=%d\n' % (len(fepfiles)-1))
+                new_script.append('for index in $(seq 0 $length);do\n'
+                                  'fepfile=${fepfiles[$index]}\n'
+                                  'fepdir=$workdir/FEP$((index+1))\n'
+                                  'mkdir -p $fepdir\n'
+                                  'cd $fepdir\n'
+                                  'tempdir=$fepdir/$temperature\n'
+                                  'mkdir -p $tempdir\n'
+                                  'cd $tempdir\n\n'
+                                  'rundir=$tempdir/$run\n'
+                                  'mkdir -p $rundir\n'
+                                  'cd $rundir\n\n'
+                                  'cp $inputfiles/md*.inp .\n'
+                                  'cp $inputfiles/*.top .\n'
+                                  'cp $inputfiles/$fepfile .\n\n'
+                                  'if [ $index -lt 1 ]; then\n'
+                                  'cp $inputfiles/eq*.inp .\n'
+                                  'sed -i s/SEED_VAR/"$[1 + $[RANDOM % 9999]]"/ eq1.inp\n'
+                                  'else\n'
+                                  'lastfep=FEP$index\n'
+                                  'cp $workdir/$lastfep/$temperature/$run/$finalMDrestart $rundir/eq5.re\n'
+                                  'fi\n\n'
+                                  'sed -i s/T_VAR/"$temperature"/ *.inp\n'
+                                  'sed -i s/FEP_VAR/"$fepfile"/ *.inp\n')
+
+                new_script.append('\n#Qdyn I/O\n\n')
+
+                new_script.append('done\n')
+
+
+            else:
+                new_script.append(line)
+
+        return new_script
+
+
+    def write_md_inputfiles(self, md_path, topology):
+        """
+        Uses qgui_functions.py to write md_inputfiles
+        :param md_path:
+        :param topology:
+        :return:
+        """
+        #Get Qdyn version
+        qdyn = self.app.q_settings[ 'executables' ][1]
+        #Check if Qdyn is MPI run or not:
+        if qdyn[-1] == 'p':
+            qdyn = 'mpirun %s' % qdyn
+
+        #Get default equilibration procedure:
+        eq = self.app.q_settings['equilibration']
+
+        #Get submission script, if this is to be used
+        submissionscript=False
+
+        print self.app.q_settings['subscript']
+
+        if self.app.q_settings['subscript'][0] == 1:
+            if os.path.isfile(self.app.settings_path + '/qsubmit'):
+                submissionscript = open(self.app.settings_path + '/qsubmit','r').readlines()
+            else:
+                print('Could not find submission script in settings path...')
+                submissionscript = ['#!/bin/bash\n#Qdyn I/O\n']
+
+        #Append multiFEP stuff to run script!
+        fepfiles = list()
+        for i in range(len(self.topology_fep[topology].keys())):
+            fepfiles.append('FEP%d.fep' % (i + 1))
+        submissionscript= self.add_multifep_runscript(submissionscript, fepfiles, md_path)
+
+        lambda_list = qf.create_lambda_list(float(self.lambda_step.get()), [1.0, 0.0], [0.0, 1.0])
+
+        #inputfiles, md_settings, topology, lambda_list, qdyn, eq=None, submissionscript=False
+        qf.write_md_inputfiles(md_path, self.md_settings, self.topology_paths[topology], lambda_list, qdyn, eq,
+                               submissionscript, True)
+
+    def write_fep_files(self, inputfiles_path, top):
+        """
+        Writes FEP files for topology to fep_path. Only those that are not alredy written (edited) wil be written.
+        :param fep_path:
+        :param top:
+        :return:
+        """
+        for fepnr in sorted(self.topology_fep[top].keys()):
+            if not self.fep_written[top][fepnr]:
+                fep_path = '%s/FEP%d.fep' % (inputfiles_path, fepnr)
+                qf.write_fepdict(self.topology_fep[top][fepnr], fep_path)
+                self.fep_written[top][fepnr] = True
 
     def run_fep(self):
         """
@@ -834,27 +1014,41 @@ class ResFEP(Toplevel):
         view_fep = Button(frame2, text='Print', highlightbackground=self.main_color, command=self.view_fep)
         view_fep.grid(row=5, column=2)
 
-        #Duplicate selected FEP file:
-        duplicate_fepfile = Button(frame2, text='Edit', highlightbackground=self.main_color,
+        #Edit selected FEP file:
+        edit_fepfile = Button(frame2, text='Edit', highlightbackground=self.main_color,
                                    command=self.edit_fepfile)
-        duplicate_fepfile.grid(row=5, column=3, columnspan=2)
+        edit_fepfile.grid(row=5, column=3, columnspan=2)
 
-        #Add a new/blank FEP file
-        add_fepfile = Button(frame2, text='Add', highlightbackground=self.main_color, command=self.add_fepfile)
-        add_fepfile.grid(row=6, column=2)
+        #Set lambda step size
+        lambda_label = Label(frame2, text=u'\u03BB step size', bg=self.main_color)
+        lambda_label.grid(row=6, column=2, columnspan=2, sticky='e')
 
-        #Delete selected FEP file
-        del_fepfile = Button(frame2, text='Delete', highlightbackground=self.main_color, command=self.delete_fepfile)
-        del_fepfile.grid(row=6, column=3, columnspan=2)
+        self.lambda_step = Spinbox(frame2, width=4, highlightthickness=0, relief=GROOVE,
+                                   from_=0.000, to=1.000, increment=0.005)
+        self.lambda_step.grid(row=6, column=4)
+        self.lambda_step.delete(0, END)
+        self.lambda_step.insert(0, '0.020')
 
-        #Move FEP file up
-        move_up = Button(frame2, text=u'\u2191', highlightbackground=self.main_color, command=lambda: self.move_fep(-1))
-        move_up.grid(row=7, column=2, sticky='e')
+        #Set temperature
+        temperature_label = Label(frame2, text='Temperature', bg=self.main_color)
+        temperature_label.grid(row=7, column=2, columnspan=2, sticky='e')
 
-        #Move FEP file down
-        move_down = Button(frame2, text=u'\u2193', highlightbackground=self.main_color,
-                           command=lambda: self.move_fep(1))
-        move_down.grid(row=7, column=3, columnspan=2, sticky='w')
+        self.temperature = Spinbox(frame2, width=4, highlightthickness=0, relief=GROOVE,
+                                   from_=270, to=570, increment=1)
+        self.temperature.grid(row=7, column=4)
+        self.temperature.delete(0, END)
+        self.temperature.insert(0, '298')
+
+        #Set nr of runs
+        runs_label = Label(frame2, text='Runs', bg=self.main_color)
+        runs_label.grid(row=8, column=2, columnspan=2, sticky='e')
+
+        self.runs = Spinbox(frame2, width=4, highlightthickness=0, relief=GROOVE,
+                                   from_=1, to=1000, increment=1)
+        self.runs.grid(row=8, column=4)
+        self.runs.delete(0, END)
+        self.runs.insert(0, '1')
+
 
         #Configure MD
         config_md = Button(frame3, text='Configure MD', highlightbackground=self.main_color, command=self.configure_md)

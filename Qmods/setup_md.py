@@ -170,7 +170,6 @@ class SetupMd(Toplevel):
             self.qatom_add_button.config(state=DISABLED)
             self.qatom_select_button.config(state=DISABLED)
 
-
         self.bath_entry.insert(0, self.qmd_settings['bath coupling'])
         self.shake_solvent.set(int(self.qmd_settings['shake solvent']))
         self.shake_solute.set(int(self.qmd_settings['shake solute']))
@@ -868,7 +867,7 @@ class SetupMd(Toplevel):
         inputfiles_label.config(background = self.main_color)
         inputfiles_label.grid(row=4, rowspan = 2, column = 0,sticky = 'w')
 
-        self.inputfiles_entry = Spinbox(left_frame, width = 4, from_=1, to=50,highlightthickness = 0, relief = GROOVE,
+        self.inputfiles_entry = Spinbox(left_frame, width = 4, from_=1, to=50, highlightthickness = 0, relief = GROOVE,
                                       textvariable=self.simfilesVar)
         self.inputfiles_entry.grid(row=4,rowspan = 2,column = 1, columnspan = 2)
         self.inputfiles_entry.config(highlightthickness = 0)
@@ -955,7 +954,7 @@ class SetupMd(Toplevel):
         solute_solute_label = Label(left_frame, text = 'Solute-Solute:')
         solute_solute_label.grid(row=10, column = 0, sticky='w')
         solute_solute_label.config(bg=self.main_color)
-	
+
         self.solute_solute = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.solute_solute.grid(row=10, column = 1, columnspan = 2,sticky = 'E')
 
@@ -1079,7 +1078,7 @@ class SetupMd(Toplevel):
         self.output = Entry(right_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.output.grid(row = 1, column = 7, columnspan = 2)
 
-	
+
         energyfile_label = Label(right_frame, text = 'Energy file:')
         energyfile_label.grid(row = 2, column = 0, columnspan = 2, sticky = 'w')
         energyfile_label.config(bg=self.main_color)

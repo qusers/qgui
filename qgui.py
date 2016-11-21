@@ -59,6 +59,7 @@ from analyze_FEP import AnalyzeFEP
 from analyze_energies import AnalyzeEnergies
 from qcalc import AnalyzeQcalc
 import prepareTopology as pt
+import qgui_functions as qf
 import cPickle
 import time
 
@@ -279,17 +280,25 @@ class QGui(object):
     def setup_md(self):
         """Opens the Setup MD for Qdyn when Setup --> MD is selected from the menubar
         """
-        if not self.pdb_id or not self.top_id:
-            self.errorBox('Error','Please load and prepare structure and topolgy before setting up MD')
-            self.log('info', 'Please load and prepare structure and topology before setting up EVB.')
+        if not self.top_id:
+            self.errorBox('Error','Please load topolgy before setting up MD')
+            self.log('info', 'Please load topology before setting up MD.')
+            return
 
-        else:
-            self.setup_md = SetupMd(self,self.root, self.pdb_id, self.top_id)
-            self.setup_md.configure(background = self.main_color)
-            self.setup_md.title('Setup MD')
-            self.setup_md.resizable()
+        if not self.pdb_id:
+            pdb_path = '%s/.tmp' % self.workdir
+            if not os.path.isdir(pdb_path):
+                os.makedirs(pdb_path)
+            pdb_name = '%s.pdb' % self.top_id.split('/')[-1].split('.')[0]
+            qf.write_top_pdb(self.top_id, pdb_name, pdb_path, self.q_settings['library'])
+            self.pdb_id = '%s/%s' % (pdb_path, pdb_name)
 
-            self.log('info', 'MD session started.')
+        self.setup_md = SetupMd(self,self.root, self.pdb_id, self.top_id)
+        self.setup_md.configure(background = self.main_color)
+        self.setup_md.title('Setup MD')
+        self.setup_md.resizable()
+
+        self.log('info', 'MD session started.')
 
     def setup_lie(self):
         """

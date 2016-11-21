@@ -87,41 +87,13 @@ class SetupFEP(Toplevel):
         self.fep_written = False
 
         #Molecular dynamics settings:
-        self.md_settings = {'simtime': 0.01,
-                            'stepsize': 1.0,
-                            'inputfiles': 51,
-                            'bath_coupling': 10,
-                            'shake_solvent': 1,
-                            'shake_solute': 0,
-                            'shake_hydrogens': 0,
-                            'lrf': 1,
-                            'solute_solute_cut': 10,
-                            'solute_solvent_cut': 10,
-                            'solvent_solvent_cut': 10,
-                            'q_atoms_cut': 99,
-                            'lrf_cut': 99,
-                            'shell_force': 10.0,
-                            'shell_rad': 30.0,
-                            'radial_force': 60.0,
-                            'polarisation': 1,
-                            'pol_force': 20.0,
-                            'nonbond_list': 25,
-                            'ene_summary': 5,
-                            'ene_file': 10,
-                            'trajectory': 100,
-                            'trajectory atoms': 'not excluded',
-                            'seq_rest': [],
-                            'atom_rest': [],
-                            'dist_rest': [],
-                            'wall_rest': []}
-
+        self.md_settings = qf.get_md_settings('FEP')
 
         #Initialize EVB status and progress:
         self.qstatus = {'Q-atoms':'No Q-atoms selected',
                         'Topology pdb': 'NA',
                         u"\N{GREEK SMALL LETTER LAMDA}-steps/run": '51',
                         'Total simulation time (ns)': '%.6f' % (float(self.md_settings['simtime']) * 51.00)}
-
 
         #Pymol session:
         self.session = None

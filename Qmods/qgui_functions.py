@@ -616,6 +616,7 @@ def get_md_settings(for_what='MD'):
     md_settings = {'simtime': 0.01,
                    'stepsize': 1.0,
                    'inputfiles': 51,
+                   'temperature': 'T_VAR',
                    'bath_coupling': 10,
                    'shake_solvent': 1,
                    'shake_solute': 0,
@@ -639,12 +640,350 @@ def get_md_settings(for_what='MD'):
                    'seq_rest': [],
                    'atom_rest': [],
                    'dist_rest': [],
-                   'wall_rest': []}
+                   'wall_rest': [],
+                   'fep_file': 'FEP_VAR'}
 
     if for_what == 'resFEP':
         md_settings['shake_hydrogens'] = 1
 
     return md_settings
+
+def create_lambda_list(lambda_step, lambda_start=list(), lambda_end=list()):
+    """
+    creates a lambda list as they are seen in the Gui for FEP and EVB setup (nr l1 l2 l3 l4).
+    Note that only one lambda-pair can be changed at the time when more than 2 states!
+    :param lambda_step: lambda step size
+    :param lambda_start: list with initial lambda values
+    :param lambda_end: list with final lambda values
+    :return: list of nr lambda values
+    """
+    if sum(lambda_start) != 1 or sum(lambda_end) != 1:
+        return
+
+    #Find out what values to change
+    change_values = list()
+    for i in range(len(lambda_start)):
+        if lambda_start[i] != lambda_end[i]:
+            change_values.append(i)
+
+    if len(change_values) > 2:
+        print('Can only vary two lambdas at the same time')
+        print('Will change lambda %d and lambda %d' % (change_values[0] + 1, change_values[1] + 1))
+
+    change_values = (change_values[0], change_values[1])
+
+    #Decide sign on lambda step:
+    if lambda_start[change_values[0]] > lambda_end[change_values[0]]:
+        lambda_step = -lambda_step
+
+    lambda_list = list()
+
+    lambda1 = np.arange(lambda_start[change_values[0]], lambda_end[change_values[0]] + lambda_step,
+                                 lambda_step)
+
+    for i in range(len(lambda1)):
+        tmp = lambda_start[:]
+        tmp[change_values[0]] = abs(lambda1[i])
+        tmp[change_values[1]] = 0
+        tmp[change_values[1]] = abs(1. - sum(tmp))
+
+        #it is list of strings: '%4d %s %s %s %s' % (i, l1, l2, l3, l4)
+        # where %s comes from '%03.3f'
+        lambda_list.append('%4d %s' % (i + 1, ' '.join(['%03.3f' % w for w in tmp])))
+
+    return lambda_list
+
+def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq=None, submissionscript=False,
+                        resFEP=False):
+    """
+    :param inputfiles: PATH to inputfiles
+    :param md_settings: dictionary with MD file settings
+    :param topology: path to topology
+    :param fepname: Name of fepfile
+    :param lambda_list: list of lambda values (floats)
+    :param submissionscript: list with lines to put in submission script!
+    :param qdyn: 'Qdyn5' or 'mpirun Qdyn5p' f. ex
+    :param resFEP: True/False In resFEP special handling is needed for the equilibration
+    :return: some kind of message...
+    """
+    #TODO write fep file name into md_settings dict!
+
+    #Make inputfiles directory and move to directory:
+    if not os.path.exists(inputfiles):
+        os.makedirs(inputfiles)
+
+    #Open submission script and write head:
+    submit = '%s/run.sh' % inputfiles
+    submitfile = open(submit,'w')
+    if not submissionscript:
+        submissionscript = ['#!/bin/bash\n', '#Qdyn I/O\n']
+
+    for line in submissionscript:
+        if '#Qdyn I/O' in line:
+            break
+        else:
+            submitfile.write(line)
+
+    pdbfile = create_pdb_from_topology(topology)
+
+    #Find atom nrs for solute and solvent:
+    solute = []
+    solvent = []
+    all_atoms = []
+    for line in pdbfile:
+         if 'ATOM' in line:
+            if 'HOH' in line or 'SPC' in line:
+                solvent.append(line.split()[1])
+            else:
+                solute.append(line.split()[1])
+            all_atoms.append(line.split()[1])
+
+    #Get global settings
+    on_off = {0: 'off', 1: 'on'}
+
+    output_int = md_settings['ene_summary']
+    trj_int = md_settings['trajectory']
+    ene_int = md_settings['ene_file']
+    non_bond_int = md_settings['nonbond_list']
+    radial_force = md_settings['radial_force']
+    polarisation = md_settings['pol_force']
+    shell_force = md_settings['shell_force']
+    shell_radius = md_settings['shell_rad']
+    md_steps = int(round((float(md_settings['simtime']) * 1000000.00)/ float(md_settings['stepsize'])))
+    md_stepsize = md_settings['stepsize']
+    md_temp = md_settings['temperature']
+    md_bath = md_settings['bath_coupling']
+    shake_solvent = on_off[md_settings['shake_solvent']]
+    shake_solute = on_off[md_settings['shake_solute']]
+    shake_hydrogens = on_off[md_settings['shake_hydrogens']]
+    lrf = on_off[md_settings['lrf']]
+    lrf_cutoff = md_settings['lrf_cut']
+    use_pol = on_off[md_settings['polarisation']]
+    fepname = md_settings['fep_file']
+
+    #Write default equilibration procedure
+    #Leave base_name as md (names are long enough with the lambda values included)
+    base_name = 'eq'
+    random_seed = 'SEED_VAR'
+    count = 0
+
+    if eq:
+        restart_file = None
+        if resFEP:
+            submitfile.write('if [ $index -lt 1 ]; then\n')
+        for i in range(len(eq)):
+            count += 1
+            inputfile = base_name + '%d.inp' % count
+            logfile = base_name + '%d.log' %count
+            eq_file = open('%s/%s' % (inputfiles, inputfile), 'w')
+
+            if eq[i][0] == 'End':
+                temp = md_temp
+            else:
+                temp = eq[i][0]
+
+            submitfile.write('%s %s > %s\n' % (qdyn, inputfile, logfile))
+
+            eq_file.write('[MD]\n')
+            eq_file.write('%25s %s\n' % ('steps'.ljust(25), eq[i][5]))
+            eq_file.write('%25s %s\n' % ('stepsize'.ljust(25), eq[i][4]))
+            eq_file.write('%25s %s\n' % ('temperature'.ljust(25), temp))
+            eq_file.write('%25s %s\n' % ('bath_coupling'.ljust(25), eq[i][1]))
+            if count == 1:
+                eq_file.write('%25s %s\n' % ('random_seed'.ljust(25), random_seed))
+                eq_file.write('%25s %s\n' % ('initial_temperature'.ljust(25), eq[i][0]))
+                eq_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), 'on'))
+            if count > 1:
+                eq_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), shake_solvent))
+
+            eq_file.write('%25s %s\n' % ('shake_hydrogens'.ljust(25), shake_hydrogens))
+            eq_file.write('%25s %s\n' % ('shake_solute'.ljust(25), shake_solute))
+            eq_file.write('%25s %s\n' % ('lrf'.ljust(25), lrf))
+
+            eq_file.write('\n[cut-offs]\n')
+            eq_file.write('%25s %s\n' % ('solute_solvent'.ljust(25), md_settings['solute_solvent_cut']))
+            eq_file.write('%25s %s\n' % ('solute_solute'.ljust(25), md_settings['solute_solute_cut']))
+            eq_file.write('%25s %s\n' % ('solvent_solvent'.ljust(25), md_settings['solvent_solvent_cut']))
+            eq_file.write('%25s %s\n' % ('q_atom'.ljust(25), md_settings['q_atoms_cut']))
+            if lrf == 'on':
+                eq_file.write('%25s %s\n' % ('lrf'.ljust(25).ljust(25), lrf_cutoff))
+
+            eq_file.write('\n[sphere]\n')
+            eq_file.write('%25s %s\n' % ('shell_force'.ljust(25), shell_force))
+            eq_file.write('%25s %s\n' % ('shell_radius'.ljust(25), shell_radius))
+
+            eq_file.write(('\n[solvent]\n'))
+            eq_file.write('%25s %s\n' % ('radial_force'.ljust(25), radial_force))
+            eq_file.write(('%25s %s\n') % ('polarisation'.ljust(25), use_pol))
+            if use_pol == 'on':
+                eq_file.write('%25s %s\n' % ('polarisation_force'.ljust(25), polarisation))
+
+            eq_file.write('\n[intervals]\n')
+            eq_file.write('%25s %s\n' % ('output'.ljust(25), output_int))
+            eq_file.write('%25s %s\n' % ('trajectory'.ljust(25), trj_int))
+            eq_file.write('%25s %s\n' % ('non_bond'.ljust(25), non_bond_int))
+
+            topology = topology.split('/')[-1]
+            fepname = fepname.split('/')[-1]
+
+            eq_file.write('%25s %s\n' % ('topology'.ljust(25), topology))
+            eq_file.write('%25s %s%d.dcd\n' % ('trajectory'.ljust(25), base_name, count))
+            if count != 1:
+                eq_file.write('%25s %s\n' % ('restart'.ljust(25), restart_file))
+            eq_file.write('%25s %s%d.re\n' % ('final'.ljust(25), base_name, count))
+            eq_file.write('%25s %s\n' % ('fep'.ljust(25), fepname))
+            restart_file = logfile.split('.')[0]+'.re'
+
+            eq_file.write('\n[trajectory_atoms]\n')
+            eq_file.write('%s\n' % md_settings['trajectory atoms'])
+
+            eq_file.write('\n[lambdas]\n')
+            eq_file.write('%s\n' % ' '.join(lambda_list[0].split()[1:]))
+
+            eq_file.write('\n[sequence_restraints]\n')
+            force = float(eq[i][3])
+            if eq[i][2] != 'None':
+                if eq[i][2] == 'All':
+                    atomlist = all_atoms
+                    #eq_file.write(' not excluded  %4.1f 0  0\n' % force)
+                elif eq[i][2] == 'Solute':
+                    atomlist = solute
+                elif eq[i][2] == 'Solvent':
+                    atomlist = solvent
+                try:
+                    atom_i = atomlist[0]
+                    atom_j = atomlist[-1]
+                    eq_file.write('%6s %6s %4.1f 0  0\n' % (atom_i, atom_j, force))
+                except:
+                    continue
+
+            if len(md_settings['seq_rest']) > 0:
+                for restraint in md_settings['seq_rest']:
+                    eq_file.write('%s\n' % restraint)
+
+            if len(md_settings['dist_rest']) > 0:
+                eq_file.write('\n[distance_restraints]\n')
+                for restraint in md_settings['dist_rest']:
+                    eq_file.write('%s\n' % restraint)
+
+            if len(md_settings['atom_rest']) > 0:
+                eq_file.write('\n[atom_restraints]\n')
+                for restraint in md_settings['atom_rest']:
+                    eq_file.write('%s\n' % restraint)
+
+            if len(md_settings['wall_rest']) > 0:
+                eq_file.write('\n[wall_restraints]\n')
+                for restraint in md_settings['wall_rest']:
+                    eq_file.write('%s\n' % restraint)
+
+        if resFEP:
+            submitfile.write('fi\n')
+
+    #Write MD inputfiles for lambda steps:
+    for lamda in lambda_list:
+        lambda_value = ' '.join(lamda.split()[1:])
+        base_name = 'md_'
+        l = lambda_value.split()
+        for i in range(0, len(l)):
+            base_name += ''.join(l[i].split('.'))
+            if i < len(l) - 1:
+                base_name += '_'
+
+        inputfile =  base_name + '.inp'
+        logfile = base_name + '.log'
+        md_file = open('%s/%s' % (inputfiles, inputfile), 'w')
+
+        submitfile.write('%s %s > %s\n' % (qdyn, inputfile, logfile))
+
+        md_file.write('[MD]\n')
+        md_file.write('%25s %s\n' % ('steps'.ljust(25), md_steps))
+        md_file.write('%25s %s\n' % ('stepsize'.ljust(25), md_stepsize))
+        md_file.write('%25s %s\n' % ('temperature'.ljust(25), md_temp))
+        md_file.write('%25s %s\n' % ('bath_coupling'.ljust(25), md_bath))
+
+        md_file.write('%25s %s\n' % ('shake_hydrogens'.ljust(25), shake_hydrogens))
+        md_file.write('%25s %s\n' % ('shake_solute'.ljust(25), shake_solute))
+        md_file.write('%25s %s\n' % ('shake_solvent'.ljust(25), shake_solvent))
+        md_file.write('%25s %s\n' % ('lrf'.ljust(25), lrf))
+
+        md_file.write('\n[cut-offs]\n')
+        md_file.write('%25s %s\n' % ('solute_solvent'.ljust(25), md_settings['solute_solvent_cut']))
+        md_file.write('%25s %s\n' % ('solute_solute'.ljust(25), md_settings['solute_solute_cut']))
+        md_file.write('%25s %s\n' % ('solvent_solvent'.ljust(25), md_settings['solvent_solvent_cut']))
+        md_file.write('%25s %s\n' % ('q_atom'.ljust(25), md_settings['q_atoms_cut']))
+        if lrf == 'on':
+            md_file.write('%25s %s\n' % ('lrf'.ljust(25).ljust(25), lrf_cutoff))
+
+        md_file.write('\n[sphere]\n')
+        md_file.write('%25s %s\n' % ('shell_force'.ljust(25), shell_force))
+        md_file.write('%25s %s\n' % ('shell_radius'.ljust(25), shell_radius))
+
+        md_file.write(('\n[solvent]\n'))
+        md_file.write('%25s %s\n' % ('radial_force'.ljust(25), radial_force))
+        md_file.write(('%25s %s\n') % ('polarisation'.ljust(25), use_pol))
+        if use_pol == 'on':
+            md_file.write('%25s %s\n' % ('polarisation_force'.ljust(25), polarisation))
+
+        md_file.write('\n[intervals]\n')
+        md_file.write('%25s %s\n' % ('output'.ljust(25), output_int))
+        md_file.write('%25s %s\n' % ('energy'.ljust(25), ene_int))
+        md_file.write('%25s %s\n' % ('trajectory'.ljust(25), trj_int))
+        md_file.write('%25s %s\n' % ('non_bond'.ljust(25), non_bond_int))
+
+        md_file.write('\n[files]\n')
+
+        topology = topology.split('/')[-1]
+        fepname = fepname.split('/')[-1]
+
+        md_file.write('%25s %s\n' % ('topology'.ljust(25), topology))
+        md_file.write('%25s %s.dcd\n' % ('trajectory'.ljust(25), base_name))
+        md_file.write('%25s %s\n' % ('restart'.ljust(25), restart_file))
+        md_file.write('%25s %s.en\n' % ('energy'.ljust(25), base_name))
+        md_file.write('%25s %s.re\n' % ('final'.ljust(25), base_name))
+        md_file.write('%25s %s\n' % ('fep'.ljust(25), fepname))
+        restart_file = logfile.split('.')[0]+'.re'
+
+        md_file.write('\n[trajectory_atoms]\n')
+        md_file.write('%s\n' % md_settings['trajectory atoms'])
+
+        md_file.write('\n[lambdas]\n')
+        md_file.write('%s\n' % lambda_value)
+
+        if len(md_settings['seq_rest']) > 0:
+            md_file.write('\n[sequence_restraints]\n')
+            for restraint in md_settings['seq_rest']:
+                md_file.write('%s\n' % restraint)
+
+        if len(md_settings['dist_rest']) > 0:
+            md_file.write('\n[distance_restraints]\n')
+            for restraint in md_settings['dist_rest']:
+                md_file.write('%s\n' % restraint)
+
+        if len(md_settings['atom_rest']) > 0:
+            md_file.write('\n[atom_restraints]\n')
+            for restraint in md_settings['atom_rest']:
+                md_file.write('%s\n' % restraint)
+
+        if len(md_settings['wall_rest']) > 0:
+            md_file.write('\n[wall_restraints]\n')
+            for restraint in md_settings['wall_rest']:
+                md_file.write('%s\n' % restraint)
+        md_file.close()
+
+    #If use submission script, check for end statements (comes after #Qdyn I/O):
+    write_end = False
+    end_statements_start = None
+    for k in range(len(submissionscript)):
+        if '#Qdyn I/O' in submissionscript[k]:
+            end_statements_start = k + 1
+            write_end = True
+    if write_end:
+        for line in range(end_statements_start, len(submissionscript)):
+            submitfile.write(submissionscript[line])
+
+    submitfile.close()
+
+    print('info', 'FEP templates written to "/inputfiles"')
 
 def get_qnr_atomnr(fepdict):
     """
@@ -660,4 +999,3 @@ def get_qnr_atomnr(fepdict):
         qnr_atomnr[qnr] = int(fepdict[order_nr]['[atoms]'][qnr][0])
 
     return qnr_atomnr
-
