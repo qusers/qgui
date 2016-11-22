@@ -28,7 +28,7 @@ class SetupMd(Toplevel):
     """Implements a dialog-box when Setup -> MD is chosen from menubar.
     Has got methods to generate input files for MD simuations with Qdyn"""
 
-    def __init__(self, app, root, pdbfile, topology, run_md=True, fep=False, fep_states=0):
+    def __init__(self, app, root, pdbfile, topology, run_md=True, fep=False, fep_states=0, resFep=False):
         Toplevel.__init__(self, root)
         self.app = app
         self.main_color = self.app.main_color
@@ -39,6 +39,7 @@ class SetupMd(Toplevel):
         self.run_md = run_md
         self.restart_file = None
         self.fep_states = fep_states
+        self.resFep = resFep
 
         self.simtimeVar = StringVar()
         self.simfilesVar = StringVar()
@@ -293,9 +294,11 @@ class SetupMd(Toplevel):
             self.app.md_settings['dist_rest'] = self.distance_restraints
             self.app.md_settings['wall_rest'] = self.wall_restraints
 
-            self.app.log('info', 'EVB MD settings configured.')
-            self.app.update_status()
-            self.app.update_temperatures()
+            if not self.resFep:
+                self.app.log('info', 'EVB MD settings configured.')
+                self.app.update_status()
+                self.app.update_temperatures()
+
             self.destroy()
             return
 

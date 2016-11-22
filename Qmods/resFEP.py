@@ -665,28 +665,6 @@ class ResFEP(Toplevel):
         self.fileEdit.title('Edit FEP file %d' % fepnr)
         self.fileEdit.resizable()
 
-    def add_fepfile(self):
-        """
-        Add empty fepfile with Q atoms in it.
-        :return:
-        """
-        pass
-
-    def delete_fepfile(self):
-        """
-        Delete the selected FEP file
-        :return:
-        """
-        pass
-
-    def move_fep(self, i=0):
-        """
-        Moves FEP file in listbox from position j to j + i
-        :param value:
-        :return:
-        """
-        pass
-
     def configure_md(self):
         """
         Opens the MD settings module!
@@ -708,7 +686,8 @@ class ResFEP(Toplevel):
 
         self.q_atom_nr = qf.get_qnr_atomnr(self.topology_fep[self.selected_topology.get()][1])
 
-        setup_md_ = SetupMd(self,self.root, pdbfile, topology, False, fep=True, fep_states=self.get_fep_states())
+        setup_md_ = SetupMd(self,self.root, pdbfile, topology, False, fep=True, fep_states=self.get_fep_states(),
+                            resFep=True)
         setup_md_.configure(background = self.main_color)
         setup_md_.title('Configure MD settings for resFEP')
 
@@ -776,6 +755,7 @@ class ResFEP(Toplevel):
                          'done\n\n' % self.app.q_settings['subscript'][1])
 
         submitfile.close()
+        os.chmod(submitname, 777)
 
         print('Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
 
@@ -788,7 +768,7 @@ class ResFEP(Toplevel):
         :return:
         """
         new_script = list()
-        workdir = '/'.join(inputfiles_path.split('/')[0:-1])
+        workdir = '/'.join(inputfiles_path.split('/')[0:-2])
         for line in runsript:
             #Write stuff that needs to come right before the Qdyn commands
             if '#Qdyn I/O' in line:
@@ -796,8 +776,10 @@ class ResFEP(Toplevel):
                 new_script.append('temperature=%s\n' % self.temperature.get())
                 new_script.append('run=1\n')
                 new_script.append('finalMDrestart=md_0000_1000.re\n\n')
-                new_script.append('workdir=%s\n' % workdir)
-                new_script.append('inputfiles=%s\n' % inputfiles_path)
+                #new_script.append('workdir=%s\n' % workdir)
+                new_script.append(('workdir=pwd\n'))
+                #new_script.append('inputfiles=%s\n' % inputfiles_path)
+                new_script.append('inputfiles=$workdir/inputfiles\n')
                 new_script.append('length=%d\n' % (len(fepfiles)-1))
                 new_script.append('for index in $(seq 0 $length);do\n'
                                   'fepfile=${fepfiles[$index]}\n'

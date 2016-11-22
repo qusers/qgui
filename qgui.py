@@ -165,11 +165,11 @@ class QGui(object):
         try:
             self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
 
-            if type( self.q_settings ) == list:
+            if type(self.q_settings) == list:
                 Keys = [ 'workdir', 'parameter', 'library', 'equilibration', 'subscript', 'executables', 'schrodinger path' ]
                 new_settings = {}
 
-                map(lambda K: new_settings.update({ Keys[K[0]] : K[1] }), enumerate( self.q_settings ) )
+                map(lambda K: new_settings.update({Keys[K[0]]: K[1]}), enumerate(self.q_settings))
 
                 self.q_settings = new_settings
 
