@@ -776,9 +776,7 @@ class ResFEP(Toplevel):
                 new_script.append('temperature=%s\n' % self.temperature.get())
                 new_script.append('run=1\n')
                 new_script.append('finalMDrestart=md_0000_1000.re\n\n')
-                #new_script.append('workdir=%s\n' % workdir)
-                new_script.append(('workdir=pwd\n'))
-                #new_script.append('inputfiles=%s\n' % inputfiles_path)
+                new_script.append(('workdir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"\n'))
                 new_script.append('inputfiles=$workdir/inputfiles\n')
                 new_script.append('length=%d\n' % (len(fepfiles)-1))
                 new_script.append('for index in $(seq 0 $length);do\n'
