@@ -747,7 +747,7 @@ class ResFEP(Toplevel):
                          'submitfile=inputfiles/run.sh\n\n' % (self.temperature.get(), self.runs.get()))
 
         submitfile.write('sed -i s/finalMDrestart=.*/finalMDrestart="$restartfile"/g $submitfile\n'
-                         'sed -i s/workdir=.*/workdir="$workdir"/g $submitfile\n'
+                         'sed -i s#workdir=.*#workdir="$workdir"#g $submitfile\n'
                          'for temp in ${temperatures[*]};do\n'
                          'sed -i s/temperature=.*/temperature="$temp"/g $submitfile\n'
                          'for i in $(seq 1 $runs);do\n'
