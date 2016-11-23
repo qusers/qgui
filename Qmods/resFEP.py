@@ -477,7 +477,7 @@ class ResFEP(Toplevel):
         """
          #Set all FEP files as unedited:
         if not self.selected_topology.get() in self.fep_written.keys():
-            self.fep_written[self.selected_topology] = dict()
+            self.fep_written[self.selected_topology.get()] = dict()
         for nr in sorted(self.topology_fep[self.selected_topology.get()].keys()):
             self.fep_written[self.selected_topology.get()][nr] = False
 
@@ -780,7 +780,8 @@ class ResFEP(Toplevel):
                 new_script.append('finalMDrestart=md_0000_1000.re\n\n')
                 new_script.append('workdir=%s\n' % workdir)
                 new_script.append('inputfiles=%s\n' % inputfiles_path)
-                new_script.append('length=%d\n' % (len(fepfiles)-1))
+                new_script.append('length=${#fepfiles[@]}\n')
+                new_script.append('length=$((length-1))\n')
                 new_script.append('for index in $(seq 0 $length);do\n'
                                   'fepfile=${fepfiles[$index]}\n'
                                   'fepdir=$workdir/FEP$((index+1))\n'
