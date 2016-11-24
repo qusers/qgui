@@ -97,7 +97,7 @@ class ResFEP(Toplevel):
         try:
             lambda_step = float(self.lambda_step.get())
 
-            self.md_settings['temperature'] = float(self.lambda_step.get())
+            self.md_settings['temperature'] = float(self.temperature.get())
             self.md_settings['inputfiles'] = \
                 int(((1.0/lambda_step) + 1) * len(self.topology_fep[self.selected_topology.get()].keys()))
 
