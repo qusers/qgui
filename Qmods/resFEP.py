@@ -744,10 +744,12 @@ class ResFEP(Toplevel):
                          'runs=%s\n'
                          'restartfile=md_0000_1000.re\n'
                          'workdir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"\n'
+                         'inputfiles=$workdir/inputfiles\n'
                          'submitfile=inputfiles/run.sh\n\n' % (self.temperature.get(), self.runs.get()))
 
         submitfile.write('sed -i s/finalMDrestart=.*/finalMDrestart="$restartfile"/g $submitfile\n'
                          'sed -i s#workdir=.*#workdir="$workdir"#g $submitfile\n'
+                         'sed -i s#inputfiles=.*#inputfiles="$inputfiles"#g $submitfile\n'
                          'for temp in ${temperatures[*]};do\n'
                          'sed -i s/temperature=.*/temperature="$temp"/g $submitfile\n'
                          'for i in $(seq 1 $runs);do\n'
