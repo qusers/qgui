@@ -826,6 +826,7 @@ def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq
             topology = topology.split('/')[-1]
             fepname = fepname.split('/')[-1]
 
+            eq_file.write('\n[files]\n')
             eq_file.write('%25s %s\n' % ('topology'.ljust(25), topology))
             eq_file.write('%25s %s%d.dcd\n' % ('trajectory'.ljust(25), base_name, count))
             if count != 1:
