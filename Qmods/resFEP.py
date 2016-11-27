@@ -74,7 +74,7 @@ class ResFEP(Toplevel):
         self.dialog_window()
 
         #Get general md settings
-        self.md_settings = qf.get_md_settings('FEP')
+        self.md_settings = qf.get_md_settings('resFEP')
 
         #Check if a topology is loaded in main window
         if self.app.top_id:

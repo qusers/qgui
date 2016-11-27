@@ -1230,36 +1230,39 @@ class EvbReactions(Toplevel):
                     try:
                         if int(line.split()[1]) == 1 or int(line.split()[1]) == 2:
                             #OLD QFEP FORMAT:
-                            #l = line[32:40]
-                            #eqtot = float(line[40:48])
-                            #eqbnd = float(line[48:56])
-                            #eqang = float(line[56:64])
-                            #eqtor = float(line[64:72])
-                            #eqimp = float(line[72:80])
-                            #eqel = float(line[80:88])
-                            #eqvdw = float(line[88:96])
-                            #qqel = float(line[96:104])
-                            #qqvdw = float(line[104:112])
-                            #qpel = float(line[112:120])
-                            #qpvdw = float(line[120:128])
-                            #qwel = float(line[128:136])
-                            #qwvdw = float(line[136:144])
+                            if len(line.split()) < 17:
+                                l = line[32:40]
+                                eqtot = float(line[40:48])
+                                eqbnd = float(line[48:56])
+                                eqang = float(line[56:64])
+                                eqtor = float(line[64:72])
+                                eqimp = float(line[72:80])
+                                eqel = float(line[80:88])
+                                eqvdw = float(line[88:96])
+                                qqel = float(line[96:104])
+                                qqvdw = float(line[104:112])
+                                qpel = float(line[112:120])
+                                qpvdw = float(line[120:128])
+                                qwel = float(line[128:136])
+                                qwvdw = float(line[136:144])
+
 
                             #New and nicer Qfep format
-                            l = line.split()[3]
-                            eqtot = float(line.split()[4])
-                            eqbnd = float(line.split()[5])
-                            eqang = float(line.split()[6])
-                            eqtor = float(line.split()[7])
-                            eqimp = float(line.split()[8])
-                            eqel = float(line.split()[9])
-                            eqvdw = float(line.split()[10])
-                            qqel = float(line.split()[11])
-                            qqvdw = float(line.split()[12])
-                            qpel = float(line.split()[13])
-                            qpvdw = float(line.split()[14])
-                            qwel = float(line.split()[15])
-                            qwvdw = float(line.split()[16])
+                            else:
+                                l = line.split()[3]
+                                eqtot = float(line.split()[4])
+                                eqbnd = float(line.split()[5])
+                                eqang = float(line.split()[6])
+                                eqtor = float(line.split()[7])
+                                eqimp = float(line.split()[8])
+                                eqel = float(line.split()[9])
+                                eqvdw = float(line.split()[10])
+                                qqel = float(line.split()[11])
+                                qqvdw = float(line.split()[12])
+                                qpel = float(line.split()[13])
+                                qpvdw = float(line.split()[14])
+                                qwel = float(line.split()[15])
+                                qwvdw = float(line.split()[16])
 
                             tmp.append([l, eqtot, eqbnd, eqang, eqtor, eqimp, eqel, eqvdw, qqel, qqvdw, qpel, qpvdw,
                                         qwel, qwvdw])
