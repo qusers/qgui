@@ -46,7 +46,7 @@ HO	0	0	0	0	0	0	1.008
 5  	0	0
 
 [bond_types]
-1	634.0	1.522	!C2	CT		
+1	640.0	1.410	!OG	CT		
 2	680.0	1.090	!HC	CT	
 
 [change_bonds]

@@ -39,7 +39,7 @@ HS	0	0	0	0	0	0	1.008
 5   HS 	HS
 
 [bond_types]
-1	634.0	1.522	!C2	CT		
+1       440.0   1.810   !SH     CT
 2	680.0	1.090	!HC	CT	
 
 [change_bonds]
