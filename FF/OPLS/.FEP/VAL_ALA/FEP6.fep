@@ -53,11 +53,11 @@ CB      1059.13	23.67	0	0	748.92	16.74	12.01
 [change_atoms]
 1  CT    CT   			    
 2  HC    HC   			    
-3  CT    HC   			 
+3  HC    HC   			 
 4  HDUM	   HDUM
 5  HDUM    HDUM   			 
 6  HDUM    HDUM   			 
-7  CT    HC   			 
+7  HC    HC   			 
 8  HDUM    HDUM   			 
 9  HDUM    HDUM   			 
 10 HDUM    HDUM   			 
