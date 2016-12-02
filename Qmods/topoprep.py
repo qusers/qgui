@@ -815,7 +815,7 @@ class TopologyPrepare(Toplevel):
                 merged_file.write(prmfiles[0][i])
             for entry in range(1, len(prmfiles)):
                 for j in range(atom_index[entry] + 1, bond_index[entry]):
-                    if '*' in prmfiles[entry][j][0:2]:
+                    if prmfiles[entry][j].startswith('*'):
                         continue
                     else:
                         merged_file.write(prmfiles[entry][j])
@@ -825,7 +825,7 @@ class TopologyPrepare(Toplevel):
                     merged_file.write(prmfiles[0][i])
                 for entry in range(1, len(prmfiles)):
                     for j in range(bond_index[entry] + 1 ,angle_index[entry]):
-                        if '*' in prmfiles[entry][j][0:2]:
+                        if prmfiles[entry][j].startswith('*'):
                             continue
                         else:
                             merged_file.write(prmfiles[entry][j])
@@ -838,7 +838,7 @@ class TopologyPrepare(Toplevel):
                     merged_file.write(prmfiles[0][i])
                 for entry in range(1, len(prmfiles)):
                     for j in range(angle_index[entry] + 1 ,torsion_index[entry]):
-                        if '*' in prmfiles[entry][j][0:2]:
+                        if prmfiles[entry][j].startswith('*'):
                             continue
                         else:
                             merged_file.write(prmfiles[entry][j])
@@ -851,7 +851,7 @@ class TopologyPrepare(Toplevel):
                     merged_file.write(prmfiles[0][i])
                 for entry in range(1, len(prmfiles)):
                     for j in range(torsion_index[entry] + 1 ,improper_index[entry]):
-                        if '*' in prmfiles[entry][j][0:2]:
+                        if prmfiles[entry][j].startswith('*'):
                             continue
                         else:
                             merged_file.write(prmfiles[entry][j])
@@ -864,7 +864,7 @@ class TopologyPrepare(Toplevel):
                     merged_file.write(prmfiles[0][i])
                 for entry in range(1, len(prmfiles)):
                     for j in range(improper_index[entry] + 1 , len(prmfiles[entry])):
-                        if '*' in prmfiles[entry][j][0:3]:
+                        if prmfiles[entry][j].startswith('*'):
                             continue
                         else:
                             merged_file.write(prmfiles[entry][j])
@@ -898,9 +898,9 @@ class TopologyPrepare(Toplevel):
             qprepinp.write('solvate %s %s %s %s 1 %s\n' % (xc,yc, zc,radius,solvation))
 
         qprepinp.write('maketop %s topology\n' % self.pdbfile.split('.')[0])
-        qprepinp.write('writetop %s/%s' % (self.app.workdir, self.topname))
+        qprepinp.write('writetop %s' % self.topname)
         qprepinp.write('\n')
-        qprepinp.write('writepdb %s/%s' % (self.app.workdir, self.top_pdbname))
+        qprepinp.write('writepdb %s' % self.top_pdbname)
         qprepinp.write('\n')
         qprepinp.write('y\n')
         qprepinp.write('q\n')

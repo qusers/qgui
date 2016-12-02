@@ -20,13 +20,10 @@ import qgui_functions as qf
 from select_return import SelectReturn
 from setup_md import SetupMd
 from edit_file import FileEdit
-from subprocess import Popen, PIPE
+import stat
 import tkFont
-import time
 import os
-import signal
-import sys
-import numpy as np
+
 import shutil
 from copy import deepcopy
 
@@ -759,7 +756,10 @@ class ResFEP(Toplevel):
                          'done\n\n' % self.app.q_settings['subscript'][1])
 
         submitfile.close()
-        os.chmod(submitname, 777)
+
+        #Make the submitfile executable!
+        st = os.stat(submitname)
+        os.chmod(submitname, st.st_mode | 0111)
 
         print('Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
 
