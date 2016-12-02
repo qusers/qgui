@@ -377,6 +377,11 @@ def write_fepdict(fep, path=None, printfep=False):
                     fepout.write('\n')
                 fepout.write('%s\n' % section)
 
+                #For some reason states needs to come first in [FEP]! adding this until we get a fix in Q...
+                #TODO delete this if claus when fix for Q is available:
+                if section == '[FEP]':
+                    fepout.write('%6s %7s\n' % ('states'.ljust(6), fep[nr][section]['states'][0].ljust(7)))
+
             for _key in sorted(fep[nr][section].keys()):
                 _val = fep[nr][section][_key]
                 if section in no_key:
@@ -390,8 +395,11 @@ def write_fepdict(fep, path=None, printfep=False):
                         print '%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val]))
 
                     else:
-                        fepout.write('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val])))
-                        fepout.write('\n')
+                        #TODO delete this if claus when fix for Q is available:
+                        if _key != 'states':
+                            fepout.write('%6s %s' %
+                                         (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val])))
+                            fepout.write('\n')
     if not printfep:
         fepout.close()
 

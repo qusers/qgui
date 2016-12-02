@@ -43,8 +43,12 @@ bash-3.2$ python qgui.py
 
 There is also an installation script to automatically set up Qgui on your MAC/LINUX.
 Simply run this by typing the following command in the terminal:
-````bash
-python INSTALL.py
+```bash
+python2 INSTALL.py
+``` 
+or
+```bash
+./INSTALL.py
 ``` 
 and follow the instructions given therin.
 
