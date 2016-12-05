@@ -912,7 +912,13 @@ class TopologyPrepare(Toplevel):
         qprepinp_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.inp'
         qprepout_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.log'
 
+        #Move to workdir
+        current_dir = os.getcwd()
+        os.chdir(self.app.workdir)
+
         self.writeTopology()
+
+        #TODO should change this to POPEN/CALL !! This here is bad programming practice:
         os.system('Qprep5 <%s/%s>%s/%s' % (self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name))
 
         qprep_done = False
@@ -966,6 +972,9 @@ class TopologyPrepare(Toplevel):
                 self.app.log('info','Qprep failed to generate topology!')
                 self.app.errorBox('Error','Could not run Qprep! Please verify installation.')
                 qprep_done = True
+
+        #Change back to original path:
+        os.chdir(current_dir)
 
     def set_structure_entry(self):
         """Inserts the name of the current file to structure_entry field. """
