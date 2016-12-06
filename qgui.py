@@ -56,6 +56,7 @@ from aboutQ import AboutQ
 from qpymol import ViewPyMol
 from evb_arrhenius import EvbArrhenius
 from analyze_FEP import AnalyzeFEP
+from analyse_resFEP import Analyse_resFEP
 from analyze_energies import AnalyzeEnergies
 from qcalc import AnalyzeQcalc
 import prepareTopology as pt
@@ -373,13 +374,22 @@ class QGui(object):
         self.fep_analyze.configure(background=self.main_color)
         self.fep_analyze.title('Free Energy Perturbation Analyze')
 
+    def analyze_resFEP(self):
+        """
+        Opens window to analyse resFEP (FEP protocol runs)
+        :return:
+        """
+        self.resFEP_analyze = Analyse_resFEP(self, self.root)
+        self.resFEP_analyze.configure(background=self.main_color)
+        self.resFEP_analyze.title('Analyse resFEP')
+
     def analyze_energies(self):
         """
         Opens window to analyze md.log file energies
         """
         self.energy_analyze = AnalyzeEnergies(self, self.root)
         self.energy_analyze.configure(background=self.main_color)
-        self.energy_analyze.title('Analyze trajectory energies')
+        self.energy_analyze.title('Analyse trajectory energies')
 
     def analyze_qcalc(self, what):
         if self.pdb_id and self.top_id:

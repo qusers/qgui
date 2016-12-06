@@ -234,10 +234,11 @@ class MainWindow(Frame):
         #Defines the analyze-menu.
         subanalyze_trajectory = Menu(menubar, tearoff = 0)
         analyzemenu = Menu(menubar, tearoff = 0)
-        analyzemenu.add_cascade(label = 'Trajectory', menu = subanalyze_trajectory, underline = 0)
-        analyzemenu.add_command(label = 'LIE', command = self.app.analyze_lie)
-        analyzemenu.add_command(label = 'FEP', command = self.app.analyze_fep)
-        menubar.add_cascade(label = 'Analyze', menu = analyzemenu)
+        analyzemenu.add_cascade(label='Trajectory', menu = subanalyze_trajectory, underline = 0)
+        analyzemenu.add_command(label='LIE', command = self.app.analyze_lie)
+        analyzemenu.add_command(label='FEP', command = self.app.analyze_fep)
+        analyzemenu.add_command(label='resFEP', command=self.app.analyze_resFEP)
+        menubar.add_cascade(label='Analyze', menu=analyzemenu)
 
         #Defines the submenu of Trajectory in Analyze-menu.
 
