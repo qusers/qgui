@@ -202,15 +202,19 @@ class MainWindow(Frame):
         self.root.config(menu = menubar)
 
         #Defines the File-menu.
-
+        convert_menu = Menu(menubar, tearoff=0)
         filemenu = Menu(menubar, tearoff = 0)
         filemenu.add_command(label = 'Change workdir', command = self.select_workdir)
         filemenu.add_command(label = 'Import structure', command = self.app.load_dialog)
         filemenu.add_command(label = 'Import Topology', command = self.app.get_top_file)
+        filemenu.add_cascade(label='Convert', menu=convert_menu, underline=0)
         filemenu.add_command(label = 'Settings', command = self.app.load_settings)
         filemenu.add_separator()
         filemenu.add_command(label = 'Close', command = self.app.exit) #Here we use the reference to Qgui-class
         menubar.add_cascade(label = 'File', menu = filemenu)
+
+        #Convert files submenu:
+        convert_menu.add_command(label=(u'*.top \u2192 *.pdb'), command=self.app.convert_top_pdb)
 
         #Defines the Prepare-menu.
 

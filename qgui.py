@@ -27,7 +27,7 @@ __status__ = "Production"
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
 from Tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE
-from tkFileDialog import askopenfilename
+from tkFileDialog import askopenfilename, asksaveasfilename
 import urllib2
 import os
 import sys
@@ -253,6 +253,38 @@ class QGui(object):
     def open_trjmask(self):
         self.trjmask = TrjMask(self, self.root)
         self.trjmask.configure(background=self.main_color)
+
+    def convert_top_pdb(self):
+        """
+        Convert a topology file to a pdb file
+        :return:
+        """
+        self.log('info', 'Select topology file\n')
+        topfile = askopenfilename(parent=self.root, initialdir=self.workdir, title='Select topology file',
+                                  filetypes=(("top", "*.top"), ("All files", "*.*")))
+        if not topfile:
+            self.log(' ', 'No topology file loaded.\n')
+            return
+
+        pdb = qf.create_pdb_from_topology(topfile, self.q_settings['library'])
+
+        if not pdb:
+            self.log(' ', 'Could not convert topology to pdb.\n')
+            return
+
+        pdb_file = asksaveasfilename(parent=self.root, initialdir=self.workdir, title='Save pdb file as',
+                                     filetypes=(("top", "*.top"), ("All files", "*.*")))
+
+        if not pdb_file:
+            self.log(' ', 'pdb file not saved\n')
+            return
+
+        pdbout = open(pdb_file, 'w')
+        for line in pdb:
+            pdbout.write(line)
+
+        pdbout.close()
+        self.log('info', 'Converted %s to %s' % (topfile.split('/')[-1], pdb_file.split('/')[-1]))
 
     def evb_calibration(self):
         """

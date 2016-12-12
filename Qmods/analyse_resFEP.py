@@ -15,12 +15,13 @@
 
 from Tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
     OptionMenu, StringVar, Spinbox, SINGLE, LabelFrame, MULTIPLE, Entry
-from tkFileDialog import askopenfilename, askdirectory
+from tkFileDialog import askopenfilename, askdirectory, asksaveasfilename
 import qgui_functions as qf
 import numpy as np
 from tkSimpleDialog import askstring
 import tkFont
 import os
+import cPickle
 
 
 class Analyse_resFEP(Toplevel):
@@ -79,7 +80,6 @@ class Analyse_resFEP(Toplevel):
         :return:
         """
         fepdirs = self.get_fep_dirs(self.feps_paths[fep_title])
-        print fepdirs
 
         if len(fepdirs) < 1:
             self.app.errorBox('Warning', 'Found no FEP directories!')
@@ -139,6 +139,7 @@ class Analyse_resFEP(Toplevel):
                     FEPdata = qf.get_qfep_part1(qpath=rundir, qfep='qfep.out')
 
                     if FEPdata:
+                        print('Added run %s' % i)
                         fepout[fep][temp]['dGf'].append(FEPdata['sum_dGf'][-1])
                         fepout[fep][temp]['dGr'].append(FEPdata['sum_dGr'][0])
                         fepout[fep][temp]['dG'].append(FEPdata['dG'][-1])
@@ -161,29 +162,32 @@ class Analyse_resFEP(Toplevel):
                     self.feps[fep_title][temp]['dG'] = [0, 0]
                     self.feps[fep_title][temp]['dGf'] = [0, 0]
                     self.feps[fep_title][temp]['dGr'] = [0, 0]
-                    self.feps[fep_title][temp][fep] = dict()
 
-                ave_frwd = np.average(fepdata[fep][temp]['frwd'])
-                frwd_sem = np.std(fepdata[fep][temp]['frwd'])/np.sqrt(len(fepdata[fep][temp]['frwd']))
+                if len(fepdata[fep][temp]['dG']) > 0:
+                    if not fep in self.feps[fep_title][temp].keys():
+                        self.feps[fep_title][temp][fep] = dict()
 
-                ave_rev = np.average(fepdata[fep][temp]['rev'])
-                rev_sem = np.std(fepdata[fep][temp]['rev'])/np.sqrt(len(fepdata[fep][temp]['rev']))
+                    ave_frwd = np.average(fepdata[fep][temp]['dGf'])
+                    frwd_sem = np.std(fepdata[fep][temp]['dGf'])/np.sqrt(len(fepdata[fep][temp]['dGf']))
 
-                ave_dg = np.average(fepdata[fep][temp]['ave'])
-                dg_sem = np.std(fepdata[fep][temp]['ave'])/np.sqrt(len(fepdata[fep][temp]['ave']))
+                    ave_rev = np.average(fepdata[fep][temp]['dGr'])
+                    rev_sem = np.std(fepdata[fep][temp]['dGr'])/np.sqrt(len(fepdata[fep][temp]['dGr']))
 
-                self.feps[fep_title][temp][fep]['dGf'] = [ave_frwd, frwd_sem]
-                self.feps[fep_title][temp][fep]['dGr'] = [ave_rev, rev_sem]
-                self.feps[fep_title][temp][fep]['dG'] = [ave_dg, dg_sem]
+                    ave_dg = np.average(fepdata[fep][temp]['dG'])
+                    dg_sem = np.std(fepdata[fep][temp]['dG'])/np.sqrt(len(fepdata[fep][temp]['dG']))
 
-                self.feps[fep_title][temp]['dG'][0] += ave_dg
-                self.feps[fep_title][temp]['dG'][1] = np.sqrt(self.feps[fep_title][temp]['dG'][1] + dg_sem)
+                    self.feps[fep_title][temp][fep]['dGf'] = [ave_frwd, frwd_sem]
+                    self.feps[fep_title][temp][fep]['dGr'] = [ave_rev, rev_sem]
+                    self.feps[fep_title][temp][fep]['dG'] = [ave_dg, dg_sem]
 
-                self.feps[fep_title][temp]['dGf'][0] += ave_frwd
-                self.feps[fep_title][temp]['dGf'][1] = np.sqrt(self.feps[fep_title][temp]['dGf'][1] + frwd_sem)
+                    self.feps[fep_title][temp]['dG'][0] += ave_dg
+                    self.feps[fep_title][temp]['dG'][1] = np.sqrt(self.feps[fep_title][temp]['dG'][1] + dg_sem)
 
-                self.feps[fep_title][temp]['dGr'][0] += ave_rev
-                self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1] + rev_sem)
+                    self.feps[fep_title][temp]['dGf'][0] += ave_frwd
+                    self.feps[fep_title][temp]['dGf'][1] = np.sqrt(self.feps[fep_title][temp]['dGf'][1] + frwd_sem)
+
+                    self.feps[fep_title][temp]['dGr'][0] += ave_rev
+                    self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1] + rev_sem)
 
     def get_fep_dirs(self, rundir):
         """
@@ -210,7 +214,16 @@ class Analyse_resFEP(Toplevel):
 
         :return:
         """
-        pass
+        selected = self.feplist.curselection()
+
+        if len(selected) < 1:
+            return
+
+        for i in reversed(selected):
+            fep_title = self.feplist.get(i)
+            self.feplist.delete(i)
+            del self.feps[fep_title]
+            del self.feps_paths[fep_title]
 
     def add_fep_combine(self, sign):
         """
@@ -334,29 +347,141 @@ class Analyse_resFEP(Toplevel):
         Deletes entries in combine FEP listbox
         :return:
         """
-
         self.comb_list.delete(0, END)
 
     def export_table(self):
         """
-
+        Save FEP dG results to text file
         :return:
         """
-        pass
+        txt_file = asksaveasfilename(parent=self.root, initialdir=self.app.workdir, title='Export table as',
+                                     filetypes=(("text", "*.txt"), ("All files", "*.*")))
+
+        if not txt_file:
+            return
+
+        outfile = open(txt_file, 'w')
+
+        outfile.write('%10s %5s %5s %7s %7s %7s %7s %7s %7s\n' %
+                                 ('Title'.ljust(10), 'T'.ljust(5), 'FEP'.ljust(5), "<dG>".ljust(3), '+/-'.ljust(3),
+                                  "dGf".ljust(3), '+/-'.ljust(3), "dGr".ljust(3), '+/-'.ljust(3)))
+
+        for i in self.dg_list.get(1, END):
+            outfile.write('%s\n' % i)
+
+
+        outfile.close()
+        self.app.log('info', 'Table saved as %s\n' % txt_file.split('/')[-1])
 
     def save_session(self):
         """
-
         :return:
         """
-        pass
+        save_name = asksaveasfilename(parent=self.root, initialdir=self.app.workdir, title='Export table as',
+                                      filetypes=(("All files", "*.*"), ("Project", "*.prj")))
+
+        if not save_name:
+            return
+
+        cPickle.dump([self.feps, self.feps_paths], open(save_name, 'wb'))
+
+        self.app.log('info', 'Session saved as %s\n' % save_name.split('/')[-1])
+
 
     def load_session(self):
         """
-
+        Imports results from saved session
         :return:
         """
-        pass
+        import_session = askopenfilename(parent=self.root, initialdir=self.app.workdir, title='Select topology file',
+                                         filetypes=(("Project", "*.prj"), ("All files", "*.*")))
+
+        if not import_session:
+            return
+
+        fep_data = cPickle.load(open(import_session, 'rb'))
+
+        self.feps.update(fep_data[0])
+        self.feps_paths.update(fep_data[1])
+
+        self.update_tables()
+
+    def update_tables(self):
+        """
+        Update listboxes
+        :return:
+        """
+        boxes = [self.feplist, self.comb_list, self.dg_list]
+
+        for box in boxes:
+            box.delete(0, END)
+
+        for fep_title in self.feps.keys():
+            self.feplist.insert(END, fep_title)
+
+
+    def insert_fep_energies(self, fep_title, temp):
+        """
+        Inserts FEP energies to dG_listbox
+        :param fep_title:
+        :param temp:
+        :return:
+        """
+        no_fep = ['dG', 'dGr', 'dGf']
+        for fep in sorted(self.feps[fep_title][temp].keys()):
+            if fep not in no_fep:
+                dg = self.feps[fep_title][temp][fep]['dG'][0]
+                dg_sem = self.feps[fep_title][temp][fep]['dG'][1]
+                dgf = self.feps[fep_title][temp][fep]['dGf'][0]
+                dgf_sem = self.feps[fep_title][temp][fep]['dGf'][1]
+                dgr = self.feps[fep_title][temp][fep]['dGr'][0]
+                dgr_sem = self.feps[fep_title][temp][fep]['dGr'][1]
+
+                self.dg_list.insert(END, '%10s %5s %5s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f' %
+                                         (fep_title.ljust(10), fep.ljust(5), temp.ljust(5),
+                                          dg, dg_sem, dgf, dgf_sem, dgr, dgr_sem))
+
+
+    def feplist_event(self, *args):
+        """
+        Display data for selected items in dG_listbox
+        :param args:
+        :return:
+        """
+        selected = self.feplist.curselection()
+        if len(selected) < 1:
+            return
+
+        show_feps = True
+        if len(selected) > 1:
+        #Display energies for every FEP step or just for the summed FEP
+            show_feps = False
+
+        #Clear dG_listbox
+        self.dg_list.delete(0, END)
+
+        #INSERT HEADER
+        self.dg_list.insert(END, '%10s %5s %5s %7s %7s %7s %7s %7s %7s' %
+                                 ('Title'.ljust(10), 'T'.ljust(5), 'FEP'.ljust(5), u"<\u0394G>".ljust(3), '+/-'.ljust(3),
+                                  u"\u0394Gf".ljust(3), '+/-'.ljust(3), u"\u0394Gr".ljust(3), '+/-'.ljust(3)))
+
+        for i in selected:
+            fep_title = self.feplist.get(i)
+            for temp in sorted(self.feps[fep_title].keys()):
+                if show_feps:
+                    self.insert_fep_energies(fep_title, temp)
+
+                #Insert total FEP energies:
+                dg = self.feps[fep_title][temp]['dG'][0]
+                dg_sem = self.feps[fep_title][temp]['dG'][1]
+                dgf = self.feps[fep_title][temp]['dGf'][0]
+                dgf_sem = self.feps[fep_title][temp]['dGf'][1]
+                dgr = self.feps[fep_title][temp]['dGr'][0]
+                dgr_sem = self.feps[fep_title][temp]['dGr'][1]
+
+                self.dg_list.insert(END, '%10s %5s %5s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f' %
+                                         (fep_title.ljust(10), temp.ljust(5), 'Total',
+                                          dg, dg_sem, dgf, dgf_sem, dgr, dgr_sem))
 
     def dialog_window(self):
 
@@ -390,7 +515,7 @@ class Analyse_resFEP(Toplevel):
         feplist_scroll.config(command=self.feplist.yview)
         self.feplist.grid(row=1, rowspan=4, column=0, sticky='nse')
         self.feplist.config(font=tkFont.Font(family="Courier", size=12))
-        #self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
+        self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
         #Add fep runs
         add_fep = Button(frame1, text='Add FEP runs', width=10, highlightbackground=self.main_color,
@@ -457,7 +582,7 @@ class Analyse_resFEP(Toplevel):
         #List with sumarised dG values
         dg_list_scroll = Scrollbar(frame2)
         dg_list_scroll.grid(row=1, rowspan=4, column=1, sticky='nsw')
-        self.dg_list = Listbox(frame2, yscrollcommand=dg_list_scroll.set, width=55, height=10,
+        self.dg_list = Listbox(frame2, yscrollcommand=dg_list_scroll.set, width=70, height=10,
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=True)
         dg_list_scroll.config(command=self.dg_list.yview)
         self.dg_list.grid(row=1, rowspan=4, column=0, sticky='nse')
@@ -476,7 +601,7 @@ class Analyse_resFEP(Toplevel):
                               command=self.save_session)
         save_session.grid(row=0, column=0)
         #LOAD
-        load_session = Button(frame3, text='Load', width=10, highlightbackground=self.main_color,
+        load_session = Button(frame3, text='Import', width=10, highlightbackground=self.main_color,
                               command=self.load_session)
         load_session.grid(row=0, column=1)
 

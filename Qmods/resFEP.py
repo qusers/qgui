@@ -716,7 +716,8 @@ class ResFEP(Toplevel):
                 os.makedirs(input_dir)
 
             #Copy the topology file to inputfiles
-            shutil.copy(self.topology_paths[top], input_dir)
+            if self.topology_paths[top] != '%s/%s' % (input_dir, top_name):
+                shutil.copy(self.topology_paths[top], '%s/%s' % (input_dir, top_name))
 
             #Write FEP files to inputfiles
             self.write_fep_files(input_dir, top)
