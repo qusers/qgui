@@ -181,13 +181,14 @@ class Analyse_resFEP(Toplevel):
                     self.feps[fep_title][temp][fep]['dG'] = [ave_dg, dg_sem]
 
                     self.feps[fep_title][temp]['dG'][0] += ave_dg
-                    self.feps[fep_title][temp]['dG'][1] = np.sqrt(self.feps[fep_title][temp]['dG'][1] + dg_sem)
+                    self.feps[fep_title][temp]['dG'][1] = np.sqrt(self.feps[fep_title][temp]['dG'][1]**2 + dg_sem**2)
 
                     self.feps[fep_title][temp]['dGf'][0] += ave_frwd
-                    self.feps[fep_title][temp]['dGf'][1] = np.sqrt(self.feps[fep_title][temp]['dGf'][1] + frwd_sem)
+                    self.feps[fep_title][temp]['dGf'][1] = \
+                        np.sqrt(self.feps[fep_title][temp]['dGf'][1]**2 + frwd_sem**2)
 
                     self.feps[fep_title][temp]['dGr'][0] += ave_rev
-                    self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1] + rev_sem)
+                    self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1]**2 + rev_sem**2)
 
     def get_fep_dirs(self, rundir):
         """
