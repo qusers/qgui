@@ -438,7 +438,7 @@ class Analyse_resFEP(Toplevel):
                 dgr_sem = self.feps[fep_title][temp][fep]['dGr'][1]
 
                 self.dg_list.insert(END, '%10s %5s %5s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f' %
-                                         (fep_title.ljust(10), fep.ljust(5), temp.ljust(5),
+                                         (fep_title.ljust(10), temp.ljust(5), fep.ljust(5),
                                           dg, dg_sem, dgf, dgf_sem, dgr, dgr_sem))
 
 
