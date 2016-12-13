@@ -335,13 +335,13 @@ class Analyse_resFEP(Toplevel):
                 dGr_sem = self.feps[i][temp]['dG'][1]
 
                 self.feps[fep_title][temp]['dG'][0] += dG
-                self.feps[fep_title][temp]['dG'][1] = np.sqrt(self.feps[fep_title][temp]['dG'][1] + dG_sem)
+                self.feps[fep_title][temp]['dG'][1] = np.sqrt(self.feps[fep_title][temp]['dG'][1]**2 + dG_sem**2)
 
                 self.feps[fep_title][temp]['dGf'][0] += dGf
-                self.feps[fep_title][temp]['dGf'][1] = np.sqrt(self.feps[fep_title][temp]['dGf'][1] + dGf_sem)
+                self.feps[fep_title][temp]['dGf'][1] = np.sqrt(self.feps[fep_title][temp]['dGf'][1]**2 + dGf_sem**2)
 
                 self.feps[fep_title][temp]['dGr'][0] += dGr
-                self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1] + dGr_sem)
+                self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1]**2 + dGr_sem**2)
 
         self.update_tables()
 
