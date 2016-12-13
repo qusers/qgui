@@ -343,6 +343,8 @@ class Analyse_resFEP(Toplevel):
                 self.feps[fep_title][temp]['dGr'][0] += dGr
                 self.feps[fep_title][temp]['dGr'][1] = np.sqrt(self.feps[fep_title][temp]['dGr'][1] + dGr_sem)
 
+        self.update_tables()
+
     def clear_combined(self):
         """
         Deletes entries in combine FEP listbox
