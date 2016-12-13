@@ -743,7 +743,7 @@ class ResFEP(Toplevel):
                          'restartfile=md_0000_1000.re\n'
                          'workdir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"\n'
                          'inputfiles=$workdir/inputfiles\n'
-                         'submitfile=inputfiles/run.sh\n\n' % (self.temperature.get(), self.runs.get()))
+                         'submitfile=$inputfiles/run.sh\n\n' % (self.temperature.get(), self.runs.get()))
 
         submitfile.write('sed -i s/finalMDrestart=.*/finalMDrestart="$restartfile"/g $submitfile\n'
                          'sed -i s#workdir=.*#workdir="$workdir"#g $submitfile\n'
