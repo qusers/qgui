@@ -110,14 +110,15 @@ class Analyse_resFEP(Toplevel):
                     fepout[fep][temp]['dG'] = list()
                     fepout[fep][temp]['dGf'] = list()
                     fepout[fep][temp]['dGr'] = list()
+                self.app.log('info', 'Analysing FEP at temperature %s' % temp)
                 print('Analysing FEP at temperature %s' % temp)
                 tdir = '%s/%s' % (fepdir, temp)
                 os.chdir(tdir)
 
                 #Go through parallel runs
-                for i in sorted(filter(os.path.isdir, os.listdir(os.getcwd()))):
+                for j in sorted(filter(os.path.isdir, os.listdir(os.getcwd()))):
                     calcFEP = False
-                    rundir = '%s/%s' % (tdir, i)
+                    rundir = '%s/%s' % (tdir, j)
                     os.chdir(rundir)
 
                     #check if qfep.out exist
@@ -131,9 +132,11 @@ class Analyse_resFEP(Toplevel):
                         runQfep = qf.write_qfep_input(qfep_path=rundir, states=2, temp=float(temp))
 
                         if runQfep:
+                            self.app.log('info', 'Running Qfep in %s/%s/%s\n' % (fep, temp, j))
                             qf.run_Qfep(qpath=rundir, qfep_inp='qfep.inp', qfep=self.app.q_settings['executables'][2])
                         else:
                             print('Found no energy files in %s' % rundir)
+                            self.app.log(' ', '\nFound no energy files in:\n%s\n' % rundir)
 
                     #Read qfep.out and collect FEP summary
                     FEPdata = qf.get_qfep_part1(qpath=rundir, qfep='qfep.out')
@@ -143,6 +146,8 @@ class Analyse_resFEP(Toplevel):
                         fepout[fep][temp]['dGf'].append(FEPdata['sum_dGf'][-1])
                         fepout[fep][temp]['dGr'].append(FEPdata['sum_dGr'][0])
                         fepout[fep][temp]['dG'].append(FEPdata['dG'][-1])
+                    else:
+                        self.app.log(' ', '\nNo FEP data in %s/%s/%s\n' % (fep, temp, j))
 
         #Calculate average FEP and update self.feps
         self.calc_ave_fep(fep_title, fepout)
@@ -281,7 +286,7 @@ class Analyse_resFEP(Toplevel):
         comb = dict()
         fep_temps = set()
         selected = self.comb_list.get(0, END)
-
+        print(selected)
         if len(selected) < 1:
             return
 
@@ -380,7 +385,7 @@ class Analyse_resFEP(Toplevel):
         """
         :return:
         """
-        save_name = asksaveasfilename(parent=self.root, initialdir=self.app.workdir, title='Export table as',
+        save_name = asksaveasfilename(parent=self.root, initialdir=self.app.workdir, title='Save session as',
                                       filetypes=(("All files", "*.*"), ("Project", "*.prj")))
 
         if not save_name:
