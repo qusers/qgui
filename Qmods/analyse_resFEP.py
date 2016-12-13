@@ -280,15 +280,15 @@ class Analyse_resFEP(Toplevel):
         """
         comb = dict()
         fep_temps = set()
-        selected = self.comb_list.curselection()
+        selected = self.comb_list.get(0, END)
 
         if len(selected) < 1:
             return
 
         #How to combine?
         for i in selected:
-            sign = self.comb_list.get(i).split()[0]
-            fep = self.comb_list.get(i).split()[1]
+            sign = i.split()[0]
+            fep = i.split()[1]
             if sign == '+':
                 comb[fep] = 1.
             else:
