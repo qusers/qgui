@@ -105,6 +105,7 @@ class Analyse_resFEP(Toplevel):
 
             #Go through temperature directories and analyse FEP runs
             for temp in temps:
+                self.update()
                 if temp not in fepout[fep].keys():
                     fepout[fep][temp] = dict()
                     fepout[fep][temp]['dG'] = list()
@@ -117,6 +118,7 @@ class Analyse_resFEP(Toplevel):
 
                 #Go through parallel runs
                 for j in sorted(filter(os.path.isdir, os.listdir(os.getcwd()))):
+                    self.update()
                     calcFEP = False
                     rundir = '%s/%s' % (tdir, j)
                     os.chdir(rundir)
@@ -142,13 +144,14 @@ class Analyse_resFEP(Toplevel):
                     FEPdata = qf.get_qfep_part1(qpath=rundir, qfep='qfep.out')
 
                     if FEPdata:
-                        print('Added run %s' % i)
+                        print('Added run %s' % j)
                         fepout[fep][temp]['dGf'].append(FEPdata['sum_dGf'][-1])
                         fepout[fep][temp]['dGr'].append(FEPdata['sum_dGr'][0])
                         fepout[fep][temp]['dG'].append(FEPdata['dG'][-1])
                     else:
                         self.app.log(' ', '\nNo FEP data in %s/%s/%s\n' % (fep, temp, j))
 
+        self.app.log('info', 'FEP calculation completed!')
         #Calculate average FEP and update self.feps
         self.calc_ave_fep(fep_title, fepout)
 
