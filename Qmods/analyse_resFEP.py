@@ -110,12 +110,12 @@ class Analyse_resFEP(Toplevel):
                     fepout[fep][temp]['dG'] = list()
                     fepout[fep][temp]['dGf'] = list()
                     fepout[fep][temp]['dGr'] = list()
-                self.app.log('info', 'Analysing FEP at temperature %s' % temp)
-                print('Analysing FEP at temperature %s' % temp)
+                self.app.log('info', '\nAnalysing %s at temperature %s' % (fep, temp))
+                print('Analysing %s at temperature %s' % (fep, temp))
                 tdir = '%s/%s' % (fepdir, temp)
                 os.chdir(tdir)
                 self.update()
-                
+
                 #Go through parallel runs
                 for j in sorted(filter(os.path.isdir, os.listdir(os.getcwd()))):
                     calcFEP = False
@@ -133,7 +133,7 @@ class Analyse_resFEP(Toplevel):
                         runQfep = qf.write_qfep_input(qfep_path=rundir, states=2, temp=float(temp))
 
                         if runQfep:
-                            self.app.log('info', 'Running Qfep in %s/%s/%s\n' % (fep, temp, j))
+                            self.app.log('info', 'Running Qfep in %s/%s/%s' % (fep, temp, j))
                             qf.run_Qfep(qpath=rundir, qfep_inp='qfep.inp', qfep=self.app.q_settings['executables'][2])
                         else:
                             print('Found no energy files in %s' % rundir)
@@ -427,7 +427,7 @@ class Analyse_resFEP(Toplevel):
         for box in boxes:
             box.delete(0, END)
 
-        for fep_title in self.feps.keys():
+        for fep_title in sorted(self.feps.keys()):
             self.feplist.insert(END, fep_title)
 
 
