@@ -452,6 +452,22 @@ class Analyse_resFEP(Toplevel):
                                          (fep_title.ljust(10), temp.ljust(5), fep.ljust(5),
                                           dg, dg_sem, dgf, dgf_sem, dgr, dgr_sem))
 
+    def copy_dG_to_excel(self):
+        """
+        Takes selected entry in dG listbox and copies it to clipboard in excel format
+        :return:
+        """
+        selected = self.dg_list.curselection()
+        if len(selected) < 1:
+            return
+
+        self.clipboard_clear()
+        for i in selected:
+            if int(i) == 0:
+                line = 'Title\tT\tFEP\t<dG>\tsem\tdGf\tsem\tdGr\tsem\n'
+            else:
+                line = '%s\n' % ' '.join(self.dg_list.get(i).split()).replace(" ", "\t")
+            self.clipboard_append(line)
 
     def feplist_event(self, *args):
         """
@@ -520,71 +536,70 @@ class Analyse_resFEP(Toplevel):
 
         #listbox with FEP run entries
         feplist_scroll = Scrollbar(frame1)
-        feplist_scroll.grid(row=1, rowspan=4, column=1, sticky='nsw')
-        self.feplist = Listbox(frame1, yscrollcommand=feplist_scroll.set, width=25, height=4,
+        feplist_scroll.grid(row=1, rowspan=4, column=2, sticky='nsw')
+        self.feplist = Listbox(frame1, yscrollcommand=feplist_scroll.set, width=25, height=6,
                                  highlightthickness=0, relief=GROOVE, selectmode=EXTENDED, exportselection=True)
         feplist_scroll.config(command=self.feplist.yview)
-        self.feplist.grid(row=1, rowspan=4, column=0, sticky='nse')
+        self.feplist.grid(row=1, rowspan=4, column=0, columnspan=2, sticky='nse')
         self.feplist.config(font=tkFont.Font(family="Courier", size=12))
         self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
         #Add fep runs
         add_fep = Button(frame1, text='Add FEP runs', width=10, highlightbackground=self.main_color,
                          command=self.add_fep_run)
-        add_fep.grid(row=5, column=0, columnspan=2)
+        add_fep.grid(row=5, column=0)
 
         #Delete fep runs
-        del_fep = Button(frame1, text='Delete', width=10, highlightbackground=self.main_color, command=self.del_fep_run)
-        del_fep.grid(row=6, column=0, columnspan=2)
-
+        del_fep = Button(frame1, text='Delete', width=6, highlightbackground=self.main_color, command=self.del_fep_run)
+        del_fep.grid(row=5, column=1, columnspan=2)
 
         #Recalculate FEP (run Qfep again)
         recalc_fep = Button(frame1, text='Recalc FEP', width=10, highlightbackground=self.main_color,
                             command=self.recalc_fep)
-        recalc_fep.grid(row=7, column=0, columnspan=2)
+        recalc_fep.grid(row=6, column=0, columnspan=3)
 
         #Right arrow to combine box label
         right_arrow = Label(frame1, text=u'\u2192', bg=self.main_color)
-        right_arrow.grid(row=2, rowspan=2, column=2)
+        right_arrow.grid(row=2, rowspan=2, column=3)
 
         #+ value to selected FEP run
         plus_dg = Button(frame1, text ='+', highlightbackground=self.main_color,
                          command=lambda: self.add_fep_combine('+'))
-        plus_dg.grid(row=2, column=3)
+        plus_dg.grid(row=2, column=4)
 
         #- value to selected fep run
         minus_dg = Button(frame1, text ='-', highlightbackground=self.main_color,
                           command=lambda: self.add_fep_combine('-'))
-        minus_dg.grid(row=3, column=3)
+        minus_dg.grid(row=3, column=4)
 
         #Label for FEP listbox
         combine = Label(frame1, text='Combine:', bg= self.main_color)
-        combine.grid(row=0, column=4, columnspan=2)
+        combine.grid(row=0, column=5, columnspan=2)
 
         #listbox with added FEP runs to be combined (added/substracted)
         comb_list_scroll = Scrollbar(frame1)
-        comb_list_scroll.grid(row=1, rowspan=4, column=5, sticky='nsw')
-        self.comb_list = Listbox(frame1, yscrollcommand=comb_list_scroll.set, width=25, height=4,
+        comb_list_scroll.grid(row=1, rowspan=4, column=8, sticky='nsw')
+        self.comb_list = Listbox(frame1, yscrollcommand=comb_list_scroll.set, width=25, height=6,
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=True)
         comb_list_scroll.config(command=self.comb_list.yview)
-        self.comb_list.grid(row=1, rowspan=4, column=4, sticky='nse')
+        self.comb_list.grid(row=1, rowspan=4, column=6, columnspan=2, sticky='nse')
         self.comb_list.config(font=tkFont.Font(family="Courier", size=12))
         #self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
-        #Clear comb_list
-        clear_comblist = Button(frame1, text='Clear', width=10, highlightbackground=self.main_color,
-                                command=self.clear_combined)
-        clear_comblist.grid(row=7, column=4, columnspan=2)
-
         #Entry field for user defined title for the combine FEP
         self.combine_title = Entry(frame1, width=17, highlightthickness=0, relief=GROOVE)
-        self.combine_title.grid(row=5, column=4, columnspan=2)
+        self.combine_title.grid(row=5, column=6, columnspan=3)
         self.combine_title.insert(0, 'ddG title')
 
+        #Clear comb_list
+        clear_comblist = Button(frame1, text='Clear', width=8, highlightbackground=self.main_color,
+                                command=self.clear_combined)
+        clear_comblist.grid(row=6, column=7, columnspan=2)
+
         #Button for combining the FEPS defined in comb_list
-        calc_combine = Button(frame1, text='Combine', width=10, highlightbackground=self.main_color,
+        calc_combine = Button(frame1, text='Combine', width=8, highlightbackground=self.main_color,
                               command=self.combine_feps)
-        calc_combine.grid(row=6, column=4, columnspan=2)
+        calc_combine.grid(row=6, column=6)
 
         ##### FRAME 2
         ave_ene = Label(frame2, text='Average energies:', bg=self.main_color)
@@ -592,18 +607,23 @@ class Analyse_resFEP(Toplevel):
 
         #List with sumarised dG values
         dg_list_scroll = Scrollbar(frame2)
-        dg_list_scroll.grid(row=1, rowspan=4, column=1, sticky='nsw')
+        dg_list_scroll.grid(row=1, rowspan=4, column=2, sticky='nsw')
         self.dg_list = Listbox(frame2, yscrollcommand=dg_list_scroll.set, width=70, height=10,
-                                 highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=True)
+                                 highlightthickness=0, relief=GROOVE, selectmode=EXTENDED, exportselection=True)
         dg_list_scroll.config(command=self.dg_list.yview)
-        self.dg_list.grid(row=1, rowspan=4, column=0, sticky='nse')
+        self.dg_list.grid(row=1, rowspan=4, column=0, columnspan=2, sticky='nse')
         self.dg_list.config(font=tkFont.Font(family="Courier", size=12))
         #self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
         #Export table
         export_table = Button(frame2, text='Export table', width=10, highlightbackground=self.main_color,
                               command=self.export_table)
-        export_table.grid(row=5, column=0, columnspan=2)
+        export_table.grid(row=5, column=0, sticky='e')
+
+        #Copy selected entry in dG listbox to clipboard in excel format
+        copy_excel = Button(frame2, text='Copy', width=10, highlightbackground=self.main_color,
+                            command=self.copy_dG_to_excel)
+        copy_excel.grid(row=5, column=1, sticky='w')
 
 
         ##### FRAME 3
