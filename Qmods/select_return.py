@@ -85,6 +85,9 @@ class SelectReturn(Toplevel):
             self.app.lig_unique_log.append('cancel')
         elif 'complex' in self.select_title:
             self.app.comp_unique_log.append('cancel')
+        elif 'atom' in self.select_title:
+            self.return_var = None
+
         self.destroy()
 
     def show(self):

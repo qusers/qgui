@@ -277,7 +277,8 @@ def read_fep(fepfile, qoffset=0, atomoffset=None):
                 '[excluded_pairs]': (2, atomoffset),
                 '[soft_pairs]': (2, qoffset),
                 '[torsion_couplings]': (2, keynr),
-                '[angle_couplings]': (2, keynr)}
+                '[angle_couplings]': (2, keynr),
+                '[shake_constraints]': (2, atomoffset)}
 
 
 

@@ -341,8 +341,7 @@ class ResFEP(Toplevel):
         top = self.selected_topology.get()
 
         if len(pdb_atoms_order) != len(q_atomname.keys()):
-            residues = qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()],
-                                               self.app.q_settings['library'])
+            residues = qf.create_pdb_from_topology(self.topology_paths[top], self.app.q_settings['library'])
             for q in q_atomname.keys():
                 atomtype = q_atomname[q]
 
@@ -350,12 +349,13 @@ class ResFEP(Toplevel):
                     #Let us add the missing atom to this FEP residue
                     print('Q atom %d %s not found in residue %d ' % (q, atomtype, res_nr))
                     self.app.log(' ', 'Q atom %d %s not found in residue %d \n' % (q, atomtype, res_nr))
-                    self.app.log(' ', 'Select atom %s from topology.' % atomtype)
+                    self.app.log(' ', 'Select atom %s from topology.\n' % atomtype)
                     atomnr = SelectReturn(self, self.root, elements=residues,
                                        select_title='atom %s for FEP' % atomtype, Entry=self.reslist).show()
+
                     if not atomnr:
                         print('Not all atoms for FEP protocol added. Aborting...')
-                        return
+                        return None
 
                     pdb_atomnumbers_order.append(atomnr)
                     pdb_atoms_order.append(atomtype)
@@ -428,7 +428,7 @@ class ResFEP(Toplevel):
                 if not checked_pdb:
                     atomoffset = self.check_fep_top(fepfile, res_nr)
                     if not atomoffset:
-                        return
+                        return None
                     checked_pdb = True
 
                 feps[nr] = qf.read_fep(fepfile, qoffset=0, atomoffset=atomoffset)
@@ -565,18 +565,23 @@ class ResFEP(Toplevel):
 
         res_nr = int(selected.split()[1])
 
-        self.reslist.delete(selection[0])
-
         mut_from = self.mutate_from.get()
         mut_to = self.mutate_to.get()
         print(mut_from, mut_to)
 
+        #Get FEP files for default mutation
+        fep_ok = self.get_fep_files(mut_from, mut_to, res_nr)
+
+        if not fep_ok:
+            self.app.log('info','Could not add all atoms to FEP %s-->%s' % (mut_from, mut_to))
+            self.app.log(' ', 'Aborted\n')
+            return
+
+        self.reslist.delete(selection[0])
+
         self.topology_mutation[self.selected_topology.get()][res_nr] = [mut_from, mut_to]
 
         del self.topology_res_fep[self.selected_topology.get()][res_nr]
-
-        #Get FEP files for default mutation
-        self.get_fep_files(mut_from, mut_to, res_nr)
 
         self.mutate_to.set(mut_to)
         self.mutate_from.set(mut_from)
@@ -599,7 +604,6 @@ class ResFEP(Toplevel):
         self.select_res.resizable()
 
         return self.select_res
-
 
     def view_fep(self):
         """
@@ -1059,7 +1063,7 @@ class ResFEP(Toplevel):
         write_inp.grid(row=1, column=0)
 
         #Run FEP calculation
-        run_fep = Button(frame3, text='Run', highlightbackground=self.main_color, command=self.run_fep)
+        run_fep = Button(frame3, text='Submit', highlightbackground=self.main_color, command=self.run_fep)
         run_fep.grid(row=1, column=1)
 
         #Close resFEP gui
