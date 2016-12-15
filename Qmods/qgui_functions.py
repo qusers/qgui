@@ -359,8 +359,9 @@ def write_fepdict(fep, path=None, printfep=False):
     :param fep: a dictionary in the format described in function read_fep in this file
     :param path: path to where the FEP file will be written
     :param printfep: print FEP=True/False. If True, file will not be written only printed.
-    :return: True/False maybe?
+    :return: fepprint: used for printing FEP file in Qgui main window
     """
+    fepprint = list()
 
     if not printfep:
         fepout = open(path, 'w')
@@ -373,6 +374,7 @@ def write_fepdict(fep, path=None, printfep=False):
         for section in sorted(fep[nr].keys()):
             if printfep:
                 print('\n%s' % section)
+                fepprint.append('\n%s\n' % section)
             else:
                 if section != '!info':
                     fepout.write('\n')
@@ -387,14 +389,18 @@ def write_fepdict(fep, path=None, printfep=False):
                 _val = fep[nr][section][_key]
                 if section in no_key:
                     if printfep:
-                        print ' '.join(['%7s' % w.ljust(7) for w in _val])
+                        print(' '.join(['%7s' % w.ljust(7) for w in _val]))
+                        fepprint.append(' '.join(['%7s' % w.ljust(7) for w in _val]))
+                        fepprint.append('\n')
                     else:
                         fepout.write(' '.join(['%7s' % w.ljust(7) for w in _val]))
                         fepout.write('\n')
                 else:
                     if printfep:
-                        print '%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val]))
-
+                        print('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val])))
+                        fepprint.append('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' %
+                                                                                  str(w).ljust(7) for w in _val])))
+                        fepprint.append('\n')
                     else:
                         #TODO delete this if claus when fix for Q is available:
                         if _key != 'states':
@@ -403,6 +409,9 @@ def write_fepdict(fep, path=None, printfep=False):
                             fepout.write('\n')
     if not printfep:
         fepout.close()
+
+    else:
+        return fepprint
 
 def extend_fep_length(fep, nr_feps):
     """
@@ -704,7 +713,7 @@ def create_lambda_list(lambda_step, lambda_start=list(), lambda_end=list()):
 
 
 def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq=None, submissionscript=False,
-                        resFEP=False):
+                        resFEP=False, pdbfile=None):
     """
     :param inputfiles: PATH to inputfiles
     :param md_settings: dictionary with MD file settings
@@ -714,6 +723,7 @@ def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq
     :param submissionscript: list with lines to put in submission script!
     :param qdyn: 'Qdyn5' or 'mpirun Qdyn5p' f. ex
     :param resFEP: True/False In resFEP special handling is needed for the equilibration
+    :param pdbfile: pdb file in list format (optional)
     :return: some kind of message...
     """
     #TODO write fep file name into md_settings dict!
@@ -734,7 +744,8 @@ def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq
         else:
             submitfile.write(line)
 
-    pdbfile = create_pdb_from_topology(topology)
+    if not pdbfile:
+        pdbfile = create_pdb_from_topology(topology)
 
     #Find atom nrs for solute and solvent:
     solute = []

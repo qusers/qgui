@@ -79,6 +79,10 @@ class Analyse_resFEP(Toplevel):
         :param fep_title:
         :return:
         """
+        if not fep_title in self.feps_paths.keys():
+            self.app.log('info', 'No FEP files for %s .' % fep_title)
+            return
+
         fepdirs = self.get_fep_dirs(self.feps_paths[fep_title])
 
         if len(fepdirs) < 1:
@@ -278,6 +282,11 @@ class Analyse_resFEP(Toplevel):
 
         for i in selected:
             fep_title = self.feplist.get(i)
+
+            for temp in self.feps[fep_title].keys():
+                self.feps[fep_title][temp]['dG'] = [0, 0]
+                self.feps[fep_title][temp]['dGf'] = [0, 0]
+                self.feps[fep_title][temp]['dGr'] = [0, 0]
             self.app.log('info', 'Recalculating FEP for %s. Please wait..\n' % fep_title)
             self.calculate_fep(fep_title=fep_title, recalcFEP=True)
 
@@ -547,11 +556,11 @@ class Analyse_resFEP(Toplevel):
         #Add fep runs
         add_fep = Button(frame1, text='Add FEP runs', width=10, highlightbackground=self.main_color,
                          command=self.add_fep_run)
-        add_fep.grid(row=5, column=0)
+        add_fep.grid(row=5, column=0, sticky='e')
 
         #Delete fep runs
         del_fep = Button(frame1, text='Delete', width=6, highlightbackground=self.main_color, command=self.del_fep_run)
-        del_fep.grid(row=5, column=1, columnspan=2)
+        del_fep.grid(row=5, column=1, columnspan=2, sticky='w')
 
         #Recalculate FEP (run Qfep again)
         recalc_fep = Button(frame1, text='Recalc FEP', width=10, highlightbackground=self.main_color,
@@ -594,12 +603,12 @@ class Analyse_resFEP(Toplevel):
         #Clear comb_list
         clear_comblist = Button(frame1, text='Clear', width=8, highlightbackground=self.main_color,
                                 command=self.clear_combined)
-        clear_comblist.grid(row=6, column=7, columnspan=2)
+        clear_comblist.grid(row=6, column=7, columnspan=2, sticky='w')
 
         #Button for combining the FEPS defined in comb_list
         calc_combine = Button(frame1, text='Combine', width=8, highlightbackground=self.main_color,
                               command=self.combine_feps)
-        calc_combine.grid(row=6, column=6)
+        calc_combine.grid(row=6, column=6, sticky='e')
 
         ##### FRAME 2
         ave_ene = Label(frame2, text='Average energies:', bg=self.main_color)

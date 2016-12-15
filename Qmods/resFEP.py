@@ -130,8 +130,9 @@ class ResFEP(Toplevel):
         """
         self.feplist.delete(0, END)
 
-        for fep in sorted(self.topology_fep[self.selected_topology.get()].keys()):
-            self.feplist.insert(END, 'FEP%d' % fep)
+        if len(self.topology_fep[self.selected_topology.get()].keys()) > 0:
+            for fep in sorted(self.topology_fep[self.selected_topology.get()].keys()):
+                self.feplist.insert(END, 'FEP%d' % fep)
 
 
     def load_topology(self):
@@ -314,8 +315,8 @@ class ResFEP(Toplevel):
         pdb_atomnumbers_order = list()
 
         #Get residue atom names and atom number from pdb file:
-        pdb_res = qf.get_pdb_resnr(qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()]),
-                                   res_nr)
+        pdb_res = qf.get_pdb_resnr(qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()],
+                                                               self.app.q_settings['library']), res_nr)
 
         for line in pdb_res:
             if 'ATOM' in line:
@@ -616,7 +617,12 @@ class ResFEP(Toplevel):
 
         fep = self.topology_fep[self.selected_topology.get()][nr]
 
-        qf.write_fepdict(fep, path=self.app.workdir, printfep=True)
+        printfep = qf.write_fepdict(fep, path=self.app.workdir, printfep=True)
+
+        self.app.log(' ','\n')
+        self.app.log('info', '%s %s:' % (self.topology_label.cget("text"), fepfile))
+        for line in printfep:
+            self.app.log(' ', '%s' % line)
 
     def edit_fepfile(self):
         """
@@ -700,9 +706,9 @@ class ResFEP(Toplevel):
 
         return int(fep_states)
 
-    def write_inputfiles(self):
+    def write_inputfiles(self, feedback=True):
         """
-        Write butten funciton - uses write_md_inputfiles and write_fep_files to write all files for MD/FEP sim. with Q.
+        Write butten function - uses write_md_inputfiles and write_fep_files to write all files for MD/FEP sim. with Q.
         :return:
         """
         for top in self.topology_fep.keys():
@@ -727,6 +733,11 @@ class ResFEP(Toplevel):
 
             #write multifep run script:
             self.write_multifep_submitscript(top_path)
+
+            self.app.log('info', 'resFEP inputfiles written for %s' % top_name)
+
+        if feedback:
+            self.app.errorBox('Info', 'resFEP inputfiles written.')
 
     def write_multifep_submitscript(self, workdir):
         """
@@ -763,6 +774,7 @@ class ResFEP(Toplevel):
         os.chmod(submitname, st.st_mode | 0111)
 
         print('Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
+        self.app.log('info', 'Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
 
     def add_multifep_runscript(self, runsript, fepfiles, inputfiles_path):
         """
@@ -858,7 +870,9 @@ class ResFEP(Toplevel):
 
         #inputfiles, md_settings, topology, lambda_list, qdyn, eq=None, submissionscript=False
         qf.write_md_inputfiles(md_path, self.md_settings, self.topology_paths[topology], lambda_list, qdyn, eq,
-                               submissionscript, True)
+                               submissionscript, True,
+                               qf.create_pdb_from_topology(self.topology_paths[self.selected_topology.get()],
+                                                           self.app.q_settings['library']))
 
     def write_fep_files(self, inputfiles_path, top):
         """
