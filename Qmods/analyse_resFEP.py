@@ -305,7 +305,7 @@ class Analyse_resFEP(Toplevel):
         #How to combine?
         for i in selected:
             sign = i.split()[0]
-            fep = i.split()[1]
+            fep = i[2:].strip()
             if sign == '+':
                 comb[fep] = 1.
             else:
@@ -475,7 +475,7 @@ class Analyse_resFEP(Toplevel):
             if int(i) == 0:
                 line = 'Title\tT\tFEP\t<dG>\tsem\tdGf\tsem\tdGr\tsem\n'
             else:
-                line = '%s\n' % ' '.join(self.dg_list.get(i).split()).replace(" ", "\t")
+                line = '%s' % ' '.join(self.dg_list.get(i).split()).replace(" ", "\t")
             self.clipboard_append(line)
 
     def feplist_event(self, *args):
