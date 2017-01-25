@@ -44,7 +44,7 @@ states 2
 16	 0	0
 17	 0 	0
 18	 0 	0
-19  1.0  1.0
+19   1.0  1.0
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass
@@ -67,10 +67,10 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 1  CT  CT 
 2  HC  HC 
 3  HC  HC 
-4  CT  CT 
-5  HC  HDUM 
-6  HC  HDUM 
-7  CT  CDUM 
+4  CT  HC 
+5  HDUM  HDUM 
+6  HDUM  HDUM 
+7  CDUM  CDUM 
 8  HDUM  HDUM 
 9  HDUM  HDUM 
 10 NDUM  NDUM 
@@ -88,10 +88,10 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 1 	0	0 
 2   0	0
 3 	0	0
-4 	0	0
-5 	20	0
-6 	20	0
-7 	20	0
+4 	20	0
+5 	0	0
+6 	0	0
+7 	0	0
 8 	0	0
 9 	0	0
 10	0	0
@@ -105,3 +105,9 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 18  0	0
 19  0   0
 
+[bond_types]
+1	536.0	1.529	!CT	CT	
+2	680.0	1.090	!HC	CT	
+
+[change_bonds]
+1	4	1	2

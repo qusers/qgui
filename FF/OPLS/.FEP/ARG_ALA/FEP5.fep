@@ -3,7 +3,6 @@
 
 [FEP]
 states 2
-softcore_use_max_potential on
 
 [atoms]
 1  1  ! CB  
@@ -26,9 +25,9 @@ softcore_use_max_potential on
 18 18 ! HH22    	   
 
 [change_charges]
-1    -0.1200  -0.1200 
-2     0.0600   0.0600
-3     0.0600   0.0600
+1    -0.1200   0 
+2     0.0600   0
+3     0.0600   0
 4     0   0
 5     0   0 
 6     0   0
@@ -70,11 +69,11 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 5  HC  HC 
 6  HC  HC 
 7  CT  CT 
-8  HC  HC 
-9  HC  HC 
-10 N   N  
-11 H   HDUM 
-12 C2  CDUM
+8  HC  HDUM 
+9  HC  HDUM 
+10 N   NDUM 
+11 HDUM  HDUM 
+12 CDUM  CDUM
 13 NDUM  NDUM 
 14 HDUM  HDUM 
 15 HDUM  HDUM 
@@ -87,19 +86,18 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 2   0	0
 3 	0	0
 4 	0	0
-5 	0	0
-6 	0	0
-7 	0	0
-8 	0	20
-9 	0	20
-10	0	20
-11	20	0
-12  20	0 
+5 	0	20
+6 	0	20
+7 	0	20
+8 	20	0
+9 	20	0
+10	20	0
+11	0	0
+12  0	0 
 13  0	0
 14  0	0
 15  0	0
 16  0	0
 17  0	0
 18  0	0
-
 

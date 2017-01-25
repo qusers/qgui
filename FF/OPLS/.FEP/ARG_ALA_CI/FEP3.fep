@@ -45,7 +45,7 @@ softcore_use_max_potential on
 16	 0	0
 17	 0 	0
 18	 0 	0
-19  1.0    1.0
+19   1.0    1.0
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass
@@ -77,12 +77,12 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 10 N   N  
 11 H   H  
 12 C2  C2 
-13 N   N  
-14 H   HDUM 
-15 H   HDUM 
-16 N   N  
-17 H   HDUM 
-18 H   HDUM 
+13 N   NDUM 
+14 HDUM  HDUM 
+15 HDUM  HDUM 
+16 N   NDUM 
+17 HDUM  HDUM 
+18 HDUM  HDUM 
 19 Na  Na
 
 [softcore]
@@ -96,16 +96,14 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 8 	0	0
 9 	0	0
 10	0	0
-11	0	0
-12  0	0 
-13  0	20
-14  20	0
-15  20	0
-16  0	20
-17  20	0
-18  20	0
+11	0	20
+12  0	20 
+13  20	0
+14  0	0
+15  0	0
+16  20	0
+17  0	0
+18  0	0
 19  0   0
-
-
 
 
