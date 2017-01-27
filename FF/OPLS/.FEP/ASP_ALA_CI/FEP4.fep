@@ -3,7 +3,6 @@
 
 [FEP]
 states 2
-offset  0
 softcore_use_max_potential on
 
 [atoms]
@@ -54,5 +53,9 @@ Cl-     5099.06 59.16   0       0       3605.58 41.83   35.450
 6  	0	0
 7       0       0
 
-[shake_constraints]
-1 	4	1.522	1.090	! CT 	C2  -> CT	HC
+[bond_types]
+1       634.0   1.522   !C2     CT
+2       680.0   1.090   !HC     CT
+
+[change_bonds]
+1       4       1       2

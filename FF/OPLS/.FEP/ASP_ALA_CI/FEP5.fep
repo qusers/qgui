@@ -3,7 +3,6 @@
 
 [FEP]
 states 2
-offset  0
 
 [atoms]
 1 1	 ! CB  				
@@ -44,5 +43,9 @@ Cl-     5099.06 59.16   0       0       3605.58 41.83   35.450
 6   ODUM	ODUM
 7   Cl-         Cl-
 
-[shake_constraints]
-1 	4	1.090	1.090	! CT	HC  -> CT	HC
+[bond_types]
+1       634.0   1.522   !C2     CT
+2       680.0   1.090   !HC     CT
+
+[change_bonds]
+1       4       2       2
