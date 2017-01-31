@@ -403,7 +403,7 @@ class ResFEP(Toplevel):
             return None
 
         if wrong_order:
-            self.app.log(' ', 'Atom order in FEP file and topology does not match.')
+            self.app.log(' ', 'Atom order in FEP file and topology does not match.\n')
 
         return atomoffset
 
