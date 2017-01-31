@@ -46,9 +46,9 @@ C	1802.24	34.18	0	0	1274.38	24.17	12.01
 2   HC  HC
 3   HC  HC
 4   CT  CT 
-5   HDUM  HDUM 
-6   HDUM  HDUM 
-7   CDUM  CDUM 
+5   H   HDUM 
+6   H   HDUM 
+7   C2  CDUM 
 8   ODUM  ODUM 
 9   ODUM  ODUM
 10  HDUM  HDUM
@@ -58,9 +58,9 @@ C	1802.24	34.18	0	0	1274.38	24.17	12.01
 2   0	0
 3  	0	0
 4  	0	20
-5   0	0
-6   0	0
-7   0   0
+5  20	0
+6  20	0
+7  20   0
 8   0   0
 9   0   0
 10  0   0
