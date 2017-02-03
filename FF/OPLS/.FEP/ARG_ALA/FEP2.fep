@@ -76,11 +76,11 @@ Na      118.32  17.32   0       0       83.67   12.25   22.99
 11 H   H  
 12 C2  C2 
 13 N   N  
-14 H   HDUM 
-15 H   HDUM 
-16 N   N  
-17 H   HDUM 
-18 H   HDUM 
+14 H   HDUM
+15 H   HDUM
+16 N   N
+17 H   HDUM
+18 H   HDUM
 
 [softcore]
 1 	0	0 
