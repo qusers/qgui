@@ -413,7 +413,7 @@ class Analyse_resFEP(Toplevel):
         Imports results from saved session
         :return:
         """
-        import_session = askopenfilename(parent=self.root, initialdir=self.app.workdir, title='Select topology file',
+        import_session = askopenfilename(parent=self.root, initialdir=self.app.workdir, title='Select resFEP project',
                                          filetypes=(("Project", "*.prj"), ("All files", "*.*")))
 
         if not import_session:
