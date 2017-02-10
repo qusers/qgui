@@ -148,7 +148,7 @@ def getfragment(fraglib,fragname):
                         break
                     elif found:
                         field = line.split()
-                        p1group.update({field[0]:{'name':field[1],'xyz':list(map(float,field[2:5])),'symbol':field[5]}})
+                        p1group.update({int(field[0]):{'name':field[1],'xyz':list(map(float,field[2:5])),'symbol':field[5]}})
             if not found:
                 print 'The fragment was not found in the library'
                 return None
@@ -235,7 +235,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                         q['xyz'] = list(rotate(q['xyz'],p1['xyz'],rv,(thetaT - current_thetaT)))
 
             #End (if p1 not None)
-            print 'Atom added'
+            print 'New atom coordinates returned'
             return q
 
     # Mode b: adjust a bond the moving atom is p1
@@ -358,13 +358,13 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                 return None
 
             #tanslation vector for bringing the group to place by the dummy atom(D0)
-            dv = np.array(p1['xyz']) - np.array(p1group['0']['xyz']) 
+            dv = np.array(p1['xyz']) - np.array(p1group[0]['xyz'])
             for atom in p1group:
                 p1group[atom]['xyz'] = dv + np.array(p1group[atom]['xyz'])
 
-            #tranlation to adjust d p1-p1group['1']
-            current_d = measure( np.array(p1['xyz']),np.array(p1group['1']['xyz']) )
-            dv = np.array(p1group['1']['xyz']) - np.array(p1['xyz'])
+            #tranlation to adjust d p1-p1group[1]
+            current_d = measure( np.array(p1['xyz']),np.array(p1group[1]['xyz']) )
+            dv = np.array(p1group[1]['xyz']) - np.array(p1['xyz'])
             for atom in p1group:
                 p1group[atom]['xyz'] = list(translate( np.array(p1group[atom]['xyz']), dv, d-current_d ))
 
@@ -375,19 +375,19 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                     print 'Bad Angle'
                     return None
 
-                #rotate the p1group by angle thetaA p1group['1']-p1-p2
-                dq1 = np.array(p1group['1']['xyz']) - np.array(p1['xyz'])
+                #rotate the p1group by angle thetaA p1group[1]-p1-p2
+                dq1 = np.array(p1group[1]['xyz']) - np.array(p1['xyz'])
                 d21 = np.array(p2['xyz']) - np.array(p1['xyz'])
                 rv = np.cross(d21,dq1)
 
                 #in case atoms are linear
                 if np.linalg.norm(rv) == 0 : 
                     rv = np.cross(d21,np.random.rand(3))
-                current_thetaA = measure(np.array(p1group['1']['xyz']),np.array(p1['xyz']),np.array(p2['xyz']))
+                current_thetaA = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']))
                 for atom in p1group:
                     p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,(thetaA - current_thetaA)))
 
-                #Mode a3. rotate by torsion thetaT(p1group['1']-p1-p2-p3)
+                #Mode a3. rotate by torsion thetaT(p1group[1]-p1-p2-p3)
                 if (p3 is not None) :
                     if thetaT == None:
                         print 'Bad Torsion angle'
@@ -395,12 +395,12 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
 
                     # The q1 first atom of fragment is the hot atom
                     rv = np.array(p1['xyz']) - np.array(p2['xyz'])
-                    current_thetaT = measure(np.array(p1group['1']['xyz']),np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']))
+                    current_thetaT = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']))
                     for atom in p1group:
                         p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,(thetaT - current_thetaT)))
 
             #remove the dummy atom before return
-            del p1group['0']
+            del p1group[0]
             print 'Group added'
             return p1group
 
@@ -430,7 +430,7 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
             #rotate the p1group by p1-p2-p3 atom
             d21 = np.array(p1['xyz']) - np.array(p2['xyz'])
             d23 = np.array(p3['xyz']) - np.array(p2['xyz'])
-            rv = np.cross(d23,d21)
+            rv = np.cross(d23, d21)
 
             #in case atoms are linear
             if np.linalg.norm(rv) == 0 : 
