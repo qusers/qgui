@@ -52,7 +52,7 @@ class SetupEVB(Toplevel):
         self.forcefields = ('2005', '2001')
 
         #Try to guess from parameter file if force field is CHARMM or OPLS (important for impropers)
-        self.ff_is_charmm = True
+        self.ff_is_charmm = False
 
         #Control if new inputfiles are to be made and old overwritten or not
         self.overwrite = True
@@ -97,7 +97,6 @@ class SetupEVB(Toplevel):
                         'Form/Break bonds': 'NA',
                         u"\N{GREEK SMALL LETTER LAMDA}-steps/run": '51',
                         'Total simulation time (ns)': '%.6f' % (float(self.md_settings['simtime']) * 51.00)}
-
 
         #Pymol session:
         self.session = None
@@ -632,7 +631,6 @@ class SetupEVB(Toplevel):
                                                             if q_head not in self.q_bonds[q_tail][state]:
                                                                 self.q_bonds[q_tail][state].append(q_head)
 
-
                                 if 'tail' in line:
                                     atom_tail = line.split()[1]
                                     if atom_tail in atomnames:
@@ -682,14 +680,9 @@ class SetupEVB(Toplevel):
                                                 charge = float(line.split()[3])
                                                 self.q_atomtypes[qi] = [type1, type1, type1, type1]
                                                 self.q_charges[qi] = [charge, charge, charge, charge]
-                                            else:
-                                                print 'Hello!!!!!'
-                                                print 'atomname %s not in' % atomname
-                                                print atomnames
+
                                     except:
                                         continue
-
-
 
                             if '[atoms]' in line:
                                 found_atoms = True
@@ -743,6 +736,7 @@ class SetupEVB(Toplevel):
                     atomtypes_to_find.append(atomtype)
 
         not_in_line = ['*','-','!', '']
+        self.ff_is_charmm = True
         for parameterfile in self.prms:
             found_atomtypes = False
             with open(parameterfile, 'r') as prm:
@@ -797,8 +791,6 @@ class SetupEVB(Toplevel):
             t1, t2, t3, t4 = state_types[0:]
             self.changetypes_listbox.insert(END, '%2d  %4s %4s %4s %4s' % (q, t1.ljust(4), t2.ljust(4),
                                                                                t3.ljust(4), t4.ljust(4)))
-
-        print prm_nr
 
         #Inset atomtypes to self.atomtypes_listbox
         self.atomtypes_listbox.delete(0, END)
@@ -885,7 +877,6 @@ class SetupEVB(Toplevel):
                         if bond not in self.bond_prm.keys() and bond_rev not in self.bond_prm.keys():
                             bonds.append(bond)
 
-        print bonds
         if len(bonds) == 0:
             return
 
@@ -1441,7 +1432,6 @@ class SetupEVB(Toplevel):
                         atomtypes.append(t)
                 if len(atomtypes) > 1:
                     q_atoms.append(q)
-        print q_atoms
 
         #Collect all torsion types:
         q_torsions = [[], [], [], []]
@@ -1750,9 +1740,7 @@ class SetupEVB(Toplevel):
                 states = [' ',' ',' ',' ']
                 for state in range(self.evb_states.get()):
                     bonds_q2 = self.q_bonds[q2][state]
-                    print q1,q2,q3,q4
-                    print 'LOOK HERE:'
-                    print bonds_q2
+
                     if q1 not in bonds_q2 or q3 not in bonds_q2 or q4 not in bonds_q2:
                         states[state] = 0
 
@@ -1776,8 +1764,6 @@ class SetupEVB(Toplevel):
                         else:
                             imp_type = '%s %s %s %s' % (t1, t2, t3, t4)
                             imp_type_rev = '%s %s %s %s' % (t4, t3, t2, t1)
-
-                        print imp_type
 
                         if imp_type not in nr_type.values() and imp_type_rev not in nr_type.values():
                             prm_nr += 1
@@ -1813,8 +1799,6 @@ class SetupEVB(Toplevel):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
-            print 'MISSING IMPROPER PARAMETERS'
-            print missing_prms
             for parameterfile in self.prms:
                 found_impropers = False
                 with open(parameterfile, 'r') as prm:
@@ -1853,8 +1837,6 @@ class SetupEVB(Toplevel):
             for imp in missing_prms:
                 self.improper_prm[imp] = ['??', '??']
 
-        print nr_type
-        print self.improper_prm
         #Insert imroper types to listbox
         for nr in sorted(nr_type.keys()):
             type_ = nr_type[nr]
@@ -1966,8 +1948,6 @@ class SetupEVB(Toplevel):
         self.angle_couplings_listbox.delete(0, END)
         self.torsion_couplings_listbox.delete(0, END)
         self.improper_couplings_listbox.delete(0, END)
-
-        print self.use_coupling
 
         if self.use_coupling == 0:
             return
@@ -2599,14 +2579,11 @@ class SetupEVB(Toplevel):
                             q1 = qj
                             break
 
-        print bonds
-        print 'q2 is %d in state %d' % (q2, s+1)
-
         if not q1:
             self.app.errorBox('Error', 'Could not add new improper. '
                                        'It seems selection is not unique and therefore already existing.')
             return
-        print 'q1 is %d' % q1
+
         del q_atoms[q_atoms.index(q1)]
 
         #Find q3 and q4 based on atomnumbers:
@@ -3197,11 +3174,6 @@ class SetupEVB(Toplevel):
         beta = 1.00 / (increase_end - increase_start)
         gamma = increase_start
 
-        print 'BETA GAMMA'
-        print (beta, gamma)
-        print self.lambda_sampling.get()
-
-
         #nitialize
         x = 0
         step += 1
@@ -3229,9 +3201,6 @@ class SetupEVB(Toplevel):
             if l_values not in self.step_lambdavalues.values():
                 step += 1
                 self.step_lambdavalues[step] = l_values
-
-
-            print (decrease_start, increase_start)
 
             if float(abs(increase_start)) >= float(increase_end):
                 break
