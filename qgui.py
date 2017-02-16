@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 __author__ = "Geir Villy Isaksen"
 __copyright__ = "Copyright (C) 2016 University of Tromso / Geir Villy Isaksen"
