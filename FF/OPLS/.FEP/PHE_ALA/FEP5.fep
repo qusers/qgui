@@ -5,29 +5,29 @@ states 2
 softcore_use_max_potential on
 
 [atoms]				
-1  1  ! CB    
-2  2  ! HB2   
-3  3  ! HB3   
-4  4  ! CG    
-5  5  ! CD1 	
-6  6  ! HD1 	
-7  7  ! CE1 	
-8  8  ! HE1 	
-9  9  ! CZ  	
-10 10 ! HZ  	
-11 11 ! CE2 	
-12 12 ! HE2 	
-13 13 ! CD2 	
-14 14 ! HD2	
+1  1  !CB    
+2  2  !HB2   
+3  3  !HB3   
+4  4  !CG    
+5  5  !CD1 	
+6  6  !HD1 	
+7  7  !CE1 	
+8  8  !HE1 	
+9  9  !CZ  	
+10 10 !HZ  	
+11 11 !CE2 	
+12 12 !HE2 	
+13 13 !CD2 	
+14 14 !HD2	
 
 [change_charges]
-1  	-0.005 	0
+1  -0.005 	0
 2 	0.06	0
 3 	0.06	0
-4  	-0.115 	0
+4  -0.115 	0
 5  	0	0
-6   	0	0
-7   	0	0
+6   0	0
+7   0	0
 8  	0	0
 9 	0	0
 10	0	0
@@ -35,6 +35,7 @@ softcore_use_max_potential on
 12	0	0
 13	0	0
 14	0	0
+
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass

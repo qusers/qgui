@@ -2,7 +2,6 @@
 
 [FEP]
 states 2
-softcore_use_max_potential on
 
 [atoms]				 
 1  1  ! CB    			 
@@ -16,15 +15,14 @@ softcore_use_max_potential on
 9  9  ! HG22	bort		 
 10 10 ! HG23 	bort		 
 
-
 [change_charges]
-1	0	0
-2	0	0
-3	0	0
+1	0	-0.18
+2	0	0.06
+3	0	0.06
 4	0	0
 5	0	0
 6   0	0
-7	0	0
+7	0	0.06
 8	0	0
 9	0	0
 10	0	0
@@ -51,34 +49,34 @@ NA      971.75	28.31	0	0	687.13	20.02	14.01
 CN      1059.13	23.67	0	0	748.92	16.74	12.01  
 CB      1059.13	23.67	0	0	748.92	16.74	12.01
 
-[change_atoms]
-1  CT    CT   			    
-2  HC    HC   			    
-3  CT    HC   			 
-4  HDUM	   HDUM
-5  HDUM    HDUM   			 
-6  HDUM    HDUM   			 
-7  CT    HC   			 
-8  HDUM    HDUM   			 
-9  HDUM    HDUM   			 
-10 HDUM    HDUM   			 
-  						 
-[softcore]			 
-1 	0	0 
-2   0	0
-3 	0	0
-4 	0	0
-5 	0	0
-6 	0	0
-7 	0	0
-8 	0	0
-9 	0	0
+[change_atoms]		
+1	CT	CT
+2	HC	HC
+3	HC	HC
+4	HDUM	HDUM
+5	HDUM	HDUM
+6	HDUM	HDUM
+7	HC	HC
+8	HDUM	HDUM
+9	HDUM	HDUM
+10	HDUM	HDUM
+		
+[softcore]		
+1	0	0
+2	0	0
+3	0	0
+4	0	0
+5	0	0
+6	0	0
+7	0	0
+8	0	0
+9	0	0
 10	0	0
-
-[bond_types]
-1	536.0	1.529	!CT	CT		
-2	680.0	1.090	!HC	CT	
-
-[change_bonds]
-1	3	1	2
-1	7	1	2
+			
+[bond_types]			
+1	536	1.529	!CT CT
+2	680	1.09	!HC CT
+			
+[change_bonds]			
+1	3	2	2
+1	7	2	2

@@ -22,19 +22,19 @@ softcore_use_max_potential on
 15 15 ! HD2	bort
 
 [change_charges]
-1  	0 	0
+1	0	0
 2	0	0
 3	0	0
-4  	0 	0
-5  	0	0
-6   	0	0
-7   	0       0
-8  	0       0
-9 	0       0
-10	0       0
-11	0       0
-12	0       0
-13	0       0
+4	0	0
+5	0	0
+6	0	0
+7	0	0
+8	0	0
+9	0	0
+10	0	0
+11	0	0
+12	0	0
+13	0	0
 14	0	0
 15	0	0
 
@@ -61,20 +61,20 @@ HO	0	0	0	0	0	0	1.008
 3  	HC	HC
 4  	CA	HC
 5  	CDUM	CDUM
-6   	HDUM	HDUM
-7   	CDUM	CDUM
-8   	HDUM	HDUM
-9   	CDUM	CDUM
+6   HDUM	HDUM
+7   CDUM	CDUM
+8   HDUM	HDUM
+9   CDUM	CDUM
 10 	ODUM	ODUM
 11 	HO 	HO 
-12  	CDUM	CDUM
-13  	HDUM	HDUM
-14  	CDUM	CDUM
-15  	HDUM	HDUM
+12  CDUM	CDUM
+13  HDUM	HDUM
+14  CDUM	CDUM
+15  HDUM	HDUM
 
 [softcore]
 1 	0 	0 
-2       0	0
+2 	0	0
 3 	0	0
 4 	20	0
 5 	0	0
@@ -90,9 +90,8 @@ HO	0	0	0	0	0	0	1.008
 15	0	0
 
 [bond_types]
-1	634.0	1.522	!C2	CT		
+1	634.0	1.510	!C149 C145
 2	680.0	1.090	!HC	CT	
 
 [change_bonds]
 1	4	1	2
-

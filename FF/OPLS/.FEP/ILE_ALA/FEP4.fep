@@ -5,21 +5,23 @@ states 2
 softcore_use_max_potential on
 
 [atoms]				 
-1  1  ! CB    			 
-2  2  ! HB    			 
-3  3  ! CG2   	blir HC			 
-4  4  ! HG21  	bort	 
-5  5  ! HG22	bort		 
-6  6  ! HG23	bort		 
-7  7  ! CG1 	blir HC		 
-8  8  ! HG12	bort		 
-9  9  ! HG13	bort		 
-10 10 ! CD1 	bort		 
-11 11 ! HD11	bort		 
-12 12 ! HD12	bort		 
-13 13 ! HD13	bort	
+1  1  !CB    			 
+2  2  !HB    			 
+3  3  !CG2  blir HC			 
+4  4  !HG21 bort	 
+5  5  !HG22	bort		 
+6  6  !HG23	bort		 
+7  7  !CG1 	blir HC		 
+8  8  !HG12	bort		 
+9  9  !HG13	bort		 
+10 10 !CD1 	bort		 
+11 11 !HD11	bort		 
+12 12 !HD12	bort		 
+13 13 !HD13	bort	
 
 [change_charges]
+1	-0.0600	0.0600
+2	0.0600	0.0600
 3 	0	0
 4  	0	0
 5  	0	0
@@ -71,7 +73,7 @@ CB      1059.13	23.67	0	0	748.92	16.74	12.01
   						 
 [softcore]			 
 1 	0 	0 
-2       0	0
+2 	0	0
 3 	0	20
 4 	20	0
 5 	20	0

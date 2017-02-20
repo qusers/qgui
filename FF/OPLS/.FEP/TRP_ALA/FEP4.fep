@@ -5,41 +5,44 @@ states 2
 softcore_use_max_potential on
 
 [atoms]
-1  1  ! CB    
-2  2  ! HB2   
-3  3  ! HB3   
-4  4  ! CG    blir HC
-5  5  ! CD1 	bort
-6  6  ! HD1 	bort
-7  7  ! NE1 	bort
-8  8  ! HE1 	bort
-9  9  ! CE2 	bort
-10 10 ! CZ2 	bort
-11 11 ! HZ2 	bort
-12 12 ! CH2 	bort
-13 13 ! HH2 	bort
-14 14 ! CZ3	bort
-15 15 ! HZ3	bort
-16 16 !	CE3	bort
-17 17 !	HE3	bort
-18 18 !	CD2	bort
+1  1  !CB    
+2  2  !HB2   
+3  3  !HB3   
+4  4  !CG    blir HC
+5  5  !CD1 	bort
+6  6  !HD1 	bort
+7  7  !NE1 	bort
+8  8  !HE1 	bort
+9  9  !CE2 	bort
+10 10 !CZ2 	bort
+11 11 !HZ2 	bort
+12 12 !CH2 	bort
+13 13 !HH2 	bort
+14 14 !CZ3	bort
+15 15 !HZ3	bort
+16 16 !CE3	bort
+17 17 !HE3	bort
+18 18 !CD2	bort
 
 [change_charges]
-4	0.0750	0	
-5	-0.1150	0	
-6	0.1150	0	
-7	-0.5700	0	
-8	0.4200	0	
-9	0.1300	0	
+1	-0.12	-0.12
+2	0.06	0.06
+3	0.06	0.06
+4	0.075	0
+5	-0.115	0
+6	0.115	0
+7	-0.57	0
+8	0.42	0
+9	0.13	0
 10	0	0
 11	0	0
-12 	0	0
+12	0	0
 13	0	0
 14	0	0
 15	0	0
 16	0	0
 17	0	0
-18	-0.0550	0
+18	-0.055	0
 
 [atom_types]
 !Type	Ai	Bi	Ci	ai	A1(1-4)	Bi(1-4)	Mass
@@ -83,10 +86,9 @@ CB      1059.13	23.67	0	0	748.92	16.74	12.01
 17 HA   HA
 18 CB   CB
 
-
 [softcore]
 1 	0 	0 
-2       0	0
+2 	0	0
 3 	0	0
 4 	0	0
 5 	0	0
