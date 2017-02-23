@@ -41,7 +41,10 @@ org_path = os.path.dirname(os.path.realpath(__file__))
 shutil.copy2('%s/qgui.py' % org_path, '%s/Qgui' % install_path)
 
 for f in os.listdir('Qmods'):
-    shutil.copy2('%s/Qmods/%s' % (org_path, f), '%s/Qmods/%s' % (install_path, f)) 
+    try:
+        shutil.copy2('%s/Qmods/%s' % (org_path, f), '%s/Qmods/%s' % (install_path, f)) 
+    except:
+        print('Did not copy %s' % f)
 
 if not os.path.isdir('%s/FF' % install_path):
     os.makedirs('%s/FF' % install_path)
