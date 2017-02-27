@@ -663,7 +663,7 @@ def get_md_settings(for_what='MD'):
                    'fep_file': 'FEP_VAR'}
 
     if for_what == 'resFEP':
-        md_settings['shake_hydrogens'] = 1
+        md_settings['shake_hydrogens'] = 0
 
     return md_settings
 
