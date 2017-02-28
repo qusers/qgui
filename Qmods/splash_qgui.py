@@ -28,7 +28,10 @@ class SplashScreen(Toplevel):
         self.app = app
 
         if 'darwin' in sys.platform:
-            os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
+            try:
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python" to true' ''')
+            except:
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
 
         # don't show main window
         #self.main.withdraw()

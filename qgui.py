@@ -95,7 +95,10 @@ class QGui(object):
 
         #On mac the following is needed to make window pop to front when opened:
         if 'darwin' in sys.platform:
-            os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
+            try:
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python" to true' ''')
+            except:
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
 
         self.structure = None
         self.top_id = None
