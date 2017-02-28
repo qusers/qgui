@@ -159,13 +159,18 @@ class ViewPyMol(Toplevel):
         :return:
         """
         atomnumbers = list()
-        atomnumbers.append(self.selected_atoms[0])
 
+        #Original selected_atoms list is strings:
+
+        selected_atoms = map(int, self.selected_atoms)
+
+        atomnumbers.append(selected_atoms[0])
         selections = self.listbox.curselection()
 
         for seleced in selections:
-            atomnumbers.append(int(self.listbox.get(seleced).split()[0]))
-
+            nr = int(self.listbox.get(seleced).split()[0])
+            if nr not in atomnumbers and nr not in selected_atoms:
+                atomnumbers.append(nr)
         p1_dict = dict()
 
         #Open current pdb file and get xyz for atomnumbers
@@ -205,7 +210,8 @@ class ViewPyMol(Toplevel):
         try:
             bond = float(self.existing_bond.get())
         except:
-            print('Invalid bond distance')
+            #Return silently, this typically happens while user is actually typing in a number
+            return
 
         p1_group = self.get_p1_group()
         p_atoms = self.get_p_atoms()
@@ -231,7 +237,8 @@ class ViewPyMol(Toplevel):
         try:
             angle = float(self.existing_angle.get())
         except:
-            print('Invalid angle')
+            #Return silently, this typically happens while user is actually typing in a number
+            return
 
         p1_group = self.get_p1_group()
         p_atoms = self.get_p_atoms()
@@ -258,7 +265,8 @@ class ViewPyMol(Toplevel):
         try:
             torsion = float(self.existing_torsion.get())
         except:
-            print('Invalid torsion')
+            #Return silently, this typically happens while user is actually typing in a number
+            return
 
         p1_group = self.get_p1_group()
         p_atoms = self.get_p_atoms()
@@ -329,8 +337,7 @@ class ViewPyMol(Toplevel):
                 self.app.errorBox('Error', 'Invalid dihedral value')
                 return
 
-        #TODO
-        #Fragment or atom?
+
         if len(self.buildlist.curselection()) > 0:
             #Get selected fragment/atom
             fragment = self.buildlist.get(self.buildlist.curselection()[0]).split()[-1]
@@ -603,6 +610,26 @@ class ViewPyMol(Toplevel):
         self.update_pymol_structure(new_pdb)
         self.add_atoms_to_list(new_pdb)
 
+    def get_residue_nr(self):
+        """
+        Opens current PDB file and finds out how many residues are in file.
+        :return: resnr: new residue nr (+1 of max in pdb)
+        """
+        pdb_file = self.pdbfile
+        if len(self.tmp_pdb) > 0:
+            pdb_file = self.tmp_pdb[-1]
+
+        resnr = 0
+
+        with open(pdb_file, 'r') as pdb:
+            for line in pdb:
+                print line
+                if 'ATOM' in line or 'HETATM' in line:
+                    resnr = int(line[22:26])
+
+        resnr += 1
+
+        return resnr
 
     def build_atom(self, atomname=None, p_atoms=None, bond=None, angle=None, torsion=None):
         """
@@ -620,7 +647,10 @@ class ViewPyMol(Toplevel):
             new_atom[1] = deepcopy(p_atoms[0])
             atomnames = self.get_atom_names(int(p_atoms[0]['residuenr']))
         else:
-            new_atom[1] = {'name':atomname+'1', 'atomnr': 1, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': 1}
+            #No atoms selected. Get residue nr
+            resnr = self.get_residue_nr()
+
+            new_atom[1] = {'name':atomname+'1', 'atomnr': 1, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': resnr}
 
             self.write_tmp_pdb(new_atom)
             return
@@ -659,7 +689,9 @@ class ViewPyMol(Toplevel):
 
         #Get dummy atom position
         if not p_atoms[0]:
-            p_atoms[0] = {'name':'DUM', 'atomnr': 0, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': 1}
+            # No atoms selected. Get residue nr
+            resnr = self.get_residue_nr()
+            p_atoms[0] = {'name':'DUM', 'atomnr': 0, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': resnr}
             bond=0.1
         else:
             atomnames = self.get_atom_names(p_atoms[0]['residuenr'])
@@ -709,7 +741,7 @@ class ViewPyMol(Toplevel):
         found_res = False
         with open(pdb_file, 'r') as pdb:
             for line in pdb:
-                if 'ATOM' or 'HETATM' in line:
+                if 'ATOM' in line or 'HETATM' in line:
                     if int(line[22:26]) == int(res_nr):
                         found_res = True
 
