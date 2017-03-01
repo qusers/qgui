@@ -84,14 +84,14 @@ class ViewPyMol(Toplevel):
         #Keep track of click sequence in edit mode. Max 4 atoms {number: atomnumber}
         self.selected_atoms = list()
 
-        #Keep track of temporary pdb files for undo function TODO
+        #Keep track of temporary pdb files for undo function
         self.tmp_pdb = list()
 
         #Max number of undo (this in principle means how many temporary pdb files to store):
         self.max_undo = 20
 
         #Store tmp pdb files:
-        self.tmp_pdb_dir = '%s/.tmp_pdb_history/' % self.app.workdir
+        self.tmp_pdb_dir = '%s/.tmp_pdb_history' % self.app.workdir
 
         #Get fragments/residues fragments.dat
         self.fragments_dict = self.get_fragments()

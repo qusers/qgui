@@ -1,5 +1,5 @@
 
-#SIDE-CHAIN     ARG     (Arginine +1)
+#GROUP    ARG     (Arginine +1)
 0  D0     -1.1380    -1.7510     0.0000 Dummy
 1  C1     -2.0246    -1.6049     1.2321 C
 2  H2     -2.7689    -2.4012     1.2414 H
@@ -30,4 +30,7 @@ END
 END
 
 #MOLECULE   HOH     (Water H2O)
+1  O     30.453  38.925  54.353 O
+2  H1    30.858  39.714  53.886 H
+3  H2    30.799  38.880  55.290 H
 END
