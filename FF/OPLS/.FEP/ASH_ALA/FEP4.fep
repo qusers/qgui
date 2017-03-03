@@ -9,9 +9,9 @@ softcore_use_max_potential on
 2 2	 !HB2
 3 3	 !HB3	
 4 4	 !CG   becomes HC 		
-5 6  !OD1  disappear
-6 5  !OD2  disappear
-7 9  !HD1  disappear				
+5 5  !OD1  disappear
+6 6  !OD2  disappear
+7 7  !HD1  disappear				
 	     
 [change_charges]
 1   0   0
