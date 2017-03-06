@@ -13,17 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
-    OptionMenu, StringVar, Spinbox, SINGLE, LabelFrame, MULTIPLE
+from Tkinter import Label, Button, Frame, Toplevel, Scrollbar, GROOVE, Listbox, END, \
+    OptionMenu, StringVar, Spinbox, SINGLE
 from tkFileDialog import askopenfilename
 import qgui_functions as qf
 from select_return import SelectReturn
 from setup_md import SetupMd
 from edit_file import FileEdit
-import stat
 import tkFont
 import os
-
+from subprocess import call
 import shutil
 from copy import deepcopy
 
@@ -710,39 +709,6 @@ class ResFEP(Toplevel):
 
         return int(fep_states)
 
-    def write_inputfiles(self, feedback=True):
-        """
-        Write butten function - uses write_md_inputfiles and write_fep_files to write all files for MD/FEP sim. with Q.
-        :return:
-        """
-        for top in self.topology_fep.keys():
-            top_name = self.topology_paths[top].split('/')[-1]
-            top_path = '%s/%s_%s' % (self.app.workdir, int(filter(str.isdigit, top)), top_name.split('.top')[0])
-            if not os.path.isdir(top_path):
-                os.makedirs(top_path)
-
-            input_dir = '%s/%s' % (top_path, 'inputfiles/')
-            if not os.path.isdir(input_dir):
-                os.makedirs(input_dir)
-
-            #Copy the topology file to inputfiles
-            if self.topology_paths[top] != '%s/%s' % (input_dir, top_name):
-                shutil.copy(self.topology_paths[top], '%s/%s' % (input_dir, top_name))
-
-            #Write FEP files to inputfiles
-            self.write_fep_files(input_dir, top)
-
-            #Write MD inputs to inputfiles
-            self.write_md_inputfiles(input_dir, top)
-
-            #write multifep run script:
-            self.write_multifep_submitscript(top_path)
-
-            self.app.log('info', 'resFEP inputfiles written for %s' % top_name)
-
-        if feedback:
-            self.app.errorBox('Info', 'resFEP inputfiles written.')
-
     def write_multifep_submitscript(self, workdir):
         """
         Writes a bash script that is used to submit the FEP jobs in /inputfiles
@@ -891,12 +857,56 @@ class ResFEP(Toplevel):
                 qf.write_fepdict(self.topology_fep[top][fepnr], fep_path)
                 self.fep_written[top][fepnr] = True
 
-    def run_fep(self):
+    def write_inputfiles(self, feedback=True, submit=False):
         """
-
+        Write butten function - uses write_md_inputfiles and write_fep_files to write all files for MD/FEP sim. with Q.
         :return:
         """
-        pass
+        for top in self.topology_fep.keys():
+            top_name = self.topology_paths[top].split('/')[-1]
+            top_path = '%s/%s_%s' % (self.app.workdir, int(filter(str.isdigit, top)), top_name.split('.top')[0])
+            if not os.path.isdir(top_path):
+                os.makedirs(top_path)
+
+            input_dir = '%s/%s' % (top_path, 'inputfiles/')
+            if not os.path.isdir(input_dir):
+                os.makedirs(input_dir)
+
+            #Copy the topology file to inputfiles
+            if self.topology_paths[top] != '%s/%s' % (input_dir, top_name):
+                shutil.copy(self.topology_paths[top], '%s/%s' % (input_dir, top_name))
+
+            #Write FEP files to inputfiles
+            self.write_fep_files(input_dir, top)
+
+            #Write MD inputs to inputfiles
+            self.write_md_inputfiles(input_dir, top)
+
+            #write multifep run script:
+            self.write_multifep_submitscript(top_path)
+
+            self.app.log('info', 'resFEP inputfiles written for %s' % top_name)
+
+            if submit:
+                os.chdir(top_path)
+                tmpfile = open('.tmpfile', 'w')
+                # os.system('bash runLIE.sh')
+                call('bash resFEP_submit.sh', shell=True, stdout=tmpfile, stderr=tmpfile)
+                job_id = open(self.app.workdir + '/.tmpfile', 'r').readlines()
+                self.app.log('info', 'Submitting EVB jobs ...')
+                for line in job_id:
+                    self.app.main_window.update_txt(line)
+
+        if feedback:
+            self.app.errorBox('Info', 'resFEP inputfiles written.')
+
+    def run_fep(self):
+        """
+        Writes inputfiles for resFEP and submits the job.
+        :return:
+        """
+        self.write_inputfiles(feedback=False, submit=True)
+
 
     def reslist_event(self, *args):
         """
