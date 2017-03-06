@@ -897,6 +897,9 @@ class ResFEP(Toplevel):
                 for line in job_id:
                     self.app.main_window.update_txt(line)
 
+                os.chdir(self.app.workdir)
+
+
         if feedback:
             self.app.errorBox('Info', 'resFEP inputfiles written.')
 
