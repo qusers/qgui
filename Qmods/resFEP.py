@@ -892,7 +892,7 @@ class ResFEP(Toplevel):
                 tmpfile = open('%s/.tmpfile' % top_path, 'w')
                 # os.system('bash runLIE.sh')
                 call('bash resFEP_submit.sh', shell=True, stdout=tmpfile, stderr=tmpfile)
-                job_id = open('%s/.tmpfile' % tmpfile, 'r').readlines()
+                job_id = open('%s/.tmpfile' % top_path, 'r').readlines()
                 self.app.log('info', 'Submitting EVB jobs ...')
                 for line in job_id:
                     self.app.main_window.update_txt(line)
