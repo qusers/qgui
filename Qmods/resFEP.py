@@ -893,15 +893,16 @@ class ResFEP(Toplevel):
                 # os.system('bash runLIE.sh')
                 call('bash resFEP_submit.sh', shell=True, stdout=tmpfile, stderr=tmpfile)
                 job_id = open('%s/.tmpfile' % top_path, 'r').readlines()
-                self.app.log('info', 'Submitting EVB jobs ...')
+                self.app.log('info', 'Submitting resFEP jobs ...')
                 for line in job_id:
                     self.app.main_window.update_txt(line)
 
                 os.chdir(self.app.workdir)
 
-
         if feedback:
             self.app.errorBox('Info', 'resFEP inputfiles written.')
+        if submit:
+            self.app.errorBox('Info', 'resFEP jobs submitted.')
 
     def run_fep(self):
         """
@@ -924,8 +925,8 @@ class ResFEP(Toplevel):
         selected = self.reslist.get(selection[0])
 
         res_wt = selected.split()[0]
-        res_nr = int(selected.split()[1])
-        res_mut = selected.split()[3]
+        # res_nr = int(selected.split()[1])
+        # res_mut = selected.split()[3]
 
         print res_wt
 
