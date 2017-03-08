@@ -314,7 +314,7 @@ class ViewPyMol(Toplevel):
             self.session.stdin.write('delete new_atom\n')
             self.pseudo_atom = False
 
-
+        #Get bond/angle/torsion for new atom/fragment
         if len(self.selected_atoms) > 0:
             #Get bond length
             try:
@@ -337,7 +337,7 @@ class ViewPyMol(Toplevel):
                 self.app.errorBox('Error', 'Invalid dihedral value')
                 return
 
-
+        #Get atom/fragmetn to add
         if len(self.buildlist.curselection()) > 0:
             #Get selected fragment/atom
             fragment = self.buildlist.get(self.buildlist.curselection()[0]).split()[-1]

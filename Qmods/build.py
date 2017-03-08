@@ -79,7 +79,8 @@ def translate(p,dv,d):
     q = np.array((0.,0.,0.))
 
     # making sure the rotation vector is normalized
-    dv = dv/np.linalg.norm(dv)
+    if np.sum(dv) != 0:
+        dv = dv/np.linalg.norm(dv)
 
     # tranlation
     q = np.array(p) + d*dv
@@ -140,7 +141,7 @@ def getfragment(fraglib,fragname):
     else:
         with open(fraglib, 'r') as f:
             for line in f:
-                if len(line) : #ignor empty lines
+                if len(line): #ignor empty lines
                     if fragname in line: 
                         found = True
                         continue
@@ -148,7 +149,8 @@ def getfragment(fraglib,fragname):
                         break
                     elif found:
                         field = line.split()
-                        p1group.update({int(field[0]):{'name':field[1],'xyz':list(map(float,field[2:5])),'symbol':field[5]}})
+                        p1group.update({int(field[0]):{'name':field[1],'xyz':list(map(float,field[2:5])),
+                                                       'symbol':field[5]}})
             if not found:
                 print 'The fragment was not found in the library'
                 return None
@@ -359,14 +361,14 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
 
             #tanslation vector for bringing the group to place by the dummy atom(D0)
             dv = np.array(p1['xyz']) - np.array(p1group[0]['xyz'])
-            for atom in p1group:
+            for atom in p1group.keys():
                 p1group[atom]['xyz'] = dv + np.array(p1group[atom]['xyz'])
 
             #tranlation to adjust d p1-p1group[1]
-            current_d = measure( np.array(p1['xyz']),np.array(p1group[1]['xyz']) )
+            current_d = measure(np.array(p1['xyz']), np.array(p1group[1]['xyz']))
             dv = np.array(p1group[1]['xyz']) - np.array(p1['xyz'])
-            for atom in p1group:
-                p1group[atom]['xyz'] = list(translate( np.array(p1group[atom]['xyz']), dv, d-current_d ))
+            for atom in p1group.keys():
+                p1group[atom]['xyz'] = list(translate(np.array(p1group[atom]['xyz']), dv, d-current_d))
 
             #Mode a2. add a fragmet to p1 atom from library by distance d > 0 and angle thetaA (q1-p1-p2).
             #q1 is the first atom in the p1group
