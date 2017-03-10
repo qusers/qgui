@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 __author__ = "Geir Villy Isaksen"
-__copyright__ = "Copyright (C) 2016 University of Tromso / Geir Villy Isaksen"
-__credits__ = ["Bjorn Olav Brandsdal","Tor Arne Heim Andberg","Laura Liikanen", "Johan Aqvist", "Christoffer Lind"]
+__copyright__ = "Copyright (C) 2017 University of Tromso / Geir Villy Isaksen"
+__credits__ = ["Bjorn Olav Brandsdal", "Tor Arne Heim Andberg", "Laura Liikanen", "Johan Aqvist", "Christoffer Lind",
+               "Masoud Kazemi", "Jaka Socan"]
 __license__ = "GPL v3"
-__version__ = "2.51"
+__version__ = "2.00"
 __maintainer__ = "Geir Isaksen"
 __email__ = "geir.isaksen@uit.no"
 __status__ = "Production"
