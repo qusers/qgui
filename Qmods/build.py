@@ -54,7 +54,8 @@ def rotate(p,rp,rv,theta):
     theta = np.deg2rad(theta)
 
     # making sure the rotation vector is normalized
-    rv = rv/np.linalg.norm(rv)
+    if np.count_nonzero(rv) != 0:
+        rv = rv/np.linalg.norm(rv)
 
     # set the values
     a, b, c = rp
@@ -79,7 +80,7 @@ def translate(p,dv,d):
     q = np.array((0.,0.,0.))
 
     # making sure the rotation vector is normalized
-    if np.sum(dv) != 0:
+    if np.count_nonzero(dv) != 0:
         dv = dv/np.linalg.norm(dv)
 
     # tranlation
@@ -101,8 +102,12 @@ def measure(v1,v2,v3=None,v4=None):
     elif (v4 is None):
         d21 = np.array(v1) - np.array(v2)
         d23 = np.array(v3) - np.array(v2)
-        d21 = d21/np.linalg.norm(d21)
-        d23 = d23/np.linalg.norm(d23)
+        print(d21)
+        print(d23)
+        if np.count_nonzero(d21) != 0:
+            d21 = d21/np.linalg.norm(d21)
+        if np.count_nonzero(d23) != 0:
+            d23 = d23/np.linalg.norm(d23)
         d21Dotd23   = np.dot(d21,d23)
         d21crossd23 = np.cross(d21,d23)
         return np.rad2deg(np.arctan2(np.linalg.norm(d21crossd23),d21Dotd23))
@@ -115,7 +120,8 @@ def measure(v1,v2,v3=None,v4=None):
         d34 = np.array(v4) - np.array(v3)
         n123 = np.cross(d12,d23)
         n234 = np.cross(d23,d34)
-        n123 = n123/np.linalg.norm(n123)
+        if np.count_nonzero(n123) != 0:
+            n123 = n123/np.linalg.norm(n123)
         n234 = n234/np.linalg.norm(n234)
         n123Dotn234   = np.dot(n123,n234)
         n123crossn234 = np.cross(n123,n234)
@@ -386,8 +392,9 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                 if np.linalg.norm(rv) == 0 : 
                     rv = np.cross(d21,np.random.rand(3))
                 current_thetaA = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']))
-                for atom in p1group:
-                    p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,(thetaA - current_thetaA)))
+                for atom in p1group.keys():
+                    p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,
+                                                       (thetaA - current_thetaA)))
 
                 #Mode a3. rotate by torsion thetaT(p1group[1]-p1-p2-p3)
                 if (p3 is not None) :
@@ -397,9 +404,11 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
 
                     # The q1 first atom of fragment is the hot atom
                     rv = np.array(p1['xyz']) - np.array(p2['xyz'])
-                    current_thetaT = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']))
-                    for atom in p1group:
-                        p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,(thetaT - current_thetaT)))
+                    current_thetaT = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']),
+                                             np.array(p3['xyz']))
+                    for atom in p1group.keys():
+                        p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,
+                                                           (thetaT - current_thetaT)))
 
             #remove the dummy atom before return
             del p1group[0]
@@ -439,8 +448,9 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                 rv = np.cross(np.random.rand(3),d23)
 
             current_thetaA = measure(np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']))
-            for atom in p1group:
-                p1group[atom]['xyz'] = list(rotate(p1group[atom]['xyz'],np.array(p2['xyz']),rv,(thetaA - current_thetaA)))
+            for atom in p1group.keys():
+                p1group[atom]['xyz'] = list(rotate(p1group[atom]['xyz'],np.array(p2['xyz']),rv,
+                                                   (thetaA - current_thetaA)))
             print 'Angle fixed'
             return p1group
         else:
@@ -455,8 +465,9 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
             #rotate around the trosron bond (p2-p3). the p1 should move
             rv = np.array(p2['xyz']) - np.array(p3['xyz'])
             current_thetaT = measure(np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']),np.array(p4['xyz']))
-            for atom in p1group:
-                p1group[atom]['xyz'] = list(rotate(p1group[atom]['xyz'],np.array(p2['xyz']),rv,(thetaT - current_thetaT)))
+            for atom in p1group.keys():
+                p1group[atom]['xyz'] = list(rotate(p1group[atom]['xyz'],np.array(p2['xyz']),rv,
+                                                   (thetaT - current_thetaT)))
             print 'Torsion fixed'
             return p1group
         else :

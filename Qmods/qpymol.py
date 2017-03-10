@@ -25,7 +25,7 @@ import numpy as np
 import shutil
 from copy import deepcopy
 import build as bld
-from tkFileDialog import askopenfilenames
+from tkFileDialog import askopenfilenames, asksaveasfilename
 
 
 class ViewPyMol(Toplevel):
@@ -404,8 +404,9 @@ class ViewPyMol(Toplevel):
         self.listbox.selection_clear(0, END)
 
         #update pymol with new tmp pdb file
-        self.update_pymol_structure(new_pdb)
         self.add_atoms_to_list(new_pdb)
+        self.update_pymol_structure(new_pdb)
+
 
     def get_old_new_pdb_name(self):
         """
@@ -459,12 +460,13 @@ class ViewPyMol(Toplevel):
         with open(old_pdb, 'r') as old:
             for line in old:
                 if 'ATOM' in line or 'HETATM' in line:
-                    atomnr = int(line.split()[1])
+                    #atomnr = int(line.split()[1])
+                    atomnr += 1
                     if inserted_fragment:
-                        atomnr += 1
+                        #atomnr += 1
                         resnr = int(line[22:26]) + resnr_add
                         tmp_pdb.write('%s%5d%s%5d%s' % (line[0:6], atomnr, line[11:21], resnr, line[26:]))
-                    elif replace:
+                    elif replace and group:
                         if atomnr in group.keys():
                             tmp_pdb.write('%s' % line[0:30])
                             tmp_pdb.write('%8.3f%8.3f%8.3f\n' % (group[atomnr]['xyz'][0], group[atomnr]['xyz'][1],
@@ -498,8 +500,8 @@ class ViewPyMol(Toplevel):
             self.listbox.selection_clear(0, END)
 
         #update pymol with new tmp pdb file
-        self.update_pymol_structure(tmp_name)
         self.add_atoms_to_list(tmp_name)
+        self.update_pymol_structure(tmp_name)
 
         if replace:
             atoms_select = group.keys()
@@ -509,12 +511,40 @@ class ViewPyMol(Toplevel):
             self.pymol_highlight_edit(self.selected_atoms)
             self.pymol_command('select')
 
+    def save_pdb(self):
+        """
+        Takes current pdb structure, asks for name and writes file
+        :return: nothing... or, well, a new pdb file on disk.
+        """
+        save_name = asksaveasfilename(parent=self.root, initialdir=self.app.workdir, title='Save structure as',
+                                      filetypes=(("Project", "*.pdb"), ("All files", "*.*")))
+
+        if not save_name:
+            return
+
+        if len(self.tmp_pdb) < 1:
+            to_save = self.pdbfile
+        else:
+            to_save = self.tmp_pdb[-1]
+
+        print(save_name)
+        new_pdb = open(save_name, 'w')
+
+        with open(to_save, 'r') as tmp_pdb:
+            for line in tmp_pdb:
+                new_pdb.write(line)
+
+        new_pdb.close()
+
+        self.app.log('info', '%s saved' % to_save.split('/')[-1])
+
     def update_pymol_structure(self, pdb):
         """
         updates currens structure in pymol to the given pdb
         :param pdb:
         :return: Nada de nada
         """
+        self.session.stdin.write('remove mol\n')
         self.session.stdin.write('load %s, mol, state=1\n' % pdb)
         self.pymol_highlight_edit(self.selected_atoms)
 
@@ -568,7 +598,7 @@ class ViewPyMol(Toplevel):
         print self.selected_atoms
 
         p_atoms = self.get_p_atoms()
-        atomnames = self.get_atom_names(int(p_atoms[0]['residuenr']))
+        atomnames, atomnr = self.get_atom_names(int(p_atoms[0]['residuenr']))
 
         if atom in atomnames.keys():
             p_atoms[0]['name'] = '%s%d' % (atom, (atomnames[atom] + 1))
@@ -613,23 +643,24 @@ class ViewPyMol(Toplevel):
     def get_residue_nr(self):
         """
         Opens current PDB file and finds out how many residues are in file.
-        :return: resnr: new residue nr (+1 of max in pdb)
+        :return: resnr: biggest residue nr in pdb file
+        :return: atoms: number atoms in pdb file
         """
         pdb_file = self.pdbfile
         if len(self.tmp_pdb) > 0:
             pdb_file = self.tmp_pdb[-1]
 
         resnr = 0
+        atoms = 0
 
         with open(pdb_file, 'r') as pdb:
             for line in pdb:
                 print line
                 if 'ATOM' in line or 'HETATM' in line:
                     resnr = int(line[22:26])
+                    atoms += 1
 
-        resnr += 1
-
-        return resnr
+        return resnr, atoms
 
     def build_atom(self, atomname=None, p_atoms=None, bond=None, angle=None, torsion=None):
         """
@@ -642,13 +673,19 @@ class ViewPyMol(Toplevel):
         """
 
         new_atom = dict()
+
+        #if a new residue is added, add 1 to residue numbers after that residue.
+        resnr_add = 0
+
         if p_atoms[0]:
             #Adapt properties from p1 atoms:
             new_atom[1] = deepcopy(p_atoms[0])
-            atomnames = self.get_atom_names(int(p_atoms[0]['residuenr']))
+            new_atom[1]['name'] = atomname
+            atomnames, atomnr = self.get_atom_names(int(p_atoms[0]['residuenr']))
+
         else:
             #No atoms selected. Get residue nr
-            resnr = self.get_residue_nr()
+            resnr = self.get_residue_nr()[0] + 1
 
             new_atom[1] = {'name':atomname+'1', 'atomnr': 1, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': resnr}
 
@@ -658,16 +695,20 @@ class ViewPyMol(Toplevel):
         #Get xyx dict from build
         q = bld.BuildByAtom('a', p_atoms[0], p_atoms[1], p_atoms[2], p_atoms[3], bond, angle, torsion)
 
+        # Guess if new atom is to be added to existing residue, or if it is to be a new residue
+        suggested_bond = self.suggest_bond_length()
+        if bond > (suggested_bond * 1.3):
+            #Bond seems too long, make new residue and add it to the end of PDB
+            resnr_add = 1
+            new_atom[1]['residuenr'] = self.get_residue_nr()[0] + 1
+            atomnr = self.get_residue_nr()[1]
+
         new_atom[1]['xyz'] = q['xyz']
-        #atomtype = ''.join([i for i in deepcopy(q['name']) if not i.isdigit()])
+
         if atomname in atomnames.keys():
             new_atom[1]['name'] = '%s%d' % (atomname, (atomnames[atomname] + 1))
 
-        #Remove potential None from p_atoms to get last p_atom
-        p_atoms = filter(lambda x: x!=None, p_atoms)
-
-        self.write_tmp_pdb(new_atom, p_atoms[-1]['atomnr'])
-
+        self.write_tmp_pdb(group=new_atom, insert_after_atomnr=atomnr, resnr_add=resnr_add)
 
     def build_fragment(self, fragment=None, p_atoms=None, bond=None, angle=None, torsion=None):
         """
@@ -680,29 +721,50 @@ class ViewPyMol(Toplevel):
         """
         fragmentlib = '%s/Qmods/fragments.dat' % self.app.qgui_path
 
-        #TODO
+        #List of fragments that should be handled as a new residue nr
+        new_residue_nr = ['MOLECULE']
+
         #Insert fragment after P1 residue. Renumber residue number and atom numbers.
         new_atoms = dict()
 
         #Create a dicitonary with atomnames {C:3, H:6,...}
         atomnames = dict()
 
+
+        #Insert fragment aftet atomnr
+        insert_after = None
+        #new residue? add +1 after that residue
+        resnr_add = 0
+
+        #Get highest residue nr and nr of atoms in pdb file
+        resnr, atoms = self.get_residue_nr()
+
         #Get dummy atom position
         if not p_atoms[0]:
             # No atoms selected. Get residue nr
-            resnr = self.get_residue_nr()
-            p_atoms[0] = {'name':'DUM', 'atomnr': 0, 'xyz': [0, 0, 0], 'residue': 'UNK', 'residuenr': resnr}
-            bond=0.1
-        else:
-            atomnames = self.get_atom_names(p_atoms[0]['residuenr'])
+            p_atoms[0] = {'name':'DUM', 'atomnr': atoms+1, 'xyz': [0.1, 0.1, 0.1], 'residue': 'UNK', 'residuenr': resnr+1}
+            bond=0.01
+            insert_after = atoms
 
-        #Append to existing residue number or add new residue number?
-        #TODO
+        #Create new residue nr of append fragment to existing residue?
+        if self.atoms_fragments.get() in new_residue_nr:
+            #New residue
+            p_atoms[0]['residue'] = fragment
+            p_atoms[0]['residuenr'] = resnr + 1
+            #insert new residue in the end of PDB file
+            insert_after = atoms
+            resnr_add = 1
+        else:
+            #Get dictionary to make unique atomnames in residue:
+            atomnames, atomnr = self.get_atom_names(p_atoms[0]['residuenr'])
+            insert_after = atomnr
+
 
         #{symbol:atom  xyz:[x,y,z]  name:C1}
         frag = bld.BuildByGroup('a', p_atoms[0], p_atoms[1], p_atoms[2], p_atoms[3], bond, angle, torsion, fragment,
                                 fragmentlib)
 
+        #Create new fragment
         atomnr = deepcopy(p_atoms[0]['atomnr'])
         for atom in sorted(frag.keys()):
             new_atoms[atom] = deepcopy(p_atoms[0])
@@ -721,16 +783,17 @@ class ViewPyMol(Toplevel):
             print frag[atom]['xyz']
             print new_atoms[atom]['xyz']
 
-        print new_atoms
 
-        self.write_tmp_pdb(new_atoms)
+        self.write_tmp_pdb(group=new_atoms, insert_after_atomnr=insert_after, resnr_add=resnr_add)
 
 
     def get_atom_names(self, res_nr):
         """
         Reads current pdb file and extracts highest number for all atom names in residue number.
+        It also return the final (max) atomnr in the selected residue
         :param res_number: residue number to get atom names from
         :return: atomnames: dictionary {C:3, H:6,....}
+        :return: atomnr: integer, highest atomnr in residue
         """
         #Get correct pdb file to read from:
         pdb_file = self.pdbfile
@@ -739,6 +802,7 @@ class ViewPyMol(Toplevel):
 
         atomnames = dict()
         found_res = False
+        atomnr = 0
         with open(pdb_file, 'r') as pdb:
             for line in pdb:
                 if 'ATOM' in line or 'HETATM' in line:
@@ -750,12 +814,13 @@ class ViewPyMol(Toplevel):
                             break
 
                         atom = ''.join([i for i in line[11:17].strip() if not i.isdigit()])
+                        atomnr = int(line.split()[1])
                         if not atom in atomnames.keys():
                             atomnames[atom] = 1
                         else:
                             atomnames[atom] += 1
 
-        return atomnames
+        return atomnames, atomnr
 
     def adjust_group(self):
         #TODO
@@ -968,17 +1033,35 @@ class ViewPyMol(Toplevel):
                         continue
 
     def close_pymol(self):
+        """
+        Quit session and clean up your mess
+        :return:
+        """
+        # Remove pdb temp directory
+        if os.path.exists(self.tmp_pdb_dir):
+            shutil.rmtree(self.tmp_pdb_dir)
+
+
+        #First close pymol
         try:
             os.killpg(self.session.pid, signal.SIGTERM)
-            self.reopen_button.config(state=NORMAL)
             self.app.pymol_running = False
+            self.reopen_button.config(state=NORMAL)
+
+            del self.tmp_pdb[:]
+            del self.selected_atoms[:]
+            # update atomlist with current pdb file
+            self.add_atoms_to_list(self.pdbfile)
+
+        #Now kill window
         except:
             self.app.pymol_running = False
             self.destroy()
 
-        #Remove pdb temp directory
-        if os.path.exists(self.tmp_pdb_dir):
-            shutil.rmtree(self.tmp_pdb_dir)
+
+
+
+
 
     def set_selection(self, atoms='all'):
         """
@@ -1404,6 +1487,9 @@ class ViewPyMol(Toplevel):
         #Changing to Display mode
         else:
             self.listbox.config(selectmode=EXTENDED)
+            if len(self.tmp_pdb) > 0 and self.app.pymol_running:
+                self.session.stdin.write('remove mol\n')
+                self.session.stdin.write('load %s, mol, state=1\n' % self.tmp_pdb[-1])
 
         #Common operations if pymol is active:
         if self.session:
@@ -1829,6 +1915,10 @@ class ViewPyMol(Toplevel):
         self.change_atom_button = Button(self.edit_frame, text='Change atom', highlightbackground=self.main_color,
                                   command=self.change_atom)
         self.change_atom_button.grid(in_=exist_frame_label, row=5, column=2, columnspan=2)
+
+        save_pdb = Button(self.edit_frame, text='Save as', highlightbackground=self.main_color,
+                               command=self.save_pdb)
+        save_pdb.grid(row=6, column=0, columnspan=5)
 
 
 
