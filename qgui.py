@@ -588,7 +588,7 @@ class QGui(object):
         Opens up the about Qgui window
         """
         self.about_q = AboutQ(self,self.root)
-        self.about_q.configure(background = 'black')
+        self.about_q.configure(background = self.main_color)
 
 
 class DialogWindow(Toplevel):
