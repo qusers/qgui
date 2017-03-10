@@ -103,8 +103,9 @@ class QGui(object):
         self.structure = None
         self.top_id = None
         self.pdb_id = None 
-        self.log('info', 'Welcome! Starting a new QGui session')
-        self.log('info', 'To downloaded a PDB file, click the Load-button.')
+        self.log('info', 'Welcome to Qgui v2.0')
+        self.log('info', 'The Free Energy package for Q.')
+        self.log(' ', '\n')
         
         self.getSettings()
         

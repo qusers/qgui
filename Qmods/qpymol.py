@@ -536,7 +536,7 @@ class ViewPyMol(Toplevel):
 
         new_pdb.close()
 
-        self.app.log('info', '%s saved' % to_save.split('/')[-1])
+        self.app.log('info', '%s saved' % save_name.split('/')[-1])
 
     def update_pymol_structure(self, pdb):
         """
