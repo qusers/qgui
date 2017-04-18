@@ -685,12 +685,12 @@ class EvbCalibration(Toplevel):
             self.dg_plot.clear()
 
         #Set color cycle for plots:
-        matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
-                                                   'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
+        #matplotlib.rcParams['axes.prop_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        #                                           'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
+        #                                           'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
 
         #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
