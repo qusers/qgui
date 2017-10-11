@@ -174,6 +174,8 @@ class ResFEP(Toplevel):
         del self.topology_res_fep[top]
         del self.topology_mutation[top]
         del self.topology_res_order[top]
+        del self.topology_fep[top]
+
         nr = int(top.split()[1]) - 1
 
         if nr < 1:
@@ -438,6 +440,9 @@ class ResFEP(Toplevel):
         self.topology_fep[top] = self.make_topology_fep(self.topology_res_fep[top], self.topology_res_order)
         self.update_fep_written()
         self.refresh_feplist()
+
+        #Assuming everything went well
+        return True
 
     def make_topology_fep(self, res_fep, res_order):
         """
