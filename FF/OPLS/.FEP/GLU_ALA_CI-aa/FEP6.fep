@@ -1,4 +1,4 @@
-!GLU+Cl-->ALA+Cl
+!GLU+Cl-->ALA+Cl (opls-aa)
 !charge -1+0-->0+-1
 
 [FEP]

@@ -1,4 +1,4 @@
-!ARG+Na-->ALA+Na
+!ARG+Na-->ALA+Na (opls-aa)
 !charge 1+0-->0+1
 
 [FEP]
