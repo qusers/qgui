@@ -790,9 +790,12 @@ class ResFEP(Toplevel):
                                   'cp $inputfiles/eq*.inp .\n'
                                   'sed -i s/SEED_VAR/"$[1 + $[RANDOM % 9999]]"/ eq1.inp\n'
                                   'else\n'
-                                  'lastfep=FEP$index\n'
-                                  'cp $workdir/$lastfep/$temperature/$run/$finalMDrestart $rundir/eq5.re\n'
-                                  'fi\n\n'
+                                  'lastfep=FEP$index\n')
+
+                new_script.append('cp $workdir/$lastfep/$temperature/$run/$finalMDrestart $rundir/eq%d.re\n' %
+                                  len(self.app.q_settings['equilibration']))
+
+                new_script.append('fi\n\n'
                                   'sed -i s/T_VAR/"$temperature"/ *.inp\n'
                                   'sed -i s/FEP_VAR/"$fepfile"/ *.inp\n')
 
