@@ -479,7 +479,7 @@ class Analyse_resFEP(Toplevel):
             if int(i) == 0:
                 line = 'Title\tT\tFEP\t<dG>\tsem\tdGf\tsem\tdGr\tsem\n'
             else:
-                line = '%s' % ' '.join(self.dg_list.get(i).split()).replace(" ", "\t")
+                line = '%s\n' % ' '.join(self.dg_list.get(i).split()).replace(" ", "\t")
             self.clipboard_append(line + '\n')
 
     def feplist_event(self, *args):
