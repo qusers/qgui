@@ -147,10 +147,14 @@ class Analyse_resFEP(Toplevel):
                     FEPdata = qf.get_qfep_part1(qpath=rundir, qfep='qfep.out')
 
                     if FEPdata:
-                        print('Added run %s' % j)
-                        fepout[fep][temp]['dGf'].append(FEPdata['sum_dGf'][-1])
-                        fepout[fep][temp]['dGr'].append(FEPdata['sum_dGr'][0])
-                        fepout[fep][temp]['dG'].append(FEPdata['dG'][-1])
+                        try:
+                            print('Added run %s' % j)
+                            fepout[fep][temp]['dGf'].append(FEPdata['sum_dGf'][-1])
+                            fepout[fep][temp]['dGr'].append(FEPdata['sum_dGr'][0])
+                            fepout[fep][temp]['dG'].append(FEPdata['dG'][-1])
+                        except:
+                            print('Error in %s/%s/%s' % (fep, temp, j))
+
                     else:
                         self.app.log(' ', '\nNo FEP data in %s/%s/%s\n' % (fep, temp, j))
                     self.update()
