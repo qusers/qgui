@@ -137,7 +137,7 @@ def write_top_pdb(topology, pdbname, pdbpath, libfiles=list()):
 
     pdb = create_pdb_from_topology(topology, libfiles)
 
-    pdbout = open('%s/%s' % (pdbpath, pdbname), 'w')
+    pdbout = open('%s/%s' % (pdbpath, pdbname.strip('/')), 'w')
 
     for line in pdb:
         pdbout.write(line)
