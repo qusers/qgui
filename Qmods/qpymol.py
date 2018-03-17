@@ -722,7 +722,7 @@ class ViewPyMol(Toplevel):
         fragmentlib = '%s/Qmods/fragments.dat' % self.app.qgui_path
 
         #List of fragments that should be handled as a new residue nr
-        new_residue_nr = ['MOLECULE']
+        new_residue_nr = ['MOLECULE', 'RESIDUE']
 
         #Insert fragment after P1 residue. Renumber residue number and atom numbers.
         new_atoms = dict()

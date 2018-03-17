@@ -233,7 +233,7 @@ class TopologyPrepare(Toplevel):
                                 origial_res = line.split()[2]
                                 new_res = line.split()[3]
                                 atoms = ' '.join(line.split('radius_to')[0].split()[4:])
-                                r_atom = line.split('radius_to')[1].strip('\n\r ')
+                                r_atom = line.split('radius_to')[1].split('#')[0].strip('\n\r ')
 
                                 self.toggle_res[origial_res] = new_res
                                 self.toggle_res_atoms[new_res] = atoms
@@ -532,6 +532,7 @@ class TopologyPrepare(Toplevel):
 
                         #If defined atom to compute distance to is found, add it:
                         if distatom == atom_name:
+
                             #x, y, z = map(float, line[30:].split()[0:3])
                             x = float(line[30:38])
                             y = float(line[38:46])

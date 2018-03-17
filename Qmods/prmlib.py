@@ -779,20 +779,28 @@ class CreatePrmLib(Toplevel):
         qname = 'Q%s_%s.prm' % (self.opls, self.ligname)
         finalFile = open('%s/%s' % (self.app.workdir, qname), 'w')
         liglist = []
+
+        #delete files not needed
+        del_files = list()
         try:
             ligvdw = open('%s/%s_vdw.prm' % (self.app.workdir, self.ligname), 'r').readlines()
+            del_files.append('%s/%s_vdw.prm' % (self.app.workdir, self.ligname))
             liglist.append(ligvdw)
             if self.bndStart:
                 ligbnd = open('%s/%s_bnd.prm' % (self.app.workdir, self.ligname), 'r').readlines()
+                del_files.append('%s/%s_bnd.prm' % (self.app.workdir, self.ligname))
                 liglist.append(ligbnd)
             if self.angStart:
                 ligang = open('%s/%s_ang.prm'% (self.app.workdir, self.ligname), 'r').readlines()
+                del_files.append('%s/%s_ang.prm'% (self.app.workdir, self.ligname))
                 liglist.append(ligang)
             if self.torStart:
                 ligtor = open('%s/%s_tor.prm' % (self.app.workdir, self.ligname), 'r').readlines()
+                del_files.append('%s/%s_tor.prm' % (self.app.workdir, self.ligname))
                 liglist.append(ligtor)
             if self.impStart:
                 ligimp = open('%s/%s_imp.prm' % (self.app.workdir, self.ligname), 'r').readlines()
+                del_files.append('%s/%s_imp.prm' % (self.app.workdir, self.ligname))
                 liglist.append(ligimp)
         except:
             print '\nWarning!'
@@ -835,6 +843,7 @@ class CreatePrmLib(Toplevel):
                 finalFile.write('[impropers] improper type definitions\n')
                 finalFile.write('*iaci   iacj    iack    iacl     forceK  phase   comment\n')
                 finalFile.write('*-----------------------------------------------------------------\n')
+
             for line in liglist[i]:
                 finalFile.write(line)
 
@@ -852,6 +861,11 @@ class CreatePrmLib(Toplevel):
 
         finalFile.write('\n ')
         finalFile.close()
+
+        #Delete files that are never used anyway!
+        for i in del_files:
+            os.remove(i)
+
 
         self.app.log('info','%s successfully generated' % qname)
         self.app.errorBox('Info','%s.lib with the corresponding %s.pdb and %s were successfully generated.' %

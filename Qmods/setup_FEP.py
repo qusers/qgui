@@ -259,7 +259,7 @@ class SetupFEP(Toplevel):
         pdb_path = '%s/.tmp/' % (self.app.workdir)
 
         if not os.path.isdir(pdb_path):
-            os.makedirs('%s/.tmp')
+            os.makedirs('%s/.tmp' % pdb_path)
 
         qf.write_top_pdb(self.topology, pdb_name, pdb_path, self.app.q_settings['library'])
 
