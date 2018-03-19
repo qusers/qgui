@@ -230,13 +230,14 @@ class CreatePrmLib(Toplevel):
             elif pdb_duplicate:
                 self.app.errorBox('Info','Duplicate atomnames in residue! Renaming all atoms.')
                 self.lig_atoms_renamed = self.rename_atoms(self.lig_atoms)
+
         #If replace original entry in pdbfile:
         if self.check_replace.get() == 1:
             res, current_res = 1, 1
             found_lig = False
 
             org_file = open(self.app.pdb_id, 'r').readlines()
-            self.app.pdb_id = self.app.pdb_id.split('.pdb')[0] + '_new.pdb'
+            self.app.pdb_id = self.app.pdb_id.split('.pdb')[0].split('_new')[0] + '_new.pdb'
             self.app.main_window.set_entryfield(self.app.pdb_id.split('/')[-1])
             new_file = open(self.app.pdb_id, 'w')
             for line in org_file:

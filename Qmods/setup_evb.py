@@ -4499,7 +4499,7 @@ class SetupEVB(Toplevel):
                         found_atom = True
 
                 atom_count[atom] += 1
-                outputfile.write('%s%1s%3s%s%s%s' % (line[0:13], atom, str(atom_count[atom]).ljust(3), resname, resnr,
+                outputfile.write('%s %1s%3s%s%s%s' % (line[0:12], atom, str(atom_count[atom]).ljust(3), resname, resnr,
                                                  line[26:]))
             except:
                 continue
