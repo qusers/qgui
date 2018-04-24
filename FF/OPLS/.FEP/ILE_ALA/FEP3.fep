@@ -20,8 +20,8 @@ softcore_use_max_potential on
 13 13 !HD13	bort	
 
 [change_charges]
-1	-0.0600	-0.0600
-2	0.0600	0.0600
+1	-0.0600	0
+2	0.0600	0
 3 	0	0
 4  	0	0
 5  	0	0
