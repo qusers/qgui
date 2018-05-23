@@ -51,20 +51,15 @@ class TrjMask(Toplevel):
 		f.write('y\n')
 		f.write('wp %s\n' % out)
 		f.write('y\n')
-		f.write('quit\n')
+		f.write('q\n ')
 		f.close()
 
-	def testlog(self,fname):	#Tries to open log file and scans for "PDB-written" string.
-		try:
-			f = open(fname, 'r')
-			for line in f:
-				if line == 'PDB file successfully written.\n':
-					f.close()
-					return True
-			f.close()
-			return False
-		except:
-			return False
+        def testfile(self,fname):     #Checks if file exist and file size is greater than zero, and then returns true/false.
+                    if os.path.isfile(fname):
+                        finfo = os.stat(fname)
+                        if finfo.st_size > 0:
+                            return True
+                    return False
 
 	def cleanup(self,fname):	#Removes file, if it exists.
 		if os.path.isfile(fname):
@@ -92,16 +87,16 @@ class TrjMask(Toplevel):
 		shutil.copyfile(topsource,top)				#Copies top file to workdir
 		shutil.copyfile(trjsource,trj)				#Copies trj file to workdir
 		self.makeinp(top,trj,inp,pdb)			#Creates input file
-		try:
+                try:
 			self.runqprep(inp,log)				#Tries to run Qprep
 		except:
 			self.app.log('info', 'Qprep5 failed to run.')					
 		self.cleanup(inp)						#Removes input file
 		self.cleanup(top)						#Removes top file
 		self.cleanup(trj)						#Removes trj file
-		if self.testlog(log): #Checks log file to see if PDB was written, then returns True/False
+		if self.testfile(pdb): #Checks log file to see if PDB was written, then returns True/False
 			shutil.copyfile(pdb,out) #Copies temporary pdb-file to chosen name and folder
-			self.cleanup(log) #Removes log file
+                        self.cleanup(log) #Removes log file
 			self.cleanup(pdb)
 			return True
 		else:
