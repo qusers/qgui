@@ -18,7 +18,9 @@ from tkFileDialog   import askopenfilename, asksaveasfilename
 import os
 import time
 import subprocess
+#from subprocess import call
 import shutil
+#import sys
 
 class TrjMask(Toplevel):
 	def __init__(self, app, root):
@@ -26,7 +28,8 @@ class TrjMask(Toplevel):
 		self.app = app
 		self.root = root
 		self.workdir=self.app.workdir
-		self.main_color = self.app.main_color
+                self.libs = self.app.libs
+                self.main_color = self.app.main_color
 
 		self.topname = None
 		if self.app.top_id: #Inherits topology file from Qgui
@@ -44,9 +47,23 @@ class TrjMask(Toplevel):
 		else:
 			return fname+'.'+fext
 
-	def makeinp(self,top,trj,inp,out):	#Writes input file for Qprep.
-		f = open(inp, 'w')
-		f.write('rt %s\n' % top)
+        def maketestinp(self,top,inp,lib):
+                self.cleanup(inp)                
+                f = open(inp, 'w')
+                if lib:
+                    for line in lib:
+                        f.write('rl %s\n' % line)
+                f.write('rt %s\n' % top)
+                f.write('q\n ')
+                f.close()
+
+	def maketrjinp(self,top,trj,inp,out,lib):	#Writes input file for Qprep.
+		self.cleanup(inp)
+                f = open(inp, 'w')
+                if lib:
+                    for line in lib:
+                        f.write('rl %s\n' % line)
+                f.write('rt %s\n' % top)
 		f.write('trj %s\n' % trj)
 		f.write('y\n')
 		f.write('wp %s\n' % out)
@@ -54,11 +71,27 @@ class TrjMask(Toplevel):
 		f.write('q\n ')
 		f.close()
 
-        def testfile(self,fname):     #Checks if file exist and file size is greater than zero, and then returns true/false.
+        def testlog(self,log):
+                f = open(log, 'r')
+                for line in f:
+                    if line.split(':',1)[0]  == '>>> ERROR Residue not found in loaded libraries':
+                        print (line)
+                        f.close()
+                        #print ('Error reading topology: Residue missing from library.')
+                        #print (log)
+                        return False
+                f.close()
+                return True
+
+        def testpdb(self,fname):     #Checks if file exist and file size is greater than zero, and then returns true/false.
                     if os.path.isfile(fname):
                         finfo = os.stat(fname)
                         if finfo.st_size > 0:
                             return True
+                        else:
+                            print 'PDB-file generated with size zero.'
+                    else:
+                        print 'PDB-file not generated.'
                     return False
 
 	def cleanup(self,fname):	#Removes file, if it exists.
@@ -66,10 +99,13 @@ class TrjMask(Toplevel):
 			os.remove(fname)
 		
 	def runqprep(self,inp,log):	#Launches Qprep with given input and creates logfile.
-		logfile=open(log,'w')                                         
-		tmp=subprocess.Popen(['Qprep5',inp], stdout=logfile)
-		tmp.communicate()
-		logfile.close()
+                try: 
+                    logfile=open(log,'w')                                         
+                    tmp=subprocess.Popen(['Qprep5',inp], stdout=logfile)
+                    tmp.communicate()
+                    logfile.close()
+                except:
+                    self.app.log('info', 'Qprep5 failed to run.')
 
 #	def move_file(self, source, destination):
 #		if not os.path.samefile(source,destination): #Checks if filenames are different.
@@ -77,30 +113,50 @@ class TrjMask(Toplevel):
 
 	### Main Method
 	def makemask(self,topsource,trjsource,out):
-		inp = self.newname('mask','inp')		#Sets name for input file
-		log = self.newname('mask','log')		#Sets name for log file
+                #print(self.app.libs)
+                valid_lib = False
+                libs = None
+                inp = self.newname('mask','inp')		#Sets name for input file
+                log = self.newname('mask','log')
+                log2 = self.newname('mask2','log')
+		log3 = self.newname('mask3','log')		#Sets name for log file
 		top = self.newname('mask','top')		#Sets name for temporary top file
 		trj = self.newname('mask','dcd')		#Sets name for temporary trj file
 		pdb = self.newname('mask','pdb')		#Sets name for temporary pdb file
-		if pdb == out.split('/')[-1]: #In case user accidentally sets output pdb name the same as temp pdb name.
+		if pdb == out.split('/')[-1]:              #In case user accidentally sets output pdb name the same as temp pdb name.
 			pdb = self.newname('tmp','pdb')
 		shutil.copyfile(topsource,top)				#Copies top file to workdir
 		shutil.copyfile(trjsource,trj)				#Copies trj file to workdir
-		self.makeinp(top,trj,inp,pdb)			#Creates input file
-                try:
-			self.runqprep(inp,log)				#Tries to run Qprep
-		except:
-			self.app.log('info', 'Qprep5 failed to run.')					
-		self.cleanup(inp)						#Removes input file
+                self.maketestinp(top,inp,libs)
+                self.runqprep(inp,log)                          #Tries to run Qprep
+                if self.testlog(log): 
+                    valid_lib = True
+                    self.app.log('info', 'Topology read correctly.')
+                else:
+                    self.app.log('info', 'Error reading topology. Residue missing from library.')
+                    self.app.log('info', 'Attempting to use Qgui-Settings library.')
+                    libs = self.app.libs
+                    self.maketestinp(top,inp,libs)
+                    self.runqprep(inp,log2)                         #Tries to run Qprep
+                    if self.testlog(log2):
+                        valid_lib = True
+                        self.app.log('info', 'Topology read correctly using Qgui-Settings library.')
+                    else:
+                        self.app.log('info', 'Error reading topology. Qgui-Settings library does not match with topology.')
+                if valid_lib:
+                    self.maketrjinp(top,trj,inp,pdb,libs)			#Creates input file
+                    self.runqprep(inp,log3)				#Tries to run Qprep
+                self.cleanup(inp)						#Removes input file
 		self.cleanup(top)						#Removes top file
 		self.cleanup(trj)						#Removes trj file
-		if self.testfile(pdb): #Checks log file to see if PDB was written, then returns True/False
+                self.cleanup(log)
+                self.cleanup(log2)
+                self.cleanup(log3)
+                if self.testpdb(pdb): #Tests to see if PDB was written, then returns True/False
 			shutil.copyfile(pdb,out) #Copies temporary pdb-file to chosen name and folder
-                        self.cleanup(log) #Removes log file
 			self.cleanup(pdb)
 			return True
 		else:
-			self.cleanup(log)
 			self.cleanup(pdb)
 			return False
 
