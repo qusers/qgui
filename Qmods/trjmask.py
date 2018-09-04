@@ -102,7 +102,7 @@ class TrjMask(Toplevel):
                 q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
                 try: 
                     logfile=open(log,'w')                                         
-                    tmp=subprocess.Popen(q_settings[ 'executables' ][0],args=inp, stdout=logfile)
+                    tmp=subprocess.Popen("%s %s" % (q_settings[ 'executables' ][0],inp), stdout=logfile)
                     tmp.communicate()
                     logfile.close()
                 except:

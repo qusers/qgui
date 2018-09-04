@@ -921,59 +921,44 @@ class TopologyPrepare(Toplevel):
 
         self.writeTopology()
 
-        Popen(executable=q_settings[ 'executables' ][0],bufsize=0, args= " <%s/%s>%s/%s" % (self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name),  preexec_fn=os.setsid)
+        Popen(args= "%s < %s/%s > %s/%s" % (q_settings[ 'executables' ][0],self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name),shell=True).wait()
 
-        qprep_done = False
-        count = 0
-        max_count = 10
-        while qprep_done == False:
-            count += 1
-            if os.path.isfile(self.app.workdir + '/' + qprepout_name):
-                with open(self.app.workdir + '/' + qprepout_name, 'r') as qpreplog:
-                    for line in qpreplog:
-                        self.app.log(' ', line)
-                        if 'Topology successfully generated' in line:
+        if os.path.isfile(self.app.workdir + '/' + qprepout_name):
+            with open(self.app.workdir + '/' + qprepout_name, 'r') as qpreplog:
+                for line in qpreplog:
+                    print line
+                    self.app.log(' ', line)
+                    if 'Topology successfully generated' in line:
                             #Qprep run OK: Update entry fields in parent (Qgui main or LIE)
-                            if not self.qgui_parent:
-                                if self.app.add_title == 'complex':
-                                    self.app.complex_pdb = self.app.workdir + '/' + self.top_pdbname
-                                    self.app.complex_top = self.app.workdir + '/' + self.topname
-                                elif self.app.add_title == 'ligand':
-                                    self.app.ligand_pdb = self.app.workdir + '/' + self.top_pdbname
-                                    self.app.ligand_top = self.app.workdir + '/' + self.topname
+                        if not self.qgui_parent:
+                            if self.app.add_title == 'complex':
+                                self.app.complex_pdb = self.app.workdir + '/' + self.top_pdbname
+                                self.app.complex_top = self.app.workdir + '/' + self.topname
+                            elif self.app.add_title == 'ligand':
+                                self.app.ligand_pdb = self.app.workdir + '/' + self.top_pdbname
+                                self.app.ligand_top = self.app.workdir + '/' + self.topname
                                 self.app.update_progress()
-
                             else:
                                 self.app.pdb_id = self.app.workdir + '/' + self.top_pdbname
                                 self.app.top_id = self.app.workdir + '/' + self.topname
                                 self.app.update_pdb_id_entryfield()
                                 self.app.main_window.set_topology_entryfield(self.topname.split('/')[-1])
 
-                            self.app.log('info','Topology successfully generated')
-                            qprep_done = True
-                            break
-                        elif 'ERROR:' in line:
-                            self.app.log('info','Topology generation failed.')
-                            self.app.errorBox('Warning','Topology contains errors. Check log file and parameters.')
-                            qprep_done = True
-                            break
-                        elif 'topology is incomplete' in line:
-                            self.app.log('info', 'Topology contains errors! Please check log file!')
-                            self.app.errorBox('Warning','Topology contains errors. Check log file and parameters.')
-                            qprep_done = True
-                            break
-                        elif 'Correct the PDB file' in line:
-                            self.app.log('info', 'Topology contains errors! Please check log file!')
-                            self.app.errorBox('Warning','Topology contains errors. Check log file and parameters.')
-                            qprep_done = True
-                            break
-            else:
-                time.sleep(1)
+                        self.app.log('info','Topology successfully generated')
+                        break
+                    elif 'ERROR:' in line:
+                        self.app.log('info','Topology generation failed.')
+                        self.app.errorBox('Warning','Topology contains errors. Check log file and parameters.')
+                        break
+                    elif 'topology is incomplete' in line:
+                        self.app.log('info', 'Topology contains errors! Please check log file!')
+                        self.app.errorBox('Warning','Topology contains errors. Check log file and parameters.')
+                        break
+                    elif 'Correct the PDB file' in line:
+                        self.app.log('info', 'Topology contains errors! Please check log file!')
+                        self.app.errorBox('Warning','Topology contains errors. Check log file and parameters.')
+                        break
 
-            if count >= max_count:
-                self.app.log('info','Qprep failed to generate topology!')
-                self.app.errorBox('Error','Could not run Qprep! Please verify installation.')
-                qprep_done = True
 
         #Change back to original path:
         os.chdir(current_dir)
