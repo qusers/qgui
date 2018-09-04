@@ -21,7 +21,7 @@ import subprocess
 #from subprocess import call
 import shutil
 #import sys
-
+import cPickle
 class TrjMask(Toplevel):
 	def __init__(self, app, root):
 		Toplevel.__init__(self, root)
@@ -99,9 +99,10 @@ class TrjMask(Toplevel):
 			os.remove(fname)
 		
 	def runqprep(self,inp,log):	#Launches Qprep with given input and creates logfile.
+                q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
                 try: 
                     logfile=open(log,'w')                                         
-                    tmp=subprocess.Popen(['Qprep5',inp], stdout=logfile)
+                    tmp=subprocess.Popen(q_settings[ 'executables' ][0],args=inp, stdout=logfile)
                     tmp.communicate()
                     logfile.close()
                 except:
