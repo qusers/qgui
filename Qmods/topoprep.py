@@ -20,6 +20,7 @@ from Tkinter import Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, 
 
 import os
 import tkFont
+import cPickle
 import prepareTopology as pt
 from select_xyz import AtomSelect
 from edit_file import FileEdit
@@ -910,6 +911,7 @@ class TopologyPrepare(Toplevel):
         self.app.log('info','Qprep input file written: %s' % qprepinp_name)
 
     def run_qprep(self):
+        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
         qprepinp_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.inp'
         qprepout_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.log'
 
@@ -919,8 +921,7 @@ class TopologyPrepare(Toplevel):
 
         self.writeTopology()
 
-        #TODO should change this to POPEN/CALL !! This here is bad programming practice:
-        os.system('Qprep5 <%s/%s>%s/%s' % (self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name))
+        Popen(executable=q_settings[ 'executables' ][0],bufsize=0, args= " <%s/%s>%s/%s" % (self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name),  preexec_fn=os.setsid)
 
         qprep_done = False
         count = 0
