@@ -281,6 +281,8 @@ class CreatePrmLib(Toplevel):
         """
         self.impact_failed = False
 
+        version = '14'
+
         self.opls = self.forcefield.get().strip()
         if self.opls == 'OPLS2001':
             version = '11'

@@ -1474,6 +1474,7 @@ class TopologyPrepare(Toplevel):
             if len(color_cmd[col].split('i.')) > 1:
                 self.session.stdin.write('%s\n' % color_cmd[col][:-2])
 
+
     def zoom_out(self):
         """
         Adjust automatic zoom buffer in pymol.
