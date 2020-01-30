@@ -19,17 +19,18 @@ from tkFileDialog import askopenfilename
 from tkSimpleDialog import askstring
 import tkFont
 from subprocess import call
+from cycler import cycler
 import numpy as np
 import os
 import shutil
 import matplotlib
 matplotlib.use('TkAgg')
 #Implement default mpl key bindings
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from tkFileDialog import asksaveasfilename, askdirectory
-
+matplotlib.rcParams['text.usetex'] = True
 
 class EvbArrhenius(Toplevel):
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
@@ -468,12 +469,16 @@ class EvbArrhenius(Toplevel):
             self.dg_plot.clear()
 
         #Set color cycle for plots:
-        matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        #matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        #                                           'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
+        #                                           'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
+        matplotlib.rcParams['axes.prop_cycle'] = (cycler('color',['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
+                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']))
+
 
         #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
@@ -490,7 +495,7 @@ class EvbArrhenius(Toplevel):
 
         temp_labels = list()
         for i in range(len(titles)):
-            line_color = matplotlib.rcParams['axes.color_cycle'][i]
+            line_color = matplotlib.rcParams['axes.prop_cycle']
             title = titles[i]
             dg = np.array(dg_t[i])
             temp = np.array(t_inv[i])
@@ -525,7 +530,7 @@ class EvbArrhenius(Toplevel):
 
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
 
-        self.canvas.show()
+        self.canvas.draw()
 
     def recomp_evb(self):
         """
@@ -1247,10 +1252,10 @@ class EvbArrhenius(Toplevel):
         self.canvas = FigureCanvasTkAgg(self.plot_window, master=frame_plot)
         self.plot_window.patch.set_facecolor('white')
 
-        self.canvas.show()
+        self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, frame_plot)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, frame_plot)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
 
