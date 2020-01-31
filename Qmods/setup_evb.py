@@ -38,6 +38,7 @@ import numpy as np
 
 
 
+
 class SetupEVB(Toplevel):
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
         Toplevel.__init__(self, root)

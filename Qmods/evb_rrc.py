@@ -23,11 +23,11 @@ import shutil
 import matplotlib
 matplotlib.use('TkAgg')
 #Implement default mpl key bindings
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from tkFileDialog import askopenfilenames, asksaveasfilename, askdirectory
-
+matplotlib.rcParams['text.usetex'] = True
 
 
 
@@ -684,10 +684,6 @@ class EvbCalibration(Toplevel):
         if self.dg_plot:
             self.dg_plot.clear()
 
-        #Set color cycle for plots:
-        #matplotlib.rcParams['axes.prop_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
-        #                                           'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-        #                                           'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
 
         #Create subplot
         self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
@@ -720,7 +716,7 @@ class EvbCalibration(Toplevel):
             except:
                 pass
 
-        self.canvas.show()
+        self.canvas.draw()
 
     def parameters_changed(self, *args):
         """
@@ -794,7 +790,7 @@ class EvbCalibration(Toplevel):
         self.ene_files = []
         if self.dg_plot:
             self.dg_plot.clear()
-            self.canvas.show()
+            self.canvas.draw()
             self.dg_plot = None
 
     def reset_parameters(self):
@@ -997,10 +993,10 @@ class EvbCalibration(Toplevel):
         self.canvas = FigureCanvasTkAgg(self.plot_window, master=frame_plot)
         self.plot_window.patch.set_facecolor('white')
 
-        self.canvas.show()
+        self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, frame_plot)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, frame_plot)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
 
