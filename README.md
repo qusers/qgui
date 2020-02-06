@@ -1,10 +1,10 @@
-Qgui
+Qgui2
 ================================================================================
 
 Gui for Q, The Molecular Dynamics Package
 --------------------------------------------------------------------------------
 
-**Qgui** is a python package written by Geir Isaksen at the University of Tromso
+**Qgui** is a python2 package written by Geir Isaksen at the University of Tromso
 to ease the interaction and submission of jobs to the specialized Molecular
 Dynamics program **Q**. We say specialized as **Q** is tailored specifically
 to tackle the challenge of predicting accurate binding free energies,
