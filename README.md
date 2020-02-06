@@ -1,4 +1,4 @@
-Qgui2
+Qgui (depricated)
 ================================================================================
 
 Gui for Q, The Molecular Dynamics Package
