@@ -1,10 +1,10 @@
-Qgui
+Qgui3
 ================================================================================
 
 Gui for Q, The Molecular Dynamics Package
 --------------------------------------------------------------------------------
 
-**Qgui** is a python package written by Geir Isaksen at the University of Tromso
+**Qgui3** is a python3 package written by Geir Isaksen at the University of Tromso
 to ease the interaction and submission of jobs to the specialized Molecular
 Dynamics program **Q**. We say specialized as **Q** is tailored specifically
 to tackle the challenge of predicting accurate binding free energies,
@@ -44,7 +44,7 @@ bash-3.2$ python qgui.py
 There is also an installation script to automatically set up Qgui on your MAC/LINUX.
 Simply run this by typing the following command in the terminal:
 ```bash
-python2 INSTALL.py
+python3 INSTALL.py
 ``` 
 or
 ```bash
