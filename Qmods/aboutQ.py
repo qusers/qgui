@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Text, Label, Button, Frame, X, CENTER, Scrollbar, YES, Menu, DISABLED, NORMAL, GROOVE, END, TOP, PhotoImage, Toplevel
+from Tkinter import Text, Label, Button, Frame, DISABLED,  GROOVE, PhotoImage, Toplevel
 
 class AboutQ(Toplevel):
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
