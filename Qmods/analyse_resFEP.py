@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
-    OptionMenu, StringVar, Spinbox, SINGLE, LabelFrame, MULTIPLE, Entry
+from Tkinter import Label, Button, Frame, Toplevel, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
+    SINGLE, Entry
 from tkFileDialog import askopenfilename, askdirectory, asksaveasfilename
 import qgui_functions as qf
 import numpy as np
@@ -216,7 +216,7 @@ class Analyse_resFEP(Toplevel):
 
         os.chdir(rundir)
         for f in sorted(filter(os.path.isdir, os.listdir(os.getcwd()))):
-            print f
+            print(f)
             if f.startswith('FEP'):
                 if f[3:].isdigit():
                     nr = int(f[3:])
