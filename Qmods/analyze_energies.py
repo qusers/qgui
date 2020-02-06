@@ -192,7 +192,7 @@ class AnalyzeEnergies(Toplevel):
                         self.titles[prj_title][nr_dir] = subdir
                         self.titles_ene[prj_title][nr_dir] = dict()
                         self.app.log(' ','../%s added\n' % '/'.join(subdir.split('/')[-2:]))
-                        print subdir
+                        print(subdir)
                     nr_dir += 1
                 else:
                     break
@@ -241,7 +241,7 @@ class AnalyzeEnergies(Toplevel):
         for entry in sorted(self.titles_files[title].keys()):
             del_log = list()
             for log in sorted(self.titles_files[title][entry]):
-                print log
+                print(log)
                 if log not in self.unique_logs:
                     del_log.append(log)
             for log_del in del_log:
@@ -302,8 +302,8 @@ class AnalyzeEnergies(Toplevel):
                 logfile = '%s/%s' % (self.titles[title][entry], log)
                 if os.path.isfile(logfile):
                     with open(logfile, 'r') as mdlog:
-                        print 'Collecting energies from'
-                        print '   %s' % logfile
+                        print('Collecting energies from')
+                        print('   %s' % logfile)
                         for line in mdlog:
                             if 'Stepsize' in line:
                                 self.titles_ene[title][entry][log]['stepsize'] = float(line.split('=')[-1])
@@ -483,7 +483,7 @@ class AnalyzeEnergies(Toplevel):
                 title = self.titles_listbox.get(i)
                 tit_entry[title] = self.titles_files[title]
 
-        print tit_entry
+        print(tit_entry)
 
 
         #Collect terms to plot (terms becomes the subplot titles):
@@ -493,7 +493,7 @@ class AnalyzeEnergies(Toplevel):
         xlist = list()
         sel_terms = map(int, self.term_listbox.curselection())
         if len(sel_terms) < 1:
-            print 'Please select terms to plot (el, vdw...)'
+            print('Please select terms to plot (el, vdw...)')
             return
         for i in sel_terms:
             main_title.append(self.term_listbox.get(i))
@@ -501,7 +501,7 @@ class AnalyzeEnergies(Toplevel):
             xlist.append([])
             ylist.append([])
 
-        print main_title
+        print(main_title)
 
         plot_types = list()
         #Collect types to plot
