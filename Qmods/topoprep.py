@@ -19,6 +19,7 @@ from Tkinter import Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, 
 # -*- coding: utf-8 -*-
 
 import os
+import shutil
 import tkFont
 import cPickle
 import prepareTopology as pt
@@ -31,6 +32,7 @@ import copy
 import signal
 import sys
 import linecache
+import random as rng
 
 
 class TopologyPrepare(Toplevel):
@@ -242,8 +244,8 @@ class TopologyPrepare(Toplevel):
                                     self.resname_distatom[new_res] = r_atom
                                     self.resname_nr_dist[new_res] = dict()
                             except:
-                                print 'Unexpected line in [toggle_residues]'
-                                print line
+                                print('Unexpected line in [toggle_residues]')
+                                print(line)
 
                         if ' QGUI_N-TERM ' in line or ' QGUI_C-TERM ' in line:
                             toggle_term_atom[line.split()[3][0]] = ' '.join(line.split()[4:]).strip('\n')
@@ -258,7 +260,7 @@ class TopologyPrepare(Toplevel):
                             found_toggle_res = False
                             tot_charge = float(np.sum(charges))
                             self.res_charge[res] = round(tot_charge, 1)
-                            print '%4s: %.1f' % (res, round(tot_charge, 1))
+                            print('%4s: %.1f' % (res, round(tot_charge, 1)))
                             if tot_charge > 0.499:
                                 self.res_colors[res] = 'blue'
                             elif tot_charge < -0.499:
@@ -294,7 +296,7 @@ class TopologyPrepare(Toplevel):
                         charges = list()
                         found_res = True
                     if '[toggle_residues]' in line:
-                        print 'Found [toggle_residues] in library file. Original will be overwritten.'
+                        print('Found [toggle_residues] in library file. Original will be overwritten.')
                         found_toggle_res = True
                         self.toggle_res = dict()
 
@@ -313,7 +315,7 @@ class TopologyPrepare(Toplevel):
                     self.resname_distatom[term] = copy.deepcopy(self.resname_distatom[term[0]+'RES'])
                     self.resname_distatom[toggle_to] = copy.deepcopy(self.resname_distatom[toggle_to[0]+'RES'])
                 else:
-                    print '(Can not toggle %4s to %4s: %4s not found in lib.)' % (term, toggle_to, toggle_to)
+                    print('(Can not toggle %4s to %4s: %4s not found in lib.)' % (term, toggle_to, toggle_to))
 
         #Remove temp NRES and CRES definitions for terminals
         for to_remove in del_list:
@@ -399,7 +401,7 @@ class TopologyPrepare(Toplevel):
                             #Check if C-terminal name is valid or if it is possible to generate one
                             if len(res) > 3 and res[0].lower() == 'c':
                                 if res in self.res_atoms.keys():
-                                    print '%4s %3d is assumed a valid C-terminal' % (res, res_nr)
+                                    print('%4s %3d is assumed a valid C-terminal' % (res, res_nr))
                                     #No need to generate it, it is already defined
                                     create_cterm = False
                                     #Add the togglable terminal:
@@ -415,7 +417,7 @@ class TopologyPrepare(Toplevel):
                                         self.resname_nr_dist[res][res_nr]['z'] = c_xyz[2]
 
                                 else:
-                                    print '%4s %3d is not found in lib!' % (res, res_nr)
+                                    print('%4s %3d is not found in lib!' % (res, res_nr))
                                     self.app.log(' ','WARNING: %4s %3d is not found in lib!\n' % (res, res_nr) )
                                     create_cterm = False
 
@@ -437,7 +439,7 @@ class TopologyPrepare(Toplevel):
                         if create_nterm:
                             if res in self.res_atoms.keys():
                                 if len(res) > 3 and res[0].lower() == 'n':
-                                    print '%4s %3d is assumed a valid N-terminal' % (res, res_nr)
+                                    print('%4s %3d is assumed a valid N-terminal' % (res, res_nr))
                                     #Add the togglable terminal if possible:
                                     if res not in self.resname_nr_dist.keys():
                                         self.resname_nr_dist[res] = dict()
@@ -474,7 +476,7 @@ class TopologyPrepare(Toplevel):
                         if not res in self.resname_nr_dist.keys():
                             if res in self.res_charge.keys():
                                 if abs(self.res_charge[res]) > 0.4999:
-                                    print 'Added charged residue which is not togglable: %s  ' % res
+                                    print('Added charged residue which is not togglable: %s  ' % res)
                                     self.resname_distatom[res] = atom_name
                                     self.resname_nr_dist[res] = dict()
                                     find_CA = True
@@ -545,11 +547,11 @@ class TopologyPrepare(Toplevel):
             else:
                 if res in self.toggle_res.keys():
                     if res.lower() == self.toggle_res[res].lower():
-                        print 'Valid C-terminal residue name found: %s %3d' % (res, res_nr)
+                        print('Valid C-terminal residue name found: %s %3d' % (res, res_nr))
                     else:
                         self.check_c_term(res, res_nr, line_number)
 
-                print 'END OF FILE REACHED'
+                print('END OF FILE REACHED')
 
         #If CYX in pdb file, turn on autogenerate S-S bridges:
         if self.makeSS:
@@ -579,7 +581,7 @@ class TopologyPrepare(Toplevel):
 
         forward = False
         if not nterm in self.toggle_res.keys():
-            print 'Generating untogglable standard N-terminal from %s %3d --> %4s\n' % (res, res_nr, nterm)
+            print('Generating untogglable standard N-terminal from %s %3d --> %4s\n' % (res, res_nr, nterm))
 
         if not nterm in self.res_charge.keys():
             self.app.log(' ', 'WARNING: Could not generate N-terminal from %s %3d\n'  % (res, res_nr))
@@ -594,9 +596,9 @@ class TopologyPrepare(Toplevel):
             if res in self.resname_nr_dist.keys():
                 if res_nr in self.resname_nr_dist[res].keys():
                     self.resname_nr_dist[nterm][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
-                    print 'Created %s %d' % (nterm, res_nr)
+                    print('Created %s %d' % (nterm, res_nr))
                     del self.resname_nr_dist[res][res_nr]
-                    print 'Deleted %s %d' % (res, res_nr)
+                    print('Deleted %s %d' % (res, res_nr))
                     forward = False
                     res = nterm
 
@@ -618,7 +620,7 @@ class TopologyPrepare(Toplevel):
                 pdb_line = linecache.getline(self.pdbfile, (line_number + i))
 
                 if 'ATOM' in pdb_line or 'HETATM' in pdb_line:
-                    print pdb_line
+                    print(pdb_line)
                     if res_nr != int(pdb_line[21:26]):
                         break
 
@@ -633,7 +635,7 @@ class TopologyPrepare(Toplevel):
                         self.resname_nr_dist[nterm][res_nr]['y'] = y
                         self.resname_nr_dist[nterm][res_nr]['z'] = z
 
-                        print 'Found correct distance atom for N-term %s' % nterm
+                        print('Found correct distance atom for N-term %s' % nterm)
                         break
 
         return res
@@ -684,7 +686,7 @@ class TopologyPrepare(Toplevel):
                         self.resname_nr_dist[cterm][res_nr]['y'] = y
                         self.resname_nr_dist[cterm][res_nr]['z'] = z
                     if atom_name2 == distatom2:
-                        print 'Found correct distance atom for C-term %s (%d)' % (cterm, res_nr)
+                        print('Found correct distance atom for C-term %s (%d)' % (cterm, res_nr))
                         break
 
 
@@ -695,7 +697,7 @@ class TopologyPrepare(Toplevel):
         Updates the loaded pdb file with the correct modifications made in the topology prepare tool.
         """
         old_pdb = open(self.pdbfile, 'r').readlines()
-        print 'Writing new pdb file from toggle'
+        print('Writing new pdb file from toggle')
 
         #Residue numbers to modify:
         #res nr : resname
@@ -718,7 +720,7 @@ class TopologyPrepare(Toplevel):
                 if res_nr in res_to_mod.keys():
                     new_res = res_to_mod[res_nr]
                     if new_res != orig_res:
-                        print 'Residue %3d %4s --> %4s' % (res_nr, orig_res, new_res)
+                        print('Residue %3d %4s --> %4s' % (res_nr, orig_res, new_res))
                         atomname = old_pdb[i][12:17].strip()
 
                         #Get atoms to modify, if some:
@@ -734,7 +736,7 @@ class TopologyPrepare(Toplevel):
                                 del_atoms.append(atom.strip('-'))
 
                         if atomname in del_atoms:
-                             print 'Atom %s was deleted from %s %d' % (atomname, orig_res, res_nr)
+                             print('Atom %s was deleted from %s %d' % (atomname, orig_res, res_nr))
                         else:
                             atomnr += 1
                             print('%s%5d  %s%4s%s' %
@@ -796,6 +798,7 @@ class TopologyPrepare(Toplevel):
             #Go through files and find indices:
             prmfiles = []
             for entry in self.prm:
+                print(entry,self.prm)
                 prmfile = open(entry,'r').readlines()
                 for i in range(len(prmfile)):
                     if '[atom_types]' in prmfile[i]:
@@ -926,7 +929,7 @@ class TopologyPrepare(Toplevel):
         if os.path.isfile(self.app.workdir + '/' + qprepout_name):
             with open(self.app.workdir + '/' + qprepout_name, 'r') as qpreplog:
                 for line in qpreplog:
-                    print line
+                    print(line)
                     self.app.log(' ', line)
                     if 'Topology successfully generated' in line:
                             #Qprep run OK: Update entry fields in parent (Qgui main or LIE)
@@ -1034,8 +1037,8 @@ class TopologyPrepare(Toplevel):
                 else:
                     if abs(self.res_charge[res]) <= abs(self.res_charge[self.toggle_res[res]]):
                         toggle_res = False
-                print res, self.toggle_res[res]
-                print self.res_charge[res], self.res_charge[self.toggle_res[res]]
+                print(res, self.toggle_res[res])
+                print(self.res_charge[res], self.res_charge[self.toggle_res[res]])
 
                 #Toggle all residues of the given residue type:
                 if toggle_res:
@@ -1059,7 +1062,7 @@ class TopologyPrepare(Toplevel):
                             self.resname_nr_dist[new_res][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
                             del self.resname_nr_dist[res][res_nr]
             else:
-                print 'Residue %s is not defined as togglable in lib' % res
+                print('Residue %s is not defined as togglable in lib' % res)
 
         self.set_total_charge()
         self.updateList()
@@ -1208,7 +1211,7 @@ class TopologyPrepare(Toplevel):
         self.find_ss_bonds()
 
         if self.makeSS:
-            print "Create S-S bonds selected:"
+            print("Create S-S bonds selected:")
             if len(self.cys_residues.keys()) > 0:
 
                 self.app.log('info','Generating S-S bonds for:')
@@ -1240,6 +1243,145 @@ class TopologyPrepare(Toplevel):
 
         if self.session:
             self.highlight_charged()
+
+    def get_charge_coordinates(self,charge,pdb,centre,rmin,rmax):
+        """
+        If checked, adds counter ions to neutralize system
+        """
+        xc,yc,zc = centre
+        xc = np.float(xc)
+        yc = np.float(yc)
+        zc = np.float(zc)
+        r = (np.float(rmin)+np.float(rmax))/2
+        n = int(abs(charge))
+
+        x_cart=[]
+        y_cart=[]
+        z_cart=[]
+
+        coords = set()
+
+
+        k=0.1 + 1.2*n
+        if n == 1:
+            start=(-1.+1./(2*n-1))
+            increment = 1
+        elif n == 2:
+            start=(-1.+1./(n-1))
+            increment = 0.5
+        else: 
+            start=(-1.+1./(n-1))
+            increment = (2.0-2.0/(n-1.))/(n-1.)
+        delta = 0.01*r
+        j=0
+        while j < n:
+            s=start+j*increment    
+            dr = rng.uniform(-1*delta,delta)
+            theta = s*k
+            phi = np.pi/2.*np.copysign(1,s)*(1.-np.sqrt(1.-abs(s)))
+            x = (r)*np.cos(theta)*np.cos(phi)+xc
+            y = (r)*np.sin(theta)*np.cos(phi)+yc
+            z = (r)*np.sin(phi)+zc    
+            if j==0:
+                coords.add((x,y,z))   
+                x_cart.append(x)
+                y_cart.append(y)
+                z_cart.append(z)
+                j+=1
+            else:
+                if (x,y,z) not in coords:
+                    coords.add((x,y,z))   
+                    x_cart.append(x)
+                    y_cart.append(y)
+                    z_cart.append(z)
+                    j+=1
+                else:
+                    k = 0.1+2.2*(n+j) 
+
+        return x_cart,y_cart,z_cart
+
+    def neutralize_system(self):
+
+        # distribute a number of ions to counter a charged protein centred on the protein centre
+        # and placed at midpoint between the protein radius and simulation sphere radius
+        centre_of_mass = pt.centerofmass(self.pdbfile)
+        protein_radius = pt.findRadius(self.pdbfile)
+        sim_radius = self.sphere_entry.get()
+        self.x_ion,self.y_ion,self.z_ion = self.get_charge_coordinates(self.total_charge,self.pdbfile,centre_of_mass,protein_radius,sim_radius)
+        atom_type = "ATOM  "
+        if self.total_charge < 0:    
+            atom_name = "Na  "
+            res_name = "Na+ "
+        elif self.total_charge > 0:
+            atom_name = "Cl  "
+            res_name = "Cl- "
+        else:
+            print("System already neutralized")
+
+        print('Writing new pdb with neutralizing ions')
+        atomnr = 0
+        resnr = 0
+
+        # write ions to a new pdb file
+        file_name_and_extension = self.pdbfile.split('.')
+        new_file = file_name_and_extension[0]+'_neut.'+file_name_and_extension[1]        
+        with open(self.pdbfile,'r') as old_pdb:
+            lines = old_pdb.readlines()
+            old_pdb.seek(0)
+            for line in old_pdb:
+                if line[0:4] == 'ATOM' or line[0:6] == 'HETATM': # find out last current atom and residue number in file
+                    atomnr = int(line[6:11])
+                    resnr =  int(line[22:26])
+            with open(new_file,'w') as new_pdb:
+                for item in lines:    
+                    new_pdb.write(item)
+                for i in range(len(self.x_ion)):
+                    atomnr+=1
+                    resnr+=1
+                    x = round(self.x_ion[i],3)
+                    y = round(self.y_ion[i],3)
+                    z = round(self.z_ion[i],3)
+                    new_line = '{:<6}{:>5}  {:<4}{:<4}{:>5}    {:> 8.3f}{:> 8.3f}{:> 8.3f}\n'.format(atom_type,atomnr,atom_name,res_name,resnr,x,y,z)
+                    new_pdb.write(new_line)
+        old_pdb.close()
+        new_pdb.close()
+
+        # move HOH entries to end of file and renumbers the atoms/residues
+        HOH_lines = []
+        with open(new_file,'r+') as new_pdb:
+            all_lines = new_pdb.readlines()
+            new_pdb.seek(0)
+            for item in all_lines:
+                if item[17:20] == 'HOH':
+                    HOH_lines.append(item)
+                else:
+                    new_pdb.write(item)
+            for item in HOH_lines:
+                new_pdb.write(item)
+            
+            new_pdb.seek(0)
+
+            
+        if self.session:     
+            self.session.stdin.write('delete %s \n' % self.pdbfile)
+            self.session.stdin.write('load %s \n' % new_file)
+
+        self.pdbfile = new_file
+        self.app.main_window.set_entryfield(new_file.split('/')[-1])
+        self.app.update_pdb_id_entryfield()
+
+        #update topo name fields
+        self.checkLib() 
+        self.updateList()
+        self.set_total_charge()
+        self.topology_entry.delete(1.0, END)
+        self.topo_pdb_entry.delete(1.0, END)
+        self.topology_entry.insert(0.0,self.pdbfile.split('/')[-1].split('.')[0]+'.top')
+        if '_top' not in self.pdbfile.split('/')[-1]:
+            self.topo_pdb_entry.insert(0.0,self.pdbfile.split('/')[-1].split('.')[0]+'_top.pdb')
+        else:
+            self.topo_pdb_entry.insert(0.0, self.pdbfile.split('/')[-1])
+
 
     def updateList(self):
         """
@@ -1381,7 +1523,7 @@ class TopologyPrepare(Toplevel):
                             if '`' in selected:
                                 selected = ' '.join(selected.split('`'))
                             selected = selected.split('\n')[0]
-                            print selected
+                            print(selected)
 
                         if 'cmd.id_atom:' in line:
                             pass
@@ -1432,6 +1574,9 @@ class TopologyPrepare(Toplevel):
 
         self.session.stdin.write('set sphere_scale, %s, simsphere\n' % r)
 
+    def update_pymol_ions(self):
+        return
+
     def highlight_charged(self):
         """
         This funciton shows all chargable sidechain as sticks with colored spheres to indicate defined charge.
@@ -1474,14 +1619,13 @@ class TopologyPrepare(Toplevel):
             if len(color_cmd[col].split('i.')) > 1:
                 self.session.stdin.write('%s\n' % color_cmd[col][:-2])
 
-
     def zoom_out(self):
         """
         Adjust automatic zoom buffer in pymol.
         """
         self.pymol_zoom += 1
 
-        print 'PyMOL zoom buffer = %d' % self.pymol_zoom
+        print('PyMOL zoom buffer = %d' % self.pymol_zoom)
 
         if not self.session:
             return
@@ -1503,7 +1647,7 @@ class TopologyPrepare(Toplevel):
         if self.pymol_zoom < 0:
             self.pymol_zoom = 0
 
-        print 'PyMOL zoom buffer = %d' % self.pymol_zoom
+        print('PyMOL zoom buffer = %d' % self.pymol_zoom)
 
         if not self.session:
             return
@@ -1554,7 +1698,7 @@ class TopologyPrepare(Toplevel):
 
 
         # Define elements in the left_frame
-        sphere_label = Label(left_frame, text = 'Simulation sphere:')
+        sphere_label = Label(left_frame, text = 'Sphere:')
         sphere_label.grid(row = 0, column = 0, sticky='e')
         sphere_label.config(background = self.main_color)
 
@@ -1682,7 +1826,7 @@ class TopologyPrepare(Toplevel):
         neutralize_label.grid(row = 11, column = 0, sticky = 'e')
         neutralize_label.config(background = self.main_color)
 
-        neutralize_checkbutton = Checkbutton(left_frame, variable=self.neutralize, command = self.not_available)
+        neutralize_checkbutton = Checkbutton(left_frame, variable=self.neutralize, command = self.neutralize_system)
         neutralize_checkbutton.grid(row = 11, column = 1, sticky = 'w')
         neutralize_checkbutton.config(background = self.main_color)
 
