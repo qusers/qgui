@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
+#Changes for matplotlib v2.2.3 on lines 525, 530, 564, 724, 1689, 1809, 1812, 633
+# NavigationToolbar2TkAgg->NavigationToolbar2Tk
+
 from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton, OptionMenu, HORIZONTAL
 from tkFileDialog import askopenfilename
@@ -25,11 +28,11 @@ import shutil
 import matplotlib
 matplotlib.use('TkAgg')
 #Implement default mpl key bindings
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from tkFileDialog import asksaveasfilename, askdirectory
-
+from cycler import cycler
 
 class EvbReactions(Toplevel):
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
@@ -155,7 +158,7 @@ class EvbReactions(Toplevel):
             #Check if the first directory is a temperature directory
             if len(dirs) == 0:
                 try:
-                    print int(float(rundir.split('/')[-1]))
+                    print(int(float(rundir.split('/')[-1])))
                     if int(float(rundir.split('/')[-1])) > 270:
                         self.app.log(' ', '%s Added. Collecting runs for temperature ...\n\n'
                                           % '/'.join(rundir.split('/')[-3:]))
@@ -210,7 +213,7 @@ class EvbReactions(Toplevel):
                         self.titles_ene[prj_title][nr_dir] = list()
                         self.titles_dG[prj_title][nr_dir] = list()
                         self.app.log(' ','...../%s added\n' % '/'.join(subdir.split('/')[-2:]))
-                        print subdir
+                        print(subdir)
                     nr_dir += 1
                 else:
                     break
@@ -259,7 +262,7 @@ class EvbReactions(Toplevel):
             if os.path.getsize(enefile) != 0:
                 count += 1
                 shutil.copy2(enefile, '%s/md%05d.en' % (self.titles[prj_title]['all'], count))
-                print '../%s ---> md%05d.en' % ('/'.join(enefile.split('/')[-3:]), count)
+                print('../%s ---> md%05d.en' % ('/'.join(enefile.split('/')[-3:]), count))
 
         if not qfep_inp:
             self.write_qfep_inp(all_dir)
@@ -363,7 +366,7 @@ class EvbReactions(Toplevel):
                 if qfile.startswith('md'):
                     enefiles.append(qfile)
 
-        print 'Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:]))
+        print('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:])))
 
         if len(enefiles) == 0:
             found_ene_files = False
@@ -518,13 +521,14 @@ class EvbReactions(Toplevel):
         if self.dg_plot:
             self.dg_plot.clear()
 
-        #Set color cycle for plots:
-        matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        #Set color cycle for plots: 
+        #Made a change here
+        matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
+                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
 
         #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
@@ -558,7 +562,7 @@ class EvbReactions(Toplevel):
             self.dg_plot.plot(deps, dG, '-', linewidth=2.0, label=r'%s$_{%s}$' % (title, nr))
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
 
-        self.canvas.show()
+        self.canvas.draw()
 
     def update_diabatic_plot(self):
         """
@@ -601,7 +605,7 @@ class EvbReactions(Toplevel):
         #Plot selected run
         runs = map(int, self.runs_listbox.curselection())
         if len(runs) > 1:
-            print 'Select exactly one title with one run to plot diabatic energy functions'
+            print('Select exactly one title with one run to plot diabatic energy functions')
             return
 
         if len(runs) == 0:
@@ -626,7 +630,7 @@ class EvbReactions(Toplevel):
 
 
         #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
@@ -718,7 +722,7 @@ class EvbReactions(Toplevel):
 
         if plot_it:
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
-        self.canvas.show()
+        self.canvas.draw()
 
     def recomp_evb(self):
         """
@@ -913,7 +917,7 @@ class EvbReactions(Toplevel):
                             for line in qfepout:
                                 if '--> Give kT & no, of pts to skip: # kT' in line:
                                     temp = round(float(line.split('=')[1]) / 0.001987209, 0)
-                                    print temp
+                                    print(temp)
                                     got_temp = True
                                     break
                     try:
@@ -1055,7 +1059,7 @@ class EvbReactions(Toplevel):
         qfepinp = '%s/qfep.inp' % self.titles[title][nr]
         if not os.path.isfile(qfepinp):
             self.write_qfep_inp(self.titles[title][nr])
-            print 'No qfep.inp in %s. Creating new...' % self.titles[title][nr]
+            print('No qfep.inp in %s. Creating new...' % self.titles[title][nr])
 
         linecount = 0
         with open(qfepinp) as qfepinp:
@@ -1171,11 +1175,11 @@ class EvbReactions(Toplevel):
         qfepinp = '%s/qfep.inp' % self.titles[title][nr]
         if not os.path.isfile(qfepinp):
             self.write_qfep_inp(self.titles[title][nr])
-            print 'No qfep.inp in %s. Creating new...' % self.titles[title][nr]
+            print('No qfep.inp in %s. Creating new...' % self.titles[title][nr])
 
         qfepout = '%s/qfep.out' % self.titles[title][nr]
         if not os.path.isfile(qfepout):
-            print 'No qfep.out in %s. Running Qfep to generate file...' % self.titles[title][nr]
+            print('No qfep.out in %s. Running Qfep to generate file...' % self.titles[title][nr])
             self.run_qfep(self.titles[title][nr], 'qfep.inp')
 
         #Go through part3 from qfep.out and find bin corresponding to RS and TS
@@ -1209,7 +1213,7 @@ class EvbReactions(Toplevel):
                         tsE = mid
                         bin_ts = part3[i].split()[0]
         if not bin_ts or not bin_rs:
-            print 'Problems locating reactant and transition state ... '
+            print('Problems locating reactant and transition state ... ')
 
         return bin_rs, bin_ts
 
@@ -1432,7 +1436,7 @@ class EvbReactions(Toplevel):
             for i in self.titles[title].keys():
                 path = self.titles[title][i]
                 self.app.log(' ', '%s\n' % path)
-                print '%s' % path
+                print('%s' % path)
                 self.title_reorge[title][path] = dict()
                 de_dg = self.get_qfep_part2(path, 'qfep.out')
                 self.title_reorge[title][path]['diabatic'] = de_dg
@@ -1518,7 +1522,7 @@ class EvbReactions(Toplevel):
                 titles.append(title)
                 dG_act.append(float(self.titles_dG[title]['ave'][0]))
                 dG_rxn.append(float(self.titles_dG[title]['ave'][1]))
-                print dG_act
+                print(dG_act)
                 try:
                     tmp_dg = self.titles_ene[title]['all'][1]
                     tmp_eps = self.titles_ene[title]['all'][0]
@@ -1530,7 +1534,7 @@ class EvbReactions(Toplevel):
 
         except:
             return
-        print titles
+        print(titles)
         #Show runs for titles:
         self.runs_listbox.delete(0, END)
         for title in titles:
@@ -1619,7 +1623,7 @@ class EvbReactions(Toplevel):
                         titles.append('%s_%s' % (title, nr))
                         d_G.append(self.titles_ene[title][nr][1])
                         d_eps.append(self.titles_ene[title][nr][0])
-                        print self.titles_dG[title][nr][0]
+                        print(self.titles_dG[title][nr][0])
                         if self.titles_dG[title][nr][0] != 'na':
                             dg_act.append(self.titles_dG[title][nr][0])
                             dg_rxn.append(self.titles_dG[title][nr][1])
@@ -1683,7 +1687,7 @@ class EvbReactions(Toplevel):
                 self.reorg_frame.grid(row=4, column=0, columnspan=2)
                 if self.dg_plot:
                     self.dg_plot.clear()
-                    self.canvas.show()
+                    self.canvas.draw()
             else:
                 self.diabatic_plot = False
                 self.reorg_frame.grid_forget()
@@ -1803,10 +1807,10 @@ class EvbReactions(Toplevel):
         self.canvas = FigureCanvasTkAgg(self.plot_window, master=frame_plot)
         self.plot_window.patch.set_facecolor('white')
 
-        self.canvas.show()
+        self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, frame_plot)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, frame_plot)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
 
