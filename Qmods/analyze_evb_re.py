@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-#Changes for matplotlib v2.2.3 on lines 525, 530, 564, 724, 1689, 1809, 1812, 633
-# NavigationToolbar2TkAgg->NavigationToolbar2Tk
-
 from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton, OptionMenu, HORIZONTAL
 from tkFileDialog import askopenfilename
@@ -522,7 +519,6 @@ class EvbReactions(Toplevel):
             self.dg_plot.clear()
 
         #Set color cycle for plots: 
-        #Made a change here
         matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
                                                    'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])

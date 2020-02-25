@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-# BB: matplotlib changes on lines 64, 85, 103, 164
-# NavigationToolbar2TkAgg -> NavigationToolbar2Tk
 
 from Tkinter import X, BOTH, TOP, Button, Frame, Toplevel, Label, Spinbox, GROOVE
 
