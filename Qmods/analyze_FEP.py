@@ -119,7 +119,7 @@ class AnalyzeFEP(Toplevel):
             #Check if the first directory is a temperature directory
             if len(dirs) == 0:
                 try:
-                    print int(float(rundir.split('/')[-1]))
+                    print(int(float(rundir.split('/')[-1])))
                     if int(float(rundir.split('/')[-1])) > 270:
                         self.app.log(' ', '%s Added. Collecting runs for temperature ...\n\n'
                                           % '/'.join(rundir.split('/')[-3:]))
@@ -175,7 +175,7 @@ class AnalyzeFEP(Toplevel):
                         self.titles[prj_title][nr_dir] = subdir
                         self.titles_dg[prj_title][nr_dir] = dict()
                         self.app.log(' ','...../%s added\n' % '/'.join(subdir.split('/')[-2:]))
-                        print subdir
+                        print(subdir)
                     nr_dir += 1
                 else:
                     break
@@ -229,7 +229,7 @@ class AnalyzeFEP(Toplevel):
                 if qfile.startswith('md'):
                     enefiles.append(qfile)
 
-        print 'Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:]))
+        print('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:])))
 
         if len(enefiles) == 0:
             found_ene_files = False
@@ -308,7 +308,7 @@ class AnalyzeFEP(Toplevel):
             found_part1 = False
             for line in qfep_out:
                 if line == 'Qfep5 terminated abnormally: Failed to read energies.\n':
-                        print ('Qfep failed to read energies in path: %s' % path)
+                        print('Qfep failed to read energies in path: %s' % path)
                         return None
                 if found_part1:
                     if len(line.split()) < 6:
@@ -402,7 +402,7 @@ class AnalyzeFEP(Toplevel):
         #Get title(s) to plot
         sel_titles = map(int, self.titles_listbox.curselection())
         if len(sel_titles) < 1:
-            print 'No titles selected for plot!'
+            print('No titles selected for plot!')
             return
 
         #Create dictionary for each title to contain runs to plot
