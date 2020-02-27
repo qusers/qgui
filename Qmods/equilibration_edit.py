@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Entry, Spinbox, Label, Button,Frame, Toplevel, END, GROOVE, LEFT
+from tkinter import Entry, Spinbox, Label, Button,Frame, Toplevel, END, GROOVE, LEFT
 
 
 class EditEq(Toplevel):
@@ -144,7 +144,3 @@ class EditEq(Toplevel):
         cancel_button = Button(left_frame, text = 'Cancel', command= self.destroy)
         cancel_button.grid(row = 2, column = 7, sticky = 'w', pady=(15,0))
         cancel_button.config(highlightbackground = self.main_color)
-
-
-
-

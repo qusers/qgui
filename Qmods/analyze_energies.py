@@ -13,17 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Listbox, Scrollbar, EXTENDED, Frame, \
+from tkinter import Label, Button, Listbox, Scrollbar, EXTENDED, Frame, \
     Toplevel, END, GROOVE, StringVar, OptionMenu, HORIZONTAL
-
-from tkSimpleDialog import askstring
-import tkFont
+from tkinter.simpledialog import askstring
+import tkinter.font
 import numpy as np
 import os
 from select_return import SelectReturn
 from Qplot import Qplot
 
-from tkFileDialog import askdirectory, asksaveasfilename
+from tkinter.filedialog import askdirectory, asksaveasfilename
 
 
 class AnalyzeEnergies(Toplevel):
@@ -76,7 +75,7 @@ class AnalyzeEnergies(Toplevel):
         #self.update_plot([[0]],[[0]],[title])
 
     def del_title(self):
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         for selected in selections:
             title = self.titles_listbox.get(selected)
             self.titles_listbox.delete(selected)
@@ -94,7 +93,7 @@ class AnalyzeEnergies(Toplevel):
         Add subrun one-by-one or select temperature directory to append all runs
         """
         try:
-            prj_entry = map(int, self.titles_listbox.curselection())
+            prj_entry = list(map(int, self.titles_listbox.curselection()))
         except:
             self.app.errorBox('Warning', 'Select a project title to append runs to.')
             return
@@ -144,7 +143,7 @@ class AnalyzeEnergies(Toplevel):
                             if os.path.getsize('%s/%s' % (rundir, ene)) != 0:
                                 enefiles = True
                                 nr_path = int(rundir.split('/')[-1])
-                                if nr_path not in self.titles_files[prj_title].keys():
+                                if nr_path not in list(self.titles_files[prj_title].keys()):
                                     self.titles_files[prj_title][nr_path] = list()
                                 if ene not in self.titles_files[prj_title][nr_path]:
                                     self.titles_files[prj_title][nr_path].append(ene)
@@ -180,7 +179,7 @@ class AnalyzeEnergies(Toplevel):
                                 if os.path.getsize('%s/%s' % (subdir, ene)) != 0:
                                     enefiles = True
 
-                                    if nr_dir not in self.titles_files[prj_title].keys():
+                                    if nr_dir not in list(self.titles_files[prj_title].keys()):
                                         self.titles_files[prj_title][nr_dir] = list()
                                     if ene not in self.titles_files[prj_title][nr_dir]:
                                         self.titles_files[prj_title][nr_dir].append(ene)
@@ -206,12 +205,12 @@ class AnalyzeEnergies(Toplevel):
         self.list_titles_event()
 
     def del_runs(self):
-        title_sel = map(int, self.titles_listbox.curselection())
+        title_sel = list(map(int, self.titles_listbox.curselection()))
         if len(title_sel) != 1:
             self.app.log(' ', '\nSelect exactly one title to delete runs from!\n')
             return
 
-        selections = map(int, self.runs_listbox.curselection())
+        selections = list(map(int, self.runs_listbox.curselection()))
         if len(selections) == 0:
             self.app.log(' ', '\nNo runs selected for deletion!\n')
             return
@@ -222,11 +221,11 @@ class AnalyzeEnergies(Toplevel):
             search = '/'.join(self.runs_listbox.get(selected).split('/')[-3:])
             self.runs_listbox.delete(selected)
 
-            for nr in self.titles[title].keys():
+            for nr in list(self.titles[title].keys()):
                 if '/'.join(self.titles[title][nr].split('/')[-3:]) == search:
-                     for i in [self.titles, self.titles_ene]:
-                        if title in i.keys():
-                            if nr in i[title].keys():
+                    for i in [self.titles, self.titles_ene]:
+                        if title in list(i.keys()):
+                            if nr in list(i[title].keys()):
                                 del i[title][nr]
 
 
@@ -253,7 +252,7 @@ class AnalyzeEnergies(Toplevel):
         self.update()
 
         for entry in sorted(self.titles_files[title].keys()):
-            if entry not in self.titles_ene[title].keys():
+            if entry not in list(self.titles_ene[title].keys()):
                 self.titles_ene[title][entry] = dict()
             for log in sorted(self.titles_files[title][entry]):
                 self.titles_ene[title][entry][log] = dict()
@@ -303,14 +302,14 @@ class AnalyzeEnergies(Toplevel):
                 if os.path.isfile(logfile):
                     with open(logfile, 'r') as mdlog:
                         print('Collecting energies from')
-                        print('   %s' % logfile)
+                        print(('   %s' % logfile))
                         for line in mdlog:
                             if 'Stepsize' in line:
                                 self.titles_ene[title][entry][log]['stepsize'] = float(line.split('=')[-1])
                             elif 'Energy summary print-out interval' in line:
                                 self.titles_ene[title][entry][log]['interval'] = float(line.split('=')[-1])
                             elif 'solute        ' in line:
-                                el, vdw, bnd, ang, tor, imp = map(float, line.split()[1:7])
+                                el, vdw, bnd, ang, tor, imp = list(map(float, line.split()[1:7]))
                                 total = (el + vdw + bnd + ang + tor + imp)
                                 self.titles_ene[title][entry][log]['solute']['el'].append(el)
                                 self.titles_ene[title][entry][log]['solute']['vdW'].append(vdw)
@@ -321,7 +320,7 @@ class AnalyzeEnergies(Toplevel):
                                 self.titles_ene[title][entry][log]['solute']['total'].append(total)
 
                             elif line.startswith('solvent       '):
-                                el, vdw, bnd, ang, tor, imp = map(float, line.split()[1:7])
+                                el, vdw, bnd, ang, tor, imp = list(map(float, line.split()[1:7]))
                                 total = (el + vdw + ang + tor + imp)
                                 self.titles_ene[title][entry][log]['solvent']['el'].append(el)
                                 self.titles_ene[title][entry][log]['solvent']['vdW'].append(vdw)
@@ -332,7 +331,7 @@ class AnalyzeEnergies(Toplevel):
                                 self.titles_ene[title][entry][log]['solvent']['total'].append(total)
 
                             elif 'solute-solvent' in line:
-                                el, vdw = map(float, line.split()[1:3])
+                                el, vdw = list(map(float, line.split()[1:3]))
                                 total = (el + vdw)
                                 self.titles_ene[title][entry][log]['solute-solvent']['el'].append(el)
                                 self.titles_ene[title][entry][log]['solute-solvent']['vdW'].append(vdw)
@@ -343,7 +342,7 @@ class AnalyzeEnergies(Toplevel):
                                 self.titles_ene[title][entry][log]['LRF']['el'].append(el)
 
                             elif 'Q-atom        ' in line:
-                                el, vdw, bnd, ang, tor, imp = map(float, line.split()[1:7])
+                                el, vdw, bnd, ang, tor, imp = list(map(float, line.split()[1:7]))
                                 total = (el + vdw + bnd + ang + tor + imp)
                                 self.titles_ene[title][entry][log]['Q-atom']['el'].append(el)
                                 self.titles_ene[title][entry][log]['Q-atom']['vdW'].append(vdw)
@@ -354,7 +353,7 @@ class AnalyzeEnergies(Toplevel):
                                 self.titles_ene[title][entry][log]['Q-atom']['total'].append(total)
 
                             elif line.startswith('restraints    '):
-                                total, fix, slvnt_rad, slvnt_pol, shell, solute = map(float, line.split()[1:7])
+                                total, fix, slvnt_rad, slvnt_pol, shell, solute = list(map(float, line.split()[1:7]))
                                 self.titles_ene[title][entry][log]['restraints']['total'].append(total)
                                 self.titles_ene[title][entry][log]['restraints']['exc. atoms'].append(fix)
                                 self.titles_ene[title][entry][log]['restraints']['solv. rad.'].append(slvnt_rad)
@@ -363,7 +362,7 @@ class AnalyzeEnergies(Toplevel):
                                 self.titles_ene[title][entry][log]['restraints']['solute'].append(solute)
 
                             elif 'SUM           ' in line and len(line.split()) > 3:
-                                total, potential, kinetic = map(float, line.split()[1:4])
+                                total, potential, kinetic = list(map(float, line.split()[1:4]))
                                 self.titles_ene[title][entry][log]['SUM']['total'].append(total)
                                 self.titles_ene[title][entry][log]['SUM']['potential'].append(potential)
                                 self.titles_ene[title][entry][log]['SUM']['kinetic'].append(kinetic)
@@ -419,12 +418,12 @@ class AnalyzeEnergies(Toplevel):
         for i in range(len(tables)):
             table = tables[i]
             table.delete(0, END)
-            head = ' '.join(map(lambda x: '%10s' % x.ljust(10), heads[i]))
+            head = ' '.join(['%10s' % x.ljust(10) for x in heads[i]])
             table.insert(END, head)
 
             term = terms[i]
 
-            for title in self.titles_ene.keys():
+            for title in list(self.titles_ene.keys()):
                 ene = list()
                 se = list()
 
@@ -432,13 +431,13 @@ class AnalyzeEnergies(Toplevel):
                     tmp_ene = list()
                     ene_type = heads[i][j].strip()
 
-                    for entry in self.titles_ene[title].keys():
+                    for entry in list(self.titles_ene[title].keys()):
                         for log in self.titles_ene[title][entry]:
                             tmp_ene += self.titles_ene[title][entry][log][term][ene_type]
                     ene.append(round(np.average(tmp_ene), 2))
                     se.append(round(float(np.std(tmp_ene)), 2))
-                ene_str = ' '.join(map(lambda x: '%10.2f' % x, ene))
-                se_str = ' '.join(map(lambda x: '%10.2f' % x, se))
+                ene_str = ' '.join(['%10.2f' % x for x in ene])
+                se_str = ' '.join(['%10.2f' % x for x in se])
 
                 tit = '%10s' % title.ljust(10)
                 se_tit = 'stdev     '
@@ -458,11 +457,11 @@ class AnalyzeEnergies(Toplevel):
 
         tit_entry = dict()
 
-        titles_sel = map(int, self.titles_listbox.curselection())
+        titles_sel = list(map(int, self.titles_listbox.curselection()))
         if len(titles_sel) < 1:
             return
 
-        runs_sel = map(int, self.runs_listbox.curselection())
+        runs_sel = list(map(int, self.runs_listbox.curselection()))
 
         #Collect titles, runs and specific md files to plot
         if len(runs_sel) > 0:
@@ -471,9 +470,9 @@ class AnalyzeEnergies(Toplevel):
                 title = run.split('/')[0]
                 entry = int(run.split('/')[1])
                 logfile = run.split('/')[-1]
-                if title not in tit_entry.keys():
+                if title not in list(tit_entry.keys()):
                     tit_entry[title] = dict()
-                if entry not in tit_entry[title].keys():
+                if entry not in list(tit_entry[title].keys()):
                     tit_entry[title][entry] = list()
 
                 tit_entry[title][entry].append(logfile)
@@ -491,7 +490,7 @@ class AnalyzeEnergies(Toplevel):
         plot_titles = list()
         ylist = list()
         xlist = list()
-        sel_terms = map(int, self.term_listbox.curselection())
+        sel_terms = list(map(int, self.term_listbox.curselection()))
         if len(sel_terms) < 1:
             print('Please select terms to plot (el, vdw...)')
             return
@@ -505,7 +504,7 @@ class AnalyzeEnergies(Toplevel):
 
         plot_types = list()
         #Collect types to plot
-        sel_types = map(int, self.plot_listbox.curselection())
+        sel_types = list(map(int, self.plot_listbox.curselection()))
         if len(sel_types) < 1:
             return
         for i in sel_types:
@@ -515,7 +514,7 @@ class AnalyzeEnergies(Toplevel):
         for i_term in range(len(main_title)):
             subtitle = main_title[i_term]
 
-            for title in tit_entry.keys():
+            for title in list(tit_entry.keys()):
                 for plot_type in plot_types:
                     line_title = '%s %s' % (title, plot_type)
                     plot_titles[i_term].append(line_title)
@@ -543,7 +542,7 @@ class AnalyzeEnergies(Toplevel):
     def list_titles_event(self, *args):
 
         self.runs_listbox.delete(0, END)
-        selected = map(int, self.titles_listbox.curselection())
+        selected = list(map(int, self.titles_listbox.curselection()))
 
         if len(selected) < 1:
             return
@@ -561,7 +560,7 @@ class AnalyzeEnergies(Toplevel):
     def list_plot_event(self, *args):
         self.term_listbox.delete(0, END)
 
-        selections = map(int, self.plot_listbox.curselection())
+        selections = list(map(int, self.plot_listbox.curselection()))
 
         if len(selections) == 0:
             return
@@ -583,7 +582,7 @@ class AnalyzeEnergies(Toplevel):
                   'SUM': self.sum_frame,
                   'Plot': self.plot_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.selected_frame.get()].grid(row=3, column=0, columnspan=2)
@@ -667,7 +666,7 @@ class AnalyzeEnergies(Toplevel):
         titles_yscroll.config(command=self.titles_listbox.yview)
         titles_xscroll.config(command=self.titles_listbox.xview)
         self.titles_listbox.grid(row=1, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.titles_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.titles_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.titles_listbox.bind('<<ListboxSelect>>', self.list_titles_event)
 
         runs_yscroll = Scrollbar(self.proj_frame)
@@ -682,7 +681,7 @@ class AnalyzeEnergies(Toplevel):
         runs_yscroll.config(command=self.runs_listbox.yview)
         runs_xscroll.config(command=self.runs_listbox.xview)
         self.runs_listbox.grid(row=1, rowspan=10, column = 4, columnspan=6, sticky='e')
-        self.runs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.runs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.runs_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         #Select frame
@@ -699,7 +698,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         fep_yscroll.config(command=self.fep_listbox.yview)
         self.fep_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.fep_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.fep_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_solute = Button(self.ss_frame, text='Export table', highlightbackground=self.main_color,
                                command=lambda: self.export_table(self.fep_listbox))
@@ -713,7 +712,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         fep2_yscroll.config(command=self.fep2_listbox.yview)
         self.fep2_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.fep2_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.fep2_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_solutesolvent = Button(self.ss2_frame, text='Export table', highlightbackground=self.main_color,
                                command=lambda: self.export_table(self.fep2_listbox))
@@ -727,7 +726,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         fep3_yscroll.config(command=self.fep3_listbox.yview)
         self.fep3_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.fep3_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.fep3_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_solvent = Button(self.ss3_frame, text='Export table', highlightbackground=self.main_color,
                                command=lambda: self.export_table(self.fep3_listbox))
@@ -741,7 +740,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         restraints_yscroll.config(command=self.restraints_listbox.yview)
         self.restraints_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.restraints_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.restraints_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_restraints = Button(self.restraints_frame, text='Export table', highlightbackground=self.main_color,
                                command=lambda: self.export_table(self.restraints_listbox))
@@ -755,7 +754,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         lrf_yscroll.config(command=self.lrf_listbox.yview)
         self.lrf_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.lrf_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.lrf_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_lrf = Button(self.lrf_frame, text='Export table', highlightbackground=self.main_color,
                                command=lambda: self.export_table(self.lrf_listbox))
@@ -769,7 +768,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         sum_yscroll.config(command=self.sum_listbox.yview)
         self.sum_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.sum_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.sum_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_sum = Button(self.sum_frame, text='Export table', highlightbackground=self.main_color,
                                command=lambda: self.export_table(self.sum_listbox))
@@ -794,7 +793,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         plot_yscroll.config(command=self.plot_listbox.yview)
         self.plot_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.plot_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.plot_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.plot_listbox.bind('<<ListboxSelect>>', self.list_plot_event)
 
         term_yscroll = Scrollbar(self.plot_frame)
@@ -804,7 +803,7 @@ class AnalyzeEnergies(Toplevel):
                                    exportselection=False)
         term_yscroll.config(command=self.term_listbox.yview)
         self.term_listbox.grid(row=0, rowspan=10, column = 4, columnspan=3, sticky='e')
-        self.term_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.term_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         for part in sorted(self.plot_parts.keys()):
             self.plot_listbox.insert(END, part)

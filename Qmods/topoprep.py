@@ -13,15 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, Button, Scrollbar, Toplevel, \
+from tkinter import  Radiobutton, Spinbox, StringVar, Entry, Text, Label, Frame, Button, Scrollbar, Toplevel, \
     Checkbutton, Listbox, DISABLED, NORMAL, END, GROOVE, LEFT, RIGHT, IntVar, PhotoImage
 
 # -*- coding: utf-8 -*-
 
 import os
 import shutil
-import tkFont
-import cPickle
+import tkinter.font
+import pickle
 import prepareTopology as pt
 from select_xyz import AtomSelect
 from edit_file import FileEdit
@@ -118,10 +118,10 @@ class TopologyPrepare(Toplevel):
             for entry in self.his:
                 pt.convertOldNew(self.pdbfile, entry, 'HID')
 
-        #ParameterList (get this from .settings)
+        #ParameterList (get this from settings)
         self.prm = prm
 
-        #Library list (get this from .settings)
+        #Library list (get this from settings)
         self.lib = lib
 
         #These are filled from self.checkLib
@@ -260,7 +260,7 @@ class TopologyPrepare(Toplevel):
                             found_toggle_res = False
                             tot_charge = float(np.sum(charges))
                             self.res_charge[res] = round(tot_charge, 1)
-                            print('%4s: %.1f' % (res, round(tot_charge, 1)))
+                            print(('%4s: %.1f' % (res, round(tot_charge, 1))))
                             if tot_charge > 0.499:
                                 self.res_colors[res] = 'blue'
                             elif tot_charge < -0.499:
@@ -303,19 +303,19 @@ class TopologyPrepare(Toplevel):
         #Add N- and C-terminals to toggle_residues
         for term in term_res:
             res = term[1:]
-            if res in self.res_charge.keys():
+            if res in list(self.res_charge.keys()):
                 if term[0].islower():
                     toggle_to = term[0].capitalize() + term[1:]
                 else:
                     toggle_to = term[0].lower() + term[1:]
 
-                if toggle_to in self.res_charge.keys():
+                if toggle_to in list(self.res_charge.keys()):
                     self.toggle_res[term] = toggle_to
                     self.toggle_res_atoms[toggle_to] = toggle_term_atom[toggle_to[0]]
                     self.resname_distatom[term] = copy.deepcopy(self.resname_distatom[term[0]+'RES'])
                     self.resname_distatom[toggle_to] = copy.deepcopy(self.resname_distatom[toggle_to[0]+'RES'])
                 else:
-                    print('(Can not toggle %4s to %4s: %4s not found in lib.)' % (term, toggle_to, toggle_to))
+                    print(('(Can not toggle %4s to %4s: %4s not found in lib.)' % (term, toggle_to, toggle_to)))
 
         #Remove temp NRES and CRES definitions for terminals
         for to_remove in del_list:
@@ -378,11 +378,11 @@ class TopologyPrepare(Toplevel):
                     #collect atom names for given residue:
                     if res_nr == int(line[21:26]):
                         pdb_atoms.append(atom_name)
-                    elif res in self.res_atoms.keys():
+                    elif res in list(self.res_atoms.keys()):
                         #Check if the next residue is a aa or not. If not, current res could be C-term:
                         next_res = line[17:21].strip()
-                        if next_res not in self.res_atoms.keys():
-                            if res in self.res_atoms.keys():
+                        if next_res not in list(self.res_atoms.keys()):
+                            if res in list(self.res_atoms.keys()):
                                 c_term_found = True
                         elif 'N' not in self.res_atoms[next_res] and 'CA' not in self.res_atoms[next_res]:
                             if 'C' in self.res_atoms[res] and 'CA' in self.res_atoms[res]:
@@ -400,16 +400,16 @@ class TopologyPrepare(Toplevel):
 
                             #Check if C-terminal name is valid or if it is possible to generate one
                             if len(res) > 3 and res[0].lower() == 'c':
-                                if res in self.res_atoms.keys():
-                                    print('%4s %3d is assumed a valid C-terminal' % (res, res_nr))
+                                if res in list(self.res_atoms.keys()):
+                                    print(('%4s %3d is assumed a valid C-terminal' % (res, res_nr)))
                                     #No need to generate it, it is already defined
                                     create_cterm = False
                                     #Add the togglable terminal:
-                                    if res not in self.resname_nr_dist.keys():
+                                    if res not in list(self.resname_nr_dist.keys()):
                                         self.resname_nr_dist[res] = dict()
-                                    if res_nr not in self.resname_nr_dist[res].keys():
+                                    if res_nr not in list(self.resname_nr_dist[res].keys()):
                                         self.resname_nr_dist[res][res_nr] = dict()
-                                    if res not in self.resname_distatom.keys():
+                                    if res not in list(self.resname_distatom.keys()):
                                         self.resname_distatom[res] = 'C'
                                     if c_xyz:
                                         self.resname_nr_dist[res][res_nr]['x'] = c_xyz[0]
@@ -417,7 +417,7 @@ class TopologyPrepare(Toplevel):
                                         self.resname_nr_dist[res][res_nr]['z'] = c_xyz[2]
 
                                 else:
-                                    print('%4s %3d is not found in lib!' % (res, res_nr))
+                                    print(('%4s %3d is not found in lib!' % (res, res_nr)))
                                     self.app.log(' ','WARNING: %4s %3d is not found in lib!\n' % (res, res_nr) )
                                     create_cterm = False
 
@@ -437,15 +437,15 @@ class TopologyPrepare(Toplevel):
                         find_CA = False
 
                         if create_nterm:
-                            if res in self.res_atoms.keys():
+                            if res in list(self.res_atoms.keys()):
                                 if len(res) > 3 and res[0].lower() == 'n':
-                                    print('%4s %3d is assumed a valid N-terminal' % (res, res_nr))
+                                    print(('%4s %3d is assumed a valid N-terminal' % (res, res_nr)))
                                     #Add the togglable terminal if possible:
-                                    if res not in self.resname_nr_dist.keys():
+                                    if res not in list(self.resname_nr_dist.keys()):
                                         self.resname_nr_dist[res] = dict()
-                                    if res_nr not in self.resname_nr_dist[res].keys():
+                                    if res_nr not in list(self.resname_nr_dist[res].keys()):
                                         self.resname_nr_dist[res][res_nr] = dict()
-                                        if res not in self.resname_distatom.keys():
+                                        if res not in list(self.resname_distatom.keys()):
                                             self.resname_distatom[res] = 'N'
                                         if n_xyz:
                                             self.resname_nr_dist[res][res_nr]['x'] = n_xyz[0]
@@ -460,36 +460,36 @@ class TopologyPrepare(Toplevel):
                             create_nterm = False
                             n_xyz = False
 
-                        if 'CYS' in self.toggle_res.keys():
+                        if 'CYS' in list(self.toggle_res.keys()):
                             if res == self.toggle_res['CYS']:
                                 if not self.makeSS:
                                     self.check_variable.set(1)
                                     self.makeSS = True
 
-                        if not res in self.res_atoms.keys():
+                        if not res in list(self.res_atoms.keys()):
                             self.app.log(' ','WARNING: %4s %5d not found in lib entries!\n' % (res, res_nr))
                             if status != 'Lib entries missing':
                                 status = 'Lib entries missing'
 
                         #Check if residue has atom defined for distance to sim center defined
                         #Apply default first atom as default. Change to CA if it exist!
-                        if not res in self.resname_nr_dist.keys():
-                            if res in self.res_charge.keys():
+                        if not res in list(self.resname_nr_dist.keys()):
+                            if res in list(self.res_charge.keys()):
                                 if abs(self.res_charge[res]) > 0.4999:
-                                    print('Added charged residue which is not togglable: %s  ' % res)
+                                    print(('Added charged residue which is not togglable: %s  ' % res))
                                     self.resname_distatom[res] = atom_name
                                     self.resname_nr_dist[res] = dict()
                                     find_CA = True
 
-                        if res in self.resname_nr_dist.keys():
+                        if res in list(self.resname_nr_dist.keys()):
                             self.resname_nr_dist[res][res_nr] = dict()
 
                     #Check if atomname matches defined residue in lib file:
-                    if res in self.res_atoms.keys():
+                    if res in list(self.res_atoms.keys()):
                         if not atom_name in self.res_atoms[res]:
                             missing_atom = True
                             #Check if residue can be toggled and toggle to correct libname
-                            if res in self.toggle_res.keys():
+                            if res in list(self.toggle_res.keys()):
                                 if atom_name in self.res_atoms[self.toggle_res[res]]:
                                     toggle_res = self.toggle_res[res]
                                     self.app.log('', 'Changed residue %s to %s (atom %s present)\n' %
@@ -497,7 +497,7 @@ class TopologyPrepare(Toplevel):
                                     missing_atom = False
                                     #TODO write code for actual change - Thinking about best way to handle...
                                     res_new = self.toggle_res[res]
-                                    if res_new not in self.resname_nr_dist.keys():
+                                    if res_new not in list(self.resname_nr_dist.keys()):
                                         self.resname_nr_dist[res_new] = dict()
 
                                     self.resname_nr_dist[res_new][res_nr] = \
@@ -514,9 +514,9 @@ class TopologyPrepare(Toplevel):
                                     status = 'Lib entries missing'
 
                     #Collect x,y,z for residues that can be toggled (compute distances to these):
-                    if res in self.resname_nr_dist.keys():
+                    if res in list(self.resname_nr_dist.keys()):
                         #Take coordinates of 1st atom in case distance atom is not found:
-                        if 'x' not in self.resname_nr_dist[res][res_nr].keys():
+                        if 'x' not in list(self.resname_nr_dist[res][res_nr].keys()):
                             #x, y, z = map(float, line[30:].split()[0:3])
                             x = float(line[30:38])
                             y = float(line[38:46])
@@ -528,7 +528,7 @@ class TopologyPrepare(Toplevel):
                         if find_CA:
                             distatom = 'CA'
                         else:
-                            if res not in self.resname_distatom.keys():
+                            if res not in list(self.resname_distatom.keys()):
                                 distatom = 'C'
                             else:
                                 distatom = self.resname_distatom[res]
@@ -545,9 +545,9 @@ class TopologyPrepare(Toplevel):
                             self.resname_nr_dist[res][res_nr]['z'] = z
 
             else:
-                if res in self.toggle_res.keys():
+                if res in list(self.toggle_res.keys()):
                     if res.lower() == self.toggle_res[res].lower():
-                        print('Valid C-terminal residue name found: %s %3d' % (res, res_nr))
+                        print(('Valid C-terminal residue name found: %s %3d' % (res, res_nr)))
                     else:
                         self.check_c_term(res, res_nr, line_number)
 
@@ -569,8 +569,8 @@ class TopologyPrepare(Toplevel):
         Takes a list of atoms (pdb_atoms) found in pdb file for a residue (res) with residue number (res_nr)
         and checks if there are any atoms defined in the lib entry missing in the pdb file for that residue.
         """
-        if res in self.res_atoms.keys():
-             for libatom in self.res_atoms[res]:
+        if res in list(self.res_atoms.keys()):
+            for libatom in self.res_atoms[res]:
                 if libatom not in pdb_atoms:
                     if libatom[0] != 'H':
                         self.app.log(' ','WARNING: Heavy atom %s missing in %4s %5d \n' % (libatom, res, res_nr))
@@ -580,25 +580,25 @@ class TopologyPrepare(Toplevel):
         nterm = 'N'+res
 
         forward = False
-        if not nterm in self.toggle_res.keys():
-            print('Generating untogglable standard N-terminal from %s %3d --> %4s\n' % (res, res_nr, nterm))
+        if not nterm in list(self.toggle_res.keys()):
+            print(('Generating untogglable standard N-terminal from %s %3d --> %4s\n' % (res, res_nr, nterm)))
 
-        if not nterm in self.res_charge.keys():
+        if not nterm in list(self.res_charge.keys()):
             self.app.log(' ', 'WARNING: Could not generate N-terminal from %s %3d\n'  % (res, res_nr))
             self.app.log(' ', 'Residue %s %3d not defined!\n' % (nterm, res_nr))
 
         else:
             forward = True
-            if nterm not in self.resname_nr_dist.keys():
+            if nterm not in list(self.resname_nr_dist.keys()):
                 self.resname_nr_dist[nterm] = dict()
 
             #Check if information exist about distance atom from original residue:
-            if res in self.resname_nr_dist.keys():
-                if res_nr in self.resname_nr_dist[res].keys():
+            if res in list(self.resname_nr_dist.keys()):
+                if res_nr in list(self.resname_nr_dist[res].keys()):
                     self.resname_nr_dist[nterm][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
-                    print('Created %s %d' % (nterm, res_nr))
+                    print(('Created %s %d' % (nterm, res_nr)))
                     del self.resname_nr_dist[res][res_nr]
-                    print('Deleted %s %d' % (res, res_nr))
+                    print(('Deleted %s %d' % (res, res_nr)))
                     forward = False
                     res = nterm
 
@@ -613,7 +613,7 @@ class TopologyPrepare(Toplevel):
             #read pdb file and look for toggle atom for sim sphere distance radius:
             distatom2 = 'N'
 
-            if nterm in self.resname_distatom.keys():
+            if nterm in list(self.resname_distatom.keys()):
                 distatom2 = self.resname_distatom[nterm]
 
             for i in range(0, 30):
@@ -635,7 +635,7 @@ class TopologyPrepare(Toplevel):
                         self.resname_nr_dist[nterm][res_nr]['y'] = y
                         self.resname_nr_dist[nterm][res_nr]['z'] = z
 
-                        print('Found correct distance atom for N-term %s' % nterm)
+                        print(('Found correct distance atom for N-term %s' % nterm))
                         break
 
         return res
@@ -644,7 +644,7 @@ class TopologyPrepare(Toplevel):
         cterm = 'C'+res
 
         rewind = False
-        if not cterm in self.res_charge.keys():
+        if not cterm in list(self.res_charge.keys()):
             self.app.log(' ', 'WARNING: Could not generate C-terminal from %s %3d\n'  % (res, res_nr))
             self.app.log(' ', 'Residue %s %3d not defined!\n' % (cterm, res_nr))
 
@@ -653,14 +653,14 @@ class TopologyPrepare(Toplevel):
 
         else:
             rewind = True
-            if cterm not in self.resname_nr_dist.keys():
+            if cterm not in list(self.resname_nr_dist.keys()):
                 self.resname_nr_dist[cterm] = dict()
 
-            if cterm not in self.resname_distatom.keys():
-                        self.resname_distatom[cterm] = 'C'
+            if cterm not in list(self.resname_distatom.keys()):
+                self.resname_distatom[cterm] = 'C'
 
-            if res in self.resname_nr_dist.keys():
-                if res_nr in self.resname_nr_dist[res].keys():
+            if res in list(self.resname_nr_dist.keys()):
+                if res_nr in list(self.resname_nr_dist[res].keys()):
                     self.resname_nr_dist[cterm][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
                     del self.resname_nr_dist[res][res_nr]
 
@@ -681,12 +681,12 @@ class TopologyPrepare(Toplevel):
                     atom_name2 = pdb_line[13:17].strip()
 
                     if atom_name2 == distatom2 or atom_name2 == 'C':
-                        x, y, z = map(float, pdb_line[30:].split()[0:3])
+                        x, y, z = list(map(float, pdb_line[30:].split()[0:3]))
                         self.resname_nr_dist[cterm][res_nr]['x'] = x
                         self.resname_nr_dist[cterm][res_nr]['y'] = y
                         self.resname_nr_dist[cterm][res_nr]['z'] = z
                     if atom_name2 == distatom2:
-                        print('Found correct distance atom for C-term %s (%d)' % (cterm, res_nr))
+                        print(('Found correct distance atom for C-term %s (%d)' % (cterm, res_nr)))
                         break
 
 
@@ -702,8 +702,8 @@ class TopologyPrepare(Toplevel):
         #Residue numbers to modify:
         #res nr : resname
         res_to_mod = dict()
-        for res in self.resname_nr_dist.keys():
-            for nr in self.resname_nr_dist[res].keys():
+        for res in list(self.resname_nr_dist.keys()):
+            for nr in list(self.resname_nr_dist[res].keys()):
                 res_to_mod[nr] = res
 
         #Write new pdb file to existing name:
@@ -717,14 +717,14 @@ class TopologyPrepare(Toplevel):
                 res_nr = int(old_pdb[i][21:26])
                 orig_res = old_pdb[i][17:21].strip()
 
-                if res_nr in res_to_mod.keys():
+                if res_nr in list(res_to_mod.keys()):
                     new_res = res_to_mod[res_nr]
                     if new_res != orig_res:
-                        print('Residue %3d %4s --> %4s' % (res_nr, orig_res, new_res))
+                        print(('Residue %3d %4s --> %4s' % (res_nr, orig_res, new_res)))
                         atomname = old_pdb[i][12:17].strip()
 
                         #Get atoms to modify, if some:
-                        if new_res in self.toggle_res_atoms.keys():
+                        if new_res in list(self.toggle_res_atoms.keys()):
                             modatoms = self.toggle_res_atoms[new_res]
                         else:
                             modatoms = str()
@@ -736,11 +736,11 @@ class TopologyPrepare(Toplevel):
                                 del_atoms.append(atom.strip('-'))
 
                         if atomname in del_atoms:
-                             print('Atom %s was deleted from %s %d' % (atomname, orig_res, res_nr))
+                            print(('Atom %s was deleted from %s %d' % (atomname, orig_res, res_nr)))
                         else:
                             atomnr += 1
-                            print('%s%5d  %s%4s%s' %
-                                            (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:]))
+                            print(('%s%5d  %s%4s%s' %
+                                            (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:])))
 
                             new_pdb.write('%s%5d  %s%4s%s' %
                                             (old_pdb[i][0:6], atomnr, old_pdb[i][13:17], new_res.ljust(4), old_pdb[i][21:]))
@@ -798,7 +798,7 @@ class TopologyPrepare(Toplevel):
             #Go through files and find indices:
             prmfiles = []
             for entry in self.prm:
-                print(entry,self.prm)
+                print((entry,self.prm))
                 prmfile = open(entry,'r').readlines()
                 for i in range(len(prmfile)):
                     if '[atom_types]' in prmfile[i]:
@@ -914,7 +914,7 @@ class TopologyPrepare(Toplevel):
         self.app.log('info','Qprep input file written: %s' % qprepinp_name)
 
     def run_qprep(self):
-        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
+        q_settings = pickle.load(open(self.app.settings_path + '/Qsettings','rb'))
         qprepinp_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.inp'
         qprepout_name = self.pdbfile.split('/')[-1].split('.')[0]+'_Qprep.log'
 
@@ -1015,9 +1015,9 @@ class TopologyPrepare(Toplevel):
         simrad = float(self.sphere_entry.get()) * 0.85
 
         #Go through all charged and togglable residues:
-        for res in self.resname_nr_dist.keys():
+        for res in list(self.resname_nr_dist.keys()):
             #Is the residue defined to be togglable?
-            if res in self.toggle_res.keys():
+            if res in list(self.toggle_res.keys()):
                 #Check if residue needs to be toggled:
                 toggle_res = True
 
@@ -1037,12 +1037,12 @@ class TopologyPrepare(Toplevel):
                 else:
                     if abs(self.res_charge[res]) <= abs(self.res_charge[self.toggle_res[res]]):
                         toggle_res = False
-                print(res, self.toggle_res[res])
-                print(self.res_charge[res], self.res_charge[self.toggle_res[res]])
+                print((res, self.toggle_res[res]))
+                print((self.res_charge[res], self.res_charge[self.toggle_res[res]]))
 
                 #Toggle all residues of the given residue type:
                 if toggle_res:
-                    for res_nr in self.resname_nr_dist[res].keys():
+                    for res_nr in list(self.resname_nr_dist[res].keys()):
                         toggle_res_nr = True
 
                         #If charges on. Check distance to simulation sphere boundary
@@ -1057,12 +1057,12 @@ class TopologyPrepare(Toplevel):
 
                         if toggle_res_nr:
                             new_res = self.toggle_res[res]
-                            if new_res not in self.resname_nr_dist.keys():
+                            if new_res not in list(self.resname_nr_dist.keys()):
                                 self.resname_nr_dist[new_res] = dict()
                             self.resname_nr_dist[new_res][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
                             del self.resname_nr_dist[res][res_nr]
             else:
-                print('Residue %s is not defined as togglable in lib' % res)
+                print(('Residue %s is not defined as togglable in lib' % res))
 
         self.set_total_charge()
         self.updateList()
@@ -1080,7 +1080,7 @@ class TopologyPrepare(Toplevel):
         toggle_res = True
 
         #Is the residue chargable?
-        if org_res in self.toggle_res.keys():
+        if org_res in list(self.toggle_res.keys()):
             #Turn on charges?
             if charge_on:
                 if abs(self.res_charge[org_res]) >= abs(self.res_charge[self.toggle_res[org_res]]):
@@ -1093,7 +1093,7 @@ class TopologyPrepare(Toplevel):
             toggle_res = False
 
         if toggle_res:
-            for res_nr in self.resname_nr_dist[res].keys():
+            for res_nr in list(self.resname_nr_dist[res].keys()):
                 toggle_res_nr = True
 
                 #If charges on. Check distance to simulation sphere boundary
@@ -1109,12 +1109,12 @@ class TopologyPrepare(Toplevel):
                 if toggle_res_nr:
                     new_res = terminal + self.toggle_res[org_res]
                     #Double check that new residue actually is defined in LIB, even though it is put in the header to be togglable:
-                    if new_res not in self.res_charge.keys():
+                    if new_res not in list(self.res_charge.keys()):
                         self.app.log(' ', 'WARNING: Tried to toggle %s --> %s\n-------> %s not found in LIB!'
                                           % (res, new_res, new_res))
                         new_res = res
                     else:
-                        if new_res not in self.resname_nr_dist.keys():
+                        if new_res not in list(self.resname_nr_dist.keys()):
                             self.resname_nr_dist[new_res] = dict()
                         self.resname_nr_dist[new_res][res_nr] = copy.deepcopy(self.resname_nr_dist[res][res_nr])
                         del self.resname_nr_dist[res][res_nr]
@@ -1133,7 +1133,7 @@ class TopologyPrepare(Toplevel):
 
         oldRes, resnr = self.listbox.get(list_index).split()[0:2]
 
-        if oldRes not in self.toggle_res.keys():
+        if oldRes not in list(self.toggle_res.keys()):
             self.app.log(' ', 'Residue %s is not defined as togglable in lib file!\n' % oldRes)
             return
 
@@ -1141,13 +1141,13 @@ class TopologyPrepare(Toplevel):
         #TODO N/C-terminals with chargable residues (4 options)
         newRes = self.toggle_res[oldRes]
 
-        if newRes not in self.res_atoms.keys():
+        if newRes not in list(self.res_atoms.keys()):
             self.app.log(' ', 'Residue %s is not defined in lib file!\n' % newRes)
             return
 
         resnr = int(resnr)
 
-        if newRes not in self.resname_nr_dist.keys():
+        if newRes not in list(self.resname_nr_dist.keys()):
             self.resname_nr_dist[newRes] = dict()
 
         self.resname_nr_dist[newRes][resnr] = copy.deepcopy(self.resname_nr_dist[oldRes][resnr])
@@ -1212,7 +1212,7 @@ class TopologyPrepare(Toplevel):
 
         if self.makeSS:
             print("Create S-S bonds selected:")
-            if len(self.cys_residues.keys()) > 0:
+            if len(list(self.cys_residues.keys())) > 0:
 
                 self.app.log('info','Generating S-S bonds for:')
                 self.app.log(' ','    -------------------------\n')
@@ -1222,11 +1222,11 @@ class TopologyPrepare(Toplevel):
 
                     self.app.log(' ','    CYX %3d - CYX %3d\n' % (cys1, cys2))
 
-                    if cys2 in self.resname_nr_dist['CYS'].keys():
+                    if cys2 in list(self.resname_nr_dist['CYS'].keys()):
                         self.resname_nr_dist['CYX'][cys2] = copy.deepcopy(self.resname_nr_dist['CYS'][cys2])
                         del self.resname_nr_dist['CYS'][cys2]
 
-                    if cys1 in self.resname_nr_dist['CYS'].keys():
+                    if cys1 in list(self.resname_nr_dist['CYS'].keys()):
                         self.resname_nr_dist['CYX'][cys1] = \
                             copy.deepcopy(self.resname_nr_dist['CYS'][cys1])
                         del self.resname_nr_dist['CYS'][cys1]
@@ -1234,8 +1234,8 @@ class TopologyPrepare(Toplevel):
                 self.app.log(' ','    -------------------------\n')
 
         else:
-            if 'CYX' in self.resname_nr_dist.keys():
-                for nr in self.resname_nr_dist['CYX'].keys():
+            if 'CYX' in list(self.resname_nr_dist.keys()):
+                for nr in list(self.resname_nr_dist['CYX'].keys()):
                     self.resname_nr_dist['CYS'][nr] = copy.deepcopy(self.resname_nr_dist['CYX'][nr])
                     del self.resname_nr_dist['CYX'][nr]
 
@@ -1269,34 +1269,34 @@ class TopologyPrepare(Toplevel):
         elif n == 2:
             start=(-1.+1./(n-1))
             increment = 0.5
-        else: 
+        else:
             start=(-1.+1./(n-1))
             increment = (2.0-2.0/(n-1.))/(n-1.)
         delta = 0.01*r
         j=0
         while j < n:
-            s=start+j*increment    
+            s=start+j*increment
             dr = rng.uniform(-1*delta,delta)
             theta = s*k
             phi = np.pi/2.*np.copysign(1,s)*(1.-np.sqrt(1.-abs(s)))
             x = (r)*np.cos(theta)*np.cos(phi)+xc
             y = (r)*np.sin(theta)*np.cos(phi)+yc
-            z = (r)*np.sin(phi)+zc    
+            z = (r)*np.sin(phi)+zc
             if j==0:
-                coords.add((x,y,z))   
+                coords.add((x,y,z))
                 x_cart.append(x)
                 y_cart.append(y)
                 z_cart.append(z)
                 j+=1
             else:
                 if (x,y,z) not in coords:
-                    coords.add((x,y,z))   
+                    coords.add((x,y,z))
                     x_cart.append(x)
                     y_cart.append(y)
                     z_cart.append(z)
                     j+=1
                 else:
-                    k = 0.1+2.2*(n+j) 
+                    k = 0.1+2.2*(n+j)
 
         return x_cart,y_cart,z_cart
 
@@ -1309,7 +1309,7 @@ class TopologyPrepare(Toplevel):
         sim_radius = self.sphere_entry.get()
         self.x_ion,self.y_ion,self.z_ion = self.get_charge_coordinates(self.total_charge,self.pdbfile,centre_of_mass,protein_radius,sim_radius)
         atom_type = "ATOM  "
-        if self.total_charge < 0:    
+        if self.total_charge < 0:
             atom_name = "Na  "
             res_name = "Na+ "
         elif self.total_charge > 0:
@@ -1324,7 +1324,7 @@ class TopologyPrepare(Toplevel):
 
         # write ions to a new pdb file
         file_name_and_extension = self.pdbfile.split('.')
-        new_file = file_name_and_extension[0]+'_neut.'+file_name_and_extension[1]        
+        new_file = file_name_and_extension[0]+'_neut.'+file_name_and_extension[1]
         with open(self.pdbfile,'r') as old_pdb:
             lines = old_pdb.readlines()
             old_pdb.seek(0)
@@ -1333,7 +1333,7 @@ class TopologyPrepare(Toplevel):
                     atomnr = int(line[6:11])
                     resnr =  int(line[22:26])
             with open(new_file,'w') as new_pdb:
-                for item in lines:    
+                for item in lines:
                     new_pdb.write(item)
                 for i in range(len(self.x_ion)):
                     atomnr+=1
@@ -1358,11 +1358,11 @@ class TopologyPrepare(Toplevel):
                     new_pdb.write(item)
             for item in HOH_lines:
                 new_pdb.write(item)
-            
+
             new_pdb.seek(0)
 
-            
-        if self.session:     
+
+        if self.session:
             self.session.stdin.write('delete %s \n' % self.pdbfile)
             self.session.stdin.write('load %s \n' % new_file)
 
@@ -1371,7 +1371,7 @@ class TopologyPrepare(Toplevel):
         self.app.update_pdb_id_entryfield()
 
         #update topo name fields
-        self.checkLib() 
+        self.checkLib()
         self.updateList()
         self.set_total_charge()
         self.topology_entry.delete(1.0, END)
@@ -1400,7 +1400,7 @@ class TopologyPrepare(Toplevel):
         #self.nterm_nr, self.nterm_res, self.cterm_nr, self.cterm_res = pt.findTerminals(self.pdbfile)
 
         #for residue in sorted(self.toggle_res.keys(), key=lambda s: s.lower()):
-        for residue in sorted(self.resname_nr_dist.keys(), key=lambda s: s.lower()):
+        for residue in sorted(list(self.resname_nr_dist.keys()), key=lambda s: s.lower()):
             #if residue in self.resname_nr_dist.keys():
             for nr in sorted(self.resname_nr_dist[residue].keys()):
                 x = self.resname_nr_dist[residue][nr]['x']
@@ -1615,7 +1615,7 @@ class TopologyPrepare(Toplevel):
         self.session.stdin.write('hide dots, name C or name N or name O or name H or name CA\n')
 
         #Color spheres
-        for col in color_cmd.keys():
+        for col in list(color_cmd.keys()):
             if len(color_cmd[col].split('i.')) > 1:
                 self.session.stdin.write('%s\n' % color_cmd[col][:-2])
 
@@ -1625,12 +1625,12 @@ class TopologyPrepare(Toplevel):
         """
         self.pymol_zoom += 1
 
-        print('PyMOL zoom buffer = %d' % self.pymol_zoom)
+        print(('PyMOL zoom buffer = %d' % self.pymol_zoom))
 
         if not self.session:
             return
 
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -1647,12 +1647,12 @@ class TopologyPrepare(Toplevel):
         if self.pymol_zoom < 0:
             self.pymol_zoom = 0
 
-        print('PyMOL zoom buffer = %d' % self.pymol_zoom)
+        print(('PyMOL zoom buffer = %d' % self.pymol_zoom))
 
         if not self.session:
             return
 
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -1668,7 +1668,7 @@ class TopologyPrepare(Toplevel):
             return
 
         self.session.stdin.write('select none\n')
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         self.session.stdin.write('hide labels\n')
 
@@ -1706,7 +1706,7 @@ class TopologyPrepare(Toplevel):
                                     textvariable=self.sphere_radius)
         self.sphere_entry.grid(row = 0, column = 1)
 
-        aangstrom_label = Label(left_frame, text='%s' % u'\xc5')
+        aangstrom_label = Label(left_frame, text='%s' % '\xc5')
         aangstrom_label.grid(row=0, column=2, sticky='w')
         aangstrom_label.config(background=self.main_color)
 
@@ -1884,7 +1884,7 @@ class TopologyPrepare(Toplevel):
         self.listbox = Listbox(left_frame, yscrollcommand = listbox_scroll.set, highlightthickness = 0, relief = GROOVE)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 8, rowspan = 5, column = 3, columnspan = 4, sticky = 'e')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.listbox.bind('<<ListboxSelect>>', self.listbox_clicked)
 
 
@@ -1899,15 +1899,3 @@ class TopologyPrepare(Toplevel):
         cancel_button = Button(left_frame, text = 'Close', command = self.destroy)
         cancel_button.grid(row = 15, column = 4, pady=(20,10))
         cancel_button.config(highlightbackground = self.main_color)
-
-
-
-
-
-
-
-
-
-
-
-

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Entry, Spinbox, Label, Button,Frame, Toplevel, END, GROOVE, DISABLED, NORMAL, StringVar
+from tkinter import Entry, Spinbox, Label, Button,Frame, Toplevel, END, GROOVE, DISABLED, NORMAL, StringVar
 
 
 class EditLIE(Toplevel):
@@ -105,13 +105,13 @@ class EditLIE(Toplevel):
 
         lie_data.append(0.0)
 
-        print lie_data
+        print(lie_data)
         if self.edit:
             self.app.lie_data[self.insert_index] = lie_data
         else:
             self.app.lie_data.append(lie_data)
 
-        print self.app.lie_data
+        print((self.app.lie_data))
 
         self.app.update_table()
         self.app.update_plot()
@@ -138,25 +138,25 @@ class EditLIE(Toplevel):
         name = Label(frame1, text='#Name     ', bg=self.main_color)
         name.grid(row=0, column=0)
 
-        beta = Label(frame1, text=u"\N{GREEK SMALL LETTER BETA}", bg=self.main_color)
+        beta = Label(frame1, text="\N{GREEK SMALL LETTER BETA}", bg=self.main_color)
         beta.grid(row=0, column=1)
 
-        d_el = Label(frame1, text=u"\N{GREEK CAPITAL LETTER DELTA}E(el)", bg=self.main_color)
+        d_el = Label(frame1, text="\N{GREEK CAPITAL LETTER DELTA}E(el)", bg=self.main_color)
         d_el.grid(row=0, column=2)
 
-        alpha = Label(frame1, text=u"\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
+        alpha = Label(frame1, text="\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
         alpha.grid(row=0, column=3)
 
-        d_vdw = Label(frame1, text=u"\N{GREEK CAPITAL LETTER DELTA}E(vdW)", bg=self.main_color)
+        d_vdw = Label(frame1, text="\N{GREEK CAPITAL LETTER DELTA}E(vdW)", bg=self.main_color)
         d_vdw.grid(row=0, column=4)
 
-        gamma = Label(frame1, text=u"\N{GREEK SMALL LETTER GAMMA}", bg=self.main_color)
+        gamma = Label(frame1, text="\N{GREEK SMALL LETTER GAMMA}", bg=self.main_color)
         gamma.grid(row=0, column=5)
 
-        dG = Label(frame1, text=u"\N{GREEK CAPITAL LETTER DELTA}G", bg=self.main_color)
+        dG = Label(frame1, text="\N{GREEK CAPITAL LETTER DELTA}G", bg=self.main_color)
         dG.grid(row=0, column=6)
 
-        dG_exp = Label(frame1, text=u"\N{GREEK CAPITAL LETTER DELTA}G(exp)", bg=self.main_color)
+        dG_exp = Label(frame1, text="\N{GREEK CAPITAL LETTER DELTA}G(exp)", bg=self.main_color)
         dG_exp.grid(row=0, column=7)
 
         self.name = Entry(frame1, width=10, highlightthickness=0)

@@ -16,7 +16,7 @@ bashfile='.bash_profile'
 ###############INSTALL SCRIPT###################################
 import os
 import shutil
-
+import sys
 if install_path == 'default':
     install_path='%s/QGUI' % os.path.expanduser("~")
 elif install_path.split('/')[-1] != 'QGUI':

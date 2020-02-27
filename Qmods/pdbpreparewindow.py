@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Entry, EXTENDED, Text, Label, Frame, Button, Scrollbar, Toplevel, Checkbutton, Listbox, END, INSERT, GROOVE, RIDGE, TOP, IntVar, BROWSE
+from tkinter import Entry, EXTENDED, Text, Label, Frame, Button, Scrollbar, Toplevel, Checkbutton, Listbox, END, INSERT, GROOVE, RIDGE, TOP, IntVar, BROWSE
 
 
 class PdbFilePrepare(Toplevel):
@@ -39,7 +39,7 @@ class PdbFilePrepare(Toplevel):
         self.final_deletion = []
 
         self.dialog_box()
-        self.pdb_info() 
+        self.pdb_info()
         self.set_chain_number()
         self.set_residues_number()
         self.set_atoms_number()
@@ -51,7 +51,7 @@ class PdbFilePrepare(Toplevel):
         """Defines a dialog-box."""
 
         self.title('Prepare PDB') #TODO
-        
+
 
         upper_frame = Frame(self, bg = self.main_color)
         upper_frame.pack(side = TOP)
@@ -136,7 +136,7 @@ class PdbFilePrepare(Toplevel):
         self.residues_listbox.grid(row = 1, column = 2, columnspan = 1, padx = 5)
         residues_scroll.config(command = self.residues_listbox.yview)
         self.residues_listbox.bind('<<ListboxSelect>>', self.fill_atoms_list)
-        
+
         atoms_scroll = Scrollbar(middel_frame)
         atoms_scroll.grid(row = 1, column = 5, sticky = 'nsw', padx = 5)
         self.atoms_listbox = Listbox(middel_frame, yscrollcommand = atoms_scroll.set, bd = 1, selectmode = EXTENDED)
@@ -155,7 +155,7 @@ class PdbFilePrepare(Toplevel):
         label_txt2.grid(row = 3, column = 0, columnspan = 2, sticky = 'w')
         label_txt2.config(background = self.main_color)
 
-        self.txt = Text(bottom_frame, height = 5) 
+        self.txt = Text(bottom_frame, height = 5)
         self.txt.config(font = ("consolas", 12), undo= True, wrap = 'word', highlightbackground = self.main_color, relief = RIDGE)
         self.txt.grid(row = 1, column = 0, columnspan = 2)
 
@@ -176,7 +176,7 @@ class PdbFilePrepare(Toplevel):
         self.clear_button.config(highlightbackground = self.main_color, relief = GROOVE)
 
 
-    def exit(self): 
+    def exit(self):
         pass
 
     def listbox_selected(self):
@@ -208,9 +208,9 @@ class PdbFilePrepare(Toplevel):
 
         # Set the state=0 for HOH checkbutton
         self.check_variable.set(0)
-    
+
     def set_chain_number(self):
-        """This method sets the number of unique chains in self.chains list to 
+        """This method sets the number of unique chains in self.chains list to
         self.chains_entry entry field. """
 
         old_chain = []
@@ -227,7 +227,7 @@ class PdbFilePrepare(Toplevel):
 
     def set_residues_number(self):
         """This method sets both the total number of residues and the number
-        of water molecules in self.residues_entry field and 
+        of water molecules in self.residues_entry field and
         self.residues_water_entry field.
          """
         whole_length = 0    #An empty variabel
@@ -241,7 +241,7 @@ class PdbFilePrepare(Toplevel):
 
         self.residues_entry.delete(0, 50)   #Delete any previous text from the entry
         self.residues_entry.insert(0, whole_length) #Insert the length in the entry
-        
+
         self.residues_water_entry.delete(0, 50)
         self.residues_water_entry.insert(0, water_length)
 
@@ -251,7 +251,7 @@ class PdbFilePrepare(Toplevel):
         self.atoms_entry.insert(0, self.atom_count)
 
     def fill_chains_list(self):
-        """Fills the self.chains_listbox with chains from the 
+        """Fills the self.chains_listbox with chains from the
         pdbfile."""
 
         self.chains_listbox.delete(0, 50)
@@ -271,7 +271,7 @@ class PdbFilePrepare(Toplevel):
             index_list.append(index_chain)
 
         self.atoms_listbox.delete(0, 100000)        #Deletes entry from atoms listbox when new chain is chosen
-        
+
         chain_chosen_list = []
         chain_chosen_flat = []
         for index in index_list:
@@ -281,7 +281,7 @@ class PdbFilePrepare(Toplevel):
                 result = isinstance(chain, list)
                 if result == True:
                     chain_chosen_flat.extend(chain)
-        
+
         residue_number_list = []
         residue_number_flat = []
         for index in index_list:
@@ -299,7 +299,7 @@ class PdbFilePrepare(Toplevel):
                 self.residues_listbox.insert(END, (residue, number))
 
         self.chain_chosen_flat = chain_chosen_flat
-        
+
 
     def fill_atoms_list(self, index):
         """Gets the chosen residue from check_residue_chosen() method.
@@ -353,9 +353,9 @@ class PdbFilePrepare(Toplevel):
         There are three possible outcomes:
 
         1. Only one chain is selected from a listbox and it is selected to be deleted from the pdbfile
-        2. Both a chain and a residue is chosen from the 
+        2. Both a chain and a residue is chosen from the
         listboxes which means that a residue is selected to be deleted
-        3. Chain, residue and atom are chosen which means that an atom is selected to be deleted 
+        3. Chain, residue and atom are chosen which means that an atom is selected to be deleted
 
         Makes a list of items to be deleted.
 
@@ -366,7 +366,7 @@ class PdbFilePrepare(Toplevel):
         residue_chosen = self.check_residue_chosen()
         chain_chosen = self.check_chain_chosen()
 
-        # Three possibilities: 
+        # Three possibilities:
         # 1.only chain chosen
         if (chain_chosen != ()) and (residue_chosen == ()) and (atom_chosen == ()):
             for index in chain_chosen:
@@ -374,7 +374,7 @@ class PdbFilePrepare(Toplevel):
                 chain_count = chain_index + 1
                 self.txt.insert(INSERT, 'Chain %s:[%s]; ' % (chain_count, self.chains[chain_index]))
                 self.atoms_deletion.append(self.atoms_chain_residues[chain_index])
-            
+
         # 2.chain and residue chosen
         elif (chain_chosen != ()) and (residue_chosen != ()) and (atom_chosen == ()):
             for index_chain in chain_chosen:
@@ -399,7 +399,7 @@ class PdbFilePrepare(Toplevel):
                         atom_chosen = self.atomtypes_chain_residues[chain_index][residue_index][atom_index]
                         self.txt.insert(INSERT, 'Atom: [%s] in Residue %s: [%s] in Chain %s:[%s]; ' % (atom_chosen, self.resnr_chain[chain_index][residue_index], residue_chosen, chain_count, self.chains[chain_index]))
                         self.atoms_deletion.append(self.atoms_chain_residues[chain_index][residue_index][atom_index])
-           
+
         else:
             pass #TODO
             #error
@@ -407,7 +407,7 @@ class PdbFilePrepare(Toplevel):
         #The following creates a flatlist from the self.atoms_deletion array.
         #Creates a new list called self.atoms_deletion_final which is used
         # at delete_atoms() method.
-        
+
         flatlist = []
         flatlist2 = []
         flatlist3 = []
@@ -431,7 +431,7 @@ class PdbFilePrepare(Toplevel):
                         self.atoms_deletion_final.append(entry2)
 
             elif result == False:
-                self.atoms_deletion_final.append(entry) 
+                self.atoms_deletion_final.append(entry)
 
 
     def create_pdb_file_button_pressed(self):
@@ -452,7 +452,7 @@ class PdbFilePrepare(Toplevel):
         indexis are appended to yet an other list, self.water_deletion.
         This list is made flat and put in to variable self.water_deletion_final.
 
-        self.water_deletion_final is used is delete_atoms() method."""  
+        self.water_deletion_final is used is delete_atoms() method."""
         state = self.check_variable.get()
 
         delete_list = []
@@ -464,7 +464,7 @@ class PdbFilePrepare(Toplevel):
                         delete_list.append((index_chain, index_residue))
             self.txt.insert(INSERT, 'Delete all HOH;')
 
-        self.water_deletion = []                
+        self.water_deletion = []
 
         for index_chain, index_residue in delete_list:
             self.water_deletion.append(self.atoms_chain_residues[index_chain][index_residue])
@@ -486,13 +486,13 @@ class PdbFilePrepare(Toplevel):
     def delete_atoms(self):
         """
         Takes a standard PDB file and deletes selected chains/residues/atoms.
-        
+
         """
         finished = False
         # Two list are combined to one final deletion list. self.final_deletion is used
         # to tell which lines from the PDB file are not written to the new PDB file.
         self.final_deletion = (self.atoms_deletion_final + self.water_deletion_final)
-        
+
         if len(self.final_deletion) == 0:
             self.app.log('info', 'No atoms specified. Please, choose chains, residues, atoms or HOH to be deleted.')
             self.app.pdb_delete_atoms_msg()
@@ -520,13 +520,13 @@ class PdbFilePrepare(Toplevel):
                 except:
                     self.savename = self.pdbfile.split('/')[-1].split('.')[0]+'_new.pdb'
         newpdb = []
-   
+
         for line in file:
             if line.split()[0] == 'ATOM' or line.split()[0] == 'HETATM':
                 current_atomnr = int(line[6:11])
                 if current_atomnr not in self.final_deletion:
-                        newpdb.append(line)
-                        finished = True
+                    newpdb.append(line)
+                    finished = True
         self.app.pdb_id = self.workdir + '/' + self.savename
         newfile = open(self.app.pdb_id,'w')
         for line in newpdb:
@@ -546,9 +546,9 @@ class PdbFilePrepare(Toplevel):
         try:
             file = open(self.pdbfile,'r').readlines()
         except:
-             print 'Please specify a valid PDB file'
+            print('Please specify a valid PDB file')
         chains = []         #chains
-        residues = [] 
+        residues = []
         residues_chain = []         #sequences[chain] --> residues in each chain (Array)
         resnr = []
         resnr_chain = []        #seqnr[chain] --> residue nr in each chain (Array)
@@ -560,7 +560,7 @@ class PdbFilePrepare(Toplevel):
         atomtypes = []      #atomtypes[chain][residue] --> Atom types
 
         chain = 'toFill'
-        old_resnr = 0 
+        old_resnr = 0
         atom_count = 0
 
         for line in file:
@@ -596,7 +596,7 @@ class PdbFilePrepare(Toplevel):
                         atomtypes = []
                         atomtypes_chain_residues.append(atomtypes_residues)
                         atomtypes_residues = []
-                
+
                         atoms.append(current_atom)
                         atomtypes.append(current_atomtype)
                 elif current_resnr != old_resnr:
@@ -632,12 +632,6 @@ class PdbFilePrepare(Toplevel):
         self.atoms_chain_residues = atoms_chain_residues
         self.atomtypes_chain_residues = atomtypes_chain_residues
         self.atom_count = atom_count
-        
+
 
         #return chains, residues_chain, resnr_chain, atoms_chain_residues, atomtypes_chain_residues, atom_count
-
-        
-    
-
-
-

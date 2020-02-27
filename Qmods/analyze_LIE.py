@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Listbox, EXTENDED, Spinbox, Entry, LabelFrame, Text, Frame, \
+from tkinter import Label, Button, Listbox, EXTENDED, Spinbox, Entry, LabelFrame, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL
-import tkFont
-from tkFileDialog import askdirectory, asksaveasfilename
+import tkinter.font
+from tkinter.filedialog import askdirectory, asksaveasfilename
 import os
 import time
 import numpy as np
@@ -134,7 +134,7 @@ class AnalyzeLie(Toplevel):
                     for files in logfiles_in_dir:
                         if mdle.is_md_log(files):
                             logfiles.append(files)
-                            print files
+                            print(files)
                             self.app.main_window.txt.insert(END, '%s\n' % files.split('/')[-1])
                             self.app.main_window.txt.yview(END)
                             self.update()
@@ -154,7 +154,7 @@ class AnalyzeLie(Toplevel):
             for files in logfiles_in_dir:
                 if mdle.is_md_log(files):
                     logfiles.append(files)
-                    print files
+                    print(files)
                     self.app.main_window.txt.insert(END, '%s\n' % files.split('/')[-1])
                     self.app.main_window.txt.yview(END)
                     self.update()
@@ -216,7 +216,7 @@ class AnalyzeLie(Toplevel):
             if logs.split('/')[-1] in unique_logs:
                 md_logs.append(logs)
 
-        print md_logs
+        print(md_logs)
 
         if len(self.comp_log) != 0 and len(self.lig_log) != 0:
             self.compute_button.config(state=NORMAL)
@@ -335,7 +335,7 @@ class AnalyzeLie(Toplevel):
         #Config all entry boxes:
         for entry_ in entries:
             entry_.config(state=NORMAL)
-            entry_.config(font=tkFont.Font(family="Courier", size=12))
+            entry_.config(font=tkinter.font.Font(family="Courier", size=12))
 
         #Insert results:
         for result in range(len(entries)):
@@ -365,9 +365,9 @@ class AnalyzeLie(Toplevel):
 
         #Get selection from list:
         try:
-            system_index = map(int, self.system_list.curselection())
-            type_index = map(int, self.interaction_list.curselection())
-            print system_index
+            system_index = list(map(int, self.system_list.curselection()))
+            type_index = list(map(int, self.interaction_list.curselection()))
+            print(system_index)
             if len(type_index) == 0:
                 return
             if len(system_index) == 0:
@@ -451,7 +451,7 @@ class AnalyzeLie(Toplevel):
                     x_to_fill.append(tmplist)
 
         except:
-            print 'No selections'
+            print('No selections')
             return
 
         qtitles = []
@@ -470,8 +470,8 @@ class AnalyzeLie(Toplevel):
         #qenergies = [el_ylist, vdw_ylist]
         #xlist = [el_xlist, vdw_xlist]
 
-        print plottitles
-        print qtitles
+        print(plottitles)
+        print(qtitles)
 
         self.plot_ = Qplot(self, self.root, qenergies, xlist, plottitles, qtitles, 'Time (ns)', 'Energy (kcal/mol)')
         self.plot_.resizable()
@@ -489,7 +489,7 @@ class AnalyzeLie(Toplevel):
         if savefile:
             if not savefile.endswith('.qlie'):
                 savefile += '.qlie'
-                print savefile
+                print(savefile)
             if os.path.isfile(savefile):
                 oldfile = open(savefile, 'r').readlines()
                 oldfile.append('\n')
@@ -599,9 +599,9 @@ class AnalyzeLie(Toplevel):
         select_ligand_dir = Button(frame, text='Select', command=lambda: self.get_lie_files('ligand', True),
                                    highlightbackground=self.main_color)
         select_ligand_dir.grid(in_=self.general_label, row=0, column=2)
-        
+
         self.ligand_runs_entry = Text(frame, width=30, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
-        
+
 
         complex_dir = Label(frame, text='Complex dir.:', bg=self.main_color)
         complex_dir.grid(in_=self.general_label, row=1, column=0, sticky='e')
@@ -616,21 +616,21 @@ class AnalyzeLie(Toplevel):
 
         self.complex_runs_entry = Text(frame, width=30, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
 
-        alpha_label = Label(frame, text= u"\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
+        alpha_label = Label(frame, text= "\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
         alpha_label.grid(in_=self.general_label, row=2, column=0, sticky='e')
 
         self.alpha_entry = Spinbox(frame,width=7, highlightthickness=0, relief=GROOVE,
                                    from_=0.00, to=1.50, increment=0.01)
         self.alpha_entry.grid(in_=self.general_label, row=2, column=1, sticky='w')
 
-        beta_label = Label(frame, text= u"\N{GREEK SMALL LETTER BETA}", bg=self.main_color)
+        beta_label = Label(frame, text= "\N{GREEK SMALL LETTER BETA}", bg=self.main_color)
         beta_label.grid(in_=self.general_label, row=3, column=0, sticky='e')
 
         self.beta_entry = Spinbox(frame,width=7, highlightthickness=0, relief=GROOVE,
                                   from_=-1.00, to=1.00, increment=0.01)
         self.beta_entry.grid(in_=self.general_label, row=3, column=1, sticky='w')
 
-        gamma_label = Label(frame, text= u"\N{GREEK SMALL LETTER GAMMA}", bg=self.main_color)
+        gamma_label = Label(frame, text= "\N{GREEK SMALL LETTER GAMMA}", bg=self.main_color)
         gamma_label.grid(in_=self.general_label, row=4, column=0, sticky='e')
 
         self.gamma_entry = Spinbox(frame,width=7, highlightthickness=0, relief=GROOVE,
@@ -759,7 +759,7 @@ class AnalyzeLie(Toplevel):
         result_label = LabelFrame(frame4, text='Binding Free Energy', padx=10, bg=self.main_color)
         result_label.grid()
 
-        dg_label = Label(frame4, text=u"\N{GREEK CAPITAL LETTER DELTA}G = ", bg=self.main_color)
+        dg_label = Label(frame4, text="\N{GREEK CAPITAL LETTER DELTA}G = ", bg=self.main_color)
         dg_label.grid(in_=result_label, row=0, column=0)
 
         self.dg_entry = Entry(frame4, width=10, highlightthickness=0)
@@ -784,7 +784,7 @@ class AnalyzeLie(Toplevel):
                                    exportselection=False)
         self.system_list.grid(in_=plot_label, row=1, column=0, columnspan=2, sticky='w')
         self.system_list.insert(END, 'LIGAND', 'COMPLEX')
-        self.system_list.config(font=tkFont.Font(family="Courier", size=12))
+        self.system_list.config(font=tkinter.font.Font(family="Courier", size=12))
 
         interactions_label = Label(frame5, text='Select interaction(s):', bg=self.main_color)
         interactions_label.grid(in_=plot_label, row=3, column=0, columnspan=2)
@@ -796,7 +796,7 @@ class AnalyzeLie(Toplevel):
                                      'Q-wat  vdW', 'Q-surr el', 'Q-surr vdW']
         for qtype in interactions:
             self.interaction_list.insert(END,'%10s%10s' % (qtype.split()[0].ljust(10),qtype.split()[1]))
-        self.interaction_list.config(font=tkFont.Font(family="Courier", size=12))
+        self.interaction_list.config(font=tkinter.font.Font(family="Courier", size=12))
 
         self.plot_button = Button(frame5, text='Plot', command=self.plot_selection, highlightbackground=self.main_color)
         self.plot_button.grid(in_=plot_label, row=10, column=0, columnspan=2)
@@ -808,7 +808,7 @@ class AnalyzeLie(Toplevel):
         self.ligname.grid(row=0, column=1)
         self.ligname.insert(0, 'LIG')
 
-        dg_exp = Label(frame6, text=u"\N{GREEK CAPITAL LETTER DELTA}G(exp):", bg=self.main_color)
+        dg_exp = Label(frame6, text="\N{GREEK CAPITAL LETTER DELTA}G(exp):", bg=self.main_color)
         dg_exp.grid(row=1, column=0, sticky='e')
         self.dg_exp_entry = Entry(frame6, width=10, highlightthickness=0)
         self.dg_exp_entry.grid(row=1, column=1)

@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import X, TOP, Entry, Label, Button, Spinbox, Frame, Toplevel, Scrollbar, Listbox, Checkbutton, DISABLED, NORMAL, END, GROOVE, IntVar
-import cPickle
-from tkFileDialog import askopenfilename
-from tkFileDialog import askdirectory
+from tkinter import  X, TOP, Entry, Label, Button, Spinbox, Frame, Toplevel, Scrollbar, Listbox, Checkbutton, DISABLED, NORMAL, END, GROOVE, IntVar
+import pickle
+from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askdirectory
 import os
-import tkFont
+import tkinter.font
 from equilibration_edit import EditEq
 from edit_file import FileEdit
 
@@ -33,12 +33,12 @@ class QguiSettings(Toplevel):
         self.app = app
         self.main_color = self.app.main_color
         self.root = root
-        self.q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
+        self.q_settings = pickle.load(open(self.app.settings_path + '/Qsettings','rb'))
         self.submit_check = IntVar()
         self.dialog_window()
         self.updateSettings()
         self.toggle_submission()
-        self.list_font = tkFont.Font(family="Monaco", size=12)
+        self.list_font = tkinter.font.Font(family="Monaco", size=12)
 
     def close(self):
         self.submitcommand.config(state=NORMAL)
@@ -51,7 +51,7 @@ class QguiSettings(Toplevel):
         self.q_settings[ 'schrodinger path' ] = self.schrodinger_path.get().strip()
 
 
-        cPickle.dump(self.q_settings, open(self.app.settings_path + '/Qsettings','wb'))
+        pickle.dump(self.q_settings, open(self.app.settings_path + '/Qsettings','wb'))
         self.app.getSettings()
         self.destroy()
 
@@ -104,7 +104,7 @@ class QguiSettings(Toplevel):
 
     def updateSettings(self):
         """
-        Read settings from .settings and update lists
+        Read settings from settings and update lists
         self.qsettings = ['workdir',[prm],[lib]]
         """
 
@@ -357,7 +357,7 @@ class QguiSettings(Toplevel):
         self.eq_list = Listbox(frame1, yscrollcommand = eq_scroll.set, width = 50, height = 13, highlightthickness = 0 , relief = GROOVE)
         eq_scroll.config(command = self.eq_list.yview)
         self.eq_list.grid(row = 1, rowspan = 4, column = 5, columnspan = 4, padx = (10,0),sticky = 'e')
-        self.eq_list.config(font = tkFont.Font(family="Courier", size=12))
+        self.eq_list.config(font = tkinter.font.Font(family="Courier", size=12))
 
         eq_add = Button(frame1, text = 'Add', command=self.add_eq_button)
         eq_add.grid(row = 5, column = 6)

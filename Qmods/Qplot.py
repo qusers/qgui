@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
+# BB: matplotlib changes on lines 64, 85, 103, 164
+# NavigationToolbar2TkAgg -> NavigationToolbar2Tk
 
-from Tkinter import X, BOTH, TOP, Button, Frame, Toplevel, Label, Spinbox, GROOVE
+from tkinter import  X, BOTH, TOP, Button, Frame, Toplevel, Label, Spinbox, GROOVE
 
 
 import matplotlib
@@ -68,9 +70,9 @@ class Qplot(Toplevel):
         #Find min X and max X to scale xrange:
         min_x = 100000.00
         max_x = -100000.00
-        print(len(xlist))
-        print(len(xlist[0]))
-        print(len(xlist[0][0]))
+        print((len(xlist)))
+        print((len(xlist[0])))
+        print((len(xlist[0][0])))
         for plot in range(len(xlist)):
             for types in range(len(xlist[plot])):
                 if xlist[plot][types][0] < min_x:
@@ -103,7 +105,7 @@ class Qplot(Toplevel):
         self.canvas.draw()
 
     def on_key_event(self, event):
-        print('you pressed %s' % event.key)
+        print(('you pressed %s' % event.key))
         key_press_handler(event, self.canvas, self.toolbar)
 
     def update_plot(self):
@@ -180,11 +182,3 @@ class Qplot(Toplevel):
 
         quit_button = Button(frame2, text='Quit', highlightbackground=self.main_color, command=self._quit)
         quit_button.grid(row=2, column=0, columnspan=10)
-
-
-
-
-
-
-
-

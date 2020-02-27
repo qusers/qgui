@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Button,Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
-import tkFont
+from tkinter import  Button,Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
+import tkinter.font
 
 import prepareTopology as pt
 
@@ -90,7 +90,7 @@ class AtomSelect(Toplevel):
         self.listbox = Listbox(left_frame, yscrollcommand = listbox_scroll.set, width = 60, height=30, highlightthickness = 0, relief = GROOVE)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 0, rowspan = 10, column = 0, columnspan = 10, sticky = 'w')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         select_button = Button(left_frame, text = 'Select', command = self.get_selected)
         select_button.grid(row = 11, column = 0, columnspan = 6, sticky = 'e')

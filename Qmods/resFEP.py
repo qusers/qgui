@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Frame, Toplevel, Scrollbar, GROOVE, Listbox, END, \
+from tkinter import  Label, Button, Frame, Toplevel, Scrollbar, GROOVE, Listbox, END, \
     OptionMenu, StringVar, Spinbox, SINGLE
-from tkFileDialog import askopenfilename
+from tkinter.filedialog import askopenfilename
 import qgui_functions as qf
 from select_return import SelectReturn
 from setup_md import SetupMd
 from edit_file import FileEdit
-import tkFont
+import tkinter.font
 import os
 from subprocess import call
 import shutil
@@ -95,7 +95,7 @@ class ResFEP(Toplevel):
 
             self.md_settings['temperature'] = float(self.temperature.get())
             self.md_settings['inputfiles'] = \
-                int(((1.0/lambda_step) + 1) * len(self.topology_fep[self.selected_topology.get()].keys()))
+                int(((1.0/lambda_step) + 1) * len(list(self.topology_fep[self.selected_topology.get()].keys())))
 
         except Exception as e:
             print(e)
@@ -110,7 +110,7 @@ class ResFEP(Toplevel):
         topology = self.topology_paths[self.selected_topology.get()]
         topname = topology.split('/')[-1]
 
-        if not self.selected_topology.get() in self.topology_fep.keys():
+        if not self.selected_topology.get() in list(self.topology_fep.keys()):
             self.topology_fep[self.selected_topology.get()] = dict()
 
         self.topology_label.config(text=topname)
@@ -129,7 +129,7 @@ class ResFEP(Toplevel):
         """
         self.feplist.delete(0, END)
 
-        if len(self.topology_fep[self.selected_topology.get()].keys()) > 0:
+        if len(list(self.topology_fep[self.selected_topology.get()].keys())) > 0:
             for fep in sorted(self.topology_fep[self.selected_topology.get()].keys()):
                 self.feplist.insert(END, 'FEP%d' % fep)
 
@@ -210,7 +210,7 @@ class ResFEP(Toplevel):
 
         """
         if self.topology_paths[self.selected_topology.get()] == '*.top':
-            print('No topology loaded for %s' % self.selected_topology.get())
+            print(('No topology loaded for %s' % self.selected_topology.get()))
             return
 
         #Get topology residues
@@ -272,25 +272,25 @@ class ResFEP(Toplevel):
         mutate_to = None
 
         #Check if resname exist in FEP protocols
-        for fepfrom in self.feps.keys():
+        for fepfrom in list(self.feps.keys()):
             if fepfrom == resname:
                 mutate_from.append(fepfrom)
-                for fepto in self.feps[fepfrom].keys():
+                for fepto in list(self.feps[fepfrom].keys()):
                     mutate_to_options.append(fepto)
                     if not '+' in fepto:
                         mutate_to = fepto
 
         if len(mutate_from) < 1:
-            print('Found no FEP protocol for residue: %s' % resname)
+            print(('Found no FEP protocol for residue: %s' % resname))
             return
 
         if not mutate_to:
             mutate_to = mutate_to_options[0]
 
-        if not top in self.topology_res_order.keys():
+        if not top in list(self.topology_res_order.keys()):
             self.topology_res_order[top] = dict()
 
-        self.topology_res_order[top][len(self.topology_res_order[top].keys())+1] = res_nr
+        self.topology_res_order[top][len(list(self.topology_res_order[top].keys()))+1] = res_nr
 
         self.topology_mutation[self.selected_topology.get()][res_nr] = [resname, mutate_to]
 
@@ -331,7 +331,7 @@ class ResFEP(Toplevel):
 
         #Remove atoms from pdb that is not present in FEP file:
         for i in range(len(pdb_atoms_order) - 1, -1, -1):
-            if pdb_atoms_order[i] not in q_atomname.values():
+            if pdb_atoms_order[i] not in list(q_atomname.values()):
                 pdb_atoms_order.pop(i)
                 pdb_atomnumbers_order.pop(i)
 
@@ -341,14 +341,14 @@ class ResFEP(Toplevel):
         #Check if additional atoms (f.ex counter ions) are missing.
         top = self.selected_topology.get()
 
-        if len(pdb_atoms_order) != len(q_atomname.keys()):
+        if len(pdb_atoms_order) != len(list(q_atomname.keys())):
             residues = qf.create_pdb_from_topology(self.topology_paths[top], self.app.q_settings['library'])
-            for q in q_atomname.keys():
+            for q in list(q_atomname.keys()):
                 atomtype = q_atomname[q]
 
                 if atomtype not in pdb_atoms_order:
                     #Let us add the missing atom to this FEP residue
-                    print('Q atom %d %s not found in residue %d ' % (q, atomtype, res_nr))
+                    print(('Q atom %d %s not found in residue %d ' % (q, atomtype, res_nr)))
                     self.app.log(' ', 'Q atom %d %s not found in residue %d \n' % (q, atomtype, res_nr))
                     self.app.log(' ', 'Select atom %s from topology.\n' % atomtype)
                     atomnr = SelectReturn(self, self.root, elements=residues,
@@ -379,7 +379,7 @@ class ResFEP(Toplevel):
                     fep_atoms_order = list()
                     for qi in sorted(q_atomname.keys()):
                         fep_atoms_order.append(q_atomname[qi])
-                    print 'FEP atoms order VS topology atoms order:'
+                    print('FEP atoms order VS topology atoms order:')
                     print(fep_atoms_order)
                     print(pdb_atoms_order)
                     print('This will most likely be handled by Qgui, but verify final FEP files!')
@@ -395,10 +395,10 @@ class ResFEP(Toplevel):
                             break
             i += 1
 
-        if len(missing_atoms.keys()) > 0:
+        if len(list(missing_atoms.keys())) > 0:
             self.app.errorBox('warning', 'Could not find all atoms defined in FEP in topology!')
             for q in sorted(missing_atoms.keys()):
-                print('Q-atom %d with atom name %s not found in topolgy.' % (q, missing_atoms[q]))
+                print(('Q-atom %d with atom name %s not found in topolgy.' % (q, missing_atoms[q])))
                 self.app.log('', 'Q-atom %d with atom name %s not found in topolgy.\n' % (q, missing_atoms[q]))
 
             return None
@@ -423,7 +423,7 @@ class ResFEP(Toplevel):
 
         for fepfile in os.listdir(self.feps[rest_wt][res_mut]):
             if fepfile.endswith('.fep'):
-                nr = int(filter(str.isdigit, fepfile))
+                nr = int(list(filter(str.isdigit, fepfile)))
                 fepfile = '%s/%s' % (self.feps[rest_wt][res_mut], fepfile)
                 #Check atom numebers from pdb
                 if not checked_pdb:
@@ -464,7 +464,7 @@ class ResFEP(Toplevel):
         fep_tot = deepcopy(res_fep[res])
 
         #Check if any existing mutations are added. If so, we need to merge FEP protocols:
-        if len(res_fep.keys()) > 1:
+        if len(list(res_fep.keys())) > 1:
             while len(merge_sequence) > 0:
                 res = res_order[self.selected_topology.get()][merge_sequence.pop(0)]
                 fep_tot = qf.merge_fep_dicts(fep_tot, res_fep[res])
@@ -478,7 +478,7 @@ class ResFEP(Toplevel):
         :return:
         """
          #Set all FEP files as unedited:
-        if not self.selected_topology.get() in self.fep_written.keys():
+        if not self.selected_topology.get() in list(self.fep_written.keys()):
             self.fep_written[self.selected_topology.get()] = dict()
         for nr in sorted(self.topology_fep[self.selected_topology.get()].keys()):
             self.fep_written[self.selected_topology.get()][nr] = False
@@ -493,7 +493,7 @@ class ResFEP(Toplevel):
         for res_nr in sorted(self.topology_mutation[self.selected_topology.get()].keys()):
             resname = self.topology_mutation[self.selected_topology.get()][res_nr][0]
             mutate_to = self.topology_mutation[self.selected_topology.get()][res_nr][1]
-            self.reslist.insert(END, u'%s %d \u2192 %s' % (resname, res_nr, mutate_to))
+            self.reslist.insert(END, '%s %d \u2192 %s' % (resname, res_nr, mutate_to))
 
     def update_mutate_from_options(self, mut_from):
         """
@@ -540,13 +540,13 @@ class ResFEP(Toplevel):
 
                         if not res_wt in res_feps:
                             res_feps[res_wt] = dict()
-                        if res_mut in res_feps[res_wt].keys():
-                            print('Found duplicate FEP protocol for %s!' % fep)
-                            print('Default version of %s will be used' % fep)
+                        if res_mut in list(res_feps[res_wt].keys()):
+                            print(('Found duplicate FEP protocol for %s!' % fep))
+                            print(('Default version of %s will be used' % fep))
                         res_feps[res_wt][res_mut] = fepdir
-                        print('%s-->%s' % (res_wt, res_mut))
+                        print(('%s-->%s' % (res_wt, res_mut)))
                     except:
-                        print('Failed to read %s' % fepdir)
+                        print(('Failed to read %s' % fepdir))
 
         if len(res_feps) < 1:
             print('Found no FEP protocols in /QGUI/FF/OPLS/FEP')
@@ -571,7 +571,7 @@ class ResFEP(Toplevel):
 
         mut_from = self.mutate_from.get()
         mut_to = self.mutate_to.get()
-        print(mut_from, mut_to)
+        print((mut_from, mut_to))
 
         #Get FEP files for default mutation
         fep_ok = self.get_fep_files(mut_from, mut_to, res_nr)
@@ -621,7 +621,7 @@ class ResFEP(Toplevel):
 
         fepfile = self.feplist.get(selection[0])
 
-        nr = int(filter(str.isdigit, fepfile))
+        nr = int(list(filter(str.isdigit, fepfile)))
 
         fep = self.topology_fep[self.selected_topology.get()][nr]
 
@@ -642,14 +642,14 @@ class ResFEP(Toplevel):
         if len(selection) == 0:
             return
         fepfile = self.feplist.get(selection[0])
-        fepnr = int(filter(str.isdigit, fepfile))
+        fepnr = int(list(filter(str.isdigit, fepfile)))
 
 
         #Get current Topology
         top = self.selected_topology.get()
 
         #Path to write stuff for this topology
-        top_path = '%s/%s_%s' % (self.app.workdir, int(filter(str.isdigit, top)), self.topology_label.cget("text"))
+        top_path = '%s/%s_%s' % (self.app.workdir, int(list(filter(str.isdigit, top))), self.topology_label.cget("text"))
         if not os.path.isdir(top_path):
             os.makedirs(top_path)
 
@@ -746,9 +746,9 @@ class ResFEP(Toplevel):
 
         #Make the submitfile executable!
         st = os.stat(submitname)
-        os.chmod(submitname, st.st_mode | 0111)
+        os.chmod(submitname, st.st_mode | 0o111)
 
-        print('Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
+        print(('Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:])))
         self.app.log('info', 'Use %s to submit resFEP job.' % '/'.join(submitname.split('/')[-3:]))
 
     def add_multifep_runscript(self, runsript, fepfiles, inputfiles_path):
@@ -829,7 +829,7 @@ class ResFEP(Toplevel):
         #Get submission script, if this is to be used
         submissionscript=False
 
-        print self.app.q_settings['subscript']
+        print(self.app.q_settings['subscript'])
 
         if self.app.q_settings['subscript'][0] == 1:
             if os.path.isfile(self.app.settings_path + '/qsubmit'):
@@ -840,7 +840,7 @@ class ResFEP(Toplevel):
 
         #Append multiFEP stuff to run script!
         fepfiles = list()
-        for i in range(len(self.topology_fep[topology].keys())):
+        for i in range(len(list(self.topology_fep[topology].keys()))):
             fepfiles.append('FEP%d.fep' % (i + 1))
         submissionscript= self.add_multifep_runscript(submissionscript, fepfiles, md_path)
 
@@ -870,9 +870,9 @@ class ResFEP(Toplevel):
         Write butten function - uses write_md_inputfiles and write_fep_files to write all files for MD/FEP sim. with Q.
         :return:
         """
-        for top in self.topology_fep.keys():
+        for top in list(self.topology_fep.keys()):
             top_name = self.topology_paths[top].split('/')[-1]
-            top_path = '%s/%s_%s' % (self.app.workdir, int(filter(str.isdigit, top)), top_name.split('.top')[0])
+            top_path = '%s/%s_%s' % (self.app.workdir, int(list(filter(str.isdigit, top))), top_name.split('.top')[0])
             if not os.path.isdir(top_path):
                 os.makedirs(top_path)
 
@@ -936,7 +936,7 @@ class ResFEP(Toplevel):
         # res_nr = int(selected.split()[1])
         # res_mut = selected.split()[3]
 
-        print res_wt
+        print(res_wt)
 
     def dialog_window(self):
 
@@ -958,7 +958,7 @@ class ResFEP(Toplevel):
         frame3.grid(row=2, column=0)
 
         #Dropdown menu for topology selection
-        self.select_topology = OptionMenu(frame1, self.selected_topology, *self.topology_paths.keys())
+        self.select_topology = OptionMenu(frame1, self.selected_topology, *list(self.topology_paths.keys()))
         self.select_topology.config(bg=self.main_color, highlightbackground=self.main_color, width=15)
         self.select_topology.grid(row=1, column=0)
 
@@ -991,7 +991,7 @@ class ResFEP(Toplevel):
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=False)
         reslist_scroll.config(command=self.reslist.yview)
         self.reslist.grid(row=1, rowspan=3, column=0, sticky='nse')
-        self.reslist.config(font=tkFont.Font(family="Courier", size=12))
+        self.reslist.config(font=tkinter.font.Font(family="Courier", size=12))
         self.reslist.bind('<<ListboxSelect>>', self.reslist_event)
 
         #Add residue button
@@ -1009,7 +1009,7 @@ class ResFEP(Toplevel):
         self.mutate_from_menu.grid(row=2, column=2)
 
         #right arrow:
-        arrow_label = Label(frame2, text='%1s' % u'\u2192', bg=self.main_color)
+        arrow_label = Label(frame2, text='%1s' % '\u2192', bg=self.main_color)
         arrow_label.grid(row=2, column=3)
 
         #Mutate to dropdown menu
@@ -1033,7 +1033,7 @@ class ResFEP(Toplevel):
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=False)
         feplist_scroll.config(command=self.feplist.yview)
         self.feplist.grid(row=5, rowspan=5, column=0, sticky='nse')
-        self.feplist.config(font=tkFont.Font(family="Courier", size=12))
+        self.feplist.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.feplist.bind('<<ListboxSelect>>', self.reslist_event)
 
         #View FEP file button
@@ -1046,7 +1046,7 @@ class ResFEP(Toplevel):
         edit_fepfile.grid(row=5, column=3, columnspan=2)
 
         #Set lambda step size
-        lambda_label = Label(frame2, text=u'\u03BB step size', bg=self.main_color)
+        lambda_label = Label(frame2, text='\u03BB step size', bg=self.main_color)
         lambda_label.grid(row=6, column=2, columnspan=2, sticky='e')
 
         self.lambda_step = Spinbox(frame2, width=4, highlightthickness=0, relief=GROOVE,
@@ -1091,4 +1091,3 @@ class ResFEP(Toplevel):
         #Close resFEP gui
         close_resfep = Button(frame3, text='close', highlightbackground=self.main_color, command=self.destroy)
         close_resfep.grid(row=1, column=2)
-

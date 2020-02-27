@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
+from tkinter import  Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
     OptionMenu, StringVar, Spinbox, SINGLE, LabelFrame, MULTIPLE
 from subprocess import Popen, PIPE
-import tkFont
+import tkinter.font
 import time
 import os
 import signal
@@ -25,7 +25,7 @@ import numpy as np
 import shutil
 from copy import deepcopy
 import build as bld
-from tkFileDialog import askopenfilenames, asksaveasfilename
+from tkinter.filedialog import askopenfilenames, asksaveasfilename
 
 
 class ViewPyMol(Toplevel):
@@ -162,7 +162,7 @@ class ViewPyMol(Toplevel):
 
         #Original selected_atoms list is strings:
 
-        selected_atoms = map(int, self.selected_atoms)
+        selected_atoms = list(map(int, self.selected_atoms))
 
         atomnumbers.append(selected_atoms[0])
         selections = self.listbox.curselection()
@@ -186,9 +186,9 @@ class ViewPyMol(Toplevel):
                     atomnr = int(line.split()[1])
                     if atomnr in atomnumbers:
                         p1_dict[atomnr] = dict()
-                        xyz = map(float, line[30:].split()[0:3])
+                        xyz = list(map(float, line[30:].split()[0:3]))
                         p1_dict[atomnr]['xyz'] = xyz
-                    if len(p1_dict.keys()) == len(atomnumbers):
+                    if len(list(p1_dict.keys())) == len(atomnumbers):
                         break
 
         return p1_dict
@@ -291,7 +291,7 @@ class ViewPyMol(Toplevel):
 
         for i in range(len(self.selected_atoms)):
             atomnr = self.selected_atoms[i]
-            xyz = map(float, pdb_lines[i][30:].split()[0:3])
+            xyz = list(map(float, pdb_lines[i][30:].split()[0:3]))
             name = pdb_lines[i][13:17].strip()
             residue = pdb_lines[i][17:21].strip()
             residue_nr = pdb_lines[i][22:26].strip()
@@ -467,7 +467,7 @@ class ViewPyMol(Toplevel):
                         resnr = int(line[22:26]) + resnr_add
                         tmp_pdb.write('%s%5d%s%5d%s' % (line[0:6], atomnr, line[11:21], resnr, line[26:]))
                     elif replace and group:
-                        if atomnr in group.keys():
+                        if atomnr in list(group.keys()):
                             tmp_pdb.write('%s' % line[0:30])
                             tmp_pdb.write('%8.3f%8.3f%8.3f\n' % (group[atomnr]['xyz'][0], group[atomnr]['xyz'][1],
                                                                  group[atomnr]['xyz'][2]))
@@ -504,7 +504,7 @@ class ViewPyMol(Toplevel):
         self.update_pymol_structure(tmp_name)
 
         if replace:
-            atoms_select = group.keys()
+            atoms_select = list(group.keys())
             #for i in self.selected_atoms:
             #    atoms_select.append(i)
             self.set_selection(atoms_select)
@@ -594,13 +594,13 @@ class ViewPyMol(Toplevel):
 
         atom = self.buildlist.get(self.buildlist.curselection()[0]).split()[-1]
 
-        print('Changing atom to %s' % atom)
-        print self.selected_atoms
+        print(('Changing atom to %s' % atom))
+        print(self.selected_atoms)
 
         p_atoms = self.get_p_atoms()
         atomnames, atomnr = self.get_atom_names(int(p_atoms[0]['residuenr']))
 
-        if atom in atomnames.keys():
+        if atom in list(atomnames.keys()):
             p_atoms[0]['name'] = '%s%d' % (atom, (atomnames[atom] + 1))
         else:
             p_atoms[0]['name'] = '%s%d' % (atom, 1)
@@ -655,7 +655,7 @@ class ViewPyMol(Toplevel):
 
         with open(pdb_file, 'r') as pdb:
             for line in pdb:
-                print line
+                print(line)
                 if 'ATOM' in line or 'HETATM' in line:
                     resnr = int(line[22:26])
                     atoms += 1
@@ -705,7 +705,7 @@ class ViewPyMol(Toplevel):
 
         new_atom[1]['xyz'] = q['xyz']
 
-        if atomname in atomnames.keys():
+        if atomname in list(atomnames.keys()):
             new_atom[1]['name'] = '%s%d' % (atomname, (atomnames[atomname] + 1))
 
         self.write_tmp_pdb(group=new_atom, insert_after_atomnr=atomnr, resnr_add=resnr_add)
@@ -771,7 +771,7 @@ class ViewPyMol(Toplevel):
             atomnr += 1
             atomtype = ''.join([i for i in deepcopy(frag[atom]['name']) if not i.isdigit()])
 
-            if atomtype in atomnames.keys():
+            if atomtype in list(atomnames.keys()):
                 atomnames[atomtype] += 1
                 atomname = '%s%d' % (atomtype, atomnames[atomtype])
             else:
@@ -780,8 +780,8 @@ class ViewPyMol(Toplevel):
             new_atoms[atom]['name'] = atomname
             new_atoms[atom]['xyz'] = deepcopy(frag[atom]['xyz'])
             new_atoms[atom]['atomnr'] = atomnr
-            print frag[atom]['xyz']
-            print new_atoms[atom]['xyz']
+            print(frag[atom]['xyz'])
+            print(new_atoms[atom]['xyz'])
 
 
         self.write_tmp_pdb(group=new_atoms, insert_after_atomnr=insert_after, resnr_add=resnr_add)
@@ -815,7 +815,7 @@ class ViewPyMol(Toplevel):
 
                         atom = ''.join([i for i in line[11:17].strip() if not i.isdigit()])
                         atomnr = int(line.split()[1])
-                        if not atom in atomnames.keys():
+                        if not atom in list(atomnames.keys()):
                             atomnames[atom] = 1
                         else:
                             atomnames[atom] += 1
@@ -929,13 +929,13 @@ class ViewPyMol(Toplevel):
                 self.session = Popen(["pymol", "-p -x -i"], stdout=tmpfile, stdin=PIPE,
                                      preexec_fn=os.setsid)
             except:
-                print 'pymol not found'
+                print('pymol not found')
 
         else:
             try:
                 self.session = Popen(["pymol", "-p"], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
             except:
-                print 'No pymol version found'
+                print('No pymol version found')
 
         self.update()
         len_log = 35
@@ -984,7 +984,7 @@ class ViewPyMol(Toplevel):
                                 time.sleep(0.2)
                                 for rline in reversed(open(self.app.workdir + '/.tmpfile').readlines()):
                                     if 'cmd.identify' in rline:
-                                        print rline
+                                        print(rline)
                                         atom = rline.split('id ')[-1]
                                         atom = atom.strip(')\n')
                                         atomnumbers.append(atom)
@@ -1108,7 +1108,7 @@ class ViewPyMol(Toplevel):
         """
         Unselects current items, and selects all other
         """
-        selection = map(int, self.listbox.curselection())
+        selection = list(map(int, self.listbox.curselection()))
         self.listbox.select_clear(0, END)
 
         self.listbox.select_set(0, END)
@@ -1121,7 +1121,7 @@ class ViewPyMol(Toplevel):
         Returns list ['id 1-123','id 321-421'] f.ex
         """
         #Get selected atoms from list:
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         atoms = []
         for selection in selections:
@@ -1152,7 +1152,7 @@ class ViewPyMol(Toplevel):
         General pymol commands
         """
         #Get selected atoms from list:
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         if len(selections) > 0:
             sel_list = self.get_selected_atoms()
@@ -1197,7 +1197,7 @@ class ViewPyMol(Toplevel):
         """
         Special types pymol command
         """
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
         if len(selections) > 0:
             sele = self.get_selected_atoms()
         else:
@@ -1245,16 +1245,16 @@ class ViewPyMol(Toplevel):
         elif cmd.split()[1] == 'PlastRay':
             self.session.stdin.write('reinitialize settings\n')
             for settings in self.pymol_settings:
-                    self.session.stdin.write('%s\n' % settings)
+                self.session.stdin.write('%s\n' % settings)
             if cmd.split()[0] == 'show':
 
-                    atom_independent = ['unset depth_cue,', 'set light_count, 10,', 'set shininess, 10,',
-                                        'set specular, 0.25,', 'set ambient, 0,',
-                                        'set direct, 0,', 'set reflect, 1.5,',
-                                        'set ray_shadow_decay_factor, 0.1,',
-                                        'set ray_shadow_decay_range, 2,']
-                    for pycmd in atom_independent:
-                        self.session.stdin.write('%s\n' %pycmd)
+                atom_independent = ['unset depth_cue,', 'set light_count, 10,', 'set shininess, 10,',
+                                    'set specular, 0.25,', 'set ambient, 0,',
+                                    'set direct, 0,', 'set reflect, 1.5,',
+                                    'set ray_shadow_decay_factor, 0.1,',
+                                    'set ray_shadow_decay_range, 2,']
+                for pycmd in atom_independent:
+                    self.session.stdin.write('%s\n' %pycmd)
 
         #Default Q-pymol settings:
         elif cmd.split()[1] == 'Q-pymol':
@@ -1363,7 +1363,7 @@ class ViewPyMol(Toplevel):
             self.session.stdin.write('bg_color %s\n' % color)
             return
 
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         if len(selections) > 0:
             sel_list = self.get_selected_atoms()
@@ -1383,7 +1383,7 @@ class ViewPyMol(Toplevel):
         Change the bond order between selected pair, or generate bond
         between pair.
         """
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
 
         if len(selections) == 2:
             atom1 = self.listbox.get(selections[0]).split()[0]
@@ -1400,7 +1400,7 @@ class ViewPyMol(Toplevel):
         """
         Fix the geometry for selected atoms:
         """
-        selections = map(int, self.listbox.curselection())
+        selections = list(map(int, self.listbox.curselection()))
         if len(selections) > 998:
             self.app.errorBox('Warning', 'Too many atoms selected. PyMol can at best do 999 atoms.')
             return
@@ -1454,13 +1454,13 @@ class ViewPyMol(Toplevel):
 
         self.fill_build_list(self.atoms_fragments.get())
 
-        
+
     def show_var_frame(self, *args):
 
         frames = {'Display': self.display_frame,
                   'Edit': self.edit_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.pymol_mode.get()].grid(row=1, column=1, pady=10, padx=(10, 10), sticky='ns')
@@ -1541,24 +1541,24 @@ class ViewPyMol(Toplevel):
         xyz = list()
         #xyz = map(float, line[30:].split()[0:3])
         for i in pdb:
-            xyz.append(map(float, i[30:].split()[0:3]))
+            xyz.append(list(map(float, i[30:].split()[0:3])))
 
         xyz = np.array(xyz)
 
         #Get bond
         r = bld.measure(xyz[0], xyz[1])
-        print 'BOND = %f' % r
+        print('BOND = %f' % r)
 
         self.update_spinbox(self.bond_exist, r)
 
         if len(xyz) > 2:
             angle = bld.measure(xyz[0], xyz[1], xyz[2])
-            print 'ANGLE = %f' % angle
+            print('ANGLE = %f' % angle)
             self.update_spinbox(self.angle_exist, angle)
 
         if len(xyz) > 3:
             torsion = bld.measure(xyz[0], xyz[1], xyz[2], xyz[3])
-            print 'TORSION = %f' % torsion
+            print('TORSION = %f' % torsion)
             self.update_spinbox(self.torsion_exist, torsion)
 
         if len(xyz) < 4:
@@ -1578,11 +1578,11 @@ class ViewPyMol(Toplevel):
             atom = atom[0].upper()+atom[1].lower()
 
         #Check if atom exist:
-        if atom not in self.atom_dict.keys():
-            if atom[0] in self.atom_dict.keys():
+        if atom not in list(self.atom_dict.keys()):
+            if atom[0] in list(self.atom_dict.keys()):
                 atomtype = atom[0]
 
-        elif atom in self.atom_dict.keys():
+        elif atom in list(self.atom_dict.keys()):
             atomtype = atom
 
         return atomtype
@@ -1727,7 +1727,7 @@ class ViewPyMol(Toplevel):
             return
 
         try:
-            selections = map(int, self.listbox.curselection())
+            selections = list(map(int, self.listbox.curselection()))
         except:
             return
 
@@ -1801,7 +1801,7 @@ class ViewPyMol(Toplevel):
 
         self.reopen_button = Button(frame, text='View again', highlightbackground=self.main_color, command=self.start_pymol)
         self.reopen_button.grid(row=1, column=1)
-        
+
         self.pymol_mode_menu = OptionMenu(frame, self.pymol_mode,
                                    'Display',
                                    'Edit')
@@ -1820,7 +1820,7 @@ class ViewPyMol(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=EXTENDED, exportselection=False)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 0, rowspan = 10, column = 0, columnspan = 10, sticky = 'w')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.listbox.bind('<<ListboxSelect>>', self.atomlist_event)
 
         sel_all_button = Button(frame2, text='Select all', highlightbackground=self.main_color,
@@ -1856,7 +1856,7 @@ class ViewPyMol(Toplevel):
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=False)
         buildlist_scroll.config(command=self.buildlist.yview)
         self.buildlist.grid(row=1, rowspan=5, column=0, sticky='e')
-        self.buildlist.config(font=tkFont.Font(family="Courier", size=12))
+        self.buildlist.config(font=tkinter.font.Font(family="Courier", size=12))
         self.buildlist.bind('<<ListboxSelect>>', self.fragmenlist_event)
 
         #information about existing atoms:
@@ -2053,6 +2053,3 @@ class ViewPyMol(Toplevel):
                                  command=lambda: self.pymol_special('hide %s' % self.pymol_presets.get()))
         self.hide_preset.grid(row=9, column=2, sticky='w')
         self.widgetList.append(self.hide_preset)
-
-
-

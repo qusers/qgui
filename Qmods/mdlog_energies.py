@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # This file is part of Qgui.
 
@@ -43,7 +43,7 @@ def get_q_energies(logfiles=[], lambda_='1.00'):
     """
 
     if len(logfiles) == 0:
-        print 'No MD logfiles specified! Aborting!'
+        print('No MD logfiles specified! Aborting!')
         return
 
     qq_el = []
@@ -158,4 +158,3 @@ def estimate_error(enelist):
     se = np.std(enelist) / np.sqrt(len(enelist) / s_b)
 
     return se
-

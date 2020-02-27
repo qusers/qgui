@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # This file is part of Qgui.
 
@@ -30,11 +30,11 @@ def checkPdb(pdb):
    Checks if pdb file is Q pdb or standard pdb format.
    Returns True if Q pdb or False if standard pdb.
    """
-    print pdb
+    print(pdb)
     try:
         pdbFile = open(pdb, 'r').readlines()
     except:
-        print 'Could not open file %s'
+        print('Could not open file %s')
         pass
     qpdb = False
     if 'ATOM' in pdbFile[0].split()[0] or 'HETATM' in pdbFile[0].split()[0]:
@@ -252,7 +252,7 @@ def convertCterminal(pdb, res_nr):
             newresname = new[i]
 
     if newresname == 'CTER':
-        print 'Could not toggle C-terminal state ...'
+        print('Could not toggle C-terminal state ...')
         return
 
 
@@ -276,7 +276,7 @@ def convertCterminal(pdb, res_nr):
                 co_y = oy - cy
                 co_z = oz - cz
             except:
-                print 'something went wrong with terminal generations'
+                print('something went wrong with terminal generations')
                 return
 
             r1 = np.sqrt(co_x**2 + co_y**2 + co_z**2)
@@ -364,7 +364,7 @@ def convertNterminal(pdb, res_nr = ' '):
         if old[i] == resname:
             newresname = new[i]
     if newresname == 'NTER':
-        print 'Could not toggle N-terminal state ...'
+        print('Could not toggle N-terminal state ...')
         return
 
     for line in pdbfile:
@@ -396,7 +396,7 @@ def getLib(libs = ['Qoplsaa.lib']):
                 if re.search('{.*}', line):
                     lib_entries.append(re.search('{.*}', line).group(0).strip('{*}'))
         except:
-            print 'Could not find %s' % libfiles
+            print(('Could not find %s' % libfiles))
             continue
 
     return lib_entries
@@ -440,7 +440,7 @@ def toggleAllCharges(pdbFile, charge_dict, atomtype_dict, toggle='off', simrad =
         if file[i][21:26] != currentResnr:
             j_start = i
         currentResnr = file[i][21:26]
-        if currentRes in charge_dict.keys():
+        if currentRes in list(charge_dict.keys()):
             if file[i][12:14].strip() != 'H':
                 if toggle == 'on':
                     atomtype = atomtype_dict[currentRes]
@@ -626,20 +626,20 @@ def convertOldNew(pdb='structure.pdb', resnrs=[], newres='NEW'):
             except:
                 continue
     else:
-        print 'No residues speciefied for conversion'
+        print('No residues speciefied for conversion')
 
 
 def centerofmass(pdb, use_mass=False):
     """
    Returns center of mass x,y,z coordinates.
-   use_mass controls if actual masses are to 
+   use_mass controls if actual masses are to
    be used or not. If False, all atoms will be treated
    as having the same mass.
    """
     try:
         pdbfile = open(pdb, 'r').readlines()
     except:
-        print 'Could not open %s' % pdb.split('/')[-1]
+        print(('Could not open %s' % pdb.split('/')[-1]))
     masses = []
     x, y, z = [], [], []
 
@@ -719,7 +719,7 @@ def pdb_info(pdb):
     try:
         pdbfile = open(pdb, 'r').readlines()
     except:
-        print 'Could not open pdb file %s' % pdb
+        print(('Could not open pdb file %s' % pdb))
 
     atomnrs = []
     atomtypes = []
@@ -743,6 +743,3 @@ def pdb_info(pdb):
             continue
 
     return atomnrs, atomtypes, residues, residuenrs, x, y, z
-
-   
-

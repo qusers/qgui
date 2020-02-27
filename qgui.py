@@ -27,12 +27,11 @@ __status__ = "Production"
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE
-from tkFileDialog import askopenfilename, asksaveasfilename
-import urllib2
+from tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE
+from tkinter.filedialog import askopenfilename, asksaveasfilename
+from urllib.request import urlopen
 import os
 import sys
-import tkMessageBox
 import datetime
 import getpass
 
@@ -62,7 +61,7 @@ from analyze_energies import AnalyzeEnergies
 from qcalc import AnalyzeQcalc
 import prepareTopology as pt
 import qgui_functions as qf
-import cPickle
+import pickle
 import time
 
 class QGui(object):
@@ -103,13 +102,13 @@ class QGui(object):
 
         self.structure = None
         self.top_id = None
-        self.pdb_id = None 
+        self.pdb_id = None
         self.log('info', 'Welcome to Qgui v2.0')
         self.log('info', 'The Free Energy package for Q.')
         self.log(' ', '\n')
-        
+
         self.getSettings()
-        
+
         self.checkUpdates()
 
         #Check for workdir key upon launce (-p)
@@ -117,14 +116,14 @@ class QGui(object):
             this_dir = sys.argv[1]
             if this_dir == '-p':
                 new_workdir = os.getcwd()
-                print '\nWorkdir: %s\n' % new_workdir
+                print('\nWorkdir: %s\n' % new_workdir)
                 self.q_settings[ 'workdir' ] = new_workdir
                 self.workdir = new_workdir
                 self.saveSettings()
 
         except:
-            print '\nUsing workdir defined in settings'
-            print 'TIPS: Launch Qgui -p to automatically set current directory as workdir.\n'
+            print('\nUsing workdir defined in settings')
+            print('TIPS: Launch Qgui -p to automatically set current directory as workdir.\n')
 
     def show_splash(self):
         SplashScreen(self, self.root, self.qgui_path + "/Qmods/qgui_box.gif")
@@ -169,7 +168,7 @@ class QGui(object):
         self.q_settings = dict()
         """
         try:
-            self.q_settings = cPickle.load(open(self.settings_path + '/Qsettings','rb'))
+            self.q_settings = pickle.load(open(self.settings_path + '/Qsettings','rb'))
 
             if type(self.q_settings) == list:
                 Keys = [ 'workdir', 'parameter', 'library', 'equilibration', 'subscript', 'executables', 'schrodinger path' ]
@@ -183,13 +182,13 @@ class QGui(object):
                 print(self.q_settings)
                 print('Please see too that you settings are they way you set it up to be.')
 
-                cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
+                pickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
         except:
 
             self.q_settings = self.set_default_qsettings()
 
-            cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
+            pickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
         #Get workdirectory:
         if self.q_settings[ 'workdir' ] == 'default':
@@ -211,7 +210,7 @@ class QGui(object):
         """
         saves q_settings to file Qsettings
         """
-        cPickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
+        pickle.dump(self.q_settings, open(self.settings_path + '/Qsettings','wb'))
 
     def log(self, useDate = 'nope', msg='text'):
         if useDate == 'info':
@@ -230,7 +229,7 @@ class QGui(object):
         if not self.pdb_id:
             self.errorBox('Error','Pease load a PDB file before starting PDB prepare.')
             return
-        else:   
+        else:
             self.prepare = PdbFilePrepare(self, self.root, self.pdb_id, self.workdir)
             self.prepare.configure(background = self.main_color)
             self.prepare.resizable()
@@ -450,13 +449,13 @@ class QGui(object):
     def prepare_topo(self):
         """Opens Topology Prepare when Prepare->Topology from the menubar
         is chosen. Checks if the file used is in the correct from,
-        if not then converts it to pdb_q format. 
+        if not then converts it to pdb_q format.
         check_pdb_id has two outcomes, either it is True = the file is in Q format
         or False = the file is in standard pdb format.
 
         If check_pdb_id == False the convertPdb()" method from prepareTopology file
         is called."""
-        
+
         if not self.pdb_id:
             self.errorBox('Error','Please load a structure (pdb) to generate topology from.')
         else:
@@ -469,7 +468,7 @@ class QGui(object):
                 self.topo_prepare.configure(background = self.main_color)
                 self.topo_prepare.resizable()
 
-                    
+
             else:
                 self.topo_prepare = TopologyPrepare(self, self.root, self.pdb_id, self.prms, self.libs)
                 self.topo_prepare.configure(background = self.main_color)
@@ -477,7 +476,7 @@ class QGui(object):
 
 
     def get_pdb_entry(self, pdb_id): #Fetch pdb file from website.
-        """This method sends pdb_id to pdb.org server and 
+        """This method sends pdb_id to pdb.org server and
         get back a pdb-file. When an incorrect pdb_id is sent the response
         from pdb.org is (currently) a short file consisting of one sentence.
         The Exception is called when the length of the pdbfile is shorter than 20 lines.
@@ -488,26 +487,26 @@ class QGui(object):
             pdb_id = pdb_id + '.pdb'
 
         try:
-            response = urllib2.urlopen('%s/%s' % ('http://pdb.org/pdb/files', pdb_id))
+            response = urlopen('%s/%s' % ('http://pdb.org/pdb/files', pdb_id))
             pdbfile = response.readlines()
-            #The following can cause trouble if the length of the response from 
+            #The following can cause trouble if the length of the response from
             # pdb.org is changed when the pdb_id is faulty.
-            if len(pdbfile) < 20:   
-                #PdbEntryNotFoundError() method is raised when the pdb_id is faulty.             
+            if len(pdbfile) < 20:
+                #PdbEntryNotFoundError() method is raised when the pdb_id is faulty.
                 self.errorBox('Error', 'Error retrieving PDB file from pdb.org. Make sure to use the correct PDB id.')
                 self.log('info', 'Error retrieving PDB file from pdb.org. Make sure to use the correct PDB id.')
                 self.main_window.clear_button_pressed()
 
             else:
                 with open(self.workdir + '/' + pdb_id, 'w') as f:
-                    for line in pdbfile:            
+                    for line in pdbfile:
                         f.write(line)
                 self.pdb_id = '%s/%s' % (self.workdir, pdb_id)
                 self.log('info', '%s successfully downloaded from pdb.org.' % self.pdb_id.split('/')[-1])
                 self.dialog.dialog_destroy()
                 self.main_window.set_entryfield(pdb_id.split('/')[-1])
 
-          
+
         except IOError:
             self.errorBox('Error','Problems connecting to pdb.org. Make sure to use correct PDB id.')
             self.log('info', 'Could not connect to pdb.')
@@ -528,24 +527,24 @@ class QGui(object):
                                    filetypes=(("Topology", "*.top"),("All files","*.*")))
         top_id = filename
         if top_id != '':
-            self.top_id = top_id 
+            self.top_id = top_id
             self.log('info', '%s loaded' % self.top_id.split('/')[-1])
             self.main_window.set_topology_entryfield(top_id.split('/')[-1])
 
             #Check header in topology file for lib and prm files!
-            print self.libs
+            print(self.libs)
 
             with open(self.top_id, 'r') as top:
                 for line in top:
                     if 'LIB_FILES' in line:
                         for lib in line.split()[1].split(';'):
                             if lib not in self.libs:
-                                print lib
+                                print(lib)
                                 if os.path.isfile(lib):
-                                    print 'From topologyfile, %s was added to library files (not in settings).'
+                                    print('From topologyfile, %s was added to library files (not in settings).')
                                     self.libs.append(lib)
                                 else:
-                                    print "Warning: Lib file %s in topology not found!" % lib
+                                    print("Warning: Lib file %s in topology not found!" % lib)
                         break
 
 
@@ -556,7 +555,7 @@ class QGui(object):
             self.main_window.set_entryfield(pdb_id.split('/')[-1])
         else:
             self.main_window.set_entryfield(self.pdb_id.split('/')[-1])
-    
+
     def reset_pdb(self, new_pdb):
         """Resets self.pdb_id to empty.
         This method is called from MainWindow-class, when the structure-entryfield is emptied.
@@ -581,7 +580,7 @@ class QGui(object):
         """This method is called from the mainwindow menubar->filemenu->Close is chosen."""
         if self.pymol_running:
             self.errorBox('Info','Please close Q-pymol first!')
-            print 'Pymol is running!'
+            print('Pymol is running!')
         self.root.quit()
 
     def aboutQ(self):
@@ -593,8 +592,8 @@ class QGui(object):
 
 
 class DialogWindow(Toplevel):
-    """Implements the dialog-box that opens upp when 'Load' button for structure is 
-    pressed. DialogWindow-class har got a reference to MainWindow-class and calls 
+    """Implements the dialog-box that opens upp when 'Load' button for structure is
+    pressed. DialogWindow-class har got a reference to MainWindow-class and calls
     to methods from controller-class: get_local_file and import_button_clicked. """
 
     def __init__(self, app, root): #Receives app and root from Qgui-class.

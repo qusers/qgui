@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
+from tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton, OptionMenu, HORIZONTAL
-from tkFileDialog import askopenfilename
-from tkSimpleDialog import askstring
-import tkFont
+from tkinter.filedialog import askopenfilename
+from tkinter.simpledialog import askstring
+import tkinter.font
 from subprocess import call
 from cycler import cycler
 import numpy as np
@@ -29,7 +29,7 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-from tkFileDialog import asksaveasfilename, askdirectory
+from tkinter.filedialog import asksaveasfilename, askdirectory
 matplotlib.rcParams['text.usetex'] = True
 
 class EvbArrhenius(Toplevel):
@@ -98,14 +98,14 @@ class EvbArrhenius(Toplevel):
                 self.titles_listbox.selection_set(ind_)
 
     def del_title(self):
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         for selected in selections:
             title = self.titles_listbox.get(selected)
             self.titles_listbox.delete(selected)
             del self.titles[title]
             for i in [self.titles_dG, self.titles_parameters, self.titles_ave_act, self.titles_ave_rxn,
                       self.dg_upper_lower]:
-                if title in i.keys():
+                if title in list(i.keys()):
                     del i[title]
 
         self.update_tables()
@@ -115,7 +115,7 @@ class EvbArrhenius(Toplevel):
         Add Temperature one-by-one or select temperature directory to append all runs
         """
         try:
-            title = map(int, self.titles_listbox.curselection())
+            title = list(map(int, self.titles_listbox.curselection()))
         except:
             self.app.errorBox('Warning', 'Select a project title to append temperature(s) to.')
             return
@@ -147,7 +147,7 @@ class EvbArrhenius(Toplevel):
                         except:
                             continue
                 else:
-                    print 'Directory ../%s not recognized as temperature directory' % '/'.join(rundir.split('/')[-3:])
+                    print(('Directory ../%s not recognized as temperature directory' % '/'.join(rundir.split('/')[-3:])))
                     return
             temperatures.append(rundir)
 
@@ -164,7 +164,7 @@ class EvbArrhenius(Toplevel):
             self.app.errorBox('Error', 'Did not recognize selected temperature directories.')
             return
 
-        print temperatures
+        print(temperatures)
 
         #Go throught temperature directories and collect subdir paths
         for t in temperatures:
@@ -185,7 +185,7 @@ class EvbArrhenius(Toplevel):
                             else:
                                 break
                     if enefiles:
-                        if not temp in self.titles[title].keys():
+                        if not temp in list(self.titles[title].keys()):
                             self.titles[title][temp] = dict()
                             self.titles_dG[title][temp] = dict()
                             self.titles_ave_act[title][temp] = dict()
@@ -197,7 +197,7 @@ class EvbArrhenius(Toplevel):
                         self.titles[title][temp][nr_dir] = subdir
                         self.app.log(' ','...../%s added\n' % '/'.join(subdir.split('/')[-2:]))
                         self.update()
-                        print subdir
+                        print(subdir)
                     nr_dir += 1
                 else:
                     break
@@ -214,12 +214,12 @@ class EvbArrhenius(Toplevel):
         self.list_titles_event()
 
     def del_runs(self):
-        title_sel = map(int, self.titles_listbox.curselection())
+        title_sel = list(map(int, self.titles_listbox.curselection()))
         if len(title_sel) != 1:
             self.app.log(' ', '\nSelect exactly one title to delete temperature from!\n')
             return
 
-        selections = map(int, self.runs_listbox.curselection())
+        selections = list(map(int, self.runs_listbox.curselection()))
         if len(selections) == 0:
             self.app.log(' ', '\nNo temperature selected for deletion!\n')
             return
@@ -236,7 +236,7 @@ class EvbArrhenius(Toplevel):
 
             del self.titles[title][temp]
             for i in [self.titles_dG, self.titles_parameters, self.titles_ave_act, self.titles_ave_rxn]:
-                if temp in i[title].keys():
+                if temp in list(i[title].keys()):
                     del i[title][temp]
 
         #self.get_dG(title)
@@ -250,13 +250,13 @@ class EvbArrhenius(Toplevel):
         """
         Add temperatures to exclude from Arrhenius calculations for title
         """
-        sel_titles = map(int, self.titles_listbox.curselection())
+        sel_titles = list(map(int, self.titles_listbox.curselection()))
         if len(sel_titles) > 1:
-            print 'Select exactly one title to exclude temperatures'
+            print('Select exactly one title to exclude temperatures')
             return
         title = self.titles_listbox.get(sel_titles[0])
 
-        sel_temp = map(int, self.runs_listbox.curselection())
+        sel_temp = list(map(int, self.runs_listbox.curselection()))
         if len(sel_temp) == 0:
             'No temperatures selected for %s' % title
             return
@@ -268,7 +268,7 @@ class EvbArrhenius(Toplevel):
             else:
                 temp = int(temp)
 
-            if title not in self.title_exclude.keys():
+            if title not in list(self.title_exclude.keys()):
                 self.title_exclude[title] = list()
 
             if temp not in self.title_exclude[title]:
@@ -284,14 +284,14 @@ class EvbArrhenius(Toplevel):
         self.list_titles_event()
 
     def del_excluded_temp(self):
-        title_sel = map(int, self.titles_listbox.curselection())
+        title_sel = list(map(int, self.titles_listbox.curselection()))
         if len(title_sel) != 1:
             self.app.log(' ', '\nSelect exactly one title to delete excluded temperature from!\n')
             return
 
         title = self.titles_listbox.get(title_sel[0])
 
-        selection = map(int, self.exclude_listbox.curselection())
+        selection = list(map(int, self.exclude_listbox.curselection()))
         for i in selection:
             temp = self.exclude_listbox.get(i)
             if '.' in temp:
@@ -321,7 +321,7 @@ class EvbArrhenius(Toplevel):
                 if qfile.startswith('md'):
                     enefiles.append(qfile)
 
-        print 'Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:]))
+        print(('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:]))))
 
         if len(enefiles) == 0:
             found_ene_files = False
@@ -331,7 +331,7 @@ class EvbArrhenius(Toplevel):
             try:
                 T = float(path.split('/')[-2])
             except:
-                print 'Could not recognize temperature, using 300 K'
+                print('Could not recognize temperature, using 300 K')
                 T = 300.00
         else:
             T = float(self.kT.get())
@@ -418,7 +418,7 @@ class EvbArrhenius(Toplevel):
 
     def import_qfep(self):
         """
-        Import EVB parameters from .qfep file
+        Import EVB parameters from qfep file
         """
         filename = None
         filename = askopenfilename(parent = self, initialdir = self.app.workdir,
@@ -458,7 +458,7 @@ class EvbArrhenius(Toplevel):
         return
 
     def on_key_event(self, event):
-        print('you pressed %s' % event.key)
+        print(('you pressed %s' % event.key))
         key_press_handler(event, self.canvas, self.toolbar)
 
     def update_plot(self, t_inv, dg_t, sem, parameters, titles, t_exc=list(), dg_exc=list(), sem_exc=list()):
@@ -472,9 +472,9 @@ class EvbArrhenius(Toplevel):
         #matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
         #                                           'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
         #                                           'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
-        matplotlib.rcParams['axes.prop_cycle'] = (cycler('color',['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        matplotlib.rcParams['axes.prop_cycle'] = cycler(color=['k','b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']))
+                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
 
 
         #Create subplot
@@ -495,7 +495,9 @@ class EvbArrhenius(Toplevel):
 
         temp_labels = list()
         for i in range(len(titles)):
-            line_color = matplotlib.rcParams['axes.prop_cycle']
+            cycle = matplotlib.rcParams['axes.prop_cycle']
+            line_color = list(matplotlib.rcParams['axes.prop_cycle'])[i%len(cycle)]['color']
+            print(line_color)
             title = titles[i]
             dg = np.array(dg_t[i])
             temp = np.array(t_inv[i])
@@ -536,7 +538,7 @@ class EvbArrhenius(Toplevel):
         """
         Recomputes EVB with current settings (alpha, Hij etc.) from main window.
         """
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         if len(selections) == 0:
             self.app.errorBox('Warning', 'Select titles to recompute EVB.')
             return
@@ -549,10 +551,10 @@ class EvbArrhenius(Toplevel):
         for title in titles:
             ##{name: T1: {1: [dG_act, dG_react]}, 2...}
             for temp in sorted(self.titles[title].keys()):
-                    for i in sorted(self.titles[title][temp].keys()):
-                        path = self.titles[title][temp][i]
-                        self.write_qfep_inp(path)
-                        self.run_qfep(path, 'qfep.inp')
+                for i in sorted(self.titles[title][temp].keys()):
+                    path = self.titles[title][temp][i]
+                    self.write_qfep_inp(path)
+                    self.run_qfep(path, 'qfep.inp')
 
             self.get_dG(title)
             self.getParameters(title)
@@ -565,10 +567,10 @@ class EvbArrhenius(Toplevel):
         Collects activation and reaction energies from self.title_ene ({title: {nr:[[enegaps],[dG]]}})
         """
 
-        for temp in self.titles[title].keys():
+        for temp in list(self.titles[title].keys()):
             act = list()
             rxn = list()
-            for nr in self.titles[title][temp].keys():
+            for nr in list(self.titles[title][temp].keys()):
                 self.app.log(' ', 'Collecting Reaction Free Energies for %s: %.2f/%d\n' % (title, temp, nr))
                 self.update()
                 dG = self.get_enegaps_dg(self.titles[title][temp][nr])[1]
@@ -628,7 +630,7 @@ class EvbArrhenius(Toplevel):
         """
         Takes upper and lower values for dG(act) and dG(rxn) and recomputes parameters.
         """
-        selections = map(int, self.dg_listbox.curselection())
+        selections = list(map(int, self.dg_listbox.curselection()))
 
         if len(selections) != 1:
             return
@@ -648,14 +650,14 @@ class EvbArrhenius(Toplevel):
             rxn_upper = float(self.dg_rxn_upper.get())
             rxn_lower = float(self.dg_rxn_lower.get())
         except:
-            print 'Invalid value encountered. Unable to update thermodynamic parameters!'
+            print('Invalid value encountered. Unable to update thermodynamic parameters!')
             return
 
         self.dg_upper_lower[title][temp]['activation'][0] = act_upper
         self.dg_upper_lower[title][temp]['activation'][1] = act_lower
         self.dg_upper_lower[title][temp]['reaction'][0] = rxn_upper
         self.dg_upper_lower[title][temp]['reaction'][1] = rxn_lower
-        print 'New upper and lower values set!'
+        print('New upper and lower values set!')
 
         self.compute_ave_dg(title, temp)
 
@@ -728,7 +730,7 @@ class EvbArrhenius(Toplevel):
 
         for temp in sorted(self.titles_ave_act[title].keys()):
             excluded = False
-            if title in self.title_exclude.keys():
+            if title in list(self.title_exclude.keys()):
                 if temp in self.title_exclude[title]:
                     excluded = True
             if not excluded:
@@ -738,7 +740,7 @@ class EvbArrhenius(Toplevel):
                 t.append(temp)
 
         if len(t) < 2:
-            print 'Need more than 1 temperature to extract parameters ..'
+            print('Need more than 1 temperature to extract parameters ..')
             self.titles_parameters[title]['dH'] = 0
             self.titles_parameters[title]['dS'] = 0
             self.titles_parameters[title]['COD'] = 0
@@ -760,8 +762,8 @@ class EvbArrhenius(Toplevel):
         r2 = 1 - resid / (_y.size * _y.var())         # R^2
 
         #Remove this:
-        print model
-        print r2
+        print(model)
+        print(r2)
 
         dH = model[0]
         dS = -model[1]
@@ -791,7 +793,7 @@ class EvbArrhenius(Toplevel):
             s2_dg2 += (dG_i2 - dG_m2) ** 2
 
             #print 'dG_i = %.5f    dG_m = %.5f' % (dG_i, dG_m)
-            print 'dG_i = %.5f    dG_m = %.5f' % (dG_i2, dG_m2)
+            print(('dG_i = %.5f    dG_m = %.5f' % (dG_i2, dG_m2)))
             #Sum of squares for the temperature
             sst += (temp - np.average(T_inv)) ** 2
             sst2 += (t[i] - np.average(t)) ** 2
@@ -800,8 +802,8 @@ class EvbArrhenius(Toplevel):
         #standard error squared of the model (remove 2 degrees of freedom <-- linear regression parameters)
         deg_freedom = 2
         if len(dG) < 3:
-            print 'Warning: linear regression with only 2 points'
-            print '--> not possible to remove 2 degrees of freedom!'
+            print('Warning: linear regression with only 2 points')
+            print('--> not possible to remove 2 degrees of freedom!')
             s2_dg = 0
             s2_dg2 = 0
 
@@ -863,7 +865,7 @@ class EvbArrhenius(Toplevel):
         self.titles_parameters[title]['SEM_ds'] = SEM_ds
         self.titles_parameters[title]['sample'] = len(dG)
 
-        print self.titles_parameters
+        print((self.titles_parameters))
 
     def update_tables(self):
         """
@@ -879,13 +881,13 @@ class EvbArrhenius(Toplevel):
         """
         self.dg_listbox.delete(0, END)
 
-        self.dg_listbox.insert(END, u"Title       Temp "
-                                       u" \N{GREEK CAPITAL LETTER DELTA}G(act)"
-                                       u"   +/-"
-                                       u"   \N{GREEK CAPITAL LETTER DELTA}G(rxn)"
-                                       u"   +/-")
+        self.dg_listbox.insert(END, "Title       Temp "
+                                       " \N{GREEK CAPITAL LETTER DELTA}G(act)"
+                                       "   +/-"
+                                       "   \N{GREEK CAPITAL LETTER DELTA}G(rxn)"
+                                       "   +/-")
 
-        for title in self.titles_dG.keys():
+        for title in list(self.titles_dG.keys()):
             for temp in sorted(self.titles_dG[title].keys()):
                 act, act_sem = self.titles_ave_act[title][temp][0:]
                 rxn, rxn_sem = self.titles_ave_rxn[title][temp][0:]
@@ -896,15 +898,15 @@ class EvbArrhenius(Toplevel):
     def update_re_listbox(self):
         self.re_tot_listbox.delete(0, END)
 
-        self.re_tot_listbox.insert(END, u"Title      "
-                                       u"\N{GREEK CAPITAL LETTER DELTA}H(act)"
-                                       u"  \N{GREEK CAPITAL LETTER DELTA}S(act)   COD"
-                                       u"  SE(\N{GREEK CAPITAL LETTER DELTA}G)"
-                                       u"  SE(\N{GREEK CAPITAL LETTER DELTA}H)"
-                                       u"  SE(\N{GREEK CAPITAL LETTER DELTA}S)"
-                                       u"  s(R)  #pts")
+        self.re_tot_listbox.insert(END, "Title      "
+                                       "\N{GREEK CAPITAL LETTER DELTA}H(act)"
+                                       "  \N{GREEK CAPITAL LETTER DELTA}S(act)   COD"
+                                       "  SE(\N{GREEK CAPITAL LETTER DELTA}G)"
+                                       "  SE(\N{GREEK CAPITAL LETTER DELTA}H)"
+                                       "  SE(\N{GREEK CAPITAL LETTER DELTA}S)"
+                                       "  s(R)  #pts")
 
-        for title in self.titles_parameters.keys():
+        for title in list(self.titles_parameters.keys()):
             try:
                 dH = self.titles_parameters[title]['dH']
                 dS = self.titles_parameters[title]['dS']
@@ -924,16 +926,16 @@ class EvbArrhenius(Toplevel):
         Computed dG from the arrhenius parameters with SEM for each temperature and compare to average dG from EVB
         """
         self.ae_nb_listbox.delete(0, END)
-        self.ae_nb_listbox.insert(END, u"Title         T    <\N{GREEK CAPITAL LETTER DELTA}G>    +/- "
-                                       u"    \N{GREEK CAPITAL LETTER DELTA}H    +/-    "
-                                       u"T\N{GREEK CAPITAL LETTER DELTA}S "
-                                       u"   +/-    \N{GREEK CAPITAL LETTER DELTA}G     +/-   "
-                                       u" \N{GREEK CAPITAL LETTER DELTA}\N{GREEK CAPITAL LETTER DELTA}G")
-        for title in self.titles_ave_act.keys():
+        self.ae_nb_listbox.insert(END, "Title         T    <\N{GREEK CAPITAL LETTER DELTA}G>    +/- "
+                                       "    \N{GREEK CAPITAL LETTER DELTA}H    +/-    "
+                                       "T\N{GREEK CAPITAL LETTER DELTA}S "
+                                       "   +/-    \N{GREEK CAPITAL LETTER DELTA}G     +/-   "
+                                       " \N{GREEK CAPITAL LETTER DELTA}\N{GREEK CAPITAL LETTER DELTA}G")
+        for title in list(self.titles_ave_act.keys()):
             dH = self.titles_parameters[title]['dH']
             dS = self.titles_parameters[title]['dS']
             exc_T = 0
-            if title in self.title_exclude.keys():
+            if title in list(self.title_exclude.keys()):
                 exc_T = len(self.title_exclude[title])
 
             sem_ds = self.titles_parameters[title]['s_ds']/ np.sqrt(len(self.titles_ave_act[title]) - exc_T)
@@ -1039,7 +1041,7 @@ class EvbArrhenius(Toplevel):
 
     def list_titles_event(self, *args):
 
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         if len(selections) == 0:
             return
 
@@ -1064,7 +1066,7 @@ class EvbArrhenius(Toplevel):
             tmp_t_exc = list()
             tmp_dg_exc = list()
             tmp_sem_exc = list()
-            if title in self.title_exclude.keys():
+            if title in list(self.title_exclude.keys()):
                 for t_ex in self.title_exclude[title]:
                     self.exclude_listbox.insert(END, '%5s' % t_ex)
                 if len(self.title_exclude[title]) > 0:
@@ -1079,7 +1081,7 @@ class EvbArrhenius(Toplevel):
                     tmp_dg_exc.append(self.titles_ave_act[title][temp][0]/ temp)
                     tmp_sem_exc.append(self.titles_ave_act[title][temp][1]/ temp)
             if len(tmp_t_exc) > 0:
-                tmp_t_exc = map(lambda x: 1.0 / x, tmp_t_exc)
+                tmp_t_exc = [1.0 / x for x in tmp_t_exc]
 
             plt_temps.append(tmp_temps)
             plt_dg.append(tmp_dg)
@@ -1093,7 +1095,7 @@ class EvbArrhenius(Toplevel):
                              plt_sem_exc)
 
     def list_runs_event(self, *args):
-        selections = map(int, self.runs_listbox.curselection())
+        selections = list(map(int, self.runs_listbox.curselection()))
         if len(selections) == 0:
             return
         pass
@@ -1106,7 +1108,7 @@ class EvbArrhenius(Toplevel):
         self.dg_rxn_upper.delete(0, END)
         self.dg_rxn_lower.delete(0, END)
 
-        selections = map(int, self.dg_listbox.curselection())
+        selections = list(map(int, self.dg_listbox.curselection()))
 
         if len(selections) != 1:
             return
@@ -1136,7 +1138,7 @@ class EvbArrhenius(Toplevel):
                   'Regression Parameters': self.re_tot_frame,
                   'Model VS Computed': self.ae_nb_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.selected_frame.get()].grid(row=3, column=0, columnspan=2)
@@ -1190,7 +1192,7 @@ class EvbArrhenius(Toplevel):
 
         alpha = Text(topframe, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         alpha.tag_configure("subscript", offset=-1)
-        alpha.insert("insert",u"\N{GREEK SMALL LETTER ALPHA}","",'ij','subscript')
+        alpha.insert("insert","\N{GREEK SMALL LETTER ALPHA}","",'ij','subscript')
         alpha.grid(row=1, column=0, sticky='e')
         alpha.config(state=DISABLED)
 
@@ -1208,7 +1210,7 @@ class EvbArrhenius(Toplevel):
 
         self.hij_entry = Spinbox(topframe, width=7, highlightthickness=0, relief=GROOVE, from_=0, to=200, increment=1.0)
         self.hij_entry.grid(row=1, column=3)
-        
+
         kt = Label(topframe, text='    kT     ', bg=self.main_color)
         kt.grid(row=0, column=4)
 
@@ -1311,7 +1313,7 @@ class EvbArrhenius(Toplevel):
         titles_yscroll.config(command=self.titles_listbox.yview)
         titles_xscroll.config(command=self.titles_listbox.xview)
         self.titles_listbox.grid(row=1, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.titles_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.titles_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.titles_listbox.bind('<<ListboxSelect>>', self.list_titles_event)
 
         runs_yscroll = Scrollbar(self.proj_frame)
@@ -1326,7 +1328,7 @@ class EvbArrhenius(Toplevel):
         runs_yscroll.config(command=self.runs_listbox.yview)
         runs_xscroll.config(command=self.runs_listbox.xview)
         self.runs_listbox.grid(row=1, rowspan=10, column = 4, columnspan=3, sticky='e')
-        self.runs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.runs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.runs_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         exclude_yscroll = Scrollbar(self.proj_frame)
@@ -1341,7 +1343,7 @@ class EvbArrhenius(Toplevel):
         exclude_yscroll.config(command=self.exclude_listbox.yview)
         exclude_xscroll.config(command=self.exclude_listbox.xview)
         self.exclude_listbox.grid(row=1, rowspan=10, column = 8, columnspan=3, sticky='e')
-        self.exclude_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.exclude_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.exclude_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
 
@@ -1354,7 +1356,7 @@ class EvbArrhenius(Toplevel):
                                       exportselection=False)
         re_tot_yscroll.config(command=self.re_tot_listbox.yview)
         self.re_tot_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='e')
-        self.re_tot_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.re_tot_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.ae_tot_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         export_tot = Button(self.re_tot_frame, text='Export table', highlightbackground=self.main_color,
@@ -1370,7 +1372,7 @@ class EvbArrhenius(Toplevel):
                                       exportselection=False)
         ae_nb_yscroll.config(command=self.ae_nb_listbox.yview)
         self.ae_nb_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='e')
-        self.ae_nb_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.ae_nb_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.ae_tot_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         export_nb = Button(self.ae_nb_frame, text='Export table', highlightbackground=self.main_color,
@@ -1386,7 +1388,7 @@ class EvbArrhenius(Toplevel):
                                       exportselection=False)
         dg_yscroll.config(command=self.dg_listbox.yview)
         self.dg_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='w')
-        self.dg_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.dg_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.dg_listbox.bind('<<ListboxSelect>>', self.list_dg_events)
 
         #### Remover outliers ####

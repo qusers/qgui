@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Text, Label, Button, Frame, Scrollbar, YES, Menu, DISABLED, NORMAL, GROOVE, END, TOP, PhotoImage,\
+from tkinter import Text, Label, Button, Frame, Scrollbar, YES, Menu, DISABLED, NORMAL, GROOVE, END, TOP, PhotoImage,\
     HORIZONTAL, NONE
-from tkFileDialog import askdirectory
+from tkinter.filedialog import askdirectory
 import sys
 
 
@@ -29,14 +29,14 @@ class MainWindow(Frame):
         self.root = root
         self.app = app #This is the reference to Qgui-class
         self.write = True
-        
+
         self.main_color = self.app.main_color
 
         self.make_grid()
         self.menubar()
 
     def set_entryfield(self, pdb_id):
-        """Deletes characters from entry_structure field when a new pdb_id 
+        """Deletes characters from entry_structure field when a new pdb_id
         is retrived from pdb.org. Gets pdb_id from Qgui-class
         - send_pdb_id_to_entryfield() method - when a correct pdb_id is submitted to
         pdb.org. Inserts this pdb_id in to entry_structure.
@@ -46,11 +46,11 @@ class MainWindow(Frame):
         self.entry_structure.delete(0.0, END)
         self.entry_structure.insert(0.0, pdb_id)
         self.entry_structure.config(state = DISABLED)
-        
+
 
 
     def set_topology_entryfield(self, top_id):
-        """Deletes characters from topology_entry field when a new pdb_id 
+        """Deletes characters from topology_entry field when a new pdb_id
         is retrived from pdb.org. Gets pdb_id from Qgui-class
         - send_pdb_id_to_entryfield() method - when a correct pdb_id is submitted to
         pdb.org. Inserts this pdb_id in to entry_topology field.
@@ -73,7 +73,7 @@ class MainWindow(Frame):
         self.app.q_settings[ 'workdir' ] = self.app.workdir
         self.app.saveSettings()
 
-        print self.app.workdir
+        print((self.app.workdir))
 
     def make_grid(self):
         """
@@ -214,7 +214,7 @@ class MainWindow(Frame):
         menubar.add_cascade(label = 'File', menu = filemenu)
 
         #Convert files submenu:
-        convert_menu.add_command(label=(u'*.top \u2192 *.pdb'), command=self.app.convert_top_pdb)
+        convert_menu.add_command(label=('*.top \\u2192 *.pdb'), command=self.app.convert_top_pdb)
 
         #Defines the Prepare-menu.
 

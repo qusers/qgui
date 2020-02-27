@@ -13,16 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Listbox, Scrollbar, EXTENDED, Frame, \
+from tkinter import  Label, Button, Listbox, Scrollbar, EXTENDED, Frame, \
     Toplevel, END, GROOVE, StringVar, OptionMenu, IntVar, Checkbutton
 
-import tkFont
+import tkinter.font
 from subprocess import call
 import numpy as np
 import os
 from Qplot import Qplot
 
-from tkFileDialog import asksaveasfilename, askopenfilenames
+from tkinter.filedialog import asksaveasfilename, askopenfilenames
 
 
 class AnalyzeQcalc(Toplevel):
@@ -181,7 +181,7 @@ class AnalyzeQcalc(Toplevel):
         Adds selected atoms from atomlist to Qcalc mask
         """
 
-        selection = map(int, self.listbox.curselection())
+        selection = list(map(int, self.listbox.curselection()))
 
         if len(selection) < 1:
             return
@@ -190,7 +190,7 @@ class AnalyzeQcalc(Toplevel):
         for i in selection:
             atom_numbers.append(self.listbox.get(i).split()[0])
 
-        print self.qcalc_what
+        print(self.qcalc_what)
 
         if self.qcalc_what == 'RMSD' or self.qcalc_what == 'RMSF':
             self.add_all_atoms(atom_numbers)
@@ -213,7 +213,7 @@ class AnalyzeQcalc(Toplevel):
         if len(atom_numbers) != b:
             self.app.errorBox('Warning','Select exactly %d atoms to analyze %s' % (b, self.qcalc_what))
             return
-        atom_numbers = map(lambda x: '%6s' % x, atom_numbers)
+        atom_numbers = ['%6s' % x for x in atom_numbers]
 
         atoms = ' '.join(atom_numbers)
         self.selected_listbox.insert(END, atoms)
@@ -222,7 +222,7 @@ class AnalyzeQcalc(Toplevel):
         """
         Deletes selected atoms from Qcalc mask
         """
-        selection = map(int, self.selected_listbox.curselection())
+        selection = list(map(int, self.selected_listbox.curselection()))
 
         if len(selection) < 1:
             return
@@ -268,7 +268,7 @@ class AnalyzeQcalc(Toplevel):
         Delete trajectories from listbox
         """
         self.sorted_dcd = False
-        selection = map(int, self.trj_listbox.curselection())
+        selection = list(map(int, self.trj_listbox.curselection()))
 
         if len(selection) < 1:
             return
@@ -337,7 +337,7 @@ class AnalyzeQcalc(Toplevel):
                     for line in qcalc:
                         if insert_results:
                             if 'frame' in line:
-                                print line.strip()[21:]
+                                print(line.strip()[21:])
                                 self.results_listbox.insert(END, '%s' % line.strip()[21:])
                             else:
                                 frame += 1
@@ -393,7 +393,7 @@ class AnalyzeQcalc(Toplevel):
                 submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
-                print 'submission script not found! Please edit this in settings'
+                print('submission script not found! Please edit this in settings')
             for line in submissionscipt:
                 if '#Qdyn I/O' in line:
                     break
@@ -411,14 +411,14 @@ class AnalyzeQcalc(Toplevel):
 
         if submit:
             #If use submission script, check for end statements (comes after #Qdyn I/O):
-                write_end = False
-                for k in range(len(submissionscipt)):
-                    if '#Qdyn I/O' in submissionscipt[k]:
-                        end_statements_start = k + 1
-                        write_end = True
-                if write_end:
-                    for line in range(end_statements_start, len(submissionscipt)):
-                        sub_script.write(submissionscipt[line])
+            write_end = False
+            for k in range(len(submissionscipt)):
+                if '#Qdyn I/O' in submissionscipt[k]:
+                    end_statements_start = k + 1
+                    write_end = True
+            if write_end:
+                for line in range(end_statements_start, len(submissionscipt)):
+                    sub_script.write(submissionscipt[line])
 
         sub_script.close()
 
@@ -501,7 +501,7 @@ class AnalyzeQcalc(Toplevel):
             if not resnr:
                 self.app.errorBox('Error', 'Could not find atom %s' % atomnr)
                 break
-            if not resnr in res_atoms.keys():
+            if not resnr in list(res_atoms.keys()):
                 res_atoms[resnr] = [atomnr]
             else:
                 res_atoms[resnr].append(atomnr)
@@ -576,7 +576,7 @@ class AnalyzeQcalc(Toplevel):
         frames = {'Setup': self.setup_frame,
                   'Results': self.result_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.selected_frame.get()].grid(row=3, column=0, columnspan=2)
@@ -621,7 +621,7 @@ class AnalyzeQcalc(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 1, rowspan = 10, column = 0, columnspan = 3, sticky = 'w')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         solute_button = Button(self.setup_frame, text='Solute', highlightbackground=self.main_color,
                                command=self.sel_solute)
@@ -644,11 +644,11 @@ class AnalyzeQcalc(Toplevel):
         add_label = Label(self.setup_frame, text=self.title_dict[self.qcalc_what], bg=self.main_color)
         add_label.grid(row=0, column=5, columnspan=4)
 
-        add_atoms = Button(self.setup_frame, text=u"\u21D2", highlightbackground=self.main_color,
+        add_atoms = Button(self.setup_frame, text="\u21D2", highlightbackground=self.main_color,
                            command=self.add_sel_atoms)
         add_atoms.grid(row=3, column=4, sticky='s')
 
-        add_atoms = Button(self.setup_frame, text=u"\u2717", highlightbackground=self.main_color,
+        add_atoms = Button(self.setup_frame, text="\u2717", highlightbackground=self.main_color,
                            command=self.del_sel_atoms)
         add_atoms.grid(row=4, column=4, sticky='n')
 
@@ -658,7 +658,7 @@ class AnalyzeQcalc(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         selected_scroll.config(command=self.selected_listbox.yview)
         self.selected_listbox.grid(row = 1, rowspan = 6, column = 5, columnspan = 3, sticky = 'w')
-        self.selected_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.selected_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         trj_label = Label(self.setup_frame, text='Trajectory files', bg=self.main_color)
         trj_label.grid(row=7, column=4, columnspan=4)
@@ -669,7 +669,7 @@ class AnalyzeQcalc(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         trj_scroll.config(command=self.trj_listbox.yview)
         self.trj_listbox.grid(row = 8, rowspan = 4, column = 4, columnspan = 4, sticky = 'e')
-        self.trj_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.trj_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         add_trj = Button(self.setup_frame, text='+', highlightbackground=self.main_color, command=self.add_trj)
         add_trj.grid(row=12, column=4, sticky='e')
@@ -708,7 +708,7 @@ class AnalyzeQcalc(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         results_scroll.config(command=self.results_listbox.yview)
         self.results_listbox.grid(row = 1, rowspan = 10, column = 0, columnspan = 3, sticky = 'w')
-        self.results_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.results_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         export_button = Button(self.result_frame, text='Export table', highlightbackground=self.main_color,
                                command=self.export_table)

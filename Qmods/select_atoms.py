@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import EXTENDED, MULTIPLE, Button, Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
+from tkinter import  EXTENDED, MULTIPLE, Button, Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
 
-import tkFont
+import tkinter.font
 
 
 class AtomSelectRange(Toplevel):
@@ -56,7 +56,7 @@ class AtomSelectRange(Toplevel):
         Gets coordinates from selection and returns it to the prepare topology window
         """
         atoms = []
-        items = map(int, self.listbox.curselection())
+        items = list(map(int, self.listbox.curselection()))
 
         if self.entry2 != 'qatoms':
             for item in items:
@@ -67,7 +67,7 @@ class AtomSelectRange(Toplevel):
             for item in items:
                 #If atomnumber is not already in list, append it:
                 qnr = len(self.app.q_atom_nr)
-                if int(self.listbox.get(item).split()[1]) not in map(int, self.app.q_atom_nr.values()):
+                if int(self.listbox.get(item).split()[1]) not in list(map(int, list(self.app.q_atom_nr.values()))):
                     qnr += 1
                     self.app.q_atom_nr[qnr] = int(self.listbox.get(item).split()[1])
                     resi = self.listbox.get(item)[17:27].strip()
@@ -96,7 +96,7 @@ class AtomSelectRange(Toplevel):
             got_resname = False
             newfilename = self.app.workdir + '/' + 'LIG.pdb'
             pdbfile = open(self.pdbfile,'r').readlines()
-            print atoms
+            print(atoms)
             for line in pdbfile:
                 if 'ATOM' in line:
                     if line.split()[1] in atoms:
@@ -134,7 +134,7 @@ class AtomSelectRange(Toplevel):
         self.listbox = Listbox(left_frame, yscrollcommand = listbox_scroll.set, width = 60, height=30, highlightthickness = 0, relief = GROOVE, selectmode=self._selectmode)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 0, rowspan = 10, column = 0, columnspan = 10, sticky = 'w')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         select_button = Button(left_frame, text = 'Select', command = self.get_selected)
         select_button.grid(row = 11, column = 0, columnspan = 6, sticky = 'e')
@@ -143,4 +143,3 @@ class AtomSelectRange(Toplevel):
         cancel_button = Button(left_frame, text = 'Cancel', command = self.cancel)
         cancel_button.grid(row=11, column = 6, columnspan = 6, sticky = 'w' )
         cancel_button.config(highlightbackground = self.main_color)
-

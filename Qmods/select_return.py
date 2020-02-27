@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import EXTENDED, StringVar, Button, Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
+from tkinter import  EXTENDED, StringVar, Button, Frame, Toplevel, Scrollbar, Listbox, END, GROOVE, LEFT
 
-import tkFont
+import tkinter.font
 
 
 class SelectReturn(Toplevel):
@@ -49,7 +49,7 @@ class SelectReturn(Toplevel):
         """
 
         try:
-            selected = map(int, self.listbox.curselection())
+            selected = list(map(int, self.listbox.curselection()))
         except:
             return
 
@@ -112,7 +112,7 @@ class SelectReturn(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row = 0, rowspan = 10, column = 0, columnspan = 10, sticky = 'w')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         select_button = Button(left_frame, text = 'Select', command = self.get_selected)
         select_button.grid(row = 11, column = 0, columnspan = 6, sticky = 'e')

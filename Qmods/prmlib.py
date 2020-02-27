@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import X, Label, Button, Spinbox, Entry, Radiobutton, LabelFrame, Text, Frame, Toplevel, DISABLED, \
+from tkinter import  X, Label, Button, Spinbox, Entry, Radiobutton, LabelFrame, Text, Frame, Toplevel, DISABLED, \
     NORMAL, END, GROOVE, IntVar, StringVar, Checkbutton
-import cPickle
+import pickle
 from select_atoms import AtomSelectRange
 from subprocess import call
-from tkFileDialog import askopenfilename
+from tkinter.filedialog import askopenfilename
 import os
 import time
 import numpy as np
@@ -30,13 +30,13 @@ class CreatePrmLib(Toplevel):
         self.app = app
         self.main_color = self.app.main_color
         self.root = root
-        self.q_settings = cPickle.load(open(self.app.settings_path + '/' + 'Qsettings','rb'))
+        self.q_settings = pickle.load(open(self.app.settings_path + '/' + 'Qsettings','rb'))
         self.ffld_path = self.app.q_settings[ 'schrodinger path' ]
         if not self.ffld_path:
             self.app.errorBox('Error', 'Schrodinger path not in settings.')
             self.destroy()
         else:
-            print self.ffld_path
+            print(self.ffld_path)
 
         self.atomi_changed = StringVar()
         self.atomj_changed = StringVar()
@@ -129,7 +129,7 @@ class CreatePrmLib(Toplevel):
             found_atom = False
             while not found_atom:
                 atom = pdb_dict[i][j]
-                if atom not in atom_count.keys():
+                if atom not in list(atom_count.keys()):
                     if j > 16:
                         self.app.errorBox('Error', 'Could not translate all atomtypes. Pleas verify pdb file.')
                         pdb_dict = None
@@ -192,7 +192,7 @@ class CreatePrmLib(Toplevel):
         for line in pdbfile:
             if 'ATOM' in line or 'HETATM' in line:
                 if int(line.split()[1]) in atom_numbers:
-                    print line
+                    print(line)
                     count += 1
                     atom = line[13]
                     if line[14].lower() == 'l':
@@ -243,17 +243,17 @@ class CreatePrmLib(Toplevel):
             for line in org_file:
 
                 if 'GAP' in line:
-                        new_file.write(line)
+                    new_file.write(line)
                 else:
                     if int(line.split()[1]) in atom_numbers:
-                        #Increas res nr by 1 the first time new res is inserted:
+                    #Increas res nr by 1 the first time new res is inserted:
                         if not found_lig:
                             res += 1
                             found_lig = True
 
                         #Find key to replace:
                         for i in sorted(self.lig_atoms.keys()):
-                            print '%s %s' % (self.lig_atoms[i].split()[1], line.split()[1])
+                            print('%s %s' % (self.lig_atoms[i].split()[1], line.split()[1]))
                             if int(self.lig_atoms[i].split()[1]) == int(line.split()[1]):
                                 newline = '%s\n' % (self.lig_atoms_renamed[i][0:55])
                                 new_file.write(newline)
@@ -300,7 +300,7 @@ class CreatePrmLib(Toplevel):
         #Check if maestro file exist
         maefile = self.ligname.split('.pdb')[0]+'.mae'
         if os.path.isfile(self.app.workdir+'/'+maefile):
-            print 'Found maestro file, using this by default'
+            print('Found maestro file, using this by default')
             input_type = 'mae'
 
         call('%s/utilities/ffld_server -i%s %s/%s.%s -print_parameters -version %s' %
@@ -493,7 +493,7 @@ class CreatePrmLib(Toplevel):
         prmnames = []
         charges = []
 
-        print self.nbndStart
+        print(self.nbndStart)
         for i in range(self.nbndStart + 1, self.nbndEnd + 1):
             atoms += 1
             atomname = ligDict[self.log[i].split()[0]]
@@ -552,7 +552,7 @@ class CreatePrmLib(Toplevel):
         self.liglib.write('\n')
         self.liglib.close()
 
-        print '%s written' % libname
+        print('%s written' % libname)
         self.app.log('info','Q library %s successfully generated.' % libname.split('/')[-1])
 
     def calcNBpar(self, sigma = 0, epsilon = 0):
@@ -631,7 +631,7 @@ class CreatePrmLib(Toplevel):
 
         bndFile.write('\n')
         bndFile.close()
-        print '%s_bnd.prm written' % self.ligname
+        print('%s_bnd.prm written' % self.ligname)
         self.app.log('info', '%s_bnd.prm successfully generated.' % self.ligname)
 
     def makeAng(self,impactLog = 'impact_param.log'):
@@ -663,7 +663,7 @@ class CreatePrmLib(Toplevel):
 
         angFile.write('\n')
         angFile.close()
-        print '%s_ang.prm written' % self.ligname
+        print('%s_ang.prm written' % self.ligname)
         self.app.log('info', '%s_ang.prm successfully generated.' % self.ligname)
 
     def makeTor(self,impactLog = 'impact_param.log'):
@@ -722,7 +722,7 @@ class CreatePrmLib(Toplevel):
         torFile.write('\n')
         torFile.close()
 
-        print '%s_tor.prm written' % self.ligname
+        print('%s_tor.prm written' % self.ligname)
         self.app.log('info','%s_tor.prm successfully generated.' % self.ligname)
 
     def makeImp(self, impactLog = 'impact_param.log'):
@@ -772,7 +772,7 @@ class CreatePrmLib(Toplevel):
 
         impFile.write('\n')
         impFile.close()
-        print '%s_imp.prm written' % self.ligname
+        print('%s_imp.prm written' % self.ligname)
         self.app.log('info', '%s_imp.prm successfully generated' % self.ligname)
 
     def writePrm(self):
@@ -806,9 +806,9 @@ class CreatePrmLib(Toplevel):
                 del_files.append('%s/%s_imp.prm' % (self.app.workdir, self.ligname))
                 liglist.append(ligimp)
         except:
-            print '\nWarning!'
-            print 'Can not find ligand parameter files in specified folder ...\n'
-            print 'Qoplsaa_lig.prm will be written without ligand parameters!\n'
+            print('\nWarning!')
+            print('Can not find ligand parameter files in specified folder ...\n')
+            print('Qoplsaa_lig.prm will be written without ligand parameters!\n')
             return
 
         finalFile.write('*-------------------------------------------------------------\n*\n')
@@ -1000,7 +1000,3 @@ class CreatePrmLib(Toplevel):
 
         self.close_button = Button(frame2, width=4, text='Close', highlightbackground=self.main_color, command=self.destroy)
         self.close_button.grid(row=6, column=7, pady=(10, 0))
-
-
-
-

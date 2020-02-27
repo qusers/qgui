@@ -13,15 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Frame, Toplevel, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
-    SINGLE, Entry
-from tkFileDialog import askopenfilename, askdirectory, asksaveasfilename
+from tkinter import Label, Button, Frame, Toplevel, DISABLED, NORMAL, Scrollbar, GROOVE, Listbox, EXTENDED, END, \
+    OptionMenu, StringVar, Spinbox, SINGLE, LabelFrame, MULTIPLE, Entry
+from tkinter.filedialog import askopenfilename, askdirectory, asksaveasfilename
 import qgui_functions as qf
 import numpy as np
-from tkSimpleDialog import askstring
-import tkFont
+from tkinter.simpledialog import askstring
+import tkinter.font
 import os
-import cPickle
+import pickle
 
 
 class Analyse_resFEP(Toplevel):
@@ -61,7 +61,7 @@ class Analyse_resFEP(Toplevel):
         if not fep_title:
             fep_title = rundir.split('/')[-1]
 
-        if not fep_title in self.feps.keys():
+        if not fep_title in list(self.feps.keys()):
             self.feps[fep_title] = dict()
             self.feps_paths[fep_title] = rundir
             self.feplist.insert(END, fep_title)
@@ -79,7 +79,7 @@ class Analyse_resFEP(Toplevel):
         :param fep_title:
         :return:
         """
-        if not fep_title in self.feps_paths.keys():
+        if not fep_title in list(self.feps_paths.keys()):
             self.app.log('info', 'No FEP files for %s .' % fep_title)
             return
 
@@ -95,11 +95,11 @@ class Analyse_resFEP(Toplevel):
         for i in sorted(fepdirs.keys()):
             fepdir = fepdirs[i]
             fep = fepdir.split('/')[-1]
-            if not fep in fepout.keys():
+            if not fep in list(fepout.keys()):
                 fepout[fep] = dict()
 
             os.chdir(fepdir)
-            print('Analysing %s' % fep)
+            print(('Analysing %s' % fep))
 
             temps = list()
             #Find temperature directories
@@ -109,13 +109,13 @@ class Analyse_resFEP(Toplevel):
 
             #Go through temperature directories and analyse FEP runs
             for temp in temps:
-                if temp not in fepout[fep].keys():
+                if temp not in list(fepout[fep].keys()):
                     fepout[fep][temp] = dict()
                     fepout[fep][temp]['dG'] = list()
                     fepout[fep][temp]['dGf'] = list()
                     fepout[fep][temp]['dGr'] = list()
                 self.app.log('info', '\nAnalysing %s at temperature %s' % (fep, temp))
-                print('Analysing %s at temperature %s' % (fep, temp))
+                print(('Analysing %s at temperature %s' % (fep, temp)))
                 tdir = '%s/%s' % (fepdir, temp)
                 os.chdir(tdir)
                 self.update()
@@ -140,7 +140,7 @@ class Analyse_resFEP(Toplevel):
                             self.app.log('info', 'Running Qfep in %s/%s/%s' % (fep, temp, j))
                             qf.run_Qfep(qpath=rundir, qfep_inp='qfep.inp', qfep=self.app.q_settings['executables'][2])
                         else:
-                            print('Found no energy files in %s' % rundir)
+                            print(('Found no energy files in %s' % rundir))
                             self.app.log(' ', '\nFound no energy files in:\n%s\n' % rundir)
 
                     #Read qfep.out and collect FEP summary
@@ -148,12 +148,12 @@ class Analyse_resFEP(Toplevel):
 
                     if FEPdata:
                         try:
-                            print('Added run %s' % j)
+                            print(('Added run %s' % j))
                             fepout[fep][temp]['dGf'].append(FEPdata['sum_dGf'][-1])
                             fepout[fep][temp]['dGr'].append(FEPdata['sum_dGr'][0])
                             fepout[fep][temp]['dG'].append(FEPdata['dG'][-1])
                         except:
-                            print('Error in %s/%s/%s' % (fep, temp, j))
+                            print(('Error in %s/%s/%s' % (fep, temp, j)))
 
                     else:
                         self.app.log(' ', '\nNo FEP data in %s/%s/%s\n' % (fep, temp, j))
@@ -172,7 +172,7 @@ class Analyse_resFEP(Toplevel):
 
         for fep in sorted(fepdata.keys()):
             for temp in sorted(fepdata[fep].keys()):
-                if temp not in self.feps[fep_title].keys():
+                if temp not in list(self.feps[fep_title].keys()):
 
                     self.feps[fep_title][temp] = dict()
                     self.feps[fep_title][temp]['dG'] = [0, 0]
@@ -180,7 +180,7 @@ class Analyse_resFEP(Toplevel):
                     self.feps[fep_title][temp]['dGr'] = [0, 0]
 
                 if len(fepdata[fep][temp]['dG']) > 0:
-                    if not fep in self.feps[fep_title][temp].keys():
+                    if not fep in list(self.feps[fep_title][temp].keys()):
                         self.feps[fep_title][temp][fep] = dict()
 
                     ave_frwd = np.average(fepdata[fep][temp]['dGf'])
@@ -287,7 +287,7 @@ class Analyse_resFEP(Toplevel):
         for i in selected:
             fep_title = self.feplist.get(i)
 
-            for temp in self.feps[fep_title].keys():
+            for temp in list(self.feps[fep_title].keys()):
                 self.feps[fep_title][temp]['dG'] = [0, 0]
                 self.feps[fep_title][temp]['dGf'] = [0, 0]
                 self.feps[fep_title][temp]['dGr'] = [0, 0]
@@ -316,17 +316,17 @@ class Analyse_resFEP(Toplevel):
                 comb[fep] = -1.
 
             #Check that fep exist in self.feps, if not abort!
-            if not fep in self.feps.keys():
-                print('Could not find FEP title %s' % fep)
+            if not fep in list(self.feps.keys()):
+                print(('Could not find FEP title %s' % fep))
                 return
             else:
-                if len(self.feps[fep].keys()) < 1:
+                if len(list(self.feps[fep].keys())) < 1:
                     self.app.errorBox('Warning', 'Found no FEP data for %s.' % fep)
                     return
 
             #Add temperature(s) to set and remove non-identical temperatures
             tmp = set()
-            for temp in self.feps[fep].keys():
+            for temp in list(self.feps[fep].keys()):
                 tmp.add(temp)
             if len(fep_temps) == 0:
                 fep_temps = tmp
@@ -339,13 +339,13 @@ class Analyse_resFEP(Toplevel):
 
         #Calculate average FEP per temperature:
         for temp in fep_temps:
-            if not temp in self.feps[fep_title].keys():
+            if not temp in list(self.feps[fep_title].keys()):
                 self.feps[fep_title][temp] = dict()
                 self.feps[fep_title][temp]['dG'] = [0, 0]
                 self.feps[fep_title][temp]['dGf'] = [0, 0]
                 self.feps[fep_title][temp]['dGr'] = [0, 0]
 
-            for i in comb.keys():
+            for i in list(comb.keys()):
                 dG = comb[i] * self.feps[i][temp]['dG'][0]
                 dG_sem = self.feps[i][temp]['dG'][1]
 
@@ -407,7 +407,7 @@ class Analyse_resFEP(Toplevel):
         if not save_name:
             return
 
-        cPickle.dump([self.feps, self.feps_paths], open(save_name, 'wb'))
+        pickle.dump([self.feps, self.feps_paths], open(save_name, 'wb'))
 
         self.app.log('info', 'Session saved as %s\n' % save_name.split('/')[-1])
 
@@ -423,7 +423,7 @@ class Analyse_resFEP(Toplevel):
         if not import_session:
             return
 
-        fep_data = cPickle.load(open(import_session, 'rb'))
+        fep_data = pickle.load(open(import_session, 'rb'))
 
         self.feps.update(fep_data[0])
         self.feps_paths.update(fep_data[1])
@@ -502,8 +502,8 @@ class Analyse_resFEP(Toplevel):
 
         #INSERT HEADER
         self.dg_list.insert(END, '%10s %5s %5s %7s %7s %7s %7s %7s %7s' %
-                                 ('Title'.ljust(10), 'T'.ljust(5), 'FEP'.ljust(5), u"<\u0394G>".ljust(3), '+/-'.ljust(3),
-                                  u"\u0394Gf".ljust(3), '+/-'.ljust(3), u"\u0394Gr".ljust(3), '+/-'.ljust(3)))
+                                 ('Title'.ljust(10), 'T'.ljust(5), 'FEP'.ljust(5), "<\\u0394G>".ljust(3), '+/-'.ljust(3),
+                                  "\\u0394Gf".ljust(3), '+/-'.ljust(3), "\\u0394Gr".ljust(3), '+/-'.ljust(3)))
 
         for i in selected:
             fep_title = self.feplist.get(i)
@@ -554,7 +554,7 @@ class Analyse_resFEP(Toplevel):
                                  highlightthickness=0, relief=GROOVE, selectmode=EXTENDED, exportselection=True)
         feplist_scroll.config(command=self.feplist.yview)
         self.feplist.grid(row=1, rowspan=4, column=0, columnspan=2, sticky='nse')
-        self.feplist.config(font=tkFont.Font(family="Courier", size=12))
+        self.feplist.config(font=tkinter.font.Font(family="Courier", size=12))
         self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
         #Add fep runs
@@ -572,7 +572,7 @@ class Analyse_resFEP(Toplevel):
         recalc_fep.grid(row=6, column=0, columnspan=3)
 
         #Right arrow to combine box label
-        right_arrow = Label(frame1, text=u'\u2192', bg=self.main_color)
+        right_arrow = Label(frame1, text='\\u2192', bg=self.main_color)
         right_arrow.grid(row=2, rowspan=2, column=3)
 
         #+ value to selected FEP run
@@ -596,7 +596,7 @@ class Analyse_resFEP(Toplevel):
                                  highlightthickness=0, relief=GROOVE, selectmode=SINGLE, exportselection=True)
         comb_list_scroll.config(command=self.comb_list.yview)
         self.comb_list.grid(row=1, rowspan=4, column=6, columnspan=2, sticky='nse')
-        self.comb_list.config(font=tkFont.Font(family="Courier", size=12))
+        self.comb_list.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
         #Entry field for user defined title for the combine FEP
@@ -625,7 +625,7 @@ class Analyse_resFEP(Toplevel):
                                  highlightthickness=0, relief=GROOVE, selectmode=EXTENDED, exportselection=True)
         dg_list_scroll.config(command=self.dg_list.yview)
         self.dg_list.grid(row=1, rowspan=4, column=0, columnspan=2, sticky='nse')
-        self.dg_list.config(font=tkFont.Font(family="Courier", size=12))
+        self.dg_list.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.feplist.bind('<<ListboxSelect>>', self.feplist_event)
 
         #Export table

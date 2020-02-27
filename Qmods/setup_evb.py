@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
+from tkinter import  Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, OptionMenu, IntVar, StringVar, Checkbutton, HORIZONTAL, LabelFrame
 
 from select_atoms import AtomSelectRange
@@ -22,10 +22,10 @@ from edit_file import FileEdit
 from edit_evb import EditEvbNotes, ImportParameters, EditParameters, EditBondParameters, EditAngleParameters, \
     EditTorsionParameters, EditImproperParameters
 from setup_md import SetupMd
-from tkFileDialog import askopenfilename
-import tkFont
+from tkinter.filedialog import askopenfilename
+import tkinter.font
 import copy
-import cPickle
+import pickle
 import shutil
 import random
 import os
@@ -96,7 +96,7 @@ class SetupEVB(Toplevel):
         self.qstatus = {'Q-atoms':'No Q-atoms selected',
                         'Topology pdb': 'NA',
                         'Form/Break bonds': 'NA',
-                        u"\N{GREEK SMALL LETTER LAMDA}-steps/run": '51',
+                        "\N{GREEK SMALL LETTER LAMDA}-steps/run": '51',
                         'Total simulation time (ns)': '%.6f' % (float(self.md_settings['simtime']) * 51.00)}
 
         #Pymol session:
@@ -389,7 +389,7 @@ class SetupEVB(Toplevel):
                 self.update_status()
                 self.sync_check.config(state=NORMAL)
             else:
-                print 'No pdb loaded'
+                print('No pdb loaded')
                 self.sync_check.config(state=DISABLED)
                 return
 
@@ -415,17 +415,17 @@ class SetupEVB(Toplevel):
                 del qlist[q]
 
             #Remove Q-atoms from self.q_bonds and q_impropers
-            if q in self.q_bonds.keys():
+            if q in list(self.q_bonds.keys()):
                 del self.q_bonds[q]
-            for qi in self.q_bonds.keys():
+            for qi in list(self.q_bonds.keys()):
                 for state in range(4):
                     if q in self.q_bonds[qi][state]:
                         del self.q_bonds[qi][state][self.q_bonds[qi][state].index(q)]
 
-            if q in self.q_impropers.keys():
+            if q in list(self.q_impropers.keys()):
                 del self.q_impropers[q]
 
-            for qi in self.q_impropers.keys():
+            for qi in list(self.q_impropers.keys()):
                 if q in self.q_impropers[qi]:
                     del self.q_impropers[qi]
 
@@ -442,24 +442,24 @@ class SetupEVB(Toplevel):
 
         #UPDATE Q-atom number in bonds and impropers
         for q_old in sorted(q_old_new.keys()):
-            if q_old in self.q_bonds.keys():
+            if q_old in list(self.q_bonds.keys()):
                 q_new = q_old_new[q_old]
                 self.q_bonds[q_new] = copy.deepcopy(self.q_bonds[q_old])
                 del self.q_bonds[q_old]
 
-            for qj in self.q_bonds.keys():
+            for qj in list(self.q_bonds.keys()):
                 for state in range(4):
                     if q_old in self.q_bonds[qj][state]:
-                        print 'before: %s' % self.q_bonds[qj][state]
+                        print('before: %s' % self.q_bonds[qj][state])
                         self.q_bonds[qj][state][self.q_bonds[qj][state].index(q_old)] = q_old_new[q_old]
-                        print 'after: %s' % self.q_bonds[qj][state]
+                        print('after: %s' % self.q_bonds[qj][state])
 
-            if q_old in self.q_impropers.keys():
+            if q_old in list(self.q_impropers.keys()):
                 q_new = q_old_new[q_old]
                 self.q_impropers[q_new] = copy.deepcopy(self.q_impropers[q_old])
                 del self.q_impropers[q_old]
                 for i in range(len(self.q_impropers[q_new])):
-                    if self.q_impropers[q_new][i] in q_old_new.keys():
+                    if self.q_impropers[q_new][i] in list(q_old_new.keys()):
                         self.q_impropers[q_new][i] = q_old_new[self.q_impropers[q_new][i]]
 
         self.update_q_atoms()
@@ -469,7 +469,7 @@ class SetupEVB(Toplevel):
         """
         Add a note to selected q-atom
         """
-        sel_index = map(int, self.qatoms_listbox.curselection())
+        sel_index = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(sel_index) == 1:
             note = self.qatoms_listbox.get(sel_index[0]).split('!')[-1]
@@ -486,7 +486,7 @@ class SetupEVB(Toplevel):
 
         #Check if Q notes exist, if not, make it atomname and res i:
         if len(self.q_notes) == 0:
-            for q in self.q_atom_name.keys():
+            for q in list(self.q_atom_name.keys()):
                 self.q_notes[q] = '%4s %s' % (self.q_atom_name[q].ljust(4), self.q_atom_res[q])
 
         #Fill Q atoms listbox
@@ -557,7 +557,7 @@ class SetupEVB(Toplevel):
                                             if (current_nr + 1) in res_nr:
                                                 next_res = residues[res_nr.index(current_nr + 1)]
                                                 #Get all Q-atoms in next residue:
-                                                for q_ in self.q_atom_res.keys():
+                                                for q_ in list(self.q_atom_res.keys()):
                                                     if self.q_atom_res[q_] == next_res:
                                                         if self.q_atom_name[q_] == next_atom:
                                                             q_imp[atom] = q_
@@ -571,7 +571,7 @@ class SetupEVB(Toplevel):
                                             if (current_nr - 1) in res_nr:
                                                 prev_res = residues[res_nr.index(current_nr - 1)]
                                                 #Get all Q-atoms in previous residue:
-                                                for q_ in self.q_atom_res.keys():
+                                                for q_ in list(self.q_atom_res.keys()):
                                                     if self.q_atom_res[q_] == prev_res:
                                                         if self.q_atom_name[q_] == prev_atom:
                                                             q_imp[atom] = q_
@@ -580,10 +580,10 @@ class SetupEVB(Toplevel):
                                     if imp_atoms:
                                         q1, q2, q3, q4 = q_imp[0:]
                                         if self.ff_is_charmm:
-                                            print 'org: %d %d %d %d' % (q1, q2, q3, q4)
+                                            print('org: %d %d %d %d' % (q1, q2, q3, q4))
                                             q1, q2, q3, q4 = self.check_imp(q1,q2,q3,q4)
-                                        print 'added %d' % q2
-                                        print q1,q2,q3,q4
+                                        print('added %d' % q2)
+                                        print(q1,q2,q3,q4)
                                         self.q_impropers[q2] = [q1, q3, q4]
 
                             #### CONNECTIONS ####
@@ -602,7 +602,7 @@ class SetupEVB(Toplevel):
 
                                             #Get all Q-atoms in previous residue:
                                             q_in_prev = []
-                                            for q_ in self.q_atom_res.keys():
+                                            for q_ in list(self.q_atom_res.keys()):
                                                 if self.q_atom_res[q_] == prev_res:
                                                     q_in_prev.append(q_)
 
@@ -610,7 +610,7 @@ class SetupEVB(Toplevel):
                                             found_tail = False
                                             for q_ in q_in_prev:
                                                 #Make sure that Q-atom is involved in bond (it may as well not be..)
-                                                if q_ in self.q_bonds.keys():
+                                                if q_ in list(self.q_bonds.keys()):
                                                     for state in range(4):
                                                         if '+' in self.q_bonds[q_][state]:
                                                             q_tail = q_
@@ -618,14 +618,14 @@ class SetupEVB(Toplevel):
 
                                                 #Append connecting Q-atoms to self.q_bonds
                                                 if found_tail:
-                                                    if q_head not in self.q_bonds.keys():
+                                                    if q_head not in list(self.q_bonds.keys()):
                                                         self.q_bonds[q_head] = [[q_tail], [q_tail], [q_tail], [q_tail]]
                                                     else:
                                                         for state in range(4):
                                                             if q_tail not in self.q_bonds[q_head][state]:
                                                                 self.q_bonds[q_head][state].append(q_tail)
 
-                                                    if q_tail not in self.q_bonds.keys():
+                                                    if q_tail not in list(self.q_bonds.keys()):
                                                         self.q_bonds[q_tail] = [[q_head], [q_head], [q_head], [q_head]]
                                                     else:
                                                         for state in range(4):
@@ -636,7 +636,7 @@ class SetupEVB(Toplevel):
                                     atom_tail = line.split()[1]
                                     if atom_tail in atomnames:
                                         q_tail = qatoms[atomnames.index(atom_tail)]
-                                        if q_tail not in self.q_bonds.keys():
+                                        if q_tail not in list(self.q_bonds.keys()):
                                             self.q_bonds[q_tail] = [['+'], ['+'], ['+'], ['+']]
                                         else:
                                             for state in range(4):
@@ -655,13 +655,13 @@ class SetupEVB(Toplevel):
                                         #Bond exist in Q-atom selection, get Q-atom nr and append bond:
                                         qi = qatoms[atomnames.index(atom1)]
                                         qj = qatoms[atomnames.index(atom2)]
-                                        if qi not in self.q_bonds.keys():
+                                        if qi not in list(self.q_bonds.keys()):
                                             self.q_bonds[qi] = [[qj], [qj], [qj], [qj]]
                                         else:
                                             for state in range(4):
                                                 if qj not in self.q_bonds[qi][state]:
                                                     self.q_bonds[qi][state].append(qj)
-                                        if qj not in self.q_bonds.keys():
+                                        if qj not in list(self.q_bonds.keys()):
                                             self.q_bonds[qj] = [[qi], [qi], [qi], [qi]]
                                         else:
                                             for state in range(4):
@@ -711,7 +711,7 @@ class SetupEVB(Toplevel):
                             found_res = True
 
         #Go through self.q_bonds and remove all '+' (Tail symbols)
-        for q in self.q_bonds.keys():
+        for q in list(self.q_bonds.keys()):
             for state in range(4):
                 if '+' in self.q_bonds[q][state]:
                     del self.q_bonds[q][state][self.q_bonds[q][state].index('+')]
@@ -730,7 +730,7 @@ class SetupEVB(Toplevel):
 
         #Make a list with atomtypes (no redundancies)
         atomtypes_to_find = []
-        for q in self.q_atomtypes.keys():
+        for q in list(self.q_atomtypes.keys()):
             for state in range(self.evb_states.get()):
                 atomtype = self.q_atomtypes[q][state]
                 if atomtype not in atomtypes_to_find:
@@ -748,12 +748,12 @@ class SetupEVB(Toplevel):
                                 atomtype = line.split()[0].strip()
                                 if atomtype in atomtypes_to_find:
                                     #Check that atomtype is not already in list (may be added/edited by user):
-                                    if atomtype not in self.atomtype_prm.keys():
+                                    if atomtype not in list(self.atomtype_prm.keys()):
                                         ri = float(line.split()[1].strip())
                                         if ri > 100:
                                             if self.ff_is_charmm:
                                                 self.ff_is_charmm = False
-                                                print 'Force field parameters is not CHARMM'
+                                                print('Force field parameters is not CHARMM')
                                         ei = float(line.split()[3].strip())
                                         ci = 70.0
                                         if atomtype[0] == 'H':
@@ -785,7 +785,7 @@ class SetupEVB(Toplevel):
             for state in range(self.evb_states.get()):
                 atomtype = self.q_atomtypes[q][state]
                 state_types[state] = atomtype
-                if atomtype not in prm_nr.keys():
+                if atomtype not in list(prm_nr.keys()):
                     nr += 1
                     prm_nr[atomtype] = nr
 
@@ -795,13 +795,13 @@ class SetupEVB(Toplevel):
 
         #Inset atomtypes to self.atomtypes_listbox
         self.atomtypes_listbox.delete(0, END)
-        for prm in prm_nr.keys():
-            if prm in self.atomtype_prm.keys():
+        for prm in list(prm_nr.keys()):
+            if prm in list(self.atomtype_prm.keys()):
                 ri, ei, ci, ai, ri1_4, ei1_4, mass  = self.atomtype_prm[prm][0:]
                 if ri > 100:
                     if self.ff_is_charmm:
                         self.ff_is_charmm = False
-                        print 'Force field parameters is not CHARMM'
+                        print('Force field parameters is not CHARMM')
                 self.atomtypes_listbox.insert(END, '%4s %7.2f %5.2f %5.2f %4.2f %7.2f %5.2f %5.2f' %
                                                (prm.ljust(4), ri, ei, ci, ai, ri1_4, ei1_4, mass))
             else:
@@ -832,7 +832,7 @@ class SetupEVB(Toplevel):
                                              t3.ljust(4), t4.ljust(4)))
 
         #Insert sum of charges for each state
-        charge_sum = map(lambda x: round(x, 3), charge_sum)
+        charge_sum = [round(x, 3) for x in charge_sum]
 
         sum1, sum2, sum3, sum4 = charge_sum[0:]
         if self.evb_states.get() < 4:
@@ -866,7 +866,7 @@ class SetupEVB(Toplevel):
         #Find all unique bonds:
         bonds = []
 
-        for q1 in self.q_bonds.keys():
+        for q1 in list(self.q_bonds.keys()):
             for state in range(self.evb_states.get()):
                 for q2 in self.q_bonds[q1][state]:
                     t1 = self.q_atomtypes[q1][state]
@@ -875,7 +875,7 @@ class SetupEVB(Toplevel):
                     bond_rev = '%s %s' % (t2, t1)
                     if bond not in bonds and bond_rev not in bonds:
                         #If parameters already exist, do not look for them:
-                        if bond not in self.bond_prm.keys() and bond_rev not in self.bond_prm.keys():
+                        if bond not in list(self.bond_prm.keys()) and bond_rev not in list(self.bond_prm.keys()):
                             bonds.append(bond)
 
         if len(bonds) == 0:
@@ -924,7 +924,7 @@ class SetupEVB(Toplevel):
         partners = set()
         for pair in pairs:
             if str(qatom) in pair.split():
-                a1, a2 = map(int, pair.split())
+                a1, a2 = list(map(int, pair.split()))
                 if qatom != a1:
                     partners.add(a1)
                 else:
@@ -952,7 +952,7 @@ class SetupEVB(Toplevel):
             for i in range(self.evb_states.get()):
                 angs[i] = 0
 
-            atom1, atom2, atom3 = map(int, [self.q_atom_nr[q1], self.q_atom_nr[q2_off], self.q_atom_nr[partner]])
+            atom1, atom2, atom3 = list(map(int, [self.q_atom_nr[q1], self.q_atom_nr[q2_off], self.q_atom_nr[partner]]))
 
             ang = '%s %s %s' % (atom1, atom2, atom3)
 
@@ -979,8 +979,8 @@ class SetupEVB(Toplevel):
             for i in range(self.evb_states.get()):
                 tors[i] = 0
 
-            atom1, atom2, atom3, atom4 = map(int, [self.q_atom_nr[q1], self.q_atom_nr[q2], self.q_atom_nr[q3],
-                                                   self.q_atom_nr[partner]])
+            atom1, atom2, atom3, atom4 = list(map(int, [self.q_atom_nr[q1], self.q_atom_nr[q2], self.q_atom_nr[q3],
+                                                   self.q_atom_nr[partner]]))
 
             tors_ = '%s %s %s %s' % (atom1, atom2, atom3, atom4)
 
@@ -1006,7 +1006,7 @@ class SetupEVB(Toplevel):
         #Go through Form/break bonds and collect bonds that are off in all states!
         nobonds = list()
         for line in self.bondchange_listbox.get(0, END):
-            q1, q2 = map(int, line.split()[0:2])
+            q1, q2 = list(map(int, line.split()[0:2]))
             if sum(map(int, line.split()[2:])) < 1:
                 nobonds.append('%d %d' % (q1, q2))
                 a1, a2 = self.q_atom_nr[int(q1)], self.q_atom_nr[int(q2)]
@@ -1034,7 +1034,7 @@ class SetupEVB(Toplevel):
                     state_qbonds[state].append('%d %d' % (q1, q2))
 
                     #Append bondtype with number to bond_prm_nr
-                    if bond not in bond_nr_prm.values() and bond_rev not in bond_nr_prm.values():
+                    if bond not in list(bond_nr_prm.values()) and bond_rev not in list(bond_nr_prm.values()):
                         prm_nr += 1
                         bond_nr_prm[prm_nr] = bond
 
@@ -1104,10 +1104,10 @@ class SetupEVB(Toplevel):
         for prm in sorted(bond_nr_prm.keys()):
             bond = bond_nr_prm[prm]
             bond_rev = '%s %s' % (bond.split()[1], bond.split()[0])
-            if bond in self.bond_prm.keys():
+            if bond in list(self.bond_prm.keys()):
                 de, alpha, rb = self.bond_prm[bond][0:3]
                 self.bondtypes_listbox.insert(END, '%2d %6.2f %5.2f %5.2f !%s' % (prm, de, alpha, rb, bond))
-            elif bond_rev in self.bond_prm.keys():
+            elif bond_rev in list(self.bond_prm.keys()):
                 de, alpha, rb = self.bond_prm[bond_rev][0:3]
                 self.bondtypes_listbox.insert(END, '%2d %6.2f %5.2f %5.2f !%s' % (prm, de, alpha, rb, bond))
             else:
@@ -1124,7 +1124,7 @@ class SetupEVB(Toplevel):
             return
 
         evb_states = self.evb_states.get()
-        for atompair in self.change_bonds.keys():
+        for atompair in list(self.change_bonds.keys()):
 
             s1, s2, s3, s4 = self.change_bonds[atompair]
             atom1 = int(atompair.split()[0])
@@ -1132,7 +1132,7 @@ class SetupEVB(Toplevel):
 
             #Find Q-atom number corresponding to atom1 and atom2
             q1, q2 = None, None
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -1166,14 +1166,14 @@ class SetupEVB(Toplevel):
         prm_nr = 0
 
         #List with Q-atoms to include for angle terms
-        q_atoms = self.q_atom_nr.keys()
+        q_atoms = list(self.q_atom_nr.keys())
 
         #Go through Form/break bonds and collect bonds that are off in all states!
         nobonds = list()
         nobond_set = set()
 
         for line in self.bondchange_listbox.get(0, END):
-            q1, q2 = map(int, line.split()[0:2])
+            q1, q2 = list(map(int, line.split()[0:2]))
             if sum(map(int, line.split()[2:])) < 1:
                 nobonds.append('%d %d' % (q1, q2))
                 nobond_set.update([q1, q2])
@@ -1183,17 +1183,17 @@ class SetupEVB(Toplevel):
             q_atoms[:] = []
             #Collect q atoms that are involved in bond forming/breaking
             if len(self.change_bonds) > 0:
-                for atompair in self.change_bonds.keys():
-                    atom1, atom2 = map(int, atompair.split())
+                for atompair in list(self.change_bonds.keys()):
+                    atom1, atom2 = list(map(int, atompair.split()))
 
                     #Find corresponding Q-atom:
-                    for q in self.q_atom_nr.keys():
+                    for q in list(self.q_atom_nr.keys()):
                         if int(self.q_atom_nr[q]) == atom1 or int(self.q_atom_nr[q]) == atom2:
                             if q not in q_atoms:
                                 q_atoms.append(q)
 
             #collect Q atoms that change atomtype
-            for q in self.q_atomtypes.keys():
+            for q in list(self.q_atomtypes.keys()):
                 atomtypes = []
                 for s in range(self.evb_states.get()):
                     t = self.q_atomtypes[q][s]
@@ -1255,8 +1255,8 @@ class SetupEVB(Toplevel):
                                         state_qangles[state].append('%d %d %d' % (q1, q2, q3))
 
                                         #Append angletype with number to bond_prm_nr
-                                        if angle not in angle_nr_prm.values() and \
-                                                        angle_rev not in angle_nr_prm.values():
+                                        if angle not in list(angle_nr_prm.values()) and \
+                                                        angle_rev not in list(angle_nr_prm.values()):
                                             prm_nr += 1
                                             angle_nr_prm[prm_nr] = angle
             if insert_angle:
@@ -1312,19 +1312,19 @@ class SetupEVB(Toplevel):
 
                         if insert_angle:
                             ang1, ang2, ang3, ang4 = type_nr[0:]
-                            q1_, q2_, q3_ = map(int, qpair.split())
-                            atom1, atom2, atom3 = map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_], self.q_atom_nr[q3_]])
+                            q1_, q2_, q3_ = list(map(int, qpair.split()))
+                            atom1, atom2, atom3 = list(map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_], self.q_atom_nr[q3_]]))
                             self.changeangle_listbox.insert(END, '%6d %6d %6d %2s  %2s %2s  %2s' %
                                                                  (atom1, atom2, atom3, ang1, ang2, ang3, ang4))
 
                     s += 1
 
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
-        prms = angle_nr_prm.values()
+        prms = list(angle_nr_prm.values())
         missing_prms = []
         for prm in prms:
             prm_rev = '%s %s %s' % (prm.split()[2], prm.split()[1], prm.split()[0] )
-            if prm not in self.angle_prm.keys() and prm_rev not in self.angle_prm.keys():
+            if prm not in list(self.angle_prm.keys()) and prm_rev not in list(self.angle_prm.keys()):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
@@ -1365,16 +1365,16 @@ class SetupEVB(Toplevel):
             for angle in missing_prms:
                 angle_rev = '%s %s %s' % (angle.split()[2], angle.split()[1], angle.split()[0])
                 del missing_prms[missing_prms.index(angle)]
-                if angle not in self.angle_prm.keys():
+                if angle not in list(self.angle_prm.keys()):
                     self.angle_prm[angle] = ['??', '??']
-                if angle_rev not in self.angle_prm.keys():
+                if angle_rev not in list(self.angle_prm.keys()):
                     self.angle_prm[angle_rev] = ['??', '??']
 
         #Insert angle types to listbox
         for prm in sorted(angle_nr_prm.keys()):
             angle = angle_nr_prm[prm]
             angle_rev = '%s %s %s' % (angle.split()[2], angle.split()[1], angle.split()[0])
-            if angle in self.angle_prm.keys():
+            if angle in list(self.angle_prm.keys()):
                 k, theta = self.angle_prm[angle][0:]
             elif angle_rev in self.angle_prm:
                 k, theta = self.angle_prm[angle_rev][0:]
@@ -1398,14 +1398,14 @@ class SetupEVB(Toplevel):
         prm_nr = 1
 
         #List with Q-atoms to include for angle terms
-        q_atoms = self.q_atom_nr.keys()
+        q_atoms = list(self.q_atom_nr.keys())
 
         #Go through Form/break bonds and collect bonds that are off in all states!
         nobonds = list()
         nobond_set = set()
 
         for line in self.bondchange_listbox.get(0, END):
-            q1, q2 = map(int, line.split()[0:2])
+            q1, q2 = list(map(int, line.split()[0:2]))
             if sum(map(int, line.split()[2:])) < 1:
                 nobonds.append('%d %d' % (q1, q2))
                 nobond_set.update([q1, q2])
@@ -1416,16 +1416,16 @@ class SetupEVB(Toplevel):
             #Collect q atoms that are involved in bond forming/breaking
             if len(self.change_bonds) > 0:
                 for atompair in self.change_bonds:
-                    atom1, atom2 = map(int, atompair.split())
+                    atom1, atom2 = list(map(int, atompair.split()))
 
                     #Find corresponding Q-atom:
-                    for q in self.q_atom_nr.keys():
+                    for q in list(self.q_atom_nr.keys()):
                         if int(self.q_atom_nr[q]) == atom1 or int(self.q_atom_nr[q]) == atom2:
                             if q not in q_atoms:
                                 q_atoms.append(q)
 
             #collect Q atoms that change atomtype
-            for q in self.q_atomtypes.keys():
+            for q in list(self.q_atomtypes.keys()):
                 atomtypes = []
                 for s in range(self.evb_states.get()):
                     t = self.q_atomtypes[q][s]
@@ -1519,8 +1519,8 @@ class SetupEVB(Toplevel):
                                                 state_qtorsions[state].append('%d %d %d %d' % (q1, q2, q3, q4))
 
                                                 #Append angletype with number to bond_prm_nr
-                                                if torsion not in torsion_nr_prm.values() and \
-                                                        torsion_rev not in torsion_nr_prm.values():
+                                                if torsion not in list(torsion_nr_prm.values()) and \
+                                                        torsion_rev not in list(torsion_nr_prm.values()):
                                                     torsion_nr_prm[prm_nr] = torsion
                                                     prm_nr += 3
             if insert_torsion:
@@ -1577,9 +1577,9 @@ class SetupEVB(Toplevel):
 
                         if insert_torsion:
                             tor1, tor2, tor3, tor4 = type_nr[0:]
-                            q1_, q2_, q3_, q4_ = map(int, qpair.split())
-                            atom1, atom2, atom3, atom4 = map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_],
-                                                                   self.q_atom_nr[q3_],  self.q_atom_nr[q4_]])
+                            q1_, q2_, q3_, q4_ = list(map(int, qpair.split()))
+                            atom1, atom2, atom3, atom4 = list(map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_],
+                                                                   self.q_atom_nr[q3_],  self.q_atom_nr[q4_]]))
                             for z in range(3):
                                 self.changetorsion_listbox.insert(END, '%6d %6d %6d %6d %3s  %3s  %3s  %3s' %
                                                                        (atom1, atom2, atom3, atom4,
@@ -1602,11 +1602,11 @@ class SetupEVB(Toplevel):
                     s += 1
 
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
-        prms = torsion_nr_prm.values()
+        prms = list(torsion_nr_prm.values())
         missing_prms = []
         for prm in prms:
             prm_rev = '%s %s %s %s' % (prm.split()[3], prm.split()[2], prm.split()[1], prm.split()[0])
-            if prm not in self.torsion_prm.keys() and prm_rev not in self.torsion_prm.keys():
+            if prm not in list(self.torsion_prm.keys()) and prm_rev not in list(self.torsion_prm.keys()):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
@@ -1638,9 +1638,9 @@ class SetupEVB(Toplevel):
                                     phase = float(line.split()[6])
                                     paths = int(float(line.split()[7]))
 
-                                    if torsion not in self.torsion_prm.keys():
+                                    if torsion not in list(self.torsion_prm.keys()):
                                         self.torsion_prm[torsion] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
-                                    if torsion_rev not in self.torsion_prm.keys():
+                                    if torsion_rev not in list(self.torsion_prm.keys()):
                                         self.torsion_prm[torsion_rev] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
                                     #Make sure to note overwrite existing parameters (check that kt > 0)
                                     if self.torsion_prm[torsion][abs(minima) - 1][0] == 0:
@@ -1661,7 +1661,7 @@ class SetupEVB(Toplevel):
                 torsion_rev = '%s %s %s %s' % (torsion.split()[2], torsion.split()[2], torsion.split()[1],
                                                torsion.split()[0])
                 del missing_prms[missing_prms.index(torsion)]
-                if torsion not in self.torsion_prm.keys() and torsion_rev not in self.torsion_prm.keys():
+                if torsion not in list(self.torsion_prm.keys()) and torsion_rev not in list(self.torsion_prm.keys()):
                     self.torsion_prm[torsion] = [['??', 0.00, 1], ['??', 180.00, 1], ['??', 0.00, 1]]
                     self.torsion_prm[torsion_rev] = [['??', 0.00, 1], ['??', 180.00, 1], ['??', 0.00, 1]]
 
@@ -1678,10 +1678,10 @@ class SetupEVB(Toplevel):
                 if int(minima) == -3:
                     minima = str(3)
 
-                if torsion in self.torsion_prm.keys():
-                    k, phase, path = map(str, self.torsion_prm[torsion][j][0:])
-                elif torsion_rev in self.torsion_prm.keys():
-                    k, phase, path = map(str, self.torsion_prm[torsion_rev][j][0:])
+                if torsion in list(self.torsion_prm.keys()):
+                    k, phase, path = list(map(str, self.torsion_prm[torsion][j][0:]))
+                elif torsion_rev in list(self.torsion_prm.keys()):
+                    k, phase, path = list(map(str, self.torsion_prm[torsion_rev][j][0:]))
                     insert_tor = torsion_rev
                 else:
                     k, phase, path = '??', '0.00', '1'
@@ -1707,23 +1707,23 @@ class SetupEVB(Toplevel):
         self.impropertypes_listbox.delete(0, END)
 
         #List with Q-atoms to include for angle terms
-        q_atoms = self.q_atom_nr.keys()
+        q_atoms = list(self.q_atom_nr.keys())
 
         if self.show_changing_impropers:
             q_atoms[:] = []
             #Collect q atoms that are involved in bond forming/breaking
             if len(self.change_bonds) > 0:
-                for atompair in self.change_bonds.keys():
-                    atom1, atom2 = map(int, atompair.split())
+                for atompair in list(self.change_bonds.keys()):
+                    atom1, atom2 = list(map(int, atompair.split()))
 
                     #Find corresponding Q-atom:
-                    for q in self.q_atom_nr.keys():
+                    for q in list(self.q_atom_nr.keys()):
                         if int(self.q_atom_nr[q]) == atom1 or int(self.q_atom_nr[q]) == atom2:
                             if q not in q_atoms:
                                 q_atoms.append(q)
 
             #collect Q atoms that change atomtype
-            for q in self.q_atomtypes.keys():
+            for q in list(self.q_atomtypes.keys()):
                 atomtypes = []
                 for s in range(self.evb_states.get()):
                     t = self.q_atomtypes[q][s]
@@ -1735,7 +1735,7 @@ class SetupEVB(Toplevel):
         #Write change impropers lisbox
         prm_nr = 0
         nr_type = dict()
-        for q2 in self.q_impropers.keys():
+        for q2 in list(self.q_impropers.keys()):
             q1, q3, q4 = self.q_impropers[q2][0:]
             if q1 in q_atoms or q2 in q_atoms or q3 in q_atoms or q4 in q_atoms:
                 states = [' ',' ',' ',' ']
@@ -1766,12 +1766,12 @@ class SetupEVB(Toplevel):
                             imp_type = '%s %s %s %s' % (t1, t2, t3, t4)
                             imp_type_rev = '%s %s %s %s' % (t4, t3, t2, t1)
 
-                        if imp_type not in nr_type.values() and imp_type_rev not in nr_type.values():
+                        if imp_type not in list(nr_type.values()) and imp_type_rev not in list(nr_type.values()):
                             prm_nr += 1
                             nr_type[prm_nr] = imp_type
                             states[state] = str(prm_nr)
-                        elif imp_type in nr_type.values() or imp_type_rev in nr_type.values():
-                            for nr in nr_type.keys():
+                        elif imp_type in list(nr_type.values()) or imp_type_rev in list(nr_type.values()):
+                            for nr in list(nr_type.keys()):
                                 if nr_type[nr] == imp_type or nr_type[nr] == imp_type_rev:
                                     states[state] = str(nr)
 
@@ -1792,11 +1792,11 @@ class SetupEVB(Toplevel):
                 except:
                     continue
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
-        prms = nr_type.values()
+        prms = list(nr_type.values())
         missing_prms = []
         for prm in prms:
             prm_rev = '%s %s %s %s' % (prm.split()[3], prm.split()[2], prm.split()[1], prm.split()[0])
-            if prm not in self.improper_prm.keys() and prm_rev not in self.improper_prm.keys():
+            if prm not in list(self.improper_prm.keys()) and prm_rev not in list(self.improper_prm.keys()):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
@@ -1842,10 +1842,10 @@ class SetupEVB(Toplevel):
         for nr in sorted(nr_type.keys()):
             type_ = nr_type[nr]
             type_rev = '%s %s %s %s' % (type_.split()[3], type_.split()[2], type_.split()[1], type_.split()[0])
-            if type_ in self.improper_prm.keys():
-                kt, phase = map(str, self.improper_prm[type_][0:])
-            elif type_rev in self.improper_prm.keys():
-                kt, phase = map(str, self.improper_prm[type_rev][0:])
+            if type_ in list(self.improper_prm.keys()):
+                kt, phase = list(map(str, self.improper_prm[type_][0:]))
+            elif type_rev in list(self.improper_prm.keys()):
+                kt, phase = list(map(str, self.improper_prm[type_rev][0:]))
 
             self.impropertypes_listbox.insert(END, '%3d %6s %6s !%s' % (nr, kt, phase, type_))
 
@@ -1855,12 +1855,12 @@ class SetupEVB(Toplevel):
         """
         self.softpairs_listbox.delete(0, END)
         #Go through self.change_bonds and set softpairs for bonds broken/formed
-        for atompair in self.change_bonds.keys():
+        for atompair in list(self.change_bonds.keys()):
             q1 = None
             q2 = None
 
             states = []
-            atom1, atom2 = map(int, atompair.split()[0:])
+            atom1, atom2 = list(map(int, atompair.split()[0:]))
 
             #Check that bondings are changed between states
             for state in range(self.evb_states.get()):
@@ -1869,7 +1869,7 @@ class SetupEVB(Toplevel):
                     states.append(s)
             if len(states) > 1:
                 #Bond is broken/formed. Find Q nr for atom1 and atom2
-                for q in self.q_atom_nr.keys():
+                for q in list(self.q_atom_nr.keys()):
                     if int(self.q_atom_nr[q]) == atom1:
                         q1 = q
                     if int(self.q_atom_nr[q]) == atom2:
@@ -1885,12 +1885,12 @@ class SetupEVB(Toplevel):
                         else:
                             note += '%s-%s' % (qt1, qt2)
                         if state != self.evb_states.get() - 1:
-                                note += ' --> '
+                            note += ' --> '
                     self.softpairs_listbox.insert(END, '%3d %3d  !%s' % (q1, q2, note))
 
         #Insert additional soft-pairs (if any)
         if len(self.softpairs_added) > 0:
-            for q1 in self.softpairs_added.keys():
+            for q1 in list(self.softpairs_added.keys()):
                 q2 = self.softpairs_added[q1]
                 bond_change = False
                 bonded = False
@@ -1925,7 +1925,7 @@ class SetupEVB(Toplevel):
                             note += '%s + %s' % (qt1, qt2)
 
                     if state != self.evb_states.get() - 1:
-                            note += ' --> '
+                        note += ' --> '
                 self.softpairs_listbox.insert(END, '%3d %3d  !%s' % (q1, q2, note))
 
     def coupling_true_false(self):
@@ -1960,10 +1960,10 @@ class SetupEVB(Toplevel):
         bond_list = self.changebond_listbox.get(0, END)
         for line in bond_list:
             nr += 1
-            a1, a2 = map(int, line.split()[0:2])
-            if 0 in map(int, line.split()[2:]):
+            a1, a2 = list(map(int, line.split()[0:2]))
+            if 0 in list(map(int, line.split()[2:])):
                 q1, q2 = None, None
-                for q in self.q_atom_nr.keys():
+                for q in list(self.q_atom_nr.keys()):
                     if int(self.q_atom_nr[q]) == a1:
                         q1 = q
                     if int(self.q_atom_nr[q]) == a2:
@@ -1977,9 +1977,9 @@ class SetupEVB(Toplevel):
         angle_list = self.changeangle_listbox.get(0, END)
         for line in angle_list:
             nr += 1
-            atom1, atom2, atom3 = map(int, line.split()[0:3])
+            atom1, atom2, atom3 = list(map(int, line.split()[0:3]))
             q1, q2, q3 = 0, 0, 0
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -2007,10 +2007,10 @@ class SetupEVB(Toplevel):
         torsion_list = self.changetorsion_listbox.get(0, END)
         for line in torsion_list:
             nr += 1
-            atom1, atom2, atom3, atom4 = map(int, line.split()[0:4])
+            atom1, atom2, atom3, atom4 = list(map(int, line.split()[0:4]))
             q1, q2, q3, q4 = 0, 0, 0, 0
 
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -2045,10 +2045,10 @@ class SetupEVB(Toplevel):
         improper_list = self.changeimproper_listbox.get(0, END)
         for line in improper_list:
             nr += 1
-            atom1, atom2, atom3, atom4 = map(int, line.split()[0:4])
+            atom1, atom2, atom3, atom4 = list(map(int, line.split()[0:4]))
             q1, q2, q3, q4 = 0, 0, 0, 0
 
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -2088,7 +2088,7 @@ class SetupEVB(Toplevel):
 
         for offd in sorted(self.offdiagonals.keys()):
             if offd < (max_numb+1):
-                mixing, qi, qj, aij, uij = map(str, self.offdiagonals[offd][0:])
+                mixing, qi, qj, aij, uij = list(map(str, self.offdiagonals[offd][0:]))
                 self.offdiagonal_listbox.insert(END,'%6s %3s %3s  %5s %5s' % (mixing, qi, qj, aij, uij))
 
     def update_excluded_pairs(self):
@@ -2097,7 +2097,7 @@ class SetupEVB(Toplevel):
         """
         self.excludedpairs_listbox.delete(0, END)
 
-        for atompair in self.excluded_pairs.keys():
+        for atompair in list(self.excluded_pairs.keys()):
             states = ' '
             for state in range(self.evb_states.get()):
                 states += '%3d ' % self.excluded_pairs[atompair][state]
@@ -2107,7 +2107,7 @@ class SetupEVB(Toplevel):
         self.lambdasteps_listbox.delete(0, END)
 
         for i in sorted(self.step_lambdavalues.keys()):
-            l1, l2, l3, l4 = map(float, self.step_lambdavalues[i][0:])
+            l1, l2, l3, l4 = list(map(float, self.step_lambdavalues[i][0:]))
             l1, l2, l3, l4 = '%03.3f' % l1, '%03.3f' % l2, '%03.3f' % l3, '%03.3f' % l4
             if self.evb_states.get() < 3:
                 l3 = ' '
@@ -2121,13 +2121,13 @@ class SetupEVB(Toplevel):
         except:
             lambda_steps = 0
 
-        self.qstatus[u"\N{GREEK small LETTER LAMDA}-steps/run"] = '%s' % str(lambda_steps)
+        self.qstatus["\N{GREEK small LETTER LAMDA}-steps/run"] = '%s' % str(lambda_steps)
         status_list = self.qstatus_listbox.get(0, END)
 
         for i in range(len(status_list)):
-            if u"\N{GREEK small LETTER LAMDA}-steps/run" in status_list[i]:
+            if "\N{GREEK small LETTER LAMDA}-steps/run" in status_list[i]:
                 self.qstatus_listbox.delete(i)
-                self.qstatus_listbox.insert(i, u"\N{GREEK small LETTER LAMDA}-steps/run: %s" % str(lambda_steps))
+                self.qstatus_listbox.insert(i, "\N{GREEK small LETTER LAMDA}-steps/run: %s" % str(lambda_steps))
 
         #Update temperatures to get correct total simulation time:
         self.update_temperatures()
@@ -2204,7 +2204,7 @@ class SetupEVB(Toplevel):
                          'Torsion parameters' : self.torsiontypes_listbox,
                          'Improper parameters' : self.impropertypes_listbox, 'Off-diagonal' : self.offdiagonal_listbox}
 
-        for term in missing_check.keys():
+        for term in list(missing_check.keys()):
             listbox_ = missing_check[term].get(0, END)
             listbox = []
             for i in listbox_:
@@ -2225,7 +2225,7 @@ class SetupEVB(Toplevel):
 
         #Check if Q-atoms and bond change is defined:
         exist_check = {'Q-atoms': self.qatoms_listbox, 'Form/Break bonds': self.bondchange_listbox}
-        for term in exist_check.keys():
+        for term in list(exist_check.keys()):
             listbox_ = exist_check[term].get(0, END)
             listbox = []
             for i in listbox_:
@@ -2242,7 +2242,7 @@ class SetupEVB(Toplevel):
         if not print_all:
             do_not_print = ['OK','ok','na','NA','']
 
-        for i in self.qstatus.keys():
+        for i in list(self.qstatus.keys()):
             if self.qstatus[i] not in do_not_print:
                 self.qstatus_listbox.insert(END, '%s: %s' % (i, self.qstatus[i]))
 
@@ -2282,21 +2282,21 @@ class SetupEVB(Toplevel):
         """
         Takes selected atomtype from list and appends it to Q-atom state 1,2,3 or 4
         """
-        type_selected = map(int, self.atomtypes_listbox.curselection())
+        type_selected = list(map(int, self.atomtypes_listbox.curselection()))
         if len(type_selected) != 1:
             self.app.errorBox('Error', 'Select exactly 1 atomtype to assign to Q-atoms.')
             return
 
         newtype = self.atomtypes_listbox.get(type_selected[0]).split()[0].strip()
 
-        q_atoms_selections = map(int, self.changetypes_listbox.curselection())
+        q_atoms_selections = list(map(int, self.changetypes_listbox.curselection()))
         for selected in q_atoms_selections:
             qi = int(self.changetypes_listbox.get(selected).split()[0])
             self.q_atomtypes[qi][state] = newtype
 
         #If new atom parameter is not in atomtype:parameter list, append it:
-        if newtype not in self.atomtype_prm.keys():
-            ri, ei, ci, ai, ri1_4, ei_1_4, mass = map(float, self.atomtypes_listbox.get(type_selected[0]).split()[1:])
+        if newtype not in list(self.atomtype_prm.keys()):
+            ri, ei, ci, ai, ri1_4, ei_1_4, mass = list(map(float, self.atomtypes_listbox.get(type_selected[0]).split()[1:]))
             self.atomtype_prm[newtype] = [ri, ei, ci, ai, ri1_4, ei_1_4, mass]
 
         #Go through parameter files and try to find bond parameters for new atomtyp
@@ -2313,7 +2313,7 @@ class SetupEVB(Toplevel):
         """
         Edit selected atom type
         """
-        selections = map(int, self.atomtypes_listbox.curselection())
+        selections = list(map(int, self.atomtypes_listbox.curselection()))
         if len(selections) != 1:
             return
 
@@ -2329,7 +2329,7 @@ class SetupEVB(Toplevel):
         """
         Deletes selected atom parameter from list
         """
-        selections = map(int, self.atomtypes_listbox.curselection())
+        selections = list(map(int, self.atomtypes_listbox.curselection()))
         if len(selections) != 1:
             return
 
@@ -2337,7 +2337,7 @@ class SetupEVB(Toplevel):
         del self.atomtype_prm[del_type]
 
         #Check if any Q atoms have atomtype, and change:
-        for atomtype in self.q_atomtypes.keys():
+        for atomtype in list(self.q_atomtypes.keys()):
             for state in range(self.evb_states.get()):
                 if del_type in self.q_atomtypes[atomtype][state]:
                     #Check if atomtype can be adapted from other states for Q-atom
@@ -2355,7 +2355,7 @@ class SetupEVB(Toplevel):
         """
         Edit existing bond parameter
         """
-        selections = map(int, self.bondtypes_listbox.curselection())
+        selections = list(map(int, self.bondtypes_listbox.curselection()))
         if len(selections) != 1:
             return
 
@@ -2371,7 +2371,7 @@ class SetupEVB(Toplevel):
         """
         Add selected Q-atom pair to bond change list
         """
-        sel_index = map(int, self.qatoms_listbox.curselection())
+        sel_index = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(sel_index) != 2:
             self.app.errorBox('Error', 'Select exactly 2 Q-atoms to form/break bonds')
@@ -2385,7 +2385,7 @@ class SetupEVB(Toplevel):
         states = [0, 0, 0, 0]
 
         #Check if bond exist in original bonding list and decide state to be bonded:
-        if q1 in self.q_bonds.keys():
+        if q1 in list(self.q_bonds.keys()):
             if q2 in self.q_bonds[q1][0]:
                 states = [1, 1 , 1, 1]
         self.change_bonds[atompair] = states
@@ -2398,15 +2398,15 @@ class SetupEVB(Toplevel):
         Turns bond for selected state on/off (1/0) and updated self.change_bonds
         ==> self.bondchange_listbox
         """
-        selections = map(int, self.bondchange_listbox.curselection())
+        selections = list(map(int, self.bondchange_listbox.curselection()))
         if len(selections) == 0:
             return
 
         for selected in selections:
             bondchange = self.bondchange_listbox.get(selected)
-            q1, q2 = map(int, bondchange.split()[0:2])
+            q1, q2 = list(map(int, bondchange.split()[0:2]))
             atompair = '%d %d' % (self.q_atom_nr[q1], self.q_atom_nr[q2])
-            states = map(int, bondchange.split()[2:])
+            states = list(map(int, bondchange.split()[2:]))
 
             #Change selected state:
             states[state] = abs(states[state] - 1)
@@ -2453,24 +2453,24 @@ class SetupEVB(Toplevel):
         removes bond change from list
         ==> self.change_bonds
         """
-        sel_index = map(int, self.bondchange_listbox.curselection())
+        sel_index = list(map(int, self.bondchange_listbox.curselection()))
 
         if len(sel_index) == 0:
             return
 
         for selected in sel_index:
             bondchange = self.bondchange_listbox.get(selected)
-            q1, q2 = map(int, bondchange.split()[0:2])
+            q1, q2 = list(map(int, bondchange.split()[0:2]))
             atompair = '%d %d' % (self.q_atom_nr[q1], self.q_atom_nr[q2])
             del self.change_bonds[atompair]
             self.bondchange_listbox.delete(selected)
-            if q1 in self.q_bonds.keys():
+            if q1 in list(self.q_bonds.keys()):
                 for state in range(4):
                     if q2 not in self.q_bonds[q1][state]:
                         self.q_bonds[q1][state].append(q2)
             else:
                 self.q_bonds[q1] = [[q2],[q2],[q2],[q2]]
-            if q2 in self.q_bonds.keys():
+            if q2 in list(self.q_bonds.keys()):
                 for state in range(4):
                     if q1 not in self.q_bonds[q2][state]:
                         self.q_bonds[q2][state].append(q1)
@@ -2488,7 +2488,7 @@ class SetupEVB(Toplevel):
         """
         Edit existing angle parameter
         """
-        selections = map(int, self.angletypes_listbox.curselection())
+        selections = list(map(int, self.angletypes_listbox.curselection()))
         if len(selections) != 1:
             return
         self.editangle = EditAngleParameters(self, self.root, self.angletypes_listbox, selections[0], True)
@@ -2503,7 +2503,7 @@ class SetupEVB(Toplevel):
         """
         edit existing torsion parameter
         """
-        selections = map(int, self.torsiontypes_listbox.curselection())
+        selections = list(map(int, self.torsiontypes_listbox.curselection()))
         if len(selections) != 1:
             return
         self.edittorsion = EditTorsionParameters(self, self.root, self.torsiontypes_listbox, selections[0], True)
@@ -2518,7 +2518,7 @@ class SetupEVB(Toplevel):
         """
         edit existing improper parameter
         """
-        selections = map(int, self.impropertypes_listbox.curselection())
+        selections = list(map(int, self.impropertypes_listbox.curselection()))
         if len(selections) != 1:
             return
         self.editimproper = EditImproperParameters(self, self.root, self.impropertypes_listbox, selections[0], True)
@@ -2534,7 +2534,7 @@ class SetupEVB(Toplevel):
         Add selection of 4 Q-atoms to improper list
         """
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
         except:
             return
 
@@ -2600,15 +2600,15 @@ class SetupEVB(Toplevel):
         """
         delete selected improper
         """
-        selections = map(int, self.changeimproper_listbox.curselection())
+        selections = list(map(int, self.changeimproper_listbox.curselection()))
 
         for selected in selections:
             line = self.changeimproper_listbox.get(selected)
             atom2 = line.split()[1]
             #Find Q atom number for atom2:
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[q]) == int(atom2):
-                    if q in self.q_impropers.keys():
+                    if q in list(self.q_impropers.keys()):
                         del self.q_impropers[q]
 
         self.update_impropers()
@@ -2618,7 +2618,7 @@ class SetupEVB(Toplevel):
         """
         add additional softpair (that is not autogenerated)
         """
-        selections = map(int, self.qatoms_listbox.curselection())
+        selections = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(selections) != 2:
             self.app.errorBox('Warning','Select exactly two Q-atoms for soft pairs!')
@@ -2630,36 +2630,36 @@ class SetupEVB(Toplevel):
             else:
                 q2 = int(self.qatoms_listbox.get(selections[i]).split()[0])
 
-        if q1 not in self.softpairs_added.keys():
+        if q1 not in list(self.softpairs_added.keys()):
             self.softpairs_added[q1] = q2
-        elif q2 not in self.softpairs_added.keys():
+        elif q2 not in list(self.softpairs_added.keys()):
             if self.softpairs_added[q1] != q2:
                 self.softpairs_added[q2] = q1
         else:
-            print 'Could not add softpair'
+            print('Could not add softpair')
         self.update_soft_pairs()
 
     def del_softpair(self):
         """
         Delete manually added softpair (it is not possible to delete required soft-pairs)
         """
-        selections = map(int, self.softpairs_listbox.curselection())
+        selections = list(map(int, self.softpairs_listbox.curselection()))
 
         if len(selections) == 0:
             return
 
         for selected in selections:
-            q1, q2 = map(int, self.softpairs_listbox.get(selected).split()[0:2])
-            if q1 in self.softpairs_added.keys():
+            q1, q2 = list(map(int, self.softpairs_listbox.get(selected).split()[0:2]))
+            if q1 in list(self.softpairs_added.keys()):
                 if self.softpairs_added[q1] == q2:
                     del self.softpairs_added[q1]
-            if q2 in self.softpairs_added.keys():
+            if q2 in list(self.softpairs_added.keys()):
                 if self.softpairs_added[q2] == q1:
                     del self.softpairs_added[q2]
         self.update_soft_pairs()
 
     def add_excludedpair(self):
-        selections = map(int, self.qatoms_listbox.curselection())
+        selections = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(selections) != 2:
             self.app.errorBox('Warning','Select exactly two atoms for excluded pairs!')
@@ -2674,24 +2674,24 @@ class SetupEVB(Toplevel):
         atompair = '%6d %6d'  % (atom1, atom2)
         atompair_rev = '%6d %6d' % (atom2, atom1)
 
-        if atompair not in self.excluded_pairs.keys() and atompair_rev not in self.excluded_pairs.keys():
+        if atompair not in list(self.excluded_pairs.keys()) and atompair_rev not in list(self.excluded_pairs.keys()):
             self.excluded_pairs[atompair] = [1,1,1,1]
             self.update_excluded_pairs()
             self.fep_written = False
 
     def del_excludedpair(self):
-        selections = map(int, self.excludedpairs_listbox.curselection())
+        selections = list(map(int, self.excludedpairs_listbox.curselection()))
 
         if len(selections) == 0:
             return
 
         for selected in selections:
-            atom1, atom2 = map(int, self.excludedpairs_listbox.get(selected).split()[0:2])
+            atom1, atom2 = list(map(int, self.excludedpairs_listbox.get(selected).split()[0:2]))
             atompair = '%6d %6d' % (atom1, atom2)
             atompair_rev = '%6d %6d' % (atom2, atom1)
-            if atompair in self.excluded_pairs.keys():
+            if atompair in list(self.excluded_pairs.keys()):
                 del self.excluded_pairs[atompair]
-            elif atompair_rev in self.excluded_pairs.keys():
+            elif atompair_rev in list(self.excluded_pairs.keys()):
                 del self.excluded_pairs[atompair_rev]
 
         self.update_excluded_pairs()
@@ -2700,19 +2700,19 @@ class SetupEVB(Toplevel):
         """
         Toggle excluded pair ON/OFF in state
         """
-        selections = map(int, self.excludedpairs_listbox.curselection())
+        selections = list(map(int, self.excludedpairs_listbox.curselection()))
         if len(selections) == 0:
             return
 
         indexes = []
         for selected in selections:
             indexes.append(selected)
-            atom1, atom2 = map(int, self.excludedpairs_listbox.get(selected).split()[0:2])
+            atom1, atom2 = list(map(int, self.excludedpairs_listbox.get(selected).split()[0:2]))
             excluded_state = int(self.excludedpairs_listbox.get(selected).split()[state + 2])
             excluded_state = abs(excluded_state - 1)
             atompair = '%6d %6d' % (atom1, atom2)
             atompair_rev = '%6d %6d' % (atom2, atom1)
-            if atompair_rev in self.excluded_pairs.keys():
+            if atompair_rev in list(self.excluded_pairs.keys()):
                 atompair = atompair_rev
             self.excluded_pairs[atompair][state] = excluded_state
 
@@ -2731,10 +2731,10 @@ class SetupEVB(Toplevel):
             temp = '%.2f' % float(self.temperature.get())
             runs = int(self.runs.get())
         except:
-            print 'Invalid values for temperature and runs'
+            print('Invalid values for temperature and runs')
             return
 
-        if temp not in self.temp_runs.keys():
+        if temp not in list(self.temp_runs.keys()):
             self.temp_runs[temp] = runs
         else:
             self.temp_runs[temp] += runs
@@ -2742,7 +2742,7 @@ class SetupEVB(Toplevel):
         self.update_temperatures()
 
     def del_temperature(self):
-        selections = map(int, self.temp_listbox.curselection())
+        selections = list(map(int, self.temp_listbox.curselection()))
 
         if len(selections) == 0:
             return
@@ -2765,7 +2765,7 @@ class SetupEVB(Toplevel):
         self.update_monitor_listboxes()
 
     def del_monitor_group(self):
-        selections = map(int, self.groups_listbox.curselection())
+        selections = list(map(int, self.groups_listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -2780,18 +2780,18 @@ class SetupEVB(Toplevel):
         self.update_monitor_listboxes()
 
     def add_monitor_atoms(self):
-        sel_group = map(int, self.groups_listbox.curselection())
+        sel_group = list(map(int, self.groups_listbox.curselection()))
 
         if len(sel_group) != 1:
-            print 'Select exactly one group to append monitor atoms to!'
+            print('Select exactly one group to append monitor atoms to!')
             return
 
         group = int(self.groups_listbox.get(sel_group[0]).split()[1])
 
-        sel_atoms = map(int, self.qatoms_listbox.curselection())
+        sel_atoms = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(sel_atoms) < 1:
-            print 'No atoms selected!'
+            print('No atoms selected!')
             return
 
         for i in sel_atoms:
@@ -2802,15 +2802,15 @@ class SetupEVB(Toplevel):
         self.update_monitor_listboxes()
 
     def del_monitor_atoms(self):
-        sel_group = map(int, self.groups_listbox.curselection())
+        sel_group = list(map(int, self.groups_listbox.curselection()))
 
         if len(sel_group) != 1:
-            print 'Select exactly one group to remove monitor atoms from!'
+            print('Select exactly one group to remove monitor atoms from!')
             return
 
         group = int(self.groups_listbox.get(sel_group[0]).split()[1])
 
-        sel_atoms = map(int, self.group_atoms_listbox.curselection())
+        sel_atoms = list(map(int, self.group_atoms_listbox.curselection()))
 
         for i in sel_atoms:
             atom = self.group_atoms_listbox.get(i).strip()
@@ -2819,10 +2819,10 @@ class SetupEVB(Toplevel):
         self.update_monitor_listboxes()
 
     def add_monitor_pair(self):
-        sel_groups = map(int, self.groups_listbox.curselection())
+        sel_groups = list(map(int, self.groups_listbox.curselection()))
 
         if len(sel_groups) != 2:
-            print 'Select exactly to groups to monitor!'
+            print('Select exactly to groups to monitor!')
             return
 
         groups = list()
@@ -2836,7 +2836,7 @@ class SetupEVB(Toplevel):
         self.update_monitor_listboxes()
 
     def del_monitor_pair(self):
-        sel_pairs = map(int, self.monitor_pairs_listbox.curselection())
+        sel_pairs = list(map(int, self.monitor_pairs_listbox.curselection()))
 
         if len(sel_pairs) < 1:
             return
@@ -2871,7 +2871,7 @@ class SetupEVB(Toplevel):
             return
 
         for state in range(len(states)):
-            print 'Updating %s and %s in state %d' % (atom1, atom2, states[state])
+            print('Updating %s and %s in state %d' % (atom1, atom2, states[state]))
             if bonds[state] == 0:
                 self.session.stdin.write('unbond state%d and id %s, state%d and id %s\n' %
                                              ((states[state]), atom1, (states[state]), atom2))
@@ -2888,7 +2888,7 @@ class SetupEVB(Toplevel):
         ==> self.q_charges
         ==> self.charge_listbox
         """
-        selections = map(int, self.charge_listbox.curselection())
+        selections = list(map(int, self.charge_listbox.curselection()))
         if len(selections) != 1:
             return
         try:
@@ -2903,7 +2903,7 @@ class SetupEVB(Toplevel):
             charges = [charge1, charge2, charge3, charge4]
 
         except:
-            print 'Can not change selection to specified charge!'
+            print('Can not change selection to specified charge!')
             return
 
         try:
@@ -2922,14 +2922,14 @@ class SetupEVB(Toplevel):
         Takes new scaling factor from self.elscale field and replaces original value
         """
         try:
-            selections = map(int, self.elscale_listbox.curselection())
+            selections = list(map(int, self.elscale_listbox.curselection()))
         except:
             return
 
         if len(selections) != 1:
             return
 
-        q1, q2 = map(int, self.elscale_listbox.get(selections[0]).split()[0:2])
+        q1, q2 = list(map(int, self.elscale_listbox.get(selections[0]).split()[0:2]))
         scale = self.elscale.get()
 
         qpair = '%3d %3d' % (q1, q2)
@@ -2942,7 +2942,7 @@ class SetupEVB(Toplevel):
         """
         self.elscale_listbox.delete(0, END)
 
-        for qpair in self.qpair_elscale.keys():
+        for qpair in list(self.qpair_elscale.keys()):
             states = ' '
             for state in range(self.evb_states.get()):
                 states += '%5s' % self.qpair_elscale[qpair][state]
@@ -2951,7 +2951,7 @@ class SetupEVB(Toplevel):
 
     def add_elscale(self):
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
             if len(selections) != 2:
                 self.app.errorBox('Warning', 'Selected exactly 2 atoms for el scale!')
                 return
@@ -2966,25 +2966,25 @@ class SetupEVB(Toplevel):
 
         qpair = '%3d %3d' % (q1, q2)
         scale = self.elscale.get()
-        if qpair not in self.qpair_elscale.keys():
+        if qpair not in list(self.qpair_elscale.keys()):
             self.qpair_elscale[qpair] = [scale, scale, scale, scale]
 
         self.update_elscale()
 
     def del_elscale(self):
         try:
-            selections = map(int, self.elscale_listbox.curselection())
+            selections = list(map(int, self.elscale_listbox.curselection()))
         except:
             return
 
         for selected in selections:
-            q1, q2 = map(int, self.elscale_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.elscale_listbox.get(selected).split()[0:2]))
             qpair = '%3d %3d' % (q1, q2)
-            if qpair in self.qpair_elscale.keys():
+            if qpair in list(self.qpair_elscale.keys()):
                 del self.qpair_elscale[qpair]
             else:
                 qpair = '%3d %3d' % (q2, q1)
-                if qpair in self.qpair_elscale.keys():
+                if qpair in list(self.qpair_elscale.keys()):
                     del self.qpair_elscale[qpair]
                 else:
                     self.app.errorBox('Error', 'An error has occured in el scale lists. Please report problem!')
@@ -2995,18 +2995,18 @@ class SetupEVB(Toplevel):
         """
         Toggle el_scale for specific state state
         """
-        selections = map(int, self.elscale_listbox.curselection())
+        selections = list(map(int, self.elscale_listbox.curselection()))
         if len(selections) == 0:
             return
 
         indexes = []
         for selected in selections:
             indexes.append(selected)
-            q1, q2 = map(int, self.elscale_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.elscale_listbox.get(selected).split()[0:2]))
 
             qpair = '%3d %3d' % (q1, q2)
             qpair_rev = '%3d %3d' % (q2, q1)
-            if qpair_rev in self.qpair_elscale.keys():
+            if qpair_rev in list(self.qpair_elscale.keys()):
                 qpair = qpair_rev
             scale = self.elscale.get()
             self.qpair_elscale[qpair][state] = scale
@@ -3017,8 +3017,8 @@ class SetupEVB(Toplevel):
 
     def add_offdiagonal(self):
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
-            state = map(int, self.offdiagonal_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
+            state = list(map(int, self.offdiagonal_listbox.curselection()))
         except:
             return
 
@@ -3043,7 +3043,7 @@ class SetupEVB(Toplevel):
 
     def del_offdiagonal(self):
         try:
-            states = map(int, self.offdiagonal_listbox.curselection())
+            states = list(map(int, self.offdiagonal_listbox.curselection()))
         except:
             return
 
@@ -3058,7 +3058,7 @@ class SetupEVB(Toplevel):
 
     def set_offdiagonal_values(self):
         try:
-            states = map(int, self.offdiagonal_listbox.curselection())
+            states = list(map(int, self.offdiagonal_listbox.curselection()))
         except:
             return
 
@@ -3199,7 +3199,7 @@ class SetupEVB(Toplevel):
             l_values[increase_ind] = increase_start
             l_values[decrease_ind] = decrease_start
 
-            if l_values not in self.step_lambdavalues.values():
+            if l_values not in list(self.step_lambdavalues.values()):
                 step += 1
                 self.step_lambdavalues[step] = l_values
 
@@ -3207,9 +3207,9 @@ class SetupEVB(Toplevel):
                 break
 
             if loop_count > 2999:
-                print 'WOOOPS!! You just reached 3000 lambda steps!!'
-                print 'Something probably went wrong!? Or did you really want this?'
-                print 'Either way, please report this problem!'
+                print('WOOOPS!! You just reached 3000 lambda steps!!')
+                print('Something probably went wrong!? Or did you really want this?')
+                print('Either way, please report this problem!')
                 break
 
         self.update_lambdasteps()
@@ -3219,7 +3219,7 @@ class SetupEVB(Toplevel):
         Deletes selected lambda steps from list, and renumbers list:
         """
         try:
-            selections = map(int, self.lambdasteps_listbox.curselection())
+            selections = list(map(int, self.lambdasteps_listbox.curselection()))
         except:
             return
 
@@ -3262,7 +3262,7 @@ class SetupEVB(Toplevel):
         q_atoms = list()
 
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
         except:
             return
 
@@ -3281,7 +3281,7 @@ class SetupEVB(Toplevel):
         for lst in lists:
             lst.selection_clear(0, END)
             for qi in q_atoms:
-                 lst.selection_set(qi - 1)
+                lst.selection_set(qi - 1)
 
         #Update pymol selection if open
         if self.session:
@@ -3297,14 +3297,14 @@ class SetupEVB(Toplevel):
 
     def list_bondform_event(self, *args):
         try:
-            selections = map(int, self.bondchange_listbox.curselection())
+            selections = list(map(int, self.bondchange_listbox.curselection()))
         except:
             return
 
         self.qatoms_listbox.selection_clear(0, END)
         for selected in selections:
 
-            q1, q2 = map(int, self.bondchange_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.bondchange_listbox.get(selected).split()[0:2]))
             for _ind in (q1-1, q2-1):
                 self.qatoms_listbox.selection_set(_ind)
                 self.qatoms_listbox.yview(min([q1 - 1, q2 - 1]))
@@ -3317,7 +3317,7 @@ class SetupEVB(Toplevel):
         self.charge4.delete(0, END)
 
         try:
-            selections = map(int, self.charge_listbox.curselection())
+            selections = list(map(int, self.charge_listbox.curselection()))
         except:
             return
 
@@ -3350,7 +3350,7 @@ class SetupEVB(Toplevel):
 
     def list_changetypes_event(self, *args):
         try:
-            selections = map(int, self.changetypes_listbox.curselection())
+            selections = list(map(int, self.changetypes_listbox.curselection()))
         except:
             return
 
@@ -3386,7 +3386,7 @@ class SetupEVB(Toplevel):
 
     def list_changebond_event(self, *args):
         try:
-            selections = map(int, self.changebond_listbox.curselection())
+            selections = list(map(int, self.changebond_listbox.curselection()))
         except:
             return
 
@@ -3397,8 +3397,8 @@ class SetupEVB(Toplevel):
         bonds = self.bondtypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            atom1, atom2 = map(int, self.changebond_listbox.get(selected).split()[0:2])
-            states = map(str, self.changebond_listbox.get(selected).split()[2:])
+            atom1, atom2 = list(map(int, self.changebond_listbox.get(selected).split()[0:2]))
+            states = list(map(str, self.changebond_listbox.get(selected).split()[2:]))
 
             for ind in range(len(qatoms)):
                 if int(qatoms[ind].split()[1]) == atom1 or int(qatoms[ind].split()[1]) == atom2:
@@ -3418,7 +3418,7 @@ class SetupEVB(Toplevel):
 
     def list_changeangle_event(self, *args):
         try:
-            selections = map(int, self.changeangle_listbox.curselection())
+            selections = list(map(int, self.changeangle_listbox.curselection()))
         except:
             return
 
@@ -3427,10 +3427,10 @@ class SetupEVB(Toplevel):
         angles = self.angletypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            a1, a2, a3 = map(int, self.changeangle_listbox.get(selected).split()[0:3])
-            states = map(str, self.changeangle_listbox.get(selected).split()[3:])
+            a1, a2, a3 = list(map(int, self.changeangle_listbox.get(selected).split()[0:3]))
+            states = list(map(str, self.changeangle_listbox.get(selected).split()[3:]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1:
                     q1 = i
                 if int(self.q_atom_nr[i]) == a2:
@@ -3450,7 +3450,7 @@ class SetupEVB(Toplevel):
 
     def list_changetorsion_event(self, *args):
         try:
-            selections = map(int, self.changetorsion_listbox.curselection())
+            selections = list(map(int, self.changetorsion_listbox.curselection()))
         except:
             return
 
@@ -3459,10 +3459,10 @@ class SetupEVB(Toplevel):
         torsions = self.torsiontypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            a1, a2, a3, a4 = map(int, self.changetorsion_listbox.get(selected).split()[0:4])
-            states = map(str, self.changetorsion_listbox.get(selected).split()[4:])
+            a1, a2, a3, a4 = list(map(int, self.changetorsion_listbox.get(selected).split()[0:4]))
+            states = list(map(str, self.changetorsion_listbox.get(selected).split()[4:]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1:
                     q1 = i
                 if int(self.q_atom_nr[i]) == a2:
@@ -3485,7 +3485,7 @@ class SetupEVB(Toplevel):
 
     def list_changeimproper_event(self, *args):
         try:
-            selections = map(int, self.changeimproper_listbox.curselection())
+            selections = list(map(int, self.changeimproper_listbox.curselection()))
         except:
             return
 
@@ -3494,10 +3494,10 @@ class SetupEVB(Toplevel):
         torsions = self.impropertypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            a1, a2, a3, a4 = map(int, self.changeimproper_listbox.get(selected).split()[0:4])
-            states = map(str, self.changeimproper_listbox.get(selected).split()[4:])
+            a1, a2, a3, a4 = list(map(int, self.changeimproper_listbox.get(selected).split()[0:4]))
+            states = list(map(str, self.changeimproper_listbox.get(selected).split()[4:]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1:
                     q1 = i
                 if int(self.q_atom_nr[i]) == a2:
@@ -3520,7 +3520,7 @@ class SetupEVB(Toplevel):
 
     def list_softpairs_event(self, *args):
         try:
-            selections = map(int, self.softpairs_listbox.curselection())
+            selections = list(map(int, self.softpairs_listbox.curselection()))
         except:
             return
 
@@ -3528,7 +3528,7 @@ class SetupEVB(Toplevel):
         indexes = []
 
         for selected in selections:
-            q1, q2 = map(int, self.softpairs_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.softpairs_listbox.get(selected).split()[0:2]))
             indexes.append(q1 - 1)
             indexes.append(q2 - 1)
             self.qatoms_listbox.selection_set(q1 - 1)
@@ -3539,7 +3539,7 @@ class SetupEVB(Toplevel):
 
     def list_excludedpairs_event(self, *args):
         try:
-            selections = map(int, self.excludedpairs_listbox.curselection())
+            selections = list(map(int, self.excludedpairs_listbox.curselection()))
         except:
             return
 
@@ -3547,9 +3547,9 @@ class SetupEVB(Toplevel):
         indexes = []
 
         for selected in selections:
-            a1, a2 = map(int, self.excludedpairs_listbox.get(selected).split()[0:2])
+            a1, a2 = list(map(int, self.excludedpairs_listbox.get(selected).split()[0:2]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1 or int(self.q_atom_nr[i]) == a2:
                     indexes.append(i - 1)
                     self.qatoms_listbox.selection_set(i-1)
@@ -3560,7 +3560,7 @@ class SetupEVB(Toplevel):
     def list_elscale_event(self, *args):
 
         try:
-            selections = map(int, self.elscale_listbox.curselection())
+            selections = list(map(int, self.elscale_listbox.curselection()))
         except:
             return
 
@@ -3568,7 +3568,7 @@ class SetupEVB(Toplevel):
         indexes = []
 
         for selected in selections:
-            q1, q2 = map(int, self.elscale_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.elscale_listbox.get(selected).split()[0:2]))
             scale = float(self.elscale_listbox.get(selected).split()[2])
             indexes.append(q1 - 1)
             indexes.append(q2 - 1)
@@ -3585,7 +3585,7 @@ class SetupEVB(Toplevel):
 
     def list_offdiagonal_event(self, *args):
         try:
-            selections = map(int, self.offdiagonal_listbox.curselection())
+            selections = list(map(int, self.offdiagonal_listbox.curselection()))
         except:
             return
 
@@ -3596,14 +3596,14 @@ class SetupEVB(Toplevel):
         self.qatoms_listbox.select_clear(0, END)
         for selected in selections:
             try:
-                q1, q2 = map(int, self.offdiagonal_listbox.get(selected).split()[2:4])
+                q1, q2 = list(map(int, self.offdiagonal_listbox.get(selected).split()[2:4]))
                 self.qatoms_listbox.selection_set(q1 - 1)
                 self.qatoms_listbox.selection_set(q2 - 1)
                 self.list_q_atoms_event()
             except:
                 continue
             if insert_data:
-                aij, uij = map(float, self.offdiagonal_listbox.get(selected).split()[4:6])
+                aij, uij = list(map(float, self.offdiagonal_listbox.get(selected).split()[4:6]))
                 self.aij.delete(0, END)
                 self.aij.insert(0, aij)
                 self.uij.delete(0, END)
@@ -3611,7 +3611,7 @@ class SetupEVB(Toplevel):
 
     def list_monitorgroups_event(self, *args):
         self.group_atoms_listbox.delete(0, END)
-        selections = map(int, self.groups_listbox.curselection())
+        selections = list(map(int, self.groups_listbox.curselection()))
 
         if len(selections) != 1:
             return
@@ -3655,7 +3655,7 @@ class SetupEVB(Toplevel):
             return
 
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
         except:
             return
 
@@ -3673,7 +3673,7 @@ class SetupEVB(Toplevel):
                 if 'You clicked' in line:
                     state = line.split('/')[1]
 
-        print 'Fixing geometry for %s: %s' % (state, pml_string)
+        print('Fixing geometry for %s: %s' % (state, pml_string))
         self.session.stdin.write('clean %s and (%s)\n' % (state, pml_string))
 
     def start_pymol(self):
@@ -3756,7 +3756,7 @@ class SetupEVB(Toplevel):
                             if '`' in selected:
                                 selected = ' '.join(selected.split('`'))
                             selected = selected.split('\n')[0]
-                            print selected
+                            print(selected)
                             #Get atomnumer of clicked atom:
                             self.session.stdin.write('id_atom sele\n')
                         if 'cmd.id_atom:' in line:
@@ -3824,10 +3824,10 @@ class SetupEVB(Toplevel):
                   'Excluded pairs': self.excludedpairs_frame,
                   'Monitor groups': self.monitorgroups_frame,
                   'Off-diagonal': self.offdiagonal_frame,
-                   u"\N{GREEK SMALL LETTER LAMDA}-steps": self.lambdasteps_frame,
+                   "\N{GREEK SMALL LETTER LAMDA}-steps": self.lambdasteps_frame,
                    'Temperature(s)': self.temperature_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.setup_evb.get()].grid(row=2, column=0, columnspan=2)
@@ -4030,9 +4030,9 @@ class SetupEVB(Toplevel):
 
             #Get q-atoms that are changing bonds
             q_changing = []
-            for pair in self.change_bonds.keys():
-                atom1, atom2 = map(int, pair.split()[0:2])
-                for q in self.q_atom_nr.keys():
+            for pair in list(self.change_bonds.keys()):
+                atom1, atom2 = list(map(int, pair.split()[0:2]))
+                for q in list(self.q_atom_nr.keys()):
                     if (self.q_atom_nr[q] == atom1) or (self.q_atom_nr[q] == atom2):
                         q_changing.append(q)
 
@@ -4096,7 +4096,7 @@ class SetupEVB(Toplevel):
                 for q in sorted(self.q_atom_nr.keys()):
                     residues.append('id %d' % self.q_atom_nr[q])
                 try:
-                    selections = map(int, self.qatoms_listbox.curselection())
+                    selections = list(map(int, self.qatoms_listbox.curselection()))
                     for selected in selections:
                         atomline = self.qatoms_listbox.get(selected)
                         if len(atomline.split()) > 4:
@@ -4143,7 +4143,7 @@ class SetupEVB(Toplevel):
             pdb = open(self.pdbfile, 'r').readlines()
             for line in pdb:
                 try:
-                    if int(line.split()[1]) in self.q_atom_nr.values():
+                    if int(line.split()[1]) in list(self.q_atom_nr.values()):
                         org_pdb.append(line)
                 except:
                     continue
@@ -4160,7 +4160,7 @@ class SetupEVB(Toplevel):
                         check_count += 1
                         time.sleep(0.1)
                     if check_count >= 50:
-                        print 'Could not find file'
+                        print('Could not find file')
                         break
 
                 q_state = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'r').readlines()
@@ -4173,7 +4173,7 @@ class SetupEVB(Toplevel):
                         orgres = orgline[17:26]
                         if orgtype == atomtype and orgres == res:
                             atomnr = int(orgline.split()[1])
-                            for q in self.q_atom_nr.keys():
+                            for q in list(self.q_atom_nr.keys()):
                                 if self.q_atom_nr[q] == atomnr:
                                     cord_q[cord] = q
 
@@ -4185,7 +4185,7 @@ class SetupEVB(Toplevel):
                 if not response:
                     self.app.errorBox('Error', 'Could not translate all atomtypes. Pleas verify pdb file.')
                     return
-                print 'ffld_server templet qevb_tmp%d.pdb generated' % state
+                print('ffld_server templet qevb_tmp%d.pdb generated' % state)
 
                 #Run ffld_server and generate parameter for state
                 ff = 'OPLS'+self.force_field.get()
@@ -4193,7 +4193,7 @@ class SetupEVB(Toplevel):
                 #Can use maestro files for ffld if existing (better structure description)
                 if os.path.isfile(self.app.workdir+'/qevb_tmp%d.mae' % state):
                     ffld_input = 'qevb_tmp%d.mae' % state
-                    print 'Found MAE file. Using this by default.'
+                    print('Found MAE file. Using this by default.')
                 else:
                     ffld_input = 'qevb_tmp%d.pdb' % state
 
@@ -4207,7 +4207,7 @@ class SetupEVB(Toplevel):
             for state in range(1, self.evb_states.get() + 1):
                 self.session.stdin.write('enable state%d\n' % state)
                 self.session.stdin.write('delete state%d_auto\n' % state)
-                print 'Now I will get parameters!'
+                print('Now I will get parameters!')
                 self.get_auto_prm(cord_q_state[state - 1], '%s/qevb_tmp%d.pdb' % (self.app.workdir, state),
                                    '%s/prm_tmp%d.out' % (self.app.workdir, state), state - 1)
 
@@ -4239,7 +4239,7 @@ class SetupEVB(Toplevel):
         found_q2 = False
         done = False
         while not done:
-            print qlist
+            print(qlist)
             if not found_q2:
                 for i in range(len(qlist)):
                     qi = qlist[i]
@@ -4284,7 +4284,7 @@ class SetupEVB(Toplevel):
         q3, q4 = qlist[0:]
 
         #Check if improper exist and rearange accordingly:
-        if q2 in self.q_impropers.keys():
+        if q2 in list(self.q_impropers.keys()):
             if q1 == self.q_impropers[q2][0]:
                 #Improper exists in dict. Check that q3 and q4 are in correct order:
                 if q3 == self.q_impropers[q2][-1]:
@@ -4320,15 +4320,15 @@ class SetupEVB(Toplevel):
         type_nr = 0
         with open(qprm, 'r') as rprm:
             for line in rprm:
-                print line
+                print(line)
                 if found_improper:
                     if len(line.split()) < 5:
                         found_improper = False
                     else:
                         atom1, atom2, atom3, atom4 = line.split()[0:4]
                         k = 0.5 * float(line.split()[4])
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
-                            if atom3 in newname_q.keys() and atom4 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
+                            if atom3 in list(newname_q.keys()) and atom4 in list(newname_q.keys()):
                                 q1 = newname_q[atom1]
                                 q2 = newname_q[atom2]
                                 q3 = newname_q[atom3]
@@ -4358,12 +4358,12 @@ class SetupEVB(Toplevel):
                         found_torsion = False
                     else:
                         atom1, atom2, atom3, atom4 = line.split()[0:4]
-                        k1, k2, k3 = map(float, line.split()[4:7])
+                        k1, k2, k3 = list(map(float, line.split()[4:7]))
                         k1 *= 0.5
                         k2 *= 0.5
                         k3 *= 0.5
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
-                            if atom3 in newname_q.keys() and atom4 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
+                            if atom3 in list(newname_q.keys()) and atom4 in list(newname_q.keys()):
                                 quart = '%s %s %s %s' % (newname_atomtype[atom1], newname_atomtype[atom2],
                                                          newname_atomtype[atom3], newname_atomtype[atom4])
                                 quart_rev = '%s %s %s %s' % (newname_atomtype[atom1], newname_atomtype[atom2],
@@ -4377,8 +4377,8 @@ class SetupEVB(Toplevel):
                         found_bending = False
                     else:
                         atom1, atom2, atom3 = line.split()[0:3]
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
-                            if atom3 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
+                            if atom3 in list(newname_q.keys()):
                                 trip = '%s %s %s' % (newname_atomtype[atom1], newname_atomtype[atom2],
                                                      newname_atomtype[atom3])
                                 trip_rev = '%s %s %s' % (trip.split()[2], trip.split()[1], trip.split()[0])
@@ -4392,7 +4392,7 @@ class SetupEVB(Toplevel):
                         found_stretch = False
                     else:
                         atom1, atom2 = line.split()[0:2]
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
                             #{'type1 type2' : [De, alpha, R, Kb]}
                             pair = '%s %s' % (newname_atomtype[atom1], newname_atomtype[atom2])
                             pair_rev = '%s %s' % (pair.split()[1], pair.split()[0])
@@ -4423,7 +4423,7 @@ class SetupEVB(Toplevel):
                         if newname[0] == 'H':
                             ci = 7.0
                         mass = massDict[newname[0]]
-                        if cord[type_nr] in cord_q.keys():
+                        if cord[type_nr] in list(cord_q.keys()):
                             newname_atomtype[newname] = atomtype
                             q = cord_q[cord[type_nr]]
                             newname_q[newname] = q
@@ -4450,7 +4450,7 @@ class SetupEVB(Toplevel):
                     found_torsion = False
                     found_improper = True
 
-        print 'Ok, I am leaving parameters run'
+        print('Ok, I am leaving parameters run')
 
     def calcNBpar(self, sigma = 0, epsilon = 0):
         """
@@ -4491,7 +4491,7 @@ class SetupEVB(Toplevel):
                 found_atom = False
                 while not found_atom:
                     atom = line[j]
-                    if atom not in atom_count.keys():
+                    if atom not in list(atom_count.keys()):
                         if j > 16:
                             pdb_created = False
                             break
@@ -4519,7 +4519,7 @@ class SetupEVB(Toplevel):
 
         ffld_path = self.app.q_settings[ 'schrodinger path' ]
 
-        print ff
+        print(ff)
 
         if ff == 'OPLS2001':
             version = '11'
@@ -4595,7 +4595,7 @@ class SetupEVB(Toplevel):
         if not os.path.isfile(fepname):
             fepname = '%s/%s' % (self.app.workdir, fepname)
             if not os.path.isfile(fepname):
-                print 'Could not find %s' % fepname
+                print('Could not find %s' % fepname)
                 return
 
         self.app.log(' ', 'Editing FEP file: \n'
@@ -4669,7 +4669,7 @@ class SetupEVB(Toplevel):
 
         fepname = self.pdbfile.split('/')[-1].split('.')[0] + '.fep'
 
-        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
+        q_settings = pickle.load(open(self.app.settings_path + '/Qsettings','rb'))
 
 
         lambda_list = list(self.lambdasteps_listbox.get(0, END))
@@ -4702,7 +4702,7 @@ class SetupEVB(Toplevel):
                 submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
-                print 'submission script not found! Please edit this in settings'
+                print('submission script not found! Please edit this in settings')
             for line in submissionscipt:
                 if '#Qdyn I/O' in line:
                     break
@@ -5026,7 +5026,7 @@ class SetupEVB(Toplevel):
             submitfile.write('for i in {%d..%d}\ndo\ncd %s/$i\n%s run.sh\n' % (start, end, T,self.app.q_settings[ 'subscript' ][1]))
             submitfile.write('cd ../../\ndone')
             for run in range(start, end + 1):
-                print 'T=%s   run=%d' % (T, run)
+                print('T=%s   run=%d' % (T, run))
                 if not os.path.exists('%s/%d' % (T, run)):
                     os.makedirs('%s/%d' % (T, run))
                 for inputfile in evb_files:
@@ -5137,7 +5137,7 @@ class SetupEVB(Toplevel):
             return
 
         else:
-            print 'FEP file %s opened' % fepname
+            print('FEP file %s opened' % fepname)
 
         # {atomnr: atomtype}
         atomnr_in_pdb = dict()
@@ -5166,22 +5166,22 @@ class SetupEVB(Toplevel):
                     if len(line.split()) < 2:
                         if '[' in line:
                             found_atoms = False
-                            print 'UPDADING Q-ATOMS'
+                            print('UPDADING Q-ATOMS')
                             #Check current PDB file if it matches FEP file description:
                             with open(self.pdbfile, 'r') as pdb:
                                 for line2 in pdb:
                                     if len(line2.split()) > 7:
                                         atomnr = line2.split()[1]
-                                        if atomnr in atomnr_in_pdb.keys():
+                                        if atomnr in list(atomnr_in_pdb.keys()):
                                             atomname = line2[12:17].strip()
                                             if atomname == atomnr_in_pdb[atomnr]:
                                                 resi = line2[17:27].strip()
                                                 self.q_atom_res[atomnr_qnr[atomnr]] = resi
                                             else:
-                                                print 'Atomnumber %s in FEP does not match atomname in pdb file' % atomnr
-                                                print 'Expected: %s' % atomnr_in_pdb[atomnr]
-                                                print 'Found:    %s' % atomname
-                                                print '\nABORTING!! '
+                                                print('Atomnumber %s in FEP does not match atomname in pdb file' % atomnr)
+                                                print('Expected: %s' % atomnr_in_pdb[atomnr])
+                                                print('Found:    %s' % atomname)
+                                                print('\nABORTING!! ')
                                                 break
                             self.update_q_atoms()
                             self.read_lib()
@@ -5223,7 +5223,7 @@ class SetupEVB(Toplevel):
                     if '[' in line:
                         found_atomtypes = False
                     if len(line.split('!')[0].split()) > 7:
-                        self.atomtype_prm[line.split()[0]] = map(float, line.split('!')[0].split()[1:])
+                        self.atomtype_prm[line.split()[0]] = list(map(float, line.split('!')[0].split()[1:]))
                         if float(line.split('!')[0].split()[1]) > 100:
                             self.ff_is_charmm = False
 
@@ -5250,9 +5250,9 @@ class SetupEVB(Toplevel):
                         found_soft_pairs = False
                     if len(line.split('!')[0].split()) > 1:
                         if line.split()[0].isdigit():
-                            q1, q2 = map(int, line.split()[0:2])
+                            q1, q2 = list(map(int, line.split()[0:2]))
 
-                            if q1 not in self.softpairs_added.keys():
+                            if q1 not in list(self.softpairs_added.keys()):
                                 self.softpairs_added[q1] = q2
                             else:
                                 self.softpairs_added[q2] = q1
@@ -5292,7 +5292,7 @@ class SetupEVB(Toplevel):
                         if notnote.split()[0].isdigit():
                             qnr = int(notnote.split()[0])
                             try:
-                                self.bond_prm[bond] = map(float, notnote.split()[1:])
+                                self.bond_prm[bond] = list(map(float, notnote.split()[1:]))
                                 kb = 8. * float(notnote.split()[-1])
                                 self.bond_prm[bond].append(kb)
 
@@ -5306,16 +5306,16 @@ class SetupEVB(Toplevel):
 
                     line = line.split('!')[0]
                     if len(line.split()) > 3:
-                        get_states = map(int, line.split()[2:])
+                        get_states = list(map(int, line.split()[2:]))
 
                         a1, a2 = line.split()[0:2]
 
                         q1 = atomnr_qnr[a1]
                         q2 = atomnr_qnr[a2]
 
-                        if q1 not in self.q_bonds.keys():
+                        if q1 not in list(self.q_bonds.keys()):
                             self.q_bonds[q1] = {0: list(), 1: list(), 2: list(), 3: list()}
-                        if q2 not in self.q_bonds.keys():
+                        if q2 not in list(self.q_bonds.keys()):
                             self.q_bonds[q2] = {0: list(), 1: list(), 2: list(), 3: list()}
 
                         #Update Q-atom connectiveties
@@ -5340,9 +5340,9 @@ class SetupEVB(Toplevel):
                             self.change_bonds[pair] = get_states
                             for i in range(4 - len(get_states)):
                                 self.change_bonds[pair].append(' ')
-                                if q1 in self.softpairs_added.keys():
+                                if q1 in list(self.softpairs_added.keys()):
                                     del self.softpairs_added[q1]
-                                if q2 in self.softpairs_added.keys():
+                                if q2 in list(self.softpairs_added.keys()):
                                     del self.softpairs_added[q2]
 
                 if found_angletypes:
@@ -5358,8 +5358,8 @@ class SetupEVB(Toplevel):
                         found_torsiontypes = False
                     if len(line.split()) > 8:
                         types = line.split('!')[-1].strip('\n')
-                        if types not in self.torsion_prm.keys():
-                            if types not in self.torsion_prm.keys():
+                        if types not in list(self.torsion_prm.keys()):
+                            if types not in list(self.torsion_prm.keys()):
                                 self.torsion_prm[types] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
 
                         k = line.split()[1]
@@ -5394,7 +5394,7 @@ class SetupEVB(Toplevel):
                     if len(line.split()) > 5:
                         s1, s2 = line.split()[0:2]
                         states = '%s %s' % (s1, s2)
-                        for i in self.offdiagonals.keys():
+                        for i in list(self.offdiagonals.keys()):
                             if states in self.offdiagonals[i]:
                                 qi, qj, aij, uij = line.split()[2:6]
                                 self.offdiagonals[i] = [states, qi, qj, aij, uij]
@@ -5508,7 +5508,7 @@ class SetupEVB(Toplevel):
         qatoms_yscroll.config(command=self.qatoms_listbox.yview)
         qatoms_xscroll.config(command=self.qatoms_listbox.xview)
         self.qatoms_listbox.grid(in_=qatoms_label, row=1, rowspan=10, column = 0, sticky='e')
-        self.qatoms_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.qatoms_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.qatoms_listbox.bind('<<ListboxSelect>>', self.list_q_atoms_event)
 
 
@@ -5529,8 +5529,8 @@ class SetupEVB(Toplevel):
         change_bonds = LabelFrame(frame2, text='Form/break bonds', bg=self.main_color)
         change_bonds.grid(sticky='ns')
 
-        bond_label = Label(frame2, text=u" Qi   Qj     \N{GREEK SMALL LETTER PHI}1   \N{GREEK SMALL LETTER PHI}2"
-                                        u"   \N{GREEK SMALL LETTER PHI}3   \N{GREEK SMALL LETTER PHI}4",
+        bond_label = Label(frame2, text=" Qi   Qj     \N{GREEK SMALL LETTER PHI}1   \N{GREEK SMALL LETTER PHI}2"
+                                        "   \N{GREEK SMALL LETTER PHI}3   \N{GREEK SMALL LETTER PHI}4",
                            bg=self.main_color)
         bond_label.grid(in_=change_bonds, row=0, column=0, sticky='e')
 
@@ -5541,7 +5541,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         bondchange_yscroll.config(command=self.bondchange_listbox.yview)
         self.bondchange_listbox.grid(in_=change_bonds, row=1, rowspan=5, column = 0, sticky = 'e')
-        self.bondchange_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.bondchange_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.bondchange_listbox.bind('<<ListboxSelect>>', self.list_bondform_event)
 
         add_bondchange = Button(frame2, text='+', highlightbackground=self.main_color, command=self.add_bond_change)
@@ -5550,21 +5550,21 @@ class SetupEVB(Toplevel):
         del_bondchange = Button(frame2, text='-', highlightbackground=self.main_color, command=self.del_bond_change)
         del_bondchange.grid(in_=change_bonds, row=0, column=3)
 
-        alter_bond1 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        alter_bond1 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                               command = lambda: self.set_bond_state(0), width=2)
         alter_bond1.grid(in_=change_bonds,row=1, column=2)
 
-        alter_bond2 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        alter_bond2 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                               command = lambda: self.set_bond_state(1), width=2)
         alter_bond2.grid(in_=change_bonds, row=1, column=3)
 
-        self.alter_bond3 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
+        self.alter_bond3 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
                               command = lambda: self.set_bond_state(2), width=2)
         self.alter_bond3.grid(in_=change_bonds, row=2, column=2)
         self.alter_bond3.config(state=DISABLED)
         self.state3_enabled.append(self.alter_bond3)
 
-        self.alter_bond4 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
+        self.alter_bond4 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
                               command = lambda: self.set_bond_state(3), width=2)
         self.alter_bond4.grid(in_=change_bonds, row=2, column=3)
         self.alter_bond4.config(state=DISABLED)
@@ -5608,7 +5608,7 @@ class SetupEVB(Toplevel):
                                    'Monitor groups',
                                    'Off-diagonal',
                                    #'Softcore',
-                                   u"\N{GREEK SMALL LETTER LAMDA}-steps",
+                                   "\N{GREEK SMALL LETTER LAMDA}-steps",
                                    'Temperature(s)')
         self.setup_menu.config(highlightbackground=self.main_color, bg=self.main_color, width=15)
         self.setup_menu.grid(in_=setup_label, row=4, column=0)
@@ -5619,7 +5619,7 @@ class SetupEVB(Toplevel):
 
         self.force_field = Spinbox(frame2, width=5, highlightthickness=0, relief=GROOVE, values=self.forcefields)
         self.force_field.grid(in_=setup_label, row=3, column=2)
-        #self.force_field.config(font=tkFont.Font(family="Courier", size=10))
+        #self.force_field.config(font=tkinter.font.Font(family="Courier", size=10))
         self.force_field.config(state=DISABLED)
 
         #Status frame
@@ -5632,14 +5632,14 @@ class SetupEVB(Toplevel):
                                       width=77, height=3, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         qstatus_yscroll.config(command=self.qstatus_listbox.yview)
         self.qstatus_listbox.grid(in_=status_label, row=1, rowspan=3, column = 0, sticky = 'e')
-        self.qstatus_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.qstatus_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         #Variable frames from dropdown menu (.grid_remove)
         ######### Charges ##########
-        charge_label = Label(self.charge_frame, text=u" Qi       \N{GREEK SMALL LETTER PHI}1    "
-                                                     u"    \N{GREEK SMALL LETTER PHI}2"
-                                                     u"       \N{GREEK SMALL LETTER PHI}3"
-                                                     u"       \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        charge_label = Label(self.charge_frame, text=" Qi       \N{GREEK SMALL LETTER PHI}1    "
+                                                     "    \N{GREEK SMALL LETTER PHI}2"
+                                                     "       \N{GREEK SMALL LETTER PHI}3"
+                                                     "       \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         charge_label.grid(row=0, column=0, sticky='w')
 
         charge_yscroll = Scrollbar(self.charge_frame)
@@ -5649,13 +5649,13 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         charge_yscroll.config(command=self.charge_listbox.yview)
         self.charge_listbox.grid(row=1, rowspan=10, column = 0, sticky = 'e')
-        self.charge_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.charge_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.charge_listbox.bind('<<ListboxSelect>>', self.list_charge_event)
 
-        s1 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}1", bg=self.main_color)
+        s1 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}1", bg=self.main_color)
         s1.grid(row=3, column=3)
 
-        s2 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}2", bg=self.main_color)
+        s2 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}2", bg=self.main_color)
         s2.grid(row=3, column=4)
 
         self.charge1 = Spinbox(self.charge_frame, width=7, highlightthickness=0, relief=GROOVE,
@@ -5686,10 +5686,10 @@ class SetupEVB(Toplevel):
         self.charge4.config(state=DISABLED)
         self.state4_enabled.append(self.charge4)
 
-        s3 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}3", bg=self.main_color)
+        s3 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}3", bg=self.main_color)
         s3.grid(row=5, column=3)
 
-        s4 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        s4 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         s4.grid(row=5, column=4)
 
         edit_charges = Button(self.charge_frame, text='Change charge', highlightbackground=self.main_color,
@@ -5708,7 +5708,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         atomtypes_yscroll.config(command=self.atomtypes_listbox.yview)
         self.atomtypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.atomtypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.atomtypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.atomtypes_listbox.bind('<<ListboxSelect>>', self.list_charge_event)
 
         import_atom_prm = Button(self.atomtype_frame, text='Import', highlightbackground=self.main_color,
@@ -5727,10 +5727,10 @@ class SetupEVB(Toplevel):
                               command=self.delete_atom_prm)
         del_atom_prm.grid(row=11, column=4)
 
-        changetypes_label = Label(self.atomtype_frame, text=u"Qi  \N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.atomtype_frame, text="Qi  \N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, columnspan=4, sticky='w')
 
         changetypes_yscroll = Scrollbar(self.atomtype_frame)
@@ -5740,24 +5740,24 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         changetypes_yscroll.config(command=self.changetypes_listbox.yview)
         self.changetypes_listbox.grid(row=1, rowspan=10, column = 7, columnspan=4, sticky = 'e')
-        self.changetypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changetypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changetypes_listbox.bind('<<ListboxSelect>>', self.list_changetypes_event)
 
-        alter_state1 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        alter_state1 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(0))
         alter_state1.grid(row=11, column=7)
 
-        alter_state2 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        alter_state2 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(1))
         alter_state2.grid(row=11, column=8)
 
-        self.alter_state3 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
+        self.alter_state3 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(2))
         self.alter_state3.grid(row=11, column=9)
         self.alter_state3.config(state=DISABLED)
         self.state3_enabled.append(self.alter_state3)
 
-        self.alter_state4 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
+        self.alter_state4 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(3))
         self.alter_state4.grid(row=11, column=10)
         self.alter_state4.config(state=DISABLED)
@@ -5765,7 +5765,7 @@ class SetupEVB(Toplevel):
 
 
         ####### Bond types ########
-        bondtypes_label = Label(self.bond_frame, text=u"#      De       \N{GREEK SMALL LETTER ALPHA}        R0      "
+        bondtypes_label = Label(self.bond_frame, text="#      De       \N{GREEK SMALL LETTER ALPHA}        R0      "
                                 , bg=self.main_color)
         bondtypes_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5776,7 +5776,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         bondtypes_yscroll.config(command=self.bondtypes_listbox.yview)
         self.bondtypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.bondtypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.bondtypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_bond_prm = Button(self.bond_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_bond_prm)
@@ -5790,10 +5790,10 @@ class SetupEVB(Toplevel):
                               command=self.add_bond_prm)
         add_bond_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.bond_frame, text=u"     i            j       \N{GREEK SMALL LETTER PHI}1"
-                                                            u"  \N{GREEK SMALL LETTER PHI}2"
-                                                            u"  \N{GREEK SMALL LETTER PHI}3"
-                                                            u"  \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.bond_frame, text="     i            j       \N{GREEK SMALL LETTER PHI}1"
+                                                            "  \N{GREEK SMALL LETTER PHI}2"
+                                                            "  \N{GREEK SMALL LETTER PHI}3"
+                                                            "  \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changebond_yscroll = Scrollbar(self.bond_frame)
@@ -5803,7 +5803,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         changebond_yscroll.config(command=self.changebond_listbox.yview)
         self.changebond_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changebond_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changebond_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changebond_listbox.bind('<<ListboxSelect>>', self.list_changebond_event)
 
         #update_bonds = Button(self.bond_frame, text='Update', highlightbackground=self.main_color,
@@ -5811,7 +5811,7 @@ class SetupEVB(Toplevel):
         #update_bonds.grid(row=11, column=7)
 
         #### ANGLE TYPES ####
-        angle_label = Label(self.angle_frame, text=u"#      K          \N{GREEK CAPITAL LETTER THETA}  ",
+        angle_label = Label(self.angle_frame, text="#      K          \N{GREEK CAPITAL LETTER THETA}  ",
                             bg=self.main_color)
         angle_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5822,7 +5822,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         angletypes_yscroll.config(command=self.angletypes_listbox.yview)
         self.angletypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.angletypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.angletypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_angle_prm = Button(self.angle_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_angle_prm)
@@ -5836,11 +5836,11 @@ class SetupEVB(Toplevel):
                               command=self.add_angle_prm)
         add_angle_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.angle_frame, text=u"   i             j           k     "
-                                                         u"\N{GREEK SMALL LETTER PHI}1"
-                                                            u"   \N{GREEK SMALL LETTER PHI}2"
-                                                            u"   \N{GREEK SMALL LETTER PHI}3"
-                                                            u"   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.angle_frame, text="   i             j           k     "
+                                                         "\N{GREEK SMALL LETTER PHI}1"
+                                                            "   \N{GREEK SMALL LETTER PHI}2"
+                                                            "   \N{GREEK SMALL LETTER PHI}3"
+                                                            "   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changeangle_yscroll = Scrollbar(self.angle_frame)
@@ -5850,7 +5850,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         changeangle_yscroll.config(command=self.changeangle_listbox.yview)
         self.changeangle_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changeangle_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changeangle_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changeangle_listbox.bind('<<ListboxSelect>>', self.list_changeangle_event)
 
         include_ang = Label(self.angle_frame, text='Include only changing angles:', bg=self.main_color)
@@ -5860,7 +5860,7 @@ class SetupEVB(Toplevel):
         all_angles_check.grid(row=11, column=7, sticky='e')
 
         #### TORSION TYPES ####
-        torsion_label = Label(self.torsion_frame, text=u"#      K          min.    phase     paths  ",
+        torsion_label = Label(self.torsion_frame, text="#      K          min.    phase     paths  ",
                             bg=self.main_color)
         torsion_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5871,7 +5871,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         torsiontypes_yscroll.config(command=self.torsiontypes_listbox.yview)
         self.torsiontypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.torsiontypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.torsiontypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_torsion_prm = Button(self.torsion_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_torsion_prm)
@@ -5885,11 +5885,11 @@ class SetupEVB(Toplevel):
                               command=self.add_torsion_prm)
         add_torsion_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.torsion_frame, text=u"    i           j           k           l       "
-                                                         u"\N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.torsion_frame, text="    i           j           k           l       "
+                                                         "\N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changetorsion_yscroll = Scrollbar(self.torsion_frame)
@@ -5899,7 +5899,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         changetorsion_yscroll.config(command=self.changetorsion_listbox.yview)
         self.changetorsion_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changetorsion_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changetorsion_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changetorsion_listbox.bind('<<ListboxSelect>>', self.list_changetorsion_event)
 
         include_ang = Label(self.torsion_frame, text='Include only changing torsions:', bg=self.main_color)
@@ -5910,7 +5910,7 @@ class SetupEVB(Toplevel):
         all_torsion_check.grid(row=11, column=7, sticky='e')
 
         #### IMPROPER TYPES ####
-        improper_label = Label(self.improper_frame, text=u"#      K          phase  ",
+        improper_label = Label(self.improper_frame, text="#      K          phase  ",
                             bg=self.main_color)
         improper_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5921,7 +5921,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         impropertypes_yscroll.config(command=self.impropertypes_listbox.yview)
         self.impropertypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.impropertypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.impropertypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_improper_prm = Button(self.improper_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_improper_prm)
@@ -5935,11 +5935,11 @@ class SetupEVB(Toplevel):
                               command=self.add_improper_prm)
         add_improper_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.improper_frame, text=u"    i           j           k           l       "
-                                                         u"\N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.improper_frame, text="    i           j           k           l       "
+                                                         "\N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changeimproper_yscroll = Scrollbar(self.improper_frame)
@@ -5949,7 +5949,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         changeimproper_yscroll.config(command=self.changeimproper_listbox.yview)
         self.changeimproper_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changeimproper_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changeimproper_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changeimproper_listbox.bind('<<ListboxSelect>>', self.list_changeimproper_event)
 
         add_imp = Button(self.improper_frame, text = 'Add', highlightbackground=self.main_color, command=self.add_improper)
@@ -5967,7 +5967,7 @@ class SetupEVB(Toplevel):
 
 
         #### SOFT PAIRS ####
-        soft_label = Label(self.softpair_frame, text=u"Qi      Qj ",
+        soft_label = Label(self.softpair_frame, text="Qi      Qj ",
                             bg=self.main_color)
         soft_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5978,7 +5978,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         softpairs_yscroll.config(command=self.softpairs_listbox.yview)
         self.softpairs_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.softpairs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.softpairs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.softpairs_listbox.bind('<<ListboxSelect>>', self.list_softpairs_event)
 
         add_softpair = Button(self.softpair_frame, text='+', highlightbackground=self.main_color,
@@ -6001,7 +6001,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         angcop_yscroll.config(command=self.angle_couplings_listbox.yview)
         self.angle_couplings_listbox.grid(row=1, rowspan=10, column = 0, columnspan=1, sticky = 'e')
-        self.angle_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.angle_couplings_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         torsion_coupling = Label(self.coupling_frame, text='Torsions',
                             bg=self.main_color)
@@ -6014,7 +6014,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         torcop_yscroll.config(command=self.torsion_couplings_listbox.yview)
         self.torsion_couplings_listbox.grid(row=1, rowspan=10, column = 2, columnspan=1, sticky = 'e')
-        self.torsion_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.torsion_couplings_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         improper_coupling = Label(self.coupling_frame, text='Impropers',
                             bg=self.main_color)
@@ -6027,7 +6027,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         impcop_yscroll.config(command=self.improper_couplings_listbox.yview)
         self.improper_couplings_listbox.grid(row=1, rowspan=10, column = 4, columnspan=1, sticky = 'e')
-        self.improper_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.improper_couplings_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         self.coupling_check = Checkbutton(self.coupling_frame, bg=self.main_color, variable=self.coupling_var,
                                           command=self.coupling_true_false)
@@ -6037,10 +6037,10 @@ class SetupEVB(Toplevel):
         use_coupling.grid(row=12, column=0, columnspan=4)
 
         #### EXCLUDED PAIRS ####
-        excluded_label = Label(self.excludedpairs_frame, text=u"     i          j       \N{GREEK SMALL LETTER PHI}1"
-                                                            u"   \N{GREEK SMALL LETTER PHI}2"
-                                                            u"   \N{GREEK SMALL LETTER PHI}3"
-                                                            u"   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        excluded_label = Label(self.excludedpairs_frame, text="     i          j       \N{GREEK SMALL LETTER PHI}1"
+                                                            "   \N{GREEK SMALL LETTER PHI}2"
+                                                            "   \N{GREEK SMALL LETTER PHI}3"
+                                                            "   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         excluded_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
         excludedpairs_yscroll = Scrollbar(self.excludedpairs_frame)
@@ -6050,7 +6050,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         excludedpairs_yscroll.config(command=self.excludedpairs_listbox.yview)
         self.excludedpairs_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.excludedpairs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.excludedpairs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.excludedpairs_listbox.bind('<<ListboxSelect>>', self.list_excludedpairs_event)
 
         add_excludedpair = Button(self.excludedpairs_frame, text='+', highlightbackground=self.main_color,
@@ -6065,31 +6065,31 @@ class SetupEVB(Toplevel):
                               command=self.del_excludedpair)
         del_excludedpair.grid(row=4, column=8)
 
-        state1 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        state1 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                         command=lambda: self.excluded_state(0))
         state1.grid(row=11, column=2)
 
-        state2 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        state2 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                         command=lambda: self.excluded_state(1))
         state2.grid(row=11, column=3)
 
-        self.state3 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+        self.state3 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}3",
                              highlightbackground=self.main_color, command=lambda: self.excluded_state(2))
         self.state3.grid(row=11, column=4)
         self.state3.config(state=DISABLED)
         self.state3_enabled.append(self.state3)
 
-        self.state4 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+        self.state4 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}4",
                              highlightbackground=self.main_color, command=lambda: self.excluded_state(3))
         self.state4.grid(row=11, column=5)
         self.state4.config(state=DISABLED)
         self.state4_enabled.append(self.state4)
 
         #### EL SCALE ####
-        elscale_label = Label(self.elscale_frame, text=u"Qi      Qj      \N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        elscale_label = Label(self.elscale_frame, text="Qi      Qj      \N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         elscale_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
         elscale_yscroll = Scrollbar(self.softpair_frame)
@@ -6099,7 +6099,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         elscale_yscroll.config(command=self.elscale_listbox.yview)
         self.elscale_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.elscale_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.elscale_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.elscale_listbox.bind('<<ListboxSelect>>', self.list_elscale_event)
 
         add_elscale = Button(self.elscale_frame, text='+', highlightbackground=self.main_color,
@@ -6120,21 +6120,21 @@ class SetupEVB(Toplevel):
                              command=self.set_elscale)
         set_elscale.grid(row=6, column=7, columnspan=2)
 
-        el_state1 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        el_state1 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                         command=lambda: self.el_state(0))
         el_state1.grid(row=11, column=2)
 
-        el_state2 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        el_state2 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                         command=lambda: self.el_state(1))
         el_state2.grid(row=11, column=3)
 
-        self.el_state3 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+        self.el_state3 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}3",
                              highlightbackground=self.main_color, command=lambda: self.el_state(2))
         self.el_state3.grid(row=11, column=4)
         self.el_state3.config(state=DISABLED)
         self.state3_enabled.append(self.el_state3)
 
-        self.el_state4 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+        self.el_state4 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}4",
                              highlightbackground=self.main_color, command=lambda: self.el_state(3))
         self.el_state4.grid(row=11, column=5)
         self.el_state4.config(state=DISABLED)
@@ -6142,8 +6142,8 @@ class SetupEVB(Toplevel):
 
 
         #### OFF-DIAGONALS ####
-        off_label = Label(self.offdiagonal_frame, text=u"\N{GREEK SMALL LETTER PHI}k  \N{GREEK SMALL LETTER PHI}l   "
-                                                   u"Qi    Qj       Aij      \N{GREEK SMALL LETTER MU}ij",
+        off_label = Label(self.offdiagonal_frame, text="\N{GREEK SMALL LETTER PHI}k  \N{GREEK SMALL LETTER PHI}l   "
+                                                   "Qi    Qj       Aij      \N{GREEK SMALL LETTER MU}ij",
                             bg=self.main_color)
         off_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -6154,7 +6154,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         offdiagonal_yscroll.config(command=self.offdiagonal_listbox.yview)
         self.offdiagonal_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.offdiagonal_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.offdiagonal_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.offdiagonal_listbox.bind('<<ListboxSelect>>', self.list_offdiagonal_event)
 
         add_offdiagonal = Button(self.offdiagonal_frame, text='+', highlightbackground=self.main_color,
@@ -6165,10 +6165,10 @@ class SetupEVB(Toplevel):
                               command=self.del_offdiagonal)
         del_offdiagonal.grid(row=4, column=8, sticky='w')
 
-        aij_label = Label(self.offdiagonal_frame, text=u'Aij', bg=self.main_color)
+        aij_label = Label(self.offdiagonal_frame, text='Aij', bg=self.main_color)
         aij_label.grid(row=5, column=7)
 
-        uij_label = Label(self.offdiagonal_frame, text=u'\N{GREEK SMALL LETTER MU}ij', bg=self.main_color)
+        uij_label = Label(self.offdiagonal_frame, text='\N{GREEK SMALL LETTER MU}ij', bg=self.main_color)
         uij_label.grid(row=5, column=8)
 
         self.aij = Spinbox(self.offdiagonal_frame, width=5, highlightthickness=0, relief=GROOVE,
@@ -6193,16 +6193,16 @@ class SetupEVB(Toplevel):
         end_label = Label(self.lambdasteps_frame, text='END', bg=self.main_color)
         end_label.grid(row=0, column=3)
 
-        l1_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}1', bg=self.main_color)
+        l1_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}1', bg=self.main_color)
         l1_label.grid(row=1, column=0)
 
-        l2_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}2', bg=self.main_color)
+        l2_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}2', bg=self.main_color)
         l2_label.grid(row=2, column=0)
 
-        l3_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}3', bg=self.main_color)
+        l3_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}3', bg=self.main_color)
         l3_label.grid(row=3, column=0)
 
-        l4_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}4', bg=self.main_color)
+        l4_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}4', bg=self.main_color)
         l4_label.grid(row=4, column=0)
 
         sum_label = Label(self.lambdasteps_frame, text='SUM', bg=self.main_color)
@@ -6286,24 +6286,24 @@ class SetupEVB(Toplevel):
         lambda_sampling.configure(bg=self.main_color, width=10)
         lambda_sampling.grid(row=1, column=4, columnspan=2)
 
-        step_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}-Step', bg=self.main_color)
+        step_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}-Step', bg=self.main_color)
         step_label.grid(row=2, column=4, sticky='s', padx=10)
 
         lambdastep = Spinbox(self.lambdasteps_frame, width=5, highlightthickness=0, relief=GROOVE,
                                    from_=0.01, to=0.40, increment=0.01, textvariable=self.lambdastep)
         lambdastep.grid(row=3,rowspan=3, column=4, sticky='n', padx=10)
 
-        add_button = Button(self.lambdasteps_frame, text=u"\u21D2",
+        add_button = Button(self.lambdasteps_frame, text="\u21D2",
                             highlightbackground=self.main_color, command=self.add_lambda_steps)
         add_button.grid(row=2, rowspan=2, column=5, padx=(0,10))
-        add_button.config(font=tkFont.Font(family="Courier", size=28))
+        add_button.config(font=tkinter.font.Font(family="Courier", size=28))
 
 
 
-        lambda_label = Label(self.lambdasteps_frame, text=u"  #      \N{GREEK SMALL LETTER LAMDA}1    "
-                                                          u"  \N{GREEK SMALL LETTER LAMDA}2    "
-                                                          u"   \N{GREEK SMALL LETTER LAMDA}3    "
-                                                          u"   \N{GREEK SMALL LETTER LAMDA}4",
+        lambda_label = Label(self.lambdasteps_frame, text="  #      \N{GREEK SMALL LETTER LAMDA}1    "
+                                                          "  \N{GREEK SMALL LETTER LAMDA}2    "
+                                                          "   \N{GREEK SMALL LETTER LAMDA}3    "
+                                                          "   \N{GREEK SMALL LETTER LAMDA}4",
                                                           bg=self.main_color)
         lambda_label.grid(row=0, column=6, columnspan=6, sticky='w')
 
@@ -6314,7 +6314,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         lambdasteps_yscroll.config(command=self.lambdasteps_listbox.yview)
         self.lambdasteps_listbox.grid(row=1, rowspan=10, column = 6, columnspan=6, sticky = 'e')
-        self.lambdasteps_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.lambdasteps_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.lambdasteps_listbox.bind('<<ListboxSelect>>', self.list_offdiagonal_event)
 
         del_lamda_steps = Button(self.lambdasteps_frame, text='Delete', highlightbackground=self.main_color,
@@ -6345,10 +6345,10 @@ class SetupEVB(Toplevel):
         self.runs.delete(0, END)
         self.runs.insert(0, 1)
 
-        add_button = Button(self.temperature_frame, text=u"\u21D2",
+        add_button = Button(self.temperature_frame, text="\u21D2",
                             highlightbackground=self.main_color, command=self.add_temperature)
         add_button.grid(row=0, rowspan=10, column=5, padx=(10,10))
-        add_button.config(font=tkFont.Font(family="Courier", size=28))
+        add_button.config(font=tkinter.font.Font(family="Courier", size=28))
 
 
 
@@ -6363,7 +6363,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         temp_yscroll.config(command=self.temp_listbox.yview)
         self.temp_listbox.grid(row=1, rowspan=10, column = 6, columnspan=6, sticky = 'e')
-        self.temp_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.temp_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.lambdasteps_listbox.bind('<<ListboxSelect>>', self.list_offdiagonal_event)
 
         del_temp = Button(self.temperature_frame, text='Delete', highlightbackground=self.main_color,
@@ -6383,7 +6383,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         groups_yscroll.config(command=self.groups_listbox.yview)
         self.groups_listbox.grid(row=1, rowspan=10, column = 0, columnspan=1, sticky = 'e')
-        self.groups_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.groups_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.groups_listbox.bind('<<ListboxSelect>>', self.list_monitorgroups_event)
 
 
@@ -6407,7 +6407,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         group_atoms_yscroll.config(command=self.group_atoms_listbox.yview)
         self.group_atoms_listbox.grid(row=1, rowspan=10, column = 2, columnspan=1, sticky = 'e')
-        self.group_atoms_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.group_atoms_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         add_monitor_atoms = Button(self.monitorgroups_frame, text='+', highlightbackground=self.main_color,
                            command=self.add_monitor_atoms)
@@ -6429,7 +6429,7 @@ class SetupEVB(Toplevel):
                                       exportselection=False)
         monitor_pairs_yscroll.config(command=self.monitor_pairs_listbox.yview)
         self.monitor_pairs_listbox.grid(row=1, rowspan=10, column = 4, columnspan=1, sticky = 'e')
-        self.monitor_pairs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.monitor_pairs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         add_monitor_pair = Button(self.monitorgroups_frame, text='+', highlightbackground=self.main_color,
                            command=self.add_monitor_pair)
@@ -6467,6 +6467,3 @@ class SetupEVB(Toplevel):
         overwrite_label.grid(row=3, column=0, columnspan=2)
         overwrite = Checkbutton(frame4, bg=self.main_color, variable=self.check_overwrite)
         overwrite.grid(row=3, column=2, sticky='w')
-
-
-

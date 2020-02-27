@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Text, Label, Button, Frame, DISABLED, GROOVE, PhotoImage, Toplevel
+from tkinter import  Text, Label, Button, Frame, X, CENTER, Scrollbar, YES, Menu, DISABLED, NORMAL, GROOVE, END, TOP, PhotoImage, Toplevel
 
 class AboutQ(Toplevel):
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
@@ -27,7 +27,7 @@ class AboutQ(Toplevel):
         """
         Window
         """
-        self.title('About Qgui3')
+        self.title('About Qgui')
 
 
         frame = Frame(self, bg=self.app.main_color)
@@ -43,7 +43,7 @@ class AboutQ(Toplevel):
 
         txt = Text(frame2, width = 40, height=40, bg='WhiteSmoke')
         txt.grid(row=1, column=0, columnspan=10)
-        txt.insert(0.0, """Qgui3 source file is free software:
+        txt.insert(0.0, """Qgui source file is free software:
 you can redistribute it and/or modify
 it under the terms of the GNU General
 Public License as published by the Free
@@ -82,6 +82,3 @@ geir.isaksen@uit.no """)
         close = Button(frame2, text='OK', command=self.destroy)
         close.config(highlightbackground=self.app.main_color)
         close.grid(row=3,column = 0, columnspan=10)
-
-
-

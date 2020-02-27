@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # This file is part of Qgui.
 
@@ -53,7 +53,7 @@ def read_topology(topology, libfiles=list()):
                         if os.path.isfile(lib):
                             libfiles.append(lib)
                         else:
-                            print 'Warning: Did not find library file: %s' % lib
+                            print(('Warning: Did not find library file: %s' % lib))
 
             #Coordinates ends here:
             if 'No. of integer atom codes' in line:
@@ -69,11 +69,11 @@ def read_topology(topology, libfiles=list()):
             if found_xyz:
                 if len(line.split()) > 2:
                     atomnr += 1
-                    atomnr_xyz[atomnr] = map(float, line.split()[0:3])
+                    atomnr_xyz[atomnr] = list(map(float, line.split()[0:3]))
 
                 if len(line.split()) == 6:
                     atomnr += 1
-                    atomnr_xyz[atomnr] = map(float, line.split()[3:6])
+                    atomnr_xyz[atomnr] = list(map(float, line.split()[3:6]))
 
             #Collect residues
             if found_res:
@@ -143,7 +143,7 @@ def write_top_pdb(topology, pdbname, pdbpath, libfiles=list()):
         pdbout.write(line)
 
     pdbout.close()
-    print('%s written to %s' % (pdbname, pdbpath))
+    print(('%s written to %s' % (pdbname, pdbpath)))
 
 
 def get_pdb_resnr(pdbfile, res_nr):
@@ -156,12 +156,12 @@ def get_pdb_resnr(pdbfile, res_nr):
     pdb_res = list()
 
     for line in pdbfile:
-            if 'ATOM' in line:
-                if found_res and int(line[22:26]) != int(res_nr):
-                    break
-                if int(line[22:26]) == int(res_nr):
-                    found_res = True
-                    pdb_res.append(line)
+        if 'ATOM' in line:
+            if found_res and int(line[22:26]) != int(res_nr):
+                break
+            if int(line[22:26]) == int(res_nr):
+                found_res = True
+                pdb_res.append(line)
 
     return pdb_res
 
@@ -314,9 +314,9 @@ def read_fep(fepfile, qoffset=0, atomoffset=None):
 
             elif not section and len(line.strip('\n')) > 0:
                 #Read info in top of file (if any):
-                if not sectionnr in fepdict.keys():
+                if not sectionnr in list(fepdict.keys()):
                     fepdict[sectionnr] = dict()
-                if not '!info' in fepdict[sectionnr].keys():
+                if not '!info' in list(fepdict[sectionnr].keys()):
                     fepdict[sectionnr]['!info'] = dict()
 
                 keynr += 1
@@ -341,7 +341,7 @@ def modify_fepline(keymod, modify, section, key_type, qoffset):
         else:
             modify = ' '.join(str(int(i) + keymod[int(i)]) for i in modify)
 
-    elif isinstance(keymod, basestring):
+    elif isinstance(keymod, str):
         modify = ' '.join(modify)
 
     elif keymod == qoffset:
@@ -374,7 +374,7 @@ def write_fepdict(fep, path=None, printfep=False):
         #The nr is just for printing the sections in the "correct" order
         for section in sorted(fep[nr].keys()):
             if printfep:
-                print('\n%s' % section)
+                print(('\n%s' % section))
                 fepprint.append('\n%s\n' % section)
             else:
                 if section != '!info':
@@ -390,7 +390,7 @@ def write_fepdict(fep, path=None, printfep=False):
                 _val = fep[nr][section][_key]
                 if section in no_key:
                     if printfep:
-                        print(' '.join(['%7s' % w.ljust(7) for w in _val]))
+                        print((' '.join(['%7s' % w.ljust(7) for w in _val])))
                         fepprint.append(' '.join(['%7s' % w.ljust(7) for w in _val]))
                         fepprint.append('\n')
                     else:
@@ -398,7 +398,7 @@ def write_fepdict(fep, path=None, printfep=False):
                         fepout.write('\n')
                 else:
                     if printfep:
-                        print('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val])))
+                        print(('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' % str(w).ljust(7) for w in _val]))))
                         fepprint.append('%6s %s' % (str(_key).ljust(6), ' '.join(['%7s' %
                                                                                   str(w).ljust(7) for w in _val])))
                         fepprint.append('\n')
@@ -426,7 +426,7 @@ def extend_fep_length(fep, nr_feps):
                  '[change_torsions]', '[change_impropers]']
 
     #Last FEP step in existing dictionary:
-    n = len(fep.keys())
+    n = len(list(fep.keys()))
     #New number for new FEP protocols
     i = n
 
@@ -436,14 +436,14 @@ def extend_fep_length(fep, nr_feps):
     if s is None:
         s = 2
 
-    while len(fep.keys()) < nr_feps:
+    while len(list(fep.keys())) < nr_feps:
         i += 1
         #Create new FEP file
         fep[i] = dict()
 
         for order_nr in sorted(fep[n].keys()):
             fep[i][order_nr] = dict()
-            for section in fep[n][order_nr].keys():
+            for section in list(fep[n][order_nr].keys()):
                 fep[i][order_nr][section] = dict()
                 for _key in sorted(fep[n][order_nr][section].keys()):
                     _val = fep[n][order_nr][section][_key]
@@ -474,7 +474,7 @@ def get_offset(org, appending):
 
     for _key in sorted(appending.keys()):
         #Does value exist in org FEP section?
-        if appending[_key] in org.values():
+        if appending[_key] in list(org.values()):
             #OK, find original key for that value then
             for org_key in sorted(org.keys()):
                 if org[org_key] == appending[_key]:
@@ -512,10 +512,10 @@ def merge_fep_dicts(fep1, fep2):
     merges two fep dictionaries so that nr of FEP files becomes equal!
     """
     #Check length of FEP protocols and make them equal in length
-    if len(fep1.keys()) > len(fep2.keys()):
-        fep2 = extend_fep_length(fep2, len(fep1.keys()))
-    elif len(fep1.keys()) < len(fep2.keys()):
-        fep1 = extend_fep_length(fep1, len(fep2.keys()))
+    if len(list(fep1.keys())) > len(list(fep2.keys())):
+        fep2 = extend_fep_length(fep2, len(list(fep1.keys())))
+    elif len(list(fep1.keys())) < len(list(fep2.keys())):
+        fep1 = extend_fep_length(fep1, len(list(fep2.keys())))
 
 
     #How to handle keys if fepdict when modifying the: (nr of elements in key, type of modification to apply)
@@ -555,7 +555,7 @@ def merge_fep_dicts(fep1, fep2):
                 insert_nr = get_fepdict_order_nr(fep1[fep], section)
                 #Maybe this section did not exist in fep1
                 if insert_nr is None:
-                    if not order_nr in fep1[fep].keys():
+                    if not order_nr in list(fep1[fep].keys()):
                         insert_nr = order_nr
                     else:
                         insert_nr = max(fep1[fep].keys()) + 1
@@ -570,7 +570,7 @@ def merge_fep_dicts(fep1, fep2):
                     #    _key = len(fep1[fep][insert_nr][section].keys()) + 1
 
                     #Modify key?
-                    if section in key_type.keys():
+                    if section in list(key_type.keys()):
                         new_key = list()
                         for i in range(len(key_type[section][0])):
 
@@ -580,7 +580,7 @@ def merge_fep_dicts(fep1, fep2):
                                 #find section in in fep1
                                 org = fep1[fep][insert_nr][section]
 
-                                if len(org.keys()) < 1:
+                                if len(list(org.keys())) < 1:
                                     org = appending
 
                                 offsets[key_type[section][1][i]] = get_offset(org, appending)
@@ -596,7 +596,7 @@ def merge_fep_dicts(fep1, fep2):
                             _key = new_key[0]
 
                     #Modify value?
-                    elif section in val_type.keys():
+                    elif section in list(val_type.keys()):
                         new_val = list()
                         for i in range(len(val_type[section][0])):
 
@@ -607,7 +607,7 @@ def merge_fep_dicts(fep1, fep2):
                                 #Find section in fep1
                                 org = fep1[fep][insert_nr][section]
 
-                                if len(org.keys()) < 1:
+                                if len(list(org.keys())) < 1:
                                     org = appending
 
                                 offsets[val_type[section][1][i]] = get_offset(org, appending)
@@ -687,7 +687,7 @@ def create_lambda_list(lambda_step, lambda_start=list(), lambda_end=list()):
 
     if len(change_values) > 2:
         print('Can only vary two lambdas at the same time')
-        print('Will change lambda %d and lambda %d' % (change_values[0] + 1, change_values[1] + 1))
+        print(('Will change lambda %d and lambda %d' % (change_values[0] + 1, change_values[1] + 1)))
 
     change_values = (change_values[0], change_values[1])
 
@@ -753,7 +753,7 @@ def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq
     solvent = []
     all_atoms = []
     for line in pdbfile:
-         if 'ATOM' in line:
+        if 'ATOM' in line:
             if 'HOH' in line or 'SPC' in line:
                 solvent.append(line.split()[1])
             else:
@@ -1006,7 +1006,7 @@ def write_md_inputfiles(inputfiles, md_settings, topology, lambda_list, qdyn, eq
 
     submitfile.close()
 
-    print('info', 'FEP templates written to "/inputfiles"')
+    print(('info', 'FEP templates written to "/inputfiles"'))
 
 
 def get_qnr_atomnr(fepdict):
@@ -1037,7 +1037,7 @@ def get_ene_files(qpath):
             if f.startswith('md'):
                 enefiles.append(f)
 
-    print('found %d energy files in in %s' % (len(enefiles), qpath))
+    print(('found %d energy files in in %s' % (len(enefiles), qpath)))
     return enefiles
 
 
@@ -1111,7 +1111,7 @@ def run_Qfep(qpath, qfep_inp='qfep.inp', qfep='Qfep5'):
         os.chdir(qpath)
 
     if not os.path.isfile(qfep_inp):
-        print('No Qfep inputfile (%s) in %s' % (qfep_inp, qpath))
+        print(('No Qfep inputfile (%s) in %s' % (qfep_inp, qpath)))
     else:
         tmpfile = open('qfep.out', 'w')
 
@@ -1143,7 +1143,7 @@ def get_qfep_part1(qpath, qfep='qfep.out'):
         found_part1 = False
         for line in qfep_out:
             if line == 'Qfep5 terminated abnormally: Failed to read energies.\n':
-                print('Qfep failed to read energies in path: %s' % os.getcwd())
+                print(('Qfep failed to read energies in path: %s' % os.getcwd()))
                 os.remove(qfep)
                 try:
                     os.remove('qfep.inp')

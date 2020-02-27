@@ -13,17 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
+from tkinter import Label, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, END, GROOVE, StringVar, OptionMenu, HORIZONTAL
 
-from tkSimpleDialog import askstring
-import tkFont
+from tkinter.simpledialog import askstring
+import tkinter.font
 from subprocess import call
 import numpy as np
 import os
 from Qplot import Qplot
 
-from tkFileDialog import askdirectory
+from tkinter.filedialog import askdirectory
 
 
 class AnalyzeFEP(Toplevel):
@@ -80,13 +80,13 @@ class AnalyzeFEP(Toplevel):
         #self.update_plot([[0]],[[0]],[title])
 
     def del_title(self):
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         for selected in selections:
             title = self.titles_listbox.get(selected)
             self.titles_listbox.delete(selected)
             del self.titles[title]
             for i in [self.titles_dg]:
-                if title in i.keys():
+                if title in list(i.keys()):
                     del i[title]
 
         self.update_tables()
@@ -96,7 +96,7 @@ class AnalyzeFEP(Toplevel):
         Add subrun one-by-one or select temperature directory to append all runs
         """
         try:
-            prj_entry = map(int, self.titles_listbox.curselection())
+            prj_entry = list(map(int, self.titles_listbox.curselection()))
         except:
             self.app.errorBox('Warning', 'Select a project title to append runs to.')
             return
@@ -119,7 +119,7 @@ class AnalyzeFEP(Toplevel):
             #Check if the first directory is a temperature directory
             if len(dirs) == 0:
                 try:
-                    print(int(float(rundir.split('/')[-1])))
+                    print((int(float(rundir.split('/')[-1]))))
                     if int(float(rundir.split('/')[-1])) > 270:
                         self.app.log(' ', '%s Added. Collecting runs for temperature ...\n\n'
                                           % '/'.join(rundir.split('/')[-3:]))
@@ -187,12 +187,12 @@ class AnalyzeFEP(Toplevel):
 
 
     def del_runs(self):
-        title_sel = map(int, self.titles_listbox.curselection())
+        title_sel = list(map(int, self.titles_listbox.curselection()))
         if len(title_sel) != 1:
             self.app.log(' ', '\nSelect exactly one title to delete runs from!\n')
             return
 
-        selections = map(int, self.runs_listbox.curselection())
+        selections = list(map(int, self.runs_listbox.curselection()))
         if len(selections) == 0:
             self.app.log(' ', '\nNo runs selected for deletion!\n')
             return
@@ -203,11 +203,11 @@ class AnalyzeFEP(Toplevel):
             search = '/'.join(self.runs_listbox.get(selected).split('/')[-3:])
             self.runs_listbox.delete(selected)
 
-            for nr in self.titles[title].keys():
+            for nr in list(self.titles[title].keys()):
                 if '/'.join(self.titles[title][nr].split('/')[-3:]) == search:
-                     for i in [self.titles, self.titles_dg]:
-                        if title in i.keys():
-                            if nr in i[title].keys():
+                    for i in [self.titles, self.titles_dg]:
+                        if title in list(i.keys()):
+                            if nr in list(i[title].keys()):
                                 del i[title][nr]
 
 
@@ -229,7 +229,7 @@ class AnalyzeFEP(Toplevel):
                 if qfile.startswith('md'):
                     enefiles.append(qfile)
 
-        print('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:])))
+        print(('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:]))))
 
         if len(enefiles) == 0:
             found_ene_files = False
@@ -289,7 +289,7 @@ class AnalyzeFEP(Toplevel):
         for entry in sorted(self.titles[prj_title]):
             if len(self.titles_dg[prj_title][entry]) == 0:
                 tmpentry = self.get_part1(self.titles[prj_title][entry])
-                if tmpentry: #Error handling: To catch if get_part1 returns None, rather than dictionary. 
+                if tmpentry: #Error handling: To catch if get_part1 returns None, rather than dictionary.
                     self.titles_dg[prj_title][entry] = tmpentry
                 else:
                     del self.titles_dg[prj_title][entry]
@@ -308,8 +308,8 @@ class AnalyzeFEP(Toplevel):
             found_part1 = False
             for line in qfep_out:
                 if line == 'Qfep5 terminated abnormally: Failed to read energies.\n':
-                        print('Qfep failed to read energies in path: %s' % path)
-                        return None
+                    print(('Qfep failed to read energies in path: %s' % path))
+                    return None
                 if found_part1:
                     if len(line.split()) < 6:
                         break
@@ -327,7 +327,7 @@ class AnalyzeFEP(Toplevel):
         self.fep_listbox.delete(0, END)
         self.fep_listbox.insert(END, 'TITLE      sum(dGf)   +/-  sum(dGr)   +/-     <dG>    +/-')
 
-        for title in self.titles_dg.keys():
+        for title in list(self.titles_dg.keys()):
             dgf = list()
             dgr = list()
             dg = list()
@@ -347,7 +347,7 @@ class AnalyzeFEP(Toplevel):
     def list_titles_event(self, *args):
 
         self.runs_listbox.delete(0, END)
-        selected = map(int, self.titles_listbox.curselection())
+        selected = list(map(int, self.titles_listbox.curselection()))
 
         if len(selected) < 1:
             return
@@ -387,7 +387,7 @@ class AnalyzeFEP(Toplevel):
         term_translated = {'Sum dGf': 'sum_dGf', 'Sum dGr': 'sum_dGr', '<dG>': 'dG'}
 
         #Get selected part
-        part = map(int, self.plot_listbox.curselection())
+        part = list(map(int, self.plot_listbox.curselection()))
         if len(part) != 1:
             return
 
@@ -395,12 +395,12 @@ class AnalyzeFEP(Toplevel):
         energies = dict_translated[part]
 
         #Get selected dG to plot
-        sel_terms = map(int, self.term_listbox.curselection())
+        sel_terms = list(map(int, self.term_listbox.curselection()))
         if len(sel_terms) < 1:
             return
 
         #Get title(s) to plot
-        sel_titles = map(int, self.titles_listbox.curselection())
+        sel_titles = list(map(int, self.titles_listbox.curselection()))
         if len(sel_titles) < 1:
             print('No titles selected for plot!')
             return
@@ -411,9 +411,9 @@ class AnalyzeFEP(Toplevel):
             titles[self.titles_listbox.get(tit)] = list()
 
         #Check if runs are selected, if not, average all from title
-        sel_runs = map(int, self.runs_listbox.curselection())
+        sel_runs = list(map(int, self.runs_listbox.curselection()))
         if len(sel_runs) == 0:
-            for tit in titles.keys():
+            for tit in list(titles.keys()):
                 titles[tit] = sorted(self.titles[tit].keys())
         else:
             for i in map(int, self.runs_listbox.curselection()):
@@ -426,7 +426,7 @@ class AnalyzeFEP(Toplevel):
         plot_titles = [[]]
 
 
-        for tit in titles.keys():
+        for tit in list(titles.keys()):
             for t in sel_terms:
                 y_dict = dict()
                 term = self.term_listbox.get(t)
@@ -442,7 +442,7 @@ class AnalyzeFEP(Toplevel):
 
                 tmp_y = list()
 
-                for nr in y_dict.keys():
+                for nr in list(y_dict.keys()):
                     tmp_y.append(np.average(y_dict[nr]))
                 ylist[0].append(tmp_y)
 
@@ -461,7 +461,7 @@ class AnalyzeFEP(Toplevel):
         frames = {'FEP summary': self.fep_frame,
                   'Plot': self.plot_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.selected_frame.get()].grid(row=3, column=0, columnspan=2)
@@ -576,7 +576,7 @@ class AnalyzeFEP(Toplevel):
         titles_yscroll.config(command=self.titles_listbox.yview)
         titles_xscroll.config(command=self.titles_listbox.xview)
         self.titles_listbox.grid(row=1, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.titles_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.titles_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.titles_listbox.bind('<<ListboxSelect>>', self.list_titles_event)
 
         runs_yscroll = Scrollbar(self.proj_frame)
@@ -591,7 +591,7 @@ class AnalyzeFEP(Toplevel):
         runs_yscroll.config(command=self.runs_listbox.yview)
         runs_xscroll.config(command=self.runs_listbox.xview)
         self.runs_listbox.grid(row=1, rowspan=10, column = 4, columnspan=3, sticky='e')
-        self.runs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.runs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.runs_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         #Select frame
@@ -608,7 +608,7 @@ class AnalyzeFEP(Toplevel):
                                    exportselection=False)
         fep_yscroll.config(command=self.fep_listbox.yview)
         self.fep_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.fep_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.fep_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         #PLOT FRAME
         #This can potentially be made more detailed later...
@@ -621,7 +621,7 @@ class AnalyzeFEP(Toplevel):
                                    exportselection=False)
         plot_yscroll.config(command=self.plot_listbox.yview)
         self.plot_listbox.grid(row=0, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.plot_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.plot_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         term_yscroll = Scrollbar(self.plot_frame)
         term_yscroll.grid(row=0, rowspan=10, column=7, sticky='nsw', padx=(0,10))
@@ -630,9 +630,9 @@ class AnalyzeFEP(Toplevel):
                                    exportselection=False)
         term_yscroll.config(command=self.plot_listbox.yview)
         self.term_listbox.grid(row=0, rowspan=10, column = 4, columnspan=3, sticky='e')
-        self.term_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.term_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
-        for part in self.plot_parts.keys():
+        for part in list(self.plot_parts.keys()):
             self.plot_listbox.insert(END, part)
             for term in self.plot_parts[part]:
                 self.term_listbox.insert(END, term)

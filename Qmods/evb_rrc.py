@@ -13,10 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, TOP, Button, Listbox, Scrollbar, BROWSE, Spinbox, Entry, Text, Frame, \
+from tkinter import Label, TOP, Button, Listbox, Scrollbar, BROWSE, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton
-
-import tkFont
+import tkinter.font
 import numpy as np
 import os
 import shutil
@@ -26,7 +25,7 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-from tkFileDialog import askopenfilenames, asksaveasfilename, askdirectory
+from tkinter.filedialog import askopenfilenames, asksaveasfilename, askdirectory
 matplotlib.rcParams['text.usetex'] = True
 
 
@@ -80,7 +79,7 @@ class EvbCalibration(Toplevel):
 
 
     def on_key_event(self, event):
-        print('you pressed %s' % event.key)
+        print(('you pressed %s' % event.key))
         key_press_handler(event, self.canvas, self.toolbar)
 
     def import_all_from_dir(self):
@@ -100,7 +99,7 @@ class EvbCalibration(Toplevel):
 
             else:
                 #Look for subfolders
-                print 'Seraching subdirectories'
+                print('Seraching subdirectories')
                 nr_dir = 1
                 while True:
                     subdir = '%s/%d' % (dirname, nr_dir)
@@ -150,7 +149,7 @@ class EvbCalibration(Toplevel):
 
     def make_qfep_input(self, enefiles=[], out_dir='workdir'):
         if len(enefiles) < 1:
-            print 'No energy files specified'
+            print('No energy files specified')
             return
         if out_dir == 'workdir':
             out_dir = self.app.workdir
@@ -190,7 +189,7 @@ class EvbCalibration(Toplevel):
 
     def compute_evb(self, return_stats = False):
         if len(self.ene_files) < 1:
-            print 'No energy files specified'
+            print('No energy files specified')
             return
         #Energy files can not be in different directories...
         #Make tempdir:
@@ -258,7 +257,7 @@ class EvbCalibration(Toplevel):
                         count += 1
 
         rsE, tsE, rE = self.find_local_min_max(self.dG)
-        self.dG = map(lambda x: x - float(rsE), self.dG)
+        self.dG = [x - float(rsE) for x in self.dG]
         self.update_plot()
 
         self.update_ddG(tsE, rE)
@@ -357,8 +356,8 @@ class EvbCalibration(Toplevel):
         Performs linear regression for x and y (y = ax +b)
         returns a and b.
         """
-        x = map(float, x)
-        y = map(float, y)
+        x = list(map(float, x))
+        y = list(map(float, y))
 
         A = np.array([x, np.ones(len(x))])
         w = np.linalg.lstsq(A.T, y)[0]
@@ -398,7 +397,7 @@ class EvbCalibration(Toplevel):
         while not done:
             self.update()
             counter += 1
-            print 'RRC iteration %d' % counter
+            print(('RRC iteration %d' % counter))
 
             #dG_rxn(alpha):
             #Decide step sign:
@@ -443,8 +442,8 @@ class EvbCalibration(Toplevel):
             else:
                 b = '+ %.2f' % b
             self.app.log(' ', '\n' + 70 * '#' + '\n')
-            self.app.log(' ', u"\N{GREEK CAPITAL LETTER DELTA}G_rxn(\N{GREEK SMALL LETTER ALPHA}, Hij=%.2f) = %.2f"
-                              u"\N{GREEK SMALL LETTER ALPHA} %s" % (hij, a, b) + '\n')
+            self.app.log(' ', "\N{GREEK CAPITAL LETTER DELTA}G_rxn(\N{GREEK SMALL LETTER ALPHA}, Hij=%.2f) = %.2f"
+                              "\N{GREEK SMALL LETTER ALPHA} %s" % (hij, a, b) + '\n')
             self.app.log(' ', '\n' + 70 * '#' + '\n')
             self.insert_entry(self.alpha_entry, alpha)
 
@@ -491,8 +490,8 @@ class EvbCalibration(Toplevel):
             else:
                 b = '+ %.2f' % b
             self.app.log(' ', '\n' + 70 * '#' + '\n')
-            self.app.log(' ', u"\N{GREEK CAPITAL LETTER DELTA}G_act(Hij, \N{GREEK SMALL LETTER ALPHA}=%.2f) = %.2f"
-                              u"Hij %s" % (alpha,a, b) + '\n')
+            self.app.log(' ', "\N{GREEK CAPITAL LETTER DELTA}G_act(Hij, \N{GREEK SMALL LETTER ALPHA}=%.2f) = %.2f"
+                              "Hij %s" % (alpha,a, b) + '\n')
             self.app.log(' ', '\n' + 70 * '#' + '\n')
             self.insert_entry(self.hij_entry, hij)
 
@@ -515,7 +514,7 @@ class EvbCalibration(Toplevel):
 
             #If iteration > 3: Do old search method in between:
             if counter in [2, 4, 6, 8] and not done:
-                print 'Running fine tuned search...'
+                print('Running fine tuned search...')
                 done, alpha, hij, treshold = self.classic_serch(dG_target, current_tsE, dG0_target, current_rE)
                 self.insert_entry(self.alpha_entry, alpha)
                 self.insert_entry(self.hij_entry, hij)
@@ -532,7 +531,7 @@ class EvbCalibration(Toplevel):
 
             if counter > 5:
                 treshold = (treshold + 0.2)
-                print 'New convergence treshold = %f' % treshold
+                print(('New convergence treshold = %f' % treshold))
 
     def classic_serch(self, dG_target, dG_current, dG0_target, dG0_current):
         """
@@ -581,10 +580,10 @@ class EvbCalibration(Toplevel):
 
             #Check for convergence:
             if abs(dG_current - dG_target) < treshold:
-                print 'Activation energy now within treshold'
+                print('Activation energy now within treshold')
                 dG0_current = float(self.compute_evb(True)[1])
                 if abs(dG0_current - dG0_target) < treshold:
-                    print 'Reaction energy now within target.'
+                    print('Reaction energy now within target.')
                     done = True
                     break
             #Use hij to tune dG(rxn)
@@ -620,9 +619,9 @@ class EvbCalibration(Toplevel):
 
             #Check for convergence:
             if abs(current_ddG - ddG_target) <= treshold:
-                print 'Reaction energy now within treshold'
+                print('Reaction energy now within treshold')
                 if abs(dG_current - dG_target) < treshold:
-                    print 'Activation energy now within treshold.'
+                    print('Activation energy now within treshold.')
                     done = True
                     break
 
@@ -630,14 +629,14 @@ class EvbCalibration(Toplevel):
 
             if iteration in [10, 20, 20]:
                 treshold += 0.1
-                print 'New treshold: %f' % treshold
+                print(('New treshold: %f' % treshold))
 
             if iteration > 40:
                 break
 
-            print (alpha, hij, dG_current, dG0_current)
+            print((alpha, hij, dG_current, dG0_current))
 
-        print (alpha, hij, dG_current, dG0_current)
+        print((alpha, hij, dG_current, dG0_current))
 
         return done, alpha, hij, treshold
 
@@ -918,10 +917,10 @@ class EvbCalibration(Toplevel):
         linear_combination = Label(frame5, text='Linear combination:', bg=self.main_color)
         linear_combination.grid(row=0, rowspan=2, column=4, padx=(10,5))
 
-        state1 = Label(frame5, text=u"\N{GREEK CAPITAL LETTER PHI}(1)", bg=self.main_color)
+        state1 = Label(frame5, text="\N{GREEK CAPITAL LETTER PHI}(1)", bg=self.main_color)
         state1.grid(row=0, column=5)
 
-        state2 = Label(frame5, text=u"\N{GREEK CAPITAL LETTER PHI}(2)", bg=self.main_color)
+        state2 = Label(frame5, text="\N{GREEK CAPITAL LETTER PHI}(2)", bg=self.main_color)
         state2.grid(row=0, column=6)
 
         self.temperature = Entry(frame5, width=5, highlightthickness=0)
@@ -943,7 +942,7 @@ class EvbCalibration(Toplevel):
         #Frame2 (Table with data)
         table_heading = Text(frame2, width=40, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         table_heading.grid(row=0, column=0, columnspan=10)
-        table_heading.config(font=tkFont.Font(family="Courier", size=12))
+        table_heading.config(font=tkinter.font.Font(family="Courier", size=12))
         table_heading.insert(0.0, 'Energy files:')
 
         listbox_scroll = Scrollbar(frame2)
@@ -952,11 +951,11 @@ class EvbCalibration(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=BROWSE)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row=1, column = 0, columnspan=9, sticky = 'e')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         alpha = Text(frame2, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         alpha.tag_configure("subscript", offset=-1)
-        alpha.insert("insert",u"\N{GREEK SMALL LETTER ALPHA}","",'ij','subscript')
+        alpha.insert("insert","\N{GREEK SMALL LETTER ALPHA}","",'ij','subscript')
         alpha.grid(row=2, column=0)
         alpha.config(state=DISABLED)
 
@@ -1006,7 +1005,7 @@ class EvbCalibration(Toplevel):
 
         real_dG = Text(frame6, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         real_dG.tag_configure("superscript", offset=3)
-        real_dG.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}G","",u"\u2021",'superscript')
+        real_dG.insert("insert","\N{GREEK CAPITAL LETTER DELTA}G","","\\u2021",'superscript')
         real_dG.grid(row=0, column=1)
         real_dG.config(state=DISABLED)
 
@@ -1016,7 +1015,7 @@ class EvbCalibration(Toplevel):
 
         real_dG0 = Text(frame6, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         real_dG0.tag_configure("superscript", offset=3)
-        real_dG0.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}G","", 'o', 'superscript')
+        real_dG0.insert("insert","\N{GREEK CAPITAL LETTER DELTA}G","", 'o', 'superscript')
         real_dG0.grid(row=0, column=2)
         real_dG0.config(state=DISABLED)
 
@@ -1026,7 +1025,7 @@ class EvbCalibration(Toplevel):
 
         real_ddG = Text(frame6, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         real_ddG.tag_configure("superscript", offset=3)
-        real_ddG.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}\N{GREEK CAPITAL LETTER DELTA}G","",u"\u2021",
+        real_ddG.insert("insert","\N{GREEK CAPITAL LETTER DELTA}\N{GREEK CAPITAL LETTER DELTA}G","","\\u2021",
                         'superscript')
         real_ddG.grid(row=0, column=3)
         real_ddG.config(state=DISABLED)
@@ -1037,7 +1036,7 @@ class EvbCalibration(Toplevel):
 
         real_ddG0 = Text(frame6, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         real_ddG0.tag_configure("superscript", offset=3)
-        real_ddG0.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}\N{GREEK CAPITAL LETTER DELTA}G","",'o','superscript')
+        real_ddG0.insert("insert","\N{GREEK CAPITAL LETTER DELTA}\N{GREEK CAPITAL LETTER DELTA}G","",'o','superscript')
         real_ddG0.grid(row=0, column=4)
         real_ddG0.config(state=DISABLED)
 
@@ -1051,7 +1050,7 @@ class EvbCalibration(Toplevel):
 
         target_dG = Text(frame7, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         target_dG.tag_configure("superscript", offset=3)
-        target_dG.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}G","",u"\u2021",'superscript')
+        target_dG.insert("insert","\N{GREEK CAPITAL LETTER DELTA}G","","\\u2021",'superscript')
         target_dG.grid(row=0, column=1)
         target_dG.config(state=DISABLED)
 
@@ -1061,7 +1060,7 @@ class EvbCalibration(Toplevel):
 
         target_dG0 = Text(frame7, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         target_dG0.tag_configure("superscript", offset=3)
-        target_dG0.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}G","", 'o', 'superscript')
+        target_dG0.insert("insert","\N{GREEK CAPITAL LETTER DELTA}G","", 'o', 'superscript')
         target_dG0.grid(row=0, column=2)
         target_dG0.config(state=DISABLED)
 

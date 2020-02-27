@@ -18,10 +18,10 @@ Build.py
 Masoud Kazemi Sep 2016
 kazemimsod@gmail.com
 This module provides the functions for:
-    1) building by atoms/group 
+    1) building by atoms/group
     2) adjusting the bond, angle, and torsions by atoms/group
 
-core functions: 
+core functions:
     rotate(p,rp,rv,theta),translate(p,dv,d)
 
 auxillary functions:
@@ -32,11 +32,11 @@ user interface functions:
     BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,fragname=None,fraglib=None,p1group=None)
     measure(v1,v2,v3=None,v4=None)
 
-BuildByAtom() BuildByGroup() and measure() interact with external user 
+BuildByAtom() BuildByGroup() and measure() interact with external user
 """
 
 import numpy as np
-import os 
+import os
 
 def rotate(p,rp,rv,theta):
     """ rotate a point based on a given rotation vector (rv)
@@ -45,7 +45,7 @@ def rotate(p,rp,rv,theta):
                 'rp'      rotation point as numpy array
                 'p'       the point to be rotated
                 'theta'   the rotation angle in degrees
-        output: 'q'      the transformed point """ 
+        output: 'q'      the transformed point """
 
     #the output point
     q = np.array((0.,0.,0.))
@@ -112,7 +112,7 @@ def measure(v1,v2,v3=None,v4=None):
         d21crossd23 = np.cross(d21,d23)
         return np.rad2deg(np.arctan2(np.linalg.norm(d21crossd23),d21Dotd23))
 
-    #measure v1-v2-v3-v4 torsion (rotation around x-v2-v3-x) in IUPAC 
+    #measure v1-v2-v3-v4 torsion (rotation around x-v2-v3-x) in IUPAC
     #convension (cis=0 and trans=180) between -180 to 180
     else:
         d12 = np.array(v2) - np.array(v1)
@@ -148,7 +148,7 @@ def getfragment(fraglib,fragname):
         with open(fraglib, 'r') as f:
             for line in f:
                 if len(line): #ignor empty lines
-                    if fragname in line: 
+                    if fragname in line:
                         found = True
                         continue
                     elif found and "END" in line:
@@ -165,8 +165,8 @@ def getfragment(fraglib,fragname):
 
 def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
     """ This function is the interface to 1) get the data
-        2) decide which operation should be done 3) prepare 
-        the required inputs and call the basic functions for 
+        2) decide which operation should be done 3) prepare
+        the required inputs and call the basic functions for
         calculations 4) return the results and errors.
         inputs:     "flag"                  define operation mode
                      "p1","p2","p3","p4"    atom dictionaris
@@ -193,7 +193,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
     if (flag == 'a') :
         q = dict()
-        # Mode a1: atom addition with one atom specified (p1). 
+        # Mode a1: atom addition with one atom specified (p1).
         # The new atom is added to p1 in the defult diretion is (0,0,1).
         if (p1 is not None) :
 
@@ -206,7 +206,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                 dv = np.array((1.,0.,0.0))
                 q['xyz'] = list(translate(p1['xyz'],dv,d))
 
-            # Mode a2: atom addition with two atoms specified (p1 ,p2). 
+            # Mode a2: atom addition with two atoms specified (p1 ,p2).
             # The new atom is added to p1 with the angle thetaA q-p1-p2
             if (p2 is not None) :
 
@@ -216,17 +216,17 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                     return None
 
                 else:
-                    # choose a rotation vector 
+                    # choose a rotation vector
                     dq1 = np.array(q['xyz']) - np.array(p1['xyz'])
                     d21 = np.array(p2['xyz']) - np.array(p1['xyz'])
                     rv = np.cross(d21,dq1)
                     #in case atoms are linear
-                    if np.linalg.norm(rv) == 0 : 
+                    if np.linalg.norm(rv) == 0 :
                         rv = np.cross(np.random.rand(3), d21)
                     current_thetaA = measure(q['xyz'],p1['xyz'],p2['xyz'])
                     q['xyz']  = list(rotate(q['xyz'],p1['xyz'],rv,(thetaA - current_thetaA)))
 
-                # Mode a3: atom addition with three atoms specified (p1 ,p2, p3). 
+                # Mode a3: atom addition with three atoms specified (p1 ,p2, p3).
                 # The new atom is added to p1 with the angle (q, p1, p2)
                 # thetaA and torsion (q, p1, p2, p3) thetaT
                 if (p3 is not None) :
@@ -286,7 +286,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                 return p1
         else :
             print('Not proper parameters for Angle adjustement')
-            return None 
+            return None
 
     # Mode d: adjustin torsion (p1,p2,p3,p4) move p1
     if (flag == 'd'):
@@ -295,7 +295,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
             #check the angle
             if thetaT is None:
                 print('Torsion angle')
-                return None 
+                return None
 
             else:
                 #rotate around the trosron bond (p2-p3). the p1 should move
@@ -304,7 +304,7 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
                 deg2rotate = thetaT - current_thetaT
                 p1['xyz'] = list(rotate(p1['xyz'],p2['xyz'],rv,(deg2rotate)))
                 print('Torsion adjusted')
-                return p1 
+                return p1
         else :
             print('Not proper parameters for Torsion adjustement')
             return None
@@ -316,8 +316,8 @@ def BuildByAtom(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None):
 
 def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,fragname=None,fraglib=None,p1group=None):
     """ This function is the interface to 1) get the data
-        2) decide which operation should be done 3) prepare 
-        the required inputs and call the basic functions for 
+        2) decide which operation should be done 3) prepare
+        the required inputs and call the basic functions for
         calculations 4) return the results and errors.
         inputs:     "flag"                  define operation mode
                      "p1","p2","p3","p4"    atom dictionaries
@@ -337,9 +337,9 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
               group adition (p1group) to the p1 with bond lenght r releive to q in the library defined direction and t angle got q-p1-p2 and
               phi torsion for q-p1-p2-p3
     NOTE:
-    in the b,c,d mode the active atom is the p1, but the operation is done on the p1group. if p1 should change it must be included in the 
-    p1group. this gives the freedom to operate on a group of atoms by defining arbitaray bond, angle, and torsions. 
-    
+    in the b,c,d mode the active atom is the p1, but the operation is done on the p1group. if p1 should change it must be included in the
+    p1group. this gives the freedom to operate on a group of atoms by defining arbitaray bond, angle, and torsions.
+
     Mode b: (flag=b,p1=x1,p2=x2,d=r,p1group) :
               adjust bond lenght along p1-p2 to r by moving p1group
     Mode c: (flag=c,p1=x1,p2=x2,p3=x3,thetaA=t,p1group) :
@@ -348,7 +348,7 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
               adjust torsion p1-p2-p3-p4 to phi by moving p1group
                                                                     """
 
-    #Addition mode 
+    #Addition mode
     if (flag == 'a'):
 
         if fraglib  == None or fragname == None:
@@ -359,7 +359,7 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
         p1group = getfragment(fraglib,fragname)
         if p1group == None: return None
 
-        #Mode a1. add a fragmet to p1 atom from library by distance d > 0. 
+        #Mode a1. add a fragmet to p1 atom from library by distance d > 0.
         if (p1 is not None):
             if d < 0 :
                 print('Bad distance')
@@ -367,13 +367,13 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
 
             #tanslation vector for bringing the group to place by the dummy atom(D0)
             dv = np.array(p1['xyz']) - np.array(p1group[0]['xyz'])
-            for atom in p1group.keys():
+            for atom in list(p1group.keys()):
                 p1group[atom]['xyz'] = dv + np.array(p1group[atom]['xyz'])
 
             #tranlation to adjust d p1-p1group[1]
             current_d = measure(np.array(p1['xyz']), np.array(p1group[1]['xyz']))
             dv = np.array(p1group[1]['xyz']) - np.array(p1['xyz'])
-            for atom in p1group.keys():
+            for atom in list(p1group.keys()):
                 p1group[atom]['xyz'] = list(translate(np.array(p1group[atom]['xyz']), dv, d-current_d))
 
             #Mode a2. add a fragmet to p1 atom from library by distance d > 0 and angle thetaA (q1-p1-p2).
@@ -389,10 +389,10 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                 rv = np.cross(d21,dq1)
 
                 #in case atoms are linear
-                if np.linalg.norm(rv) == 0 : 
+                if np.linalg.norm(rv) == 0 :
                     rv = np.cross(d21,np.random.rand(3))
                 current_thetaA = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']))
-                for atom in p1group.keys():
+                for atom in list(p1group.keys()):
                     p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,
                                                        (thetaA - current_thetaA)))
 
@@ -406,7 +406,7 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
                     rv = np.array(p1['xyz']) - np.array(p2['xyz'])
                     current_thetaT = measure(np.array(p1group[1]['xyz']),np.array(p1['xyz']),np.array(p2['xyz']),
                                              np.array(p3['xyz']))
-                    for atom in p1group.keys():
+                    for atom in list(p1group.keys()):
                         p1group[atom]['xyz'] = list(rotate(np.array(p1group[atom]['xyz']),np.array(p1['xyz']),rv,
                                                            (thetaT - current_thetaT)))
 
@@ -444,11 +444,11 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
             rv = np.cross(d23, d21)
 
             #in case atoms are linear
-            if np.linalg.norm(rv) == 0 : 
+            if np.linalg.norm(rv) == 0 :
                 rv = np.cross(np.random.rand(3),d23)
 
             current_thetaA = measure(np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']))
-            for atom in p1group.keys():
+            for atom in list(p1group.keys()):
                 p1group[atom]['xyz'] = list(rotate(p1group[atom]['xyz'],np.array(p2['xyz']),rv,
                                                    (thetaA - current_thetaA)))
             print('Angle fixed')
@@ -465,7 +465,7 @@ def BuildByGroup(flag,p1,p2=None,p3=None,p4=None,d=None,thetaA=None,thetaT=None,
             #rotate around the trosron bond (p2-p3). the p1 should move
             rv = np.array(p2['xyz']) - np.array(p3['xyz'])
             current_thetaT = measure(np.array(p1['xyz']),np.array(p2['xyz']),np.array(p3['xyz']),np.array(p4['xyz']))
-            for atom in p1group.keys():
+            for atom in list(p1group.keys()):
                 p1group[atom]['xyz'] = list(rotate(p1group[atom]['xyz'],np.array(p2['xyz']),rv,
                                                    (thetaT - current_thetaT)))
             print('Torsion fixed')
@@ -486,7 +486,7 @@ if __name__ == '__main__':
     #          \      /     \      \
     #           c5--c6       hb2    ha2
     #          /      \
-    #         h5       h6             
+    #         h5       h6
 
     #define a random point
     mol = dict()
@@ -545,8 +545,8 @@ if __name__ == '__main__':
 
     with open('01.xyz','w') as f:
         f.write('%d \n' %(len(mol)))
-        for key in mol: 
-            print(mol[key])
+        for key in mol:
+            print((mol[key]))
             f.write('%s %.4f %.4f %.4f \n' %(mol[key]['name'],mol[key]['xyz'][0],mol[key]['xyz'][1],mol[key]['xyz'][2]))
 
     #TEST adjust bond,angle,torsion by atom
@@ -556,8 +556,8 @@ if __name__ == '__main__':
 
     with open('02.xyz','w') as f:
         f.write('%d \n' %(len(mol)))
-        for key in mol: 
-            print(mol[key])
+        for key in mol:
+            print((mol[key]))
             f.write('%s %.4f %.4f %.4f \n' %(mol[key]['name'],mol[key]['xyz'][0],mol[key]['xyz'][1],mol[key]['xyz'][2]))
 
 
@@ -568,17 +568,17 @@ if __name__ == '__main__':
     mtl = BuildByGroup("a",p1=mol['8'],p2=mol['1'],p3=mol['2'],d=1.5,thetaA=109.0,thetaT=90.0,fraglib=fraglib,fragname='MTL')
     #adding the rgening group to the O4
     arg = BuildByGroup("a",p1=mol['7'],p2=mol['4'],p3=mol['3'],d=1.5,thetaA=109.0,thetaT=90.0,fraglib=fraglib,fragname='ARG')
-    
+
     with open('03.xyz','w') as f:
         f.write('%d \n' %(len(mol)+len(mtl)+len(arg)))
-        for key in sorted(mol): 
-            print(key, mol[key])
+        for key in sorted(mol):
+            print((key, mol[key]))
             f.write('%s %.4f %.4f %.4f \n' %(mol[key]['name'],mol[key]['xyz'][0],mol[key]['xyz'][1],mol[key]['xyz'][2]))
-        for key in sorted(mtl): 
-            print(key, mtl[key])
+        for key in sorted(mtl):
+            print((key, mtl[key]))
             f.write('%s %.4f %.4f %.4f \n' %(mtl[key]['name'],mtl[key]['xyz'][0],mtl[key]['xyz'][1],mtl[key]['xyz'][2]))
-        for key in sorted(arg): 
-            print(key, arg[key])
+        for key in sorted(arg):
+            print((key, arg[key]))
             f.write('%s %.4f %.4f %.4f \n' %(arg[key]['name'],arg[key]['xyz'][0],arg[key]['xyz'][1],arg[key]['xyz'][2]))
 
 
@@ -589,24 +589,12 @@ if __name__ == '__main__':
 
     with open('04.xyz','w') as f:
         f.write('%d \n' %(len(mol)+len(mtl)+len(arg)))
-        for key in sorted(mol): 
-            print(key, mol[key])
+        for key in sorted(mol):
+            print((key, mol[key]))
             f.write('%s %.4f %.4f %.4f \n' %(mol[key]['name'],mol[key]['xyz'][0],mol[key]['xyz'][1],mol[key]['xyz'][2]))
-        for key in sorted(mtl): 
-            print(key, mtl[key])
+        for key in sorted(mtl):
+            print((key, mtl[key]))
             f.write('%s %.4f %.4f %.4f \n' %(mtl[key]['name'],mtl[key]['xyz'][0],mtl[key]['xyz'][1],mtl[key]['xyz'][2]))
-        for key in sorted(arg): 
-            print(key, arg[key])
+        for key in sorted(arg):
+            print((key, arg[key]))
             f.write('%s %.4f %.4f %.4f \n' %(arg[key]['name'],arg[key]['xyz'][0],arg[key]['xyz'][1],arg[key]['xyz'][2]))
-
-
-
-
-
-
-
-
-
-
-
-

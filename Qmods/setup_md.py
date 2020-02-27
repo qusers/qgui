@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import StringVar, SUNKEN,Y, Spinbox, Scrollbar,Listbox, Button, Entry, Text, Label, Frame, Toplevel, \
+from tkinter import  StringVar, SUNKEN,Y, Spinbox, Scrollbar,Listbox, Button, Entry, Text, Label, Frame, Toplevel, \
     Checkbutton, DISABLED, NORMAL, END, GROOVE, LEFT, IntVar
 
 import prepareTopology as pt
@@ -21,7 +21,7 @@ from select_atoms import AtomSelectRange
 from md_restraints import AddSequenceRestraints, AddAtomRestraints, AddDistanceRestraints, AddWallRestraints
 import random
 import os
-import cPickle
+import pickle
 from subprocess import call
 
 class SetupMd(Toplevel):
@@ -134,7 +134,7 @@ class SetupMd(Toplevel):
         self.inputfiles_entry.delete(0,END)
         #Check if default MD settings exist, and use values from there:
         if os.path.isfile(self.app.settings_path + '/qmd_settings') and not self.fep:
-            print 'file found'
+            print('file found')
             with open(self.app.settings_path + '/qmd_settings', 'r') as mdsettings:
                 for line in mdsettings:
                     if '#' in line:
@@ -232,7 +232,7 @@ class SetupMd(Toplevel):
         #If solvent radius in top, insert it. If not, use radius of system - 3.
         if solv_r:
             self.shell_radius.insert(0, '%.1f' % (float(float(solv_r) * 0.85)))
-            print solv_r
+            print(solv_r)
         else:
             system_radius = pt.findRadius(self.pdbfile)
             self.shell_radius.insert(0, '%d' % int(round(system_radius - 3)))
@@ -303,7 +303,7 @@ class SetupMd(Toplevel):
             return
 
         #Get global settings:
-        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
+        q_settings = pickle.load(open(self.app.settings_path + '/Qsettings','rb'))
         output_int = self.output.get()
         trj_int = self.trajectory.get()
         ene_int = self.energyfile.get()
@@ -355,7 +355,7 @@ class SetupMd(Toplevel):
                 submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
-                print 'submission script not found! Please edit this in settings'
+                print('submission script not found! Please edit this in settings')
             for line in submissionscipt:
                 if '#Qdyn I/O' in line:
                     break
@@ -675,11 +675,11 @@ class SetupMd(Toplevel):
     def check_equilibration(self):
         check = self.use_eq.get()
         if check == 0:
-            print 'Not using equilibration procedure'
+            print('Not using equilibration procedure')
             self.app.errorBox('info', 'Sorry, you have to use the equilibration procedure for now...')
             self.use_eq.set(1)
         elif check == 1:
-            print 'Using default equilibration procedure'
+            print('Using default equilibration procedure')
 
     def check_lrf(self):
         check = self.lrf_check.get()
@@ -692,7 +692,7 @@ class SetupMd(Toplevel):
             self.lrf_expansion.config(state = NORMAL)
             self.lrf_expansion.delete(0, END)
             self.lrf_expansion.insert(0, self.qmd_settings['lrf cutoff'])
-    
+
     def check_polarisation(self):
         check = self.polarisation_check.get()
         if check == 0:
@@ -721,7 +721,7 @@ class SetupMd(Toplevel):
         self.total_time.delete(0.0, END)
         self.total_time.insert(0.0, tot_time)
         self.total_time.config(state = DISABLED)
-        
+
     def set_total_steps(self):
         try:
             stepsize = float(self.stepsize_variable.get())
@@ -756,13 +756,13 @@ class SetupMd(Toplevel):
         self.select_atomrange.configure(bg = self.main_color)
         self.select_atomrange.title('Select atoms')
         self.select_atomrange.resizable()
-    
+
     def add_restraints(self, newtitle = '',restraintlist = []):
         """
         opens dialog to add restraints
         """
         new_window = None
-        if newtitle == 'sequence': 
+        if newtitle == 'sequence':
             new_window = AddSequenceRestraints
         elif newtitle == 'atom':
             new_window = AddAtomRestraints
@@ -794,7 +794,7 @@ class SetupMd(Toplevel):
             return
 
         self.qatom_list.insert(END, 'Q-atoms: %5d - %5d' % (int(first_atom), int(last_atom)))
-        print self.qatoms_list
+        print(self.qatoms_list)
 
     def remove_qatoms(self):
         """
@@ -811,13 +811,13 @@ class SetupMd(Toplevel):
                 self.qatoms_list.remove(atom)
 
         self.qatom_list.delete(selected_index)
-        print self.qatoms_list
+        print(self.qatoms_list)
 
     def dialog_box(self):
         """Defines the outlook of Setup MD window.
         Uses Frame-widget to define left and right side of the window
         and uses grid to organize widgets inside the Frames. """
-       
+
         #self.title('Setup MD')
         self.config(background=self.main_color)
 
@@ -837,10 +837,10 @@ class SetupMd(Toplevel):
         simtime_label.grid(row = 1, column = 0, sticky = 'w')
         simtime_label.config(background = self.main_color)
 
-        #Sim. time 
+        #Sim. time
         self.simtime_entry = Entry(left_frame,width = 7, highlightthickness = 0, relief = GROOVE, textvariable = self.simtimeVar)
         self.simtime_entry.grid(row = 1, column = 1, columnspan=2)
-        
+
         ns_label = Label(left_frame, text = 'ns/file')
         ns_label.grid(row = 1, column = 3, columnspan = 2, sticky = 'w')
         ns_label.config(background = self.main_color)
@@ -875,7 +875,7 @@ class SetupMd(Toplevel):
         self.inputfiles_entry.grid(row=4,rowspan = 2,column = 1, columnspan = 2)
         self.inputfiles_entry.config(highlightthickness = 0)
 
-        
+
         total_time_label = Label(left_frame, text = 'Total sim. time:')
         total_time_label.grid(row = 4, column = 3, columnspan = 4, sticky = 'E')
         total_time_label.config(background = self.main_color)
@@ -961,7 +961,7 @@ class SetupMd(Toplevel):
         self.solute_solute = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.solute_solute.grid(row=10, column = 1, columnspan = 2,sticky = 'E')
 
-        aa_label = Label(left_frame, text = '%s' % u'\xc5')
+        aa_label = Label(left_frame, text = '%s' % '\xc5')
         aa_label.grid(row=10, column = 3, sticky = 'w')
         aa_label.config(bg = self.main_color)
 
@@ -972,7 +972,7 @@ class SetupMd(Toplevel):
         self.solvent_solvent = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.solvent_solvent.grid(row=10, column = 8, columnspan = 2,sticky = 'E')
 
-        aa2_label = Label(left_frame, text = '%s' % u'\xc5')
+        aa2_label = Label(left_frame, text = '%s' % '\xc5')
         aa2_label.grid(row = 10, column = 10, sticky = 'w')
         aa2_label.config(bg = self.main_color)
 
@@ -983,7 +983,7 @@ class SetupMd(Toplevel):
         self.solute_solvent = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.solute_solvent.grid(row=11, column = 1, columnspan = 2,sticky = 'E')
 
-        aa3_label = Label(left_frame, text = '%s' % u'\xc5')
+        aa3_label = Label(left_frame, text = '%s' % '\xc5')
         aa3_label.grid(row=11, column = 3, sticky = 'w')
         aa3_label.config(bg = self.main_color)
 
@@ -994,9 +994,9 @@ class SetupMd(Toplevel):
         self.qatom_cutoff = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.qatom_cutoff.grid(row=11, column = 8, columnspan = 2,sticky = 'E')
 
-        aa5_label = Label(left_frame, text = '%s' % u'\xc5')
+        aa5_label = Label(left_frame, text = '%s' % '\xc5')
         aa5_label.grid(row = 11, column = 10, sticky = 'w')
-        aa5_label.config(bg = self.main_color) 
+        aa5_label.config(bg = self.main_color)
 
         lrf_expansion_label = Label(left_frame, text = 'LRF expansion:')
         lrf_expansion_label.grid(row=12, column = 0, sticky = 'w')
@@ -1004,9 +1004,9 @@ class SetupMd(Toplevel):
 
         self.lrf_expansion = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.lrf_expansion.grid(row=12, column = 1, columnspan = 2,sticky = 'E')
-        self.lrf_expansion.config(state=DISABLED)        
+        self.lrf_expansion.config(state=DISABLED)
 
-        aa4_label = Label(left_frame, text = '%s' % u'\xc5')
+        aa4_label = Label(left_frame, text = '%s' % '\xc5')
         aa4_label.grid(row = 12, column = 3, sticky = 'w')
         aa4_label.config(bg = self.main_color)
 
@@ -1029,7 +1029,7 @@ class SetupMd(Toplevel):
         self.shell_radius = Entry(left_frame, width = 4, highlightthickness = 0, relief = GROOVE)
         self.shell_radius.grid(row=14, column = 8, columnspan = 2,sticky = 'E')
 
-        aa5_label = Label(left_frame, text = '%s' % u'\xc5')
+        aa5_label = Label(left_frame, text = '%s' % '\xc5')
         aa5_label.grid(row = 14, column = 10, sticky = 'w')
         aa5_label.config(bg = self.main_color)
 
@@ -1065,7 +1065,7 @@ class SetupMd(Toplevel):
         recording_label = Label(right_frame, text = 'Output recording intervals')
         recording_label.grid(row = 0, column = 0, columnspan = 8, pady=(0,5))
         recording_label.config(bg=self.main_color)
-  
+
         nonbond_label = Label(right_frame, text = 'Non-bonded list:')
         nonbond_label.grid(row = 1, column = 0, columnspan = 2,sticky = 'w')
         nonbond_label.config(bg = self.main_color)
@@ -1108,7 +1108,7 @@ class SetupMd(Toplevel):
 
         self.trj_atom1 = Entry(right_frame, width = 8, highlightthickness = 0, relief = GROOVE)
         self.trj_atom1.grid(row=4, column=2, columnspan =2)
-        	
+
         atom2_label = Label(right_frame, text = 'Last atom:')
         atom2_label.grid(row=4, column =4, columnspan = 2, sticky = 'w', padx =(10,0))
         atom2_label.config(bg=self.main_color)
@@ -1210,13 +1210,3 @@ class SetupMd(Toplevel):
         cancel_button = Button(right_frame, text = 'Close ', command = self.destroy)
         cancel_button.grid(row = 14, column = 7, columnspan = 3, pady = (20,5))
         cancel_button.config(highlightbackground = self.main_color)
-
-
-
-
-
-
-
-
-
-

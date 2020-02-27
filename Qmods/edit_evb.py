@@ -13,10 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Entry, Spinbox, Label, Button,Frame, Toplevel, END, GROOVE, DISABLED, NORMAL, Text, Scrollbar, \
+from tkinter import Entry, Spinbox, Label, Button,Frame, Toplevel, END, GROOVE, DISABLED, NORMAL, Text, Scrollbar, \
     Listbox, EXTENDED, HORIZONTAL, Radiobutton, IntVar, StringVar
-
-import tkFont
+import tkinter.font
 
 
 class EditEvbNotes(Toplevel):
@@ -26,9 +25,9 @@ class EditEvbNotes(Toplevel):
         Toplevel.__init__(self, root)
         self.app = app
         self.root = root
-        
+
         self.main_color = self.app.main_color
-        
+
         self.insert_index = sel_index
         self.note = note
         self.qatom = qatom
@@ -107,7 +106,7 @@ class ImportParameters(Toplevel):
                         found_atoms = True
 
     def get_parameters(self):
-        selections = map(int, self.prm_listbox.curselection())
+        selections = list(map(int, self.prm_listbox.curselection()))
         if len(selections) == 0:
             return
         for selected in selections:
@@ -123,7 +122,7 @@ class ImportParameters(Toplevel):
                 ri1_4 = float(prm_line.split()[4].strip())
                 ei1_4 = float(prm_line.split()[5].strip())
                 mass = float(prm_line.split()[6].strip())
-                in_list = map(lambda x: x.split()[0].strip(), self.listbox.get(0,END))
+                in_list = [x.split()[0].strip() for x in self.listbox.get(0,END)]
                 if atomtype not in in_list:
                     self.listbox.insert(END, '%4s %7.2f %5.2f %5.2f %4.2f %7.2f %5.2f %5.2f' %
                                         (atomtype.ljust(4), ri, ei, ci, ai, ri1_4, ei1_4, mass))
@@ -134,7 +133,7 @@ class ImportParameters(Toplevel):
                 rb = float(prm_line.split()[3])
                 alpha = 2.00
                 De = (kb / 8.00)
-                in_list = map(lambda x: int(x.split()[0]), self.listbox.get(0, END))
+                in_list = [int(x.split()[0]) for x in self.listbox.get(0, END)]
                 new_nr = max(in_list) + 1
                 self.listbox.insert(END, '%2d %6s %6s %5s %7s !%10s' %
                                          (new_nr, str(De), str(alpha), str(rb), str(kb), bond.ljust(10)))
@@ -157,9 +156,9 @@ class ImportParameters(Toplevel):
                 minima = int(float(prm_line.split()[5]))
                 phase = float(prm_line.split()[6])
                 paths = float(prm_line.split()[7])
-                if torsion not in self.app.torsion_prm.keys():
+                if torsion not in list(self.app.torsion_prm.keys()):
                     self.app.torsion_prm[torsion] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
-                if torsion_rev not in self.app.torsion_prm.keys():
+                if torsion_rev not in list(self.app.torsion_prm.keys()):
                     self.app.torsion_prm[torsion_rev] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
 
                 self.app.torsion_prm[torsion][abs(minima) - 1] = [kt, phase, paths]
@@ -201,7 +200,7 @@ class ImportParameters(Toplevel):
         prm_yscroll.config(command=self.prm_listbox.yview)
         prm_xscroll.config(command=self.prm_listbox.xview)
         self.prm_listbox.grid(row=1, rowspan=10, column = 0, sticky = 'e')
-        self.prm_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.prm_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         get_button = Button(frame2, text='Get selected', highlightbackground=self.main_color, command=self.get_parameters)
         get_button.grid(row=0, column=0)
@@ -433,12 +432,12 @@ class EditBondParameters(Toplevel):
 
         state1 = '%s %s' % (self.type1.get(), self.type2.get())
         state1_rev = '%s %s' % (state1.split()[0], state1.split()[1])
-        if state1_rev in self.app.bond_prm.keys():
+        if state1_rev in list(self.app.bond_prm.keys()):
             state1 = state1_rev
 
         self.app.bond_prm[state1] = [de, alpha, rb, kb]
 
-        print self.app.bond_prm[state1]
+        print((self.app.bond_prm[state1]))
         self.app.update_q_bonds()
         self.app.update_status()
 
@@ -461,7 +460,7 @@ class EditBondParameters(Toplevel):
         de = Label(frame1, text='De', bg = self.main_color)
         de.grid(row=0, column=0)
 
-        alpha = Label(frame1, text=u"\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
+        alpha = Label(frame1, text="\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
         alpha.grid(row=0, column=1)
 
         rb = Label(frame1, text='R0', bg=self.main_color)
@@ -573,7 +572,7 @@ class EditAngleParameters(Toplevel):
         force = Label(frame1, text='K', bg = self.main_color)
         force.grid(row=0, column=0)
 
-        theta = Label(frame1, text=u"\N{GREEK CAPITAL LETTER THETA}", bg=self.main_color)
+        theta = Label(frame1, text="\N{GREEK CAPITAL LETTER THETA}", bg=self.main_color)
         theta.grid(row=0, column=1)
 
         type1 = Label(frame1, text='Type 1', bg=self.main_color)
@@ -632,7 +631,7 @@ class EditTorsionParameters(Toplevel):
     def fill_entries(self):
         if self.edit:
             line = self.app.torsiontypes_listbox.get(self.insert_index)
-            print line
+            print(line)
             self.torsion_nr, k, minima, phase, paths = line.split()[0:5]
             type1, type2, type3, type4 = line.split('!')[1].split()[0:]
 
@@ -655,19 +654,19 @@ class EditTorsionParameters(Toplevel):
             phase = float(self.phase.get())
             paths = float(self.paths.get())
         except:
-            print 'Invalid parameter value(s) given. Parameters not saved!'
+            print('Invalid parameter value(s) given. Parameters not saved!')
             return
 
         if abs(minima) > 3:
-            print 'Minima can not exceed 3!. Parameters not saved!'
+            print('Minima can not exceed 3!. Parameters not saved!')
             return
 
         torsion = '%s %s %s %s' % (self.type1.get(), self.type2.get(), self.type3.get(), self.type4.get())
         torsion_rev = '%s %s %s %s' % (self.type4.get(), self.type3.get(), self.type2.get(), self.type1.get())
 
-        if torsion not in self.app.torsion_prm.keys():
+        if torsion not in list(self.app.torsion_prm.keys()):
             self.app.torsion_prm[torsion] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
-        if torsion_rev not in self.app.torsion_prm.keys():
+        if torsion_rev not in list(self.app.torsion_prm.keys()):
             self.app.torsion_prm[torsion_rev] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
 
         self.app.torsion_prm[torsion][abs(minima) - 1] = [force, phase, paths]
@@ -769,7 +768,7 @@ class EditImproperParameters(Toplevel):
     def fill_entries(self):
         if self.edit:
             line = self.app.impropertypes_listbox.get(self.insert_index)
-            print line
+            print(line)
             self.improper_nr, k, phase = line.split()[0:3]
             type1, type2, type3, type4 = line.split('!')[1].split()[0:]
 
@@ -788,7 +787,7 @@ class EditImproperParameters(Toplevel):
             force = float(self.force.get())
             phase = float(self.phase.get())
         except:
-            print 'Invalid parameter value(s) given. Parameters not saved!'
+            print('Invalid parameter value(s) given. Parameters not saved!')
             return
 
         improper = '%s %s %s %s' % (self.type1.get(), self.type2.get(), self.type3.get(), self.type4.get())

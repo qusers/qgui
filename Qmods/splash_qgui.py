@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import PhotoImage, Toplevel, Canvas, Scrollbar, Listbox, Checkbutton, DISABLED, NORMAL, END, GROOVE, IntVar
+from tkinter import PhotoImage, Toplevel, Canvas, Scrollbar, Listbox, Checkbutton, DISABLED, NORMAL, END, GROOVE, IntVar
 import os
 import sys
 
@@ -29,7 +29,7 @@ class SplashScreen(Toplevel):
 
         if 'darwin' in sys.platform:
             try:
-                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python" to true' ''')
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python2" to true' ''')
             except:
                 os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
 
@@ -67,7 +67,3 @@ class SplashScreen(Toplevel):
         # bring back main window and destroy splash screen
         self.withdraw()
         self.destroy()
-
-
-
-

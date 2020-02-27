@@ -13,11 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
+#Changes for matplotlib v2.2.3 on lines 525, 530, 564, 724, 1689, 1809, 1812, 633
+# NavigationToolbar2TkAgg->NavigationToolbar2Tk
+
+from tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton, OptionMenu, HORIZONTAL
-from tkFileDialog import askopenfilename
-from tkSimpleDialog import askstring
-import tkFont
+from tkinter.filedialog import askopenfilename
+from tkinter.simpledialog import askstring
+import tkinter.font
 from subprocess import call
 import numpy as np
 import os
@@ -28,7 +31,7 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-from tkFileDialog import asksaveasfilename, askdirectory
+from tkinter.filedialog import asksaveasfilename, askdirectory
 from cycler import cycler
 
 class EvbReactions(Toplevel):
@@ -115,13 +118,13 @@ class EvbReactions(Toplevel):
         #self.update_plot([[0]],[[0]],[title])
 
     def del_title(self):
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         for selected in selections:
             title = self.titles_listbox.get(selected)
             self.titles_listbox.delete(selected)
             del self.titles[title]
             for i in [self.titles_dG, self.titles_ave, self.titles_dU, self.titles_ene]:
-                if title in i.keys():
+                if title in list(i.keys()):
                     del i[title]
 
         self.update_plot([[0]],[[0]],[' '])
@@ -132,7 +135,7 @@ class EvbReactions(Toplevel):
         Add subrun one-by-one or select temperature directory to append all runs
         """
         try:
-            prj_entry = map(int, self.titles_listbox.curselection())
+            prj_entry = list(map(int, self.titles_listbox.curselection()))
         except:
             self.app.errorBox('Warning', 'Select a project title to append runs to.')
             return
@@ -155,7 +158,7 @@ class EvbReactions(Toplevel):
             #Check if the first directory is a temperature directory
             if len(dirs) == 0:
                 try:
-                    print(int(float(rundir.split('/')[-1])))
+                    print((int(float(rundir.split('/')[-1]))))
                     if int(float(rundir.split('/')[-1])) > 270:
                         self.app.log(' ', '%s Added. Collecting runs for temperature ...\n\n'
                                           % '/'.join(rundir.split('/')[-3:]))
@@ -244,7 +247,7 @@ class EvbReactions(Toplevel):
                     os.remove('%s/%s' % (all_dir, qene))
 
         enefiles = list()
-        for qdir in self.titles[prj_title].keys():
+        for qdir in list(self.titles[prj_title].keys()):
             if qdir != 'all':
                 path = self.titles[prj_title][qdir]
                 qfiles = os.listdir(path)
@@ -259,7 +262,7 @@ class EvbReactions(Toplevel):
             if os.path.getsize(enefile) != 0:
                 count += 1
                 shutil.copy2(enefile, '%s/md%05d.en' % (self.titles[prj_title]['all'], count))
-                print('../%s ---> md%05d.en' % ('/'.join(enefile.split('/')[-3:]), count))
+                print(('../%s ---> md%05d.en' % ('/'.join(enefile.split('/')[-3:]), count)))
 
         if not qfep_inp:
             self.write_qfep_inp(all_dir)
@@ -267,12 +270,12 @@ class EvbReactions(Toplevel):
         self.get_binave_out(prj_title, False)
 
     def del_runs(self):
-        title_sel = map(int, self.titles_listbox.curselection())
+        title_sel = list(map(int, self.titles_listbox.curselection()))
         if len(title_sel) != 1:
             self.app.log(' ', '\nSelect exactly one title to delete runs from!\n')
             return
 
-        selections = map(int, self.runs_listbox.curselection())
+        selections = list(map(int, self.runs_listbox.curselection()))
         if len(selections) == 0:
             self.app.log(' ', '\nNo runs selected for deletion!\n')
             return
@@ -285,19 +288,19 @@ class EvbReactions(Toplevel):
             search = '/'.join(self.runs_listbox.get(selected).split('/')[-3:])
             self.runs_listbox.delete(selected)
 
-            if 'all' in self.titles[title].keys():
+            if 'all' in list(self.titles[title].keys()):
                 if title not in titles_to_recopy:
                     titles_to_recopy.append(title)
-            for nr in self.titles[title].keys():
+            for nr in list(self.titles[title].keys()):
                 if '/'.join(self.titles[title][nr].split('/')[-3:]) == search:
                     if nr != 'all':
                         for i in [self.titles, self.titles_dG, self.titles_ene]:
-                            if title in i.keys():
-                                if nr in i[title].keys():
+                            if title in list(i.keys()):
+                                if nr in list(i[title].keys()):
                                     del i[title][nr]
 
         for title in titles_to_recopy:
-            if 'all' in self.titles_ene[title].keys():
+            if 'all' in list(self.titles_ene[title].keys()):
                 self.titles_ene[title]['all'] = list()
                 self.titles_dG[title]['all'] = list()
                 self.copy_all_enefiles(title, qfep_inp=False, delete_existing=True)
@@ -317,7 +320,7 @@ class EvbReactions(Toplevel):
         runs Qfep on all energy files.
         """
         try:
-            prj_entry = map(int, self.titles_listbox.curselection())
+            prj_entry = list(map(int, self.titles_listbox.curselection()))
         except:
             self.app.errorBox('Warning', 'Select a project title to append runs to.')
             return
@@ -363,7 +366,7 @@ class EvbReactions(Toplevel):
                 if qfile.startswith('md'):
                     enefiles.append(qfile)
 
-        print('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:])))
+        print(('Found %d MD energy files in ../%s' % (len(enefiles), '/'.join(path.split('/')[-3:]))))
 
         if len(enefiles) == 0:
             found_ene_files = False
@@ -469,7 +472,7 @@ class EvbReactions(Toplevel):
 
     def import_qfep(self):
         """
-        Import EVB parameters from .qfep file
+        Import EVB parameters from qfep file
         """
         filename = askopenfilename(parent = self, initialdir = self.app.workdir,
                                    filetypes=(("Qfep", "*.qfep"),("All files","*.*")))
@@ -508,7 +511,7 @@ class EvbReactions(Toplevel):
         return
 
     def on_key_event(self, event):
-        print('you pressed %s' % event.key)
+        print(('you pressed %s' % event.key))
         key_press_handler(event, self.canvas, self.toolbar)
 
     def update_plot(self, d_eps, d_G, titles ):
@@ -518,7 +521,8 @@ class EvbReactions(Toplevel):
         if self.dg_plot:
             self.dg_plot.clear()
 
-        #Set color cycle for plots: 
+        #Set color cycle for plots:
+        #Made a change here
         matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
                                                    'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
@@ -566,7 +570,7 @@ class EvbReactions(Toplevel):
         {title: {run: 'diabatic': {energy_gap: [dg1, dg2, c1, c2, Hij], 'marcus1': [[e], [dg]], 'marcus2': {[e]:[dg]},
          'norm1':[[e], [dg]], 'norm2': [[e], [dg]], 'reorg': value}}}
         """
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         if len(selections) == 0:
             return
 
@@ -579,9 +583,9 @@ class EvbReactions(Toplevel):
         #Get reorganization energy avarage for selected title(s)
         for i in selections:
             title = self.titles_listbox.get(i)
-            if not title in self.title_reorge.keys():
+            if not title in list(self.title_reorge.keys()):
                 return
-            for run in self.title_reorge[title].keys():
+            for run in list(self.title_reorge[title].keys()):
                 reorgs.append(self.title_reorge[title][run]['reorg'])
 
         reorg_ave = np.average(reorgs)
@@ -599,7 +603,7 @@ class EvbReactions(Toplevel):
         self.reorg_se.config(state=DISABLED)
 
         #Plot selected run
-        runs = map(int, self.runs_listbox.curselection())
+        runs = list(map(int, self.runs_listbox.curselection()))
         if len(runs) > 1:
             print('Select exactly one title with one run to plot diabatic energy functions')
             return
@@ -610,7 +614,7 @@ class EvbReactions(Toplevel):
         run = self.runs_listbox.get(runs[0]).split('/')[-1]
         path = None
 
-        for i in self.title_reorge[title].keys():
+        for i in list(self.title_reorge[title].keys()):
             if i.split('/')[-1] == run:
                 path = i
 
@@ -724,7 +728,7 @@ class EvbReactions(Toplevel):
         """
         Recomputes EVB with current settings (alpha, Hij etc.) from main window.
         """
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         if len(selections) == 0:
             self.app.errorBox('Warning', 'Select titles to recompute EVB.')
         self.titles_listbox.select_clear(0, END)
@@ -817,7 +821,7 @@ class EvbReactions(Toplevel):
 
             #Normalize reaction profile if rE == 0
             if int(rsE) != 0:
-                self.titles_ene[title][nr][1] = map(lambda x: -rsE + x, self.titles_ene[title][nr][1])
+                self.titles_ene[title][nr][1] = [-rsE + x for x in self.titles_ene[title][nr][1]]
 
         except:
             rE = 'na'
@@ -838,15 +842,15 @@ class EvbReactions(Toplevel):
         """
 
         self.ae_tot_listbox.delete(0, END)
-        self.ae_tot_listbox.insert(END, u"Title       \N{GREEK CAPITAL LETTER DELTA}U(el) "
-                                        u"\N{GREEK CAPITAL LETTER DELTA}U(vdW)"
-                                        u"  \N{GREEK CAPITAL LETTER DELTA}U(bnd)"
-                                        u"  \N{GREEK CAPITAL LETTER DELTA}U(ang)"
-                                        u"  \N{GREEK CAPITAL LETTER DELTA}U(tor)"
-                                        u"  \N{GREEK CAPITAL LETTER DELTA}U(imp)"
-                                        u" \N{GREEK CAPITAL LETTER DELTA}U(tot) "
-                                        u"\N{GREEK CAPITAL LETTER DELTA}U(rr+rs)")
-        for title in self.titles_dU.keys():
+        self.ae_tot_listbox.insert(END, "Title       \N{GREEK CAPITAL LETTER DELTA}U(el) "
+                                        "\N{GREEK CAPITAL LETTER DELTA}U(vdW)"
+                                        "  \N{GREEK CAPITAL LETTER DELTA}U(bnd)"
+                                        "  \N{GREEK CAPITAL LETTER DELTA}U(ang)"
+                                        "  \N{GREEK CAPITAL LETTER DELTA}U(tor)"
+                                        "  \N{GREEK CAPITAL LETTER DELTA}U(imp)"
+                                        " \N{GREEK CAPITAL LETTER DELTA}U(tot) "
+                                        "\N{GREEK CAPITAL LETTER DELTA}U(rr+rs)")
+        for title in list(self.titles_dU.keys()):
             self.ae_tot_listbox.insert(END, '%10s%8.2f%8.2f%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f' % (title.ljust(10),
                                     self.titles_dU[title][0]['EQel'], self.titles_dU[title][0]['EQvdw'],
                                     self.titles_dU[title][0]['EQbnd'], self.titles_dU[title][0]['EQang'],
@@ -870,13 +874,13 @@ class EvbReactions(Toplevel):
         """
 
         self.ae_nb_listbox.delete(0, END)
-        self.ae_nb_listbox.insert(END, u"Title       \N{GREEK CAPITAL LETTER DELTA}U(qq_el) "
-                                        u"\N{GREEK CAPITAL LETTER DELTA}U(qq_vdW)"
-                                        u" \N{GREEK CAPITAL LETTER DELTA}U(qp_el)"
-                                        u" \N{GREEK CAPITAL LETTER DELTA}U(qp_vdw)"
-                                        u" \N{GREEK CAPITAL LETTER DELTA}U(qw_el)"
-                                        u" \N{GREEK CAPITAL LETTER DELTA}U(qw_vdw)")
-        for title in self.titles_dU.keys():
+        self.ae_nb_listbox.insert(END, "Title       \N{GREEK CAPITAL LETTER DELTA}U(qq_el) "
+                                        "\N{GREEK CAPITAL LETTER DELTA}U(qq_vdW)"
+                                        " \N{GREEK CAPITAL LETTER DELTA}U(qp_el)"
+                                        " \N{GREEK CAPITAL LETTER DELTA}U(qp_vdw)"
+                                        " \N{GREEK CAPITAL LETTER DELTA}U(qw_el)"
+                                        " \N{GREEK CAPITAL LETTER DELTA}U(qw_vdw)")
+        for title in list(self.titles_dU.keys()):
             self.ae_nb_listbox.insert(END, '%10s%9.2f %10.2f%10.2f %10.2f %10.2f %10.2f' % (title.ljust(10),
                                     self.titles_dU[title][0]['qq_el'], self.titles_dU[title][0]['qq_vdw'],
                                     self.titles_dU[title][0]['qp_el'], self.titles_dU[title][0]['qp_vdw'],
@@ -895,18 +899,18 @@ class EvbReactions(Toplevel):
         """
         self.dg_listbox.delete(0, END)
 
-        self.dg_listbox.insert(END, u"Title       Temp "
-                                       u" \N{GREEK CAPITAL LETTER DELTA}G(act)"
-                                       u"   +/-"
-                                       u"   \N{GREEK CAPITAL LETTER DELTA}G(rxn)"
-                                       u"   +/-"
-                                       u"    pts")
+        self.dg_listbox.insert(END, "Title       Temp "
+                                       " \N{GREEK CAPITAL LETTER DELTA}G(act)"
+                                       "   +/-"
+                                       "   \N{GREEK CAPITAL LETTER DELTA}G(rxn)"
+                                       "   +/-"
+                                       "    pts")
         temp = 300.00
-        for title in self.titles_dG.keys():
+        for title in list(self.titles_dG.keys()):
             got_temp = False
             dg_act = list()
             dg_rxn = list()
-            for nr in self.titles_dG[title].keys():
+            for nr in list(self.titles_dG[title].keys()):
                 if nr != 'ave':
                     if not got_temp:
                         with open(self.titles[title][nr]+'/qfep.out', 'r') as qfepout:
@@ -958,15 +962,15 @@ class EvbReactions(Toplevel):
         #Collect all activetion potential energy terms
         #dQ = {'EQtot', 'EQbnd', 'EQang', 'EQtor', 'EQimp' , 'EQel', 'EQvdw', 'qq_el', 'qq_vdw',
         #'qp_el', 'qp_vdw', 'qw_el', 'qw_vdw', 'alpha', 'Hij'}
-        for nr in self.titles[title].keys():
+        for nr in list(self.titles[title].keys()):
             if self.titles_dG[title][nr][0] != 'na':
                 runs += 1
                 dQ = self.compute_activation_ene(title, nr)
-                for term in dQ.keys():
+                for term in list(dQ.keys()):
                     all_dQ[term].append(dQ[term])
 
         #Compute averages and standard deviation of the mean
-        for term in all_dQ.keys():
+        for term in list(all_dQ.keys()):
             self.titles_dU[title][0][term] = np.average(all_dQ[term])
             self.titles_dU[title][1][term] = np.std(all_dQ[term]) / np.sqrt(runs)
 
@@ -992,7 +996,7 @@ class EvbReactions(Toplevel):
 
         #Go through dictionaries and
         dQ = dict()
-        for term in ts_ave.keys():
+        for term in list(ts_ave.keys()):
             if term != 'lambda' and term != 'w':
                 dQ[term] = ts_ave[term] - rs_ave[term]
 
@@ -1028,10 +1032,10 @@ class EvbReactions(Toplevel):
                     'alpha': 0,
                     'Hij': 0}
 
-        for l in energies.keys():
+        for l in list(energies.keys()):
             w = energies[l]['w']
             ave_ene['lambda'] += (w * float(l))
-            for qterm in energies[l].keys():
+            for qterm in list(energies[l].keys()):
                 ave_ene[qterm] += energies[l][qterm]
 
         return ave_ene
@@ -1055,7 +1059,7 @@ class EvbReactions(Toplevel):
         qfepinp = '%s/qfep.inp' % self.titles[title][nr]
         if not os.path.isfile(qfepinp):
             self.write_qfep_inp(self.titles[title][nr])
-            print('No qfep.inp in %s. Creating new...' % self.titles[title][nr])
+            print(('No qfep.inp in %s. Creating new...' % self.titles[title][nr]))
 
         linecount = 0
         with open(qfepinp) as qfepinp:
@@ -1080,11 +1084,11 @@ class EvbReactions(Toplevel):
         for i in range(len(part0)):
             l = part0[i][0][0]
             found_lambda = False
-            if l in rs_lambdas.keys():
+            if l in list(rs_lambdas.keys()):
                 energies = rs_energies
                 lambdas = rs_lambdas
                 found_lambda = True
-            if l in ts_lambdas.keys():
+            if l in list(ts_lambdas.keys()):
                 energies = ts_energies
                 lambdas = ts_lambdas
                 found_lambda = True
@@ -1158,7 +1162,7 @@ class EvbReactions(Toplevel):
                 scale = float(rs_pts)
             else:
                 scale = float(ts_pts)
-            for lamda in state.keys():
+            for lamda in list(state.keys()):
                 state[lamda][0] /= scale
 
         return rs, ts
@@ -1171,11 +1175,11 @@ class EvbReactions(Toplevel):
         qfepinp = '%s/qfep.inp' % self.titles[title][nr]
         if not os.path.isfile(qfepinp):
             self.write_qfep_inp(self.titles[title][nr])
-            print('No qfep.inp in %s. Creating new...' % self.titles[title][nr])
+            print(('No qfep.inp in %s. Creating new...' % self.titles[title][nr]))
 
         qfepout = '%s/qfep.out' % self.titles[title][nr]
         if not os.path.isfile(qfepout):
-            print('No qfep.out in %s. Running Qfep to generate file...' % self.titles[title][nr])
+            print(('No qfep.out in %s. Running Qfep to generate file...' % self.titles[title][nr]))
             self.run_qfep(self.titles[title][nr], 'qfep.inp')
 
         #Go through part3 from qfep.out and find bin corresponding to RS and TS
@@ -1419,7 +1423,7 @@ class EvbReactions(Toplevel):
         """
 
         #Get selected title(s)
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         if len(selections) == 0:
             return
 
@@ -1427,12 +1431,12 @@ class EvbReactions(Toplevel):
         for selected in selections:
             title = self.titles_listbox.get(selected)
             self.app.log(' ', '\n\nComputing reorganization energies for %s\n' % title)
-            if title not in self.title_reorge.keys():
+            if title not in list(self.title_reorge.keys()):
                 self.title_reorge[title] = dict()
-            for i in self.titles[title].keys():
+            for i in list(self.titles[title].keys()):
                 path = self.titles[title][i]
                 self.app.log(' ', '%s\n' % path)
-                print('%s' % path)
+                print(('%s' % path))
                 self.title_reorge[title][path] = dict()
                 de_dg = self.get_qfep_part2(path, 'qfep.out')
                 self.title_reorge[title][path]['diabatic'] = de_dg
@@ -1501,7 +1505,7 @@ class EvbReactions(Toplevel):
 
     def list_titles_event(self, *args):
 
-        selections = map(int, self.titles_listbox.curselection())
+        selections = list(map(int, self.titles_listbox.curselection()))
         if len(selections) == 0:
             return
 
@@ -1566,7 +1570,7 @@ class EvbReactions(Toplevel):
         self.dg_react.delete(0.0, END)
 
         if len(titles) == 1:
-            if 'all' in self.titles_dG[title].keys():
+            if 'all' in list(self.titles_dG[title].keys()):
                 self.dg_act.insert(0.0, '%.2f' % self.titles_dG[title]['all'][0])
                 self.dg_react.insert(0.0, '%.2f' % self.titles_dG[title]['all'][1])
             else:
@@ -1586,7 +1590,7 @@ class EvbReactions(Toplevel):
             self.update_diabatic_plot()
 
     def list_runs_event(self, *args):
-        selections = map(int, self.runs_listbox.curselection())
+        selections = list(map(int, self.runs_listbox.curselection()))
         if len(selections) == 0:
             return
 
@@ -1604,12 +1608,12 @@ class EvbReactions(Toplevel):
 
         for selected in selections:
             search = '/'.join(self.runs_listbox.get(selected).split('/')[-3:])
-            for title in self.titles.keys():
+            for title in list(self.titles.keys()):
                 for nr in self.titles[title]:
                     if '/'.join(self.titles[title][nr].split('/')[-3:]) == search:
                         if show_average:
                             if title not in titles:
-                                if 'all' in self.titles_ene[title].keys():
+                                if 'all' in list(self.titles_ene[title].keys()):
                                     titles.append(title)
                                     d_G.append(self.titles_ene[title]['all'][1])
                                     d_eps.append(self.titles_ene[title]['all'][0])
@@ -1619,7 +1623,7 @@ class EvbReactions(Toplevel):
                         titles.append('%s_%s' % (title, nr))
                         d_G.append(self.titles_ene[title][nr][1])
                         d_eps.append(self.titles_ene[title][nr][0])
-                        print(self.titles_dG[title][nr][0])
+                        print((self.titles_dG[title][nr][0]))
                         if self.titles_dG[title][nr][0] != 'na':
                             dg_act.append(self.titles_dG[title][nr][0])
                             dg_rxn.append(self.titles_dG[title][nr][1])
@@ -1674,7 +1678,7 @@ class EvbReactions(Toplevel):
                   'Activation Energies Non Bonded': self.ae_nb_frame,
                   'Reorganization Energies': self.plot_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.selected_frame.get()].grid(row=3, column=0, columnspan=2)
@@ -1741,7 +1745,7 @@ class EvbReactions(Toplevel):
 
         alpha = Text(topframe, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         alpha.tag_configure("subscript", offset=-1)
-        alpha.insert("insert",u"\N{GREEK SMALL LETTER ALPHA}","",'ij','subscript')
+        alpha.insert("insert","\N{GREEK SMALL LETTER ALPHA}","",'ij','subscript')
         alpha.grid(row=1, column=0, sticky='e')
         alpha.config(state=DISABLED)
 
@@ -1759,7 +1763,7 @@ class EvbReactions(Toplevel):
 
         self.hij_entry = Spinbox(topframe, width=7, highlightthickness=0, relief=GROOVE, from_=0, to=200, increment=1.0)
         self.hij_entry.grid(row=1, column=3)
-        
+
         kt = Label(topframe, text='    kT     ', bg=self.main_color)
         kt.grid(row=0, column=4)
 
@@ -1850,7 +1854,7 @@ class EvbReactions(Toplevel):
         titles_yscroll.config(command=self.titles_listbox.yview)
         titles_xscroll.config(command=self.titles_listbox.xview)
         self.titles_listbox.grid(row=1, rowspan=10, column = 0, columnspan=3, sticky='e')
-        self.titles_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.titles_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.titles_listbox.bind('<<ListboxSelect>>', self.list_titles_event)
 
         runs_yscroll = Scrollbar(self.proj_frame)
@@ -1865,13 +1869,13 @@ class EvbReactions(Toplevel):
         runs_yscroll.config(command=self.runs_listbox.yview)
         runs_xscroll.config(command=self.runs_listbox.xview)
         self.runs_listbox.grid(row=1, rowspan=10, column = 4, columnspan=3, sticky='e')
-        self.runs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.runs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.runs_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
 
         ave_dG = Text(self.proj_frame, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         ave_dG.tag_configure("superscript", offset=3)
-        ave_dG.insert("insert",u"<\N{GREEK CAPITAL LETTER DELTA}G","",u"\u2021",'superscript')
+        ave_dG.insert("insert","<\N{GREEK CAPITAL LETTER DELTA}G","","\\u2021",'superscript')
         ave_dG.insert(END,'>')
         ave_dG.grid(row=1, column=8)
         ave_dG.config(state=DISABLED)
@@ -1882,7 +1886,7 @@ class EvbReactions(Toplevel):
 
         ave_dG_rxn = Text(self.proj_frame, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         ave_dG_rxn.tag_configure("superscript", offset=-3)
-        ave_dG_rxn.insert("insert",u"<\N{GREEK CAPITAL LETTER DELTA}G","",u"o",'superscript')
+        ave_dG_rxn.insert("insert","<\N{GREEK CAPITAL LETTER DELTA}G","","o",'superscript')
         ave_dG_rxn.insert(END,'>')
         ave_dG_rxn.grid(row=3, column=8)
         ave_dG_rxn.config(state=DISABLED)
@@ -1894,7 +1898,7 @@ class EvbReactions(Toplevel):
 
         real_dG = Text(self.proj_frame, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         real_dG.tag_configure("superscript", offset=3)
-        real_dG.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}G","",u"\u2021",'superscript')
+        real_dG.insert("insert","\N{GREEK CAPITAL LETTER DELTA}G","","\\u2021",'superscript')
         real_dG.grid(row=5, column=8)
         real_dG.config(state=DISABLED)
 
@@ -1904,7 +1908,7 @@ class EvbReactions(Toplevel):
 
         react_dG = Text(self.proj_frame, width=5, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         react_dG.tag_configure("superscript", offset=-3)
-        react_dG.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}G","",u"o",'superscript')
+        react_dG.insert("insert","\N{GREEK CAPITAL LETTER DELTA}G","","o",'superscript')
         react_dG.grid(row=7, column=8)
         react_dG.config(state=DISABLED)
 
@@ -1929,7 +1933,7 @@ class EvbReactions(Toplevel):
                                       exportselection=False)
         ae_tot_yscroll.config(command=self.ae_tot_listbox.yview)
         self.ae_tot_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='e')
-        self.ae_tot_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.ae_tot_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.ae_tot_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         export_tot = Button(self.ae_tot_frame, text='Export table', highlightbackground=self.main_color,
@@ -1945,7 +1949,7 @@ class EvbReactions(Toplevel):
                                       exportselection=False)
         ae_nb_yscroll.config(command=self.ae_nb_listbox.yview)
         self.ae_nb_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='e')
-        self.ae_nb_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.ae_nb_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.ae_tot_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         export_nb = Button(self.ae_nb_frame, text='Export table', highlightbackground=self.main_color,
@@ -1961,7 +1965,7 @@ class EvbReactions(Toplevel):
                                       exportselection=False)
         dg_yscroll.config(command=self.dg_listbox.yview)
         self.dg_listbox.grid(row=1, rowspan=16, column = 0, columnspan=3, sticky='e')
-        self.dg_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.dg_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.ae_tot_listbox.bind('<<ListboxSelect>>', self.list_runs_event)
 
         export_dg = Button(self.dg_frame, text='Export table', highlightbackground=self.main_color,
@@ -1975,7 +1979,7 @@ class EvbReactions(Toplevel):
 
         hii = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         hii.tag_configure("subscript", offset=-1)
-        hii.insert("insert",u"\N{GREEK CAPITAL LETTER DELTA}g","",'i,j','subscript')
+        hii.insert("insert","\N{GREEK CAPITAL LETTER DELTA}g","",'i,j','subscript')
         hii.grid(row=0, column=1, sticky='w')
         hii.config(state=DISABLED)
 
@@ -2002,7 +2006,7 @@ class EvbReactions(Toplevel):
         cj_plot_check.grid(row=1, column=0, sticky='e')
 
         mix = Text(self.reorg_frame, width=11, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
-        mix.insert("insert", u"\N{GREEK CAPITAL LETTER DELTA}gi + \N{GREEK CAPITAL LETTER DELTA}gj")
+        mix.insert("insert", "\N{GREEK CAPITAL LETTER DELTA}gi + \N{GREEK CAPITAL LETTER DELTA}gj")
         mix.grid(row=1, column=1, sticky='w')
         mix.config(state=DISABLED)
 
@@ -2032,13 +2036,13 @@ class EvbReactions(Toplevel):
 
         avg_lamdbda = Text(self.reorg_frame, width=4, height=1, bg=self.main_color, borderwidth=0,
                            highlightthickness=0)
-        avg_lamdbda.insert('insert', u"<\N{GREEK small LETTER LAMDA}>")
+        avg_lamdbda.insert('insert', "<\N{GREEK small LETTER LAMDA}>")
         avg_lamdbda.grid(row=0, column=6, sticky='e', padx=(20,5))
         avg_lamdbda.config(state=DISABLED)
 
         curr_lamdbda = Text(self.reorg_frame, width=4, height=1, bg=self.main_color, borderwidth=0,
                            highlightthickness=0)
-        curr_lamdbda.insert('insert', u" \N{GREEK small LETTER LAMDA} ")
+        curr_lamdbda.insert('insert', " \N{GREEK small LETTER LAMDA} ")
         curr_lamdbda.grid(row=1, column=6, sticky='e', padx=(20,5))
         curr_lamdbda.config(state=DISABLED)
 

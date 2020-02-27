@@ -14,11 +14,11 @@
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
 # -*- coding: utf-8 -*-
-from ttk import Frame
+from tkinter.ttk import Frame
 
-import tkMessageBox
+import tkinter.messagebox
 
-from Tkinter import Button
+from tkinter import Button
 
 
 class MessageBox(Frame):
@@ -30,9 +30,9 @@ class MessageBox(Frame):
         self.message_box(self.message)
 
     def message_box(self, message):
-        
-        msg_box = tkMessageBox.showinfo('Error', self.message)
-        
+
+        msg_box = tkinter.messagebox.showinfo('Error', self.message)
+
 
         button = Button(self, text = 'OK')
 

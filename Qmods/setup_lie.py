@@ -13,15 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import X, Label, Button, Spinbox, BOTTOM, Entry, LabelFrame, Frame, Toplevel, DISABLED, \
+from tkinter import  X, Label, Button, Spinbox, BOTTOM, Entry, LabelFrame, Frame, Toplevel, DISABLED, \
     NORMAL, END, GROOVE
 
 from select_atoms import AtomSelectRange
 import os
-from tkFileDialog import askopenfilename
+from tkinter.filedialog import askopenfilename
 from setup_md import SetupMd
 from topoprep import TopologyPrepare
-from ttk import Progressbar
+from tkinter.ttk import Progressbar
 import random
 from subprocess import call
 
@@ -197,8 +197,8 @@ class SetupLie(Toplevel):
         runs = int(self.runs.get())
         complex_dir = self.app.workdir + '/' + self.complex_dir.get().strip()
         ligand_dir = self.app.workdir + '/' + self.ligand_dir.get().strip()
-        print complex_dir
-        print ligand_dir
+        print(complex_dir)
+        print(ligand_dir)
         for dir_ in [complex_dir, ligand_dir]:
             for i in range(1, runs + 1):
                 if not os.path.exists('%s/%d' % (dir_, i)):
@@ -219,7 +219,7 @@ class SetupLie(Toplevel):
                             eq1_new.write(line)
                     eq1_new.close()
                 except:
-                    print 'Equilibration file with random seed not found!'
+                    print('Equilibration file with random seed not found!')
                 submitfile.write('cd %s/%d\n' % (dir_, i))
                 submitfile.write('%s %srun.sh\n' % (self.app.q_settings[ 'subscript' ][1], basename))
                 submitfile.write('cd ../../\n')

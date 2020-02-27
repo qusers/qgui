@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
+from tkinter import  Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, OptionMenu, IntVar, StringVar, Checkbutton, HORIZONTAL, LabelFrame
 
 from select_atoms import AtomSelectRange
@@ -22,10 +22,10 @@ import qgui_functions as qf
 from edit_evb import EditEvbNotes, ImportParameters, EditParameters, EditBondParameters, EditAngleParameters, \
     EditTorsionParameters, EditImproperParameters
 from setup_md import SetupMd
-from tkFileDialog import askopenfilename
-import tkFont
+from tkinter.filedialog import askopenfilename
+import tkinter.font
 import copy
-import cPickle
+import pickle
 import shutil
 import random
 import os
@@ -92,7 +92,7 @@ class SetupFEP(Toplevel):
         #Initialize EVB status and progress:
         self.qstatus = {'Q-atoms':'No Q-atoms selected',
                         'Topology pdb': 'NA',
-                        u"\N{GREEK SMALL LETTER LAMDA}-steps/run": '51',
+                        "\N{GREEK SMALL LETTER LAMDA}-steps/run": '51',
                         'Total simulation time (ns)': '%.6f' % (float(self.md_settings['simtime']) * 51.00)}
 
         #Pymol session:
@@ -381,7 +381,7 @@ class SetupFEP(Toplevel):
                 self.update_status()
                 self.sync_check.config(state=NORMAL)
             else:
-                print 'No pdb loaded'
+                print('No pdb loaded')
                 self.sync_check.config(state=DISABLED)
                 return
 
@@ -407,17 +407,17 @@ class SetupFEP(Toplevel):
                 del qlist[q]
 
             #Remove Q-atoms from self.q_bonds and q_impropers
-            if q in self.q_bonds.keys():
+            if q in list(self.q_bonds.keys()):
                 del self.q_bonds[q]
-            for qi in self.q_bonds.keys():
+            for qi in list(self.q_bonds.keys()):
                 for state in range(4):
                     if q in self.q_bonds[qi][state]:
                         del self.q_bonds[qi][state][self.q_bonds[qi][state].index(q)]
 
-            if q in self.q_impropers.keys():
+            if q in list(self.q_impropers.keys()):
                 del self.q_impropers[q]
 
-            for qi in self.q_impropers.keys():
+            for qi in list(self.q_impropers.keys()):
                 if q in self.q_impropers[qi]:
                     del self.q_impropers[qi]
 
@@ -434,25 +434,25 @@ class SetupFEP(Toplevel):
 
         #UPDATE Q-atom number in bonds and impropers
         for q_old in sorted(q_old_new.keys()):
-            if q_old in self.q_bonds.keys():
+            if q_old in list(self.q_bonds.keys()):
                 q_new = q_old_new[q_old]
                 self.q_bonds[q_new] = copy.deepcopy(self.q_bonds[q_old])
                 del self.q_bonds[q_old]
 
-            for qj in self.q_bonds.keys():
+            for qj in list(self.q_bonds.keys()):
                 for state in range(4):
-                    print self.q_bonds[qj][state]
+                    print(self.q_bonds[qj][state])
                     if q_old in self.q_bonds[qj][state]:
-                        print 'befor: %s' % self.q_bonds[qj][state]
+                        print('befor: %s' % self.q_bonds[qj][state])
                         self.q_bonds[qj][state][self.q_bonds[qj][state].index(q_old)] = q_old_new[q_old]
-                        print 'after: %s' % self.q_bonds[qj][state]
+                        print('after: %s' % self.q_bonds[qj][state])
 
-            if q_old in self.q_impropers.keys():
+            if q_old in list(self.q_impropers.keys()):
                 q_new = q_old_new[q_old]
                 self.q_impropers[q_new] = copy.deepcopy(self.q_impropers[q_old])
                 del self.q_impropers[q_old]
                 for i in range(len(self.q_impropers[q_new])):
-                    if self.q_impropers[q_new][i] in q_old_new.keys():
+                    if self.q_impropers[q_new][i] in list(q_old_new.keys()):
                         self.q_impropers[q_new][i] = q_old_new[self.q_impropers[q_new][i]]
 
         self.update_q_atoms()
@@ -462,7 +462,7 @@ class SetupFEP(Toplevel):
         """
         Add a note to selected q-atom
         """
-        sel_index = map(int, self.qatoms_listbox.curselection())
+        sel_index = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(sel_index) == 1:
             note = self.qatoms_listbox.get(sel_index[0]).split('!')[-1]
@@ -479,7 +479,7 @@ class SetupFEP(Toplevel):
 
         #Check if Q notes exist, if not, make it atomname and res i:
         if len(self.q_notes) == 0:
-            for q in self.q_atom_name.keys():
+            for q in list(self.q_atom_name.keys()):
                 self.q_notes[q] = '%4s %s' % (self.q_atom_name[q].ljust(4), self.q_atom_res[q])
 
         #Fill Q atoms listbox
@@ -550,7 +550,7 @@ class SetupFEP(Toplevel):
                                             if (current_nr + 1) in res_nr:
                                                 next_res = residues[res_nr.index(current_nr + 1)]
                                                 #Get all Q-atoms in next residue:
-                                                for q_ in self.q_atom_res.keys():
+                                                for q_ in list(self.q_atom_res.keys()):
                                                     if self.q_atom_res[q_] == next_res:
                                                         if self.q_atom_name[q_] == next_atom:
                                                             q_imp[atom] = q_
@@ -564,7 +564,7 @@ class SetupFEP(Toplevel):
                                             if (current_nr - 1) in res_nr:
                                                 prev_res = residues[res_nr.index(current_nr - 1)]
                                                 #Get all Q-atoms in previous residue:
-                                                for q_ in self.q_atom_res.keys():
+                                                for q_ in list(self.q_atom_res.keys()):
                                                     if self.q_atom_res[q_] == prev_res:
                                                         if self.q_atom_name[q_] == prev_atom:
                                                             q_imp[atom] = q_
@@ -590,7 +590,7 @@ class SetupFEP(Toplevel):
 
                                             #Get all Q-atoms in previous residue:
                                             q_in_prev = []
-                                            for q_ in self.q_atom_res.keys():
+                                            for q_ in list(self.q_atom_res.keys()):
                                                 if self.q_atom_res[q_] == prev_res:
                                                     q_in_prev.append(q_)
 
@@ -598,7 +598,7 @@ class SetupFEP(Toplevel):
                                             found_tail = False
                                             for q_ in q_in_prev:
                                                 #Make sure that Q-atom is involved in bond (it may as well not be..)
-                                                if q_ in self.q_bonds.keys():
+                                                if q_ in list(self.q_bonds.keys()):
                                                     for state in range(4):
                                                         if '+' in self.q_bonds[q_][state]:
                                                             q_tail = q_
@@ -606,14 +606,14 @@ class SetupFEP(Toplevel):
 
                                                 #Append connecting Q-atoms to self.q_bonds
                                                 if found_tail:
-                                                    if q_head not in self.q_bonds.keys():
+                                                    if q_head not in list(self.q_bonds.keys()):
                                                         self.q_bonds[q_head] = [[q_tail], [q_tail], [q_tail], [q_tail]]
                                                     else:
                                                         for state in range(4):
                                                             if q_tail not in self.q_bonds[q_head][state]:
                                                                 self.q_bonds[q_head][state].append(q_tail)
 
-                                                    if q_tail not in self.q_bonds.keys():
+                                                    if q_tail not in list(self.q_bonds.keys()):
                                                         self.q_bonds[q_tail] = [[q_head], [q_head], [q_head], [q_head]]
                                                     else:
                                                         for state in range(4):
@@ -625,7 +625,7 @@ class SetupFEP(Toplevel):
                                     atom_tail = line.split()[1]
                                     if atom_tail in atomnames:
                                         q_tail = qatoms[atomnames.index(atom_tail)]
-                                        if q_tail not in self.q_bonds.keys():
+                                        if q_tail not in list(self.q_bonds.keys()):
                                             self.q_bonds[q_tail] = [['+'], ['+'], ['+'], ['+']]
                                         else:
                                             for state in range(4):
@@ -644,13 +644,13 @@ class SetupFEP(Toplevel):
                                         #Bond exist in Q-atom selection, get Q-atom nr and append bond:
                                         qi = qatoms[atomnames.index(atom1)]
                                         qj = qatoms[atomnames.index(atom2)]
-                                        if qi not in self.q_bonds.keys():
+                                        if qi not in list(self.q_bonds.keys()):
                                             self.q_bonds[qi] = [[qj], [qj], [qj], [qj]]
                                         else:
                                             for state in range(4):
                                                 if qj not in self.q_bonds[qi][state]:
                                                     self.q_bonds[qi][state].append(qj)
-                                        if qj not in self.q_bonds.keys():
+                                        if qj not in list(self.q_bonds.keys()):
                                             self.q_bonds[qj] = [[qi], [qi], [qi], [qi]]
                                         else:
                                             for state in range(4):
@@ -702,7 +702,7 @@ class SetupFEP(Toplevel):
 
 
         #Go through self.q_bonds and remove all '+' (Tail symbols)
-        for q in self.q_bonds.keys():
+        for q in list(self.q_bonds.keys()):
             for state in range(4):
                 if '+' in self.q_bonds[q][state]:
                     del self.q_bonds[q][state][self.q_bonds[q][state].index('+')]
@@ -721,7 +721,7 @@ class SetupFEP(Toplevel):
 
         #Make a list with atomtypes (no redundancies)
         atomtypes_to_find = []
-        for q in self.q_atomtypes.keys():
+        for q in list(self.q_atomtypes.keys()):
             for state in range(self.evb_states.get()):
                 atomtype = self.q_atomtypes[q][state]
                 if atomtype not in atomtypes_to_find:
@@ -738,7 +738,7 @@ class SetupFEP(Toplevel):
                                 atomtype = line.split()[0].strip()
                                 if atomtype in atomtypes_to_find:
                                     #Check that atomtype is not already in list (may be added/edited by user):
-                                    if atomtype not in self.atomtype_prm.keys():
+                                    if atomtype not in list(self.atomtype_prm.keys()):
                                         ri = float(line.split()[1].strip())
                                         ei = float(line.split()[3].strip())
                                         ci = 0.0
@@ -755,7 +755,7 @@ class SetupFEP(Toplevel):
                         found_atomtypes = True
                     if '[bonds]' in line:
                         break
-        print self.atomtype_prm
+        print(self.atomtype_prm)
 
     def update_atom_parameters(self):
         """
@@ -772,7 +772,7 @@ class SetupFEP(Toplevel):
             for state in range(self.evb_states.get()):
                 atomtype = self.q_atomtypes[q][state]
                 state_types[state] = atomtype
-                if atomtype not in prm_nr.keys():
+                if atomtype not in list(prm_nr.keys()):
                     nr += 1
                     prm_nr[atomtype] = nr
 
@@ -780,12 +780,12 @@ class SetupFEP(Toplevel):
             self.changetypes_listbox.insert(END, '%2d  %4s %4s %4s %4s' % (q, t1.ljust(4), t2.ljust(4),
                                                                                t3.ljust(4), t4.ljust(4)))
 
-        print prm_nr
+        print(prm_nr)
 
         #Insert atomtypes to self.atomtypes_listbox
         self.atomtypes_listbox.delete(0, END)
-        for prm in prm_nr.keys():
-            if prm in self.atomtype_prm.keys():
+        for prm in list(prm_nr.keys()):
+            if prm in list(self.atomtype_prm.keys()):
                 ri, ei, ci, ai, ri1_4, ei1_4, mass  = self.atomtype_prm[prm][0:]
                 self.atomtypes_listbox.insert(END, '%4s %7.2f %5.2f %5.2f %4.2f %7.2f %5.2f %5.2f' %
                                                (prm.ljust(4), ri, ei, ci, ai, ri1_4, ei1_4, mass))
@@ -817,7 +817,7 @@ class SetupFEP(Toplevel):
                                              t3.ljust(4), t4.ljust(4)))
 
         #Insert sum of charges for each state
-        charge_sum = map(lambda x: round(x, 3), charge_sum)
+        charge_sum = [round(x, 3) for x in charge_sum]
 
         sum1, sum2, sum3, sum4 = charge_sum[0:]
         if self.evb_states.get() < 4:
@@ -865,7 +865,7 @@ class SetupFEP(Toplevel):
         #Find all unique bonds:
         bonds = []
 
-        for q1 in self.q_bonds.keys():
+        for q1 in list(self.q_bonds.keys()):
             for state in range(self.evb_states.get()):
                 for q2 in self.q_bonds[q1][state]:
                     t1 = self.q_atomtypes[q1][state]
@@ -874,9 +874,9 @@ class SetupFEP(Toplevel):
                     bond_rev = '%s %s' % (t2, t1)
                     if bond not in bonds and bond_rev not in bonds:
                         #If parameters already exist, do not look for them:
-                        if bond not in self.bond_prm.keys() and bond_rev not in self.bond_prm.keys():
+                        if bond not in list(self.bond_prm.keys()) and bond_rev not in list(self.bond_prm.keys()):
                             bonds.append(bond)
-        print bonds
+        print(bonds)
         if len(bonds) == 0:
             return
 
@@ -904,7 +904,7 @@ class SetupFEP(Toplevel):
                             continue
                     if '[bonds]' in line:
                         found_bonds = True
-        print self.bond_prm
+        print(self.bond_prm)
 
     def find_non_dummy(self,states, du='du'):
         for state in states:
@@ -943,7 +943,7 @@ class SetupFEP(Toplevel):
                     state_types[state].append(bond)
                     state_qbonds[state].append('%d %d' % (q1, q2))
                     #Append bondtype with number to bond_prm_nr
-                    if bond not in bond_nr_prm.values() and bond_rev not in bond_nr_prm.values():
+                    if bond not in list(bond_nr_prm.values()) and bond_rev not in list(bond_nr_prm.values()):
                         prm_nr += 1
                         bond_nr_prm[prm_nr] = bond
 
@@ -1014,10 +1014,10 @@ class SetupFEP(Toplevel):
         for prm in sorted(bond_nr_prm.keys()):
             bond = bond_nr_prm[prm]
             bond_rev = '%s %s' % (bond.split()[1], bond.split()[0])
-            if bond in self.bond_prm.keys():
+            if bond in list(self.bond_prm.keys()):
                 de, alpha, rb = self.bond_prm[bond][0:3]
                 self.bondtypes_listbox.insert(END, '%2d %6.2f %5.2f %5.2f !%s' % (prm, de, alpha, rb, bond))
-            elif bond_rev in self.bond_prm.keys():
+            elif bond_rev in list(self.bond_prm.keys()):
                 de, alpha, rb = self.bond_prm[bond_rev][0:3]
                 self.bondtypes_listbox.insert(END, '%2d %6.2f %5.2f %5.2f !%s' % (prm, de, alpha, rb, bond))
             else:
@@ -1034,14 +1034,14 @@ class SetupFEP(Toplevel):
             return
 
         evb_states = self.evb_states.get()
-        for atom in self.fep_atoms.keys():
+        for atom in list(self.fep_atoms.keys()):
 
             s1, s2, s3, s4 = self.fep_atoms[atom]
             atom = int(atom)
 
             #Find Q-atom number corresponding to atom1 and atom2
             q1 = None
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom:
                     q1 = q
 
@@ -1073,24 +1073,24 @@ class SetupFEP(Toplevel):
         prm_nr = 0
 
         #List with Q-atoms to include for angle terms
-        q_atoms = self.q_atom_nr.keys()
+        q_atoms = list(self.q_atom_nr.keys())
 
         if self.show_changing_angles:
             insert_angle = False
             q_atoms[:] = []
             #Collect q atoms that are involved in bond forming/breaking
             if len(self.change_bonds) > 0:
-                for atompair in self.change_bonds.keys():
-                    atom1, atom2 = map(int, atompair.split())
+                for atompair in list(self.change_bonds.keys()):
+                    atom1, atom2 = list(map(int, atompair.split()))
 
                     #Find corresponding Q-atom:
-                    for q in self.q_atom_nr.keys():
+                    for q in list(self.q_atom_nr.keys()):
                         if int(self.q_atom_nr[q]) == atom1 or int(self.q_atom_nr[q]) == atom2:
                             if q not in q_atoms:
                                 q_atoms.append(q)
 
             #collect Q atoms that change atomtype
-            for q in self.q_atomtypes.keys():
+            for q in list(self.q_atomtypes.keys()):
                 atomtypes = []
                 for s in range(self.evb_states.get()):
                     t = self.q_atomtypes[q][s]
@@ -1132,8 +1132,8 @@ class SetupFEP(Toplevel):
                                         state_qangles[state].append('%d %d %d' % (q1, q2, q3))
 
                                         #Append angletype with number to bond_prm_nr
-                                        if angle not in angle_nr_prm.values() and \
-                                                        angle_rev not in angle_nr_prm.values():
+                                        if angle not in list(angle_nr_prm.values()) and \
+                                                        angle_rev not in list(angle_nr_prm.values()):
                                             prm_nr += 1
                                             angle_nr_prm[prm_nr] = angle
             if insert_angle:
@@ -1189,19 +1189,19 @@ class SetupFEP(Toplevel):
 
                         if insert_angle:
                             ang1, ang2, ang3, ang4 = type_nr[0:]
-                            q1_, q2_, q3_ = map(int, qpair.split())
-                            atom1, atom2, atom3 = map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_], self.q_atom_nr[q3_]])
+                            q1_, q2_, q3_ = list(map(int, qpair.split()))
+                            atom1, atom2, atom3 = list(map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_], self.q_atom_nr[q3_]]))
                             self.changeangle_listbox.insert(END, '%6d %6d %6d %2s  %2s %2s  %2s' %
                                                                  (atom1, atom2, atom3, ang1, ang2, ang3, ang4))
 
                     s += 1
 
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
-        prms = angle_nr_prm.values()
+        prms = list(angle_nr_prm.values())
         missing_prms = []
         for prm in prms:
             prm_rev = '%s %s %s' % (prm.split()[2], prm.split()[1], prm.split()[0] )
-            if prm not in self.angle_prm.keys() and prm_rev not in self.angle_prm.keys():
+            if prm not in list(self.angle_prm.keys()) and prm_rev not in list(self.angle_prm.keys()):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
@@ -1242,16 +1242,16 @@ class SetupFEP(Toplevel):
             for angle in missing_prms:
                 angle_rev = '%s %s %s' % (angle.split()[2], angle.split()[1], angle.split()[0])
                 del missing_prms[missing_prms.index(angle)]
-                if angle not in self.angle_prm.keys():
+                if angle not in list(self.angle_prm.keys()):
                     self.angle_prm[angle] = ['??', '??']
-                if angle_rev not in self.angle_prm.keys():
+                if angle_rev not in list(self.angle_prm.keys()):
                     self.angle_prm[angle_rev] = ['??', '??']
 
         #Insert angle types to listbox
         for prm in sorted(angle_nr_prm.keys()):
             angle = angle_nr_prm[prm]
             angle_rev = '%s %s %s' % (angle.split()[2], angle.split()[1], angle.split()[0])
-            if angle in self.angle_prm.keys():
+            if angle in list(self.angle_prm.keys()):
                 k, theta = self.angle_prm[angle][0:]
             elif angle_rev in self.angle_prm:
                 k, theta = self.angle_prm[angle_rev][0:]
@@ -1275,7 +1275,7 @@ class SetupFEP(Toplevel):
         prm_nr = 1
 
         #List with Q-atoms to include for angle terms
-        q_atoms = self.q_atom_nr.keys()
+        q_atoms = list(self.q_atom_nr.keys())
 
         if self.show_changing_torsion:
             insert_torsion = False
@@ -1283,16 +1283,16 @@ class SetupFEP(Toplevel):
             #Collect q atoms that are involved in bond forming/breaking
             if len(self.change_bonds) > 0:
                 for atompair in self.change_bonds:
-                    atom1, atom2 = map(int, atompair.split())
+                    atom1, atom2 = list(map(int, atompair.split()))
 
                     #Find corresponding Q-atom:
-                    for q in self.q_atom_nr.keys():
+                    for q in list(self.q_atom_nr.keys()):
                         if int(self.q_atom_nr[q]) == atom1 or int(self.q_atom_nr[q]) == atom2:
                             if q not in q_atoms:
                                 q_atoms.append(q)
 
             #collect Q atoms that change atomtype
-            for q in self.q_atomtypes.keys():
+            for q in list(self.q_atomtypes.keys()):
                 atomtypes = []
                 for s in range(self.evb_states.get()):
                     t = self.q_atomtypes[q][s]
@@ -1336,8 +1336,8 @@ class SetupFEP(Toplevel):
                                                 state_qtorsions[state].append('%d %d %d %d' % (q1, q2, q3, q4))
 
                                                 #Append angletype with number to bond_prm_nr
-                                                if torsion not in torsion_nr_prm.values() and \
-                                                        torsion_rev not in torsion_nr_prm.values():
+                                                if torsion not in list(torsion_nr_prm.values()) and \
+                                                        torsion_rev not in list(torsion_nr_prm.values()):
                                                     torsion_nr_prm[prm_nr] = torsion
                                                     prm_nr += 3
             if insert_torsion:
@@ -1394,9 +1394,9 @@ class SetupFEP(Toplevel):
 
                         if insert_torsion:
                             tor1, tor2, tor3, tor4 = type_nr[0:]
-                            q1_, q2_, q3_, q4_ = map(int, qpair.split())
-                            atom1, atom2, atom3, atom4 = map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_],
-                                                                   self.q_atom_nr[q3_],  self.q_atom_nr[q4_]])
+                            q1_, q2_, q3_, q4_ = list(map(int, qpair.split()))
+                            atom1, atom2, atom3, atom4 = list(map(int, [self.q_atom_nr[q1_], self.q_atom_nr[q2_],
+                                                                   self.q_atom_nr[q3_],  self.q_atom_nr[q4_]]))
                             for z in range(3):
                                 self.changetorsion_listbox.insert(END, '%6d %6d %6d %6d %3s  %3s  %3s  %3s' %
                                                                        (atom1, atom2, atom3, atom4,
@@ -1419,11 +1419,11 @@ class SetupFEP(Toplevel):
                     s += 1
 
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
-        prms = torsion_nr_prm.values()
+        prms = list(torsion_nr_prm.values())
         missing_prms = []
         for prm in prms:
             prm_rev = '%s %s %s %s' % (prm.split()[3], prm.split()[2], prm.split()[1], prm.split()[0])
-            if prm not in self.torsion_prm.keys() and prm_rev not in self.torsion_prm.keys():
+            if prm not in list(self.torsion_prm.keys()) and prm_rev not in list(self.torsion_prm.keys()):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
@@ -1455,9 +1455,9 @@ class SetupFEP(Toplevel):
                                     phase = float(line.split()[6])
                                     paths = int(float(line.split()[7]))
 
-                                    if torsion not in self.torsion_prm.keys():
+                                    if torsion not in list(self.torsion_prm.keys()):
                                         self.torsion_prm[torsion] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
-                                    if torsion_rev not in self.torsion_prm.keys():
+                                    if torsion_rev not in list(self.torsion_prm.keys()):
                                         self.torsion_prm[torsion_rev] = [[0,0.0,1],[0, 180.0,1],[0, 0.0,1]]
                                     #Make sure to note overwrite existing parameters (check that kt > 0)
                                     if self.torsion_prm[torsion][abs(minima) - 1][0] == 0:
@@ -1479,7 +1479,7 @@ class SetupFEP(Toplevel):
                 torsion_rev = '%s %s %s %s' % (torsion.split()[2], torsion.split()[2], torsion.split()[1],
                                                torsion.split()[0])
                 del missing_prms[missing_prms.index(torsion)]
-                if torsion not in self.torsion_prm.keys() and torsion_rev not in self.torsion_prm.keys():
+                if torsion not in list(self.torsion_prm.keys()) and torsion_rev not in list(self.torsion_prm.keys()):
                     self.torsion_prm[torsion] = [['??', 0.00, 1], ['??', 180.00, 1], ['??', 0.00, 1]]
                     self.torsion_prm[torsion_rev] = [['??', 0.00, 1], ['??', 180.00, 1], ['??', 0.00, 1]]
 
@@ -1496,10 +1496,10 @@ class SetupFEP(Toplevel):
                 if int(minima) == -3:
                     minima = str(3)
 
-                if torsion in self.torsion_prm.keys():
-                    k, phase, path = map(str, self.torsion_prm[torsion][j][0:])
-                elif torsion_rev in self.torsion_prm.keys():
-                    k, phase, path = map(str, self.torsion_prm[torsion_rev][j][0:])
+                if torsion in list(self.torsion_prm.keys()):
+                    k, phase, path = list(map(str, self.torsion_prm[torsion][j][0:]))
+                elif torsion_rev in list(self.torsion_prm.keys()):
+                    k, phase, path = list(map(str, self.torsion_prm[torsion_rev][j][0:]))
                     insert_tor = torsion_rev
                 else:
                     k, phase, path = '??', '0.00', '1'
@@ -1524,23 +1524,23 @@ class SetupFEP(Toplevel):
         self.impropertypes_listbox.delete(0, END)
 
         #List with Q-atoms to include for angle terms
-        q_atoms = self.q_atom_nr.keys()
+        q_atoms = list(self.q_atom_nr.keys())
 
         if self.show_changing_impropers:
             q_atoms[:] = []
             #Collect q atoms that are involved in bond forming/breaking
             if len(self.change_bonds) > 0:
-                for atompair in self.change_bonds.keys():
-                    atom1, atom2 = map(int, atompair.split())
+                for atompair in list(self.change_bonds.keys()):
+                    atom1, atom2 = list(map(int, atompair.split()))
 
                     #Find corresponding Q-atom:
-                    for q in self.q_atom_nr.keys():
+                    for q in list(self.q_atom_nr.keys()):
                         if int(self.q_atom_nr[q]) == atom1 or int(self.q_atom_nr[q]) == atom2:
                             if q not in q_atoms:
                                 q_atoms.append(q)
 
             #collect Q atoms that change atomtype
-            for q in self.q_atomtypes.keys():
+            for q in list(self.q_atomtypes.keys()):
                 atomtypes = []
                 for s in range(self.evb_states.get()):
                     t = self.q_atomtypes[q][s]
@@ -1557,7 +1557,7 @@ class SetupFEP(Toplevel):
         #Write change impropers lisbox
         prm_nr = 0
         nr_type = dict()
-        for q2 in self.q_impropers.keys():
+        for q2 in list(self.q_impropers.keys()):
             q1, q3, q4 = self.q_impropers[q2][0:]
             if q1 in q_atoms or q2 in q_atoms or q3 in q_atoms or q4 in q_atoms:
                 states = [' ',' ',' ',' ']
@@ -1578,12 +1578,12 @@ class SetupFEP(Toplevel):
                         t4 = self.q_atomtypes[q4][state]
                         imp_type = '%s %s %s %s' % (t1, t2, t3, t4)
                         imp_type_rev = '%s %s %s %s' % (t4, t3, t2, t1)
-                        if imp_type not in nr_type.values() and imp_type_rev not in nr_type.values():
+                        if imp_type not in list(nr_type.values()) and imp_type_rev not in list(nr_type.values()):
                             prm_nr += 1
                             nr_type[prm_nr] = imp_type
                             states[state] = str(prm_nr)
-                        elif imp_type in nr_type.values() or imp_type_rev in nr_type.values():
-                            for nr in nr_type.keys():
+                        elif imp_type in list(nr_type.values()) or imp_type_rev in list(nr_type.values()):
+                            for nr in list(nr_type.keys()):
                                 if nr_type[nr] == imp_type or nr_type[nr] == imp_type_rev:
                                     states[state] = str(nr)
 
@@ -1599,11 +1599,11 @@ class SetupFEP(Toplevel):
                 except:
                     continue
         #Check if any parameters are missing, and collect missing from parameter file(s) if possible:
-        prms = nr_type.values()
+        prms = list(nr_type.values())
         missing_prms = []
         for prm in prms:
             prm_rev = '%s %s %s %s' % (prm.split()[3], prm.split()[2], prm.split()[1], prm.split()[0])
-            if prm not in self.improper_prm.keys() and prm_rev not in self.improper_prm.keys():
+            if prm not in list(self.improper_prm.keys()) and prm_rev not in list(self.improper_prm.keys()):
                 missing_prms.append(prm)
 
         if len(missing_prms) > 0:
@@ -1649,14 +1649,14 @@ class SetupFEP(Toplevel):
         for nr in sorted(nr_type.keys()):
             type_ = nr_type[nr]
             type_rev = '%s %s %s %s' % (type_.split()[3], type_.split()[2], type_.split()[1], type_.split()[0])
-            if type_ in self.improper_prm.keys():
-                kt, phase = map(str, self.improper_prm[type_][0:])
-            elif type_rev in self.improper_prm.keys():
-                kt, phase = map(str, self.improper_prm[type_rev][0:])
+            if type_ in list(self.improper_prm.keys()):
+                kt, phase = list(map(str, self.improper_prm[type_][0:]))
+            elif type_rev in list(self.improper_prm.keys()):
+                kt, phase = list(map(str, self.improper_prm[type_rev][0:]))
 
             self.impropertypes_listbox.insert(END, '%3d %6s %6s !%s' % (nr, kt, phase, type_))
 
-        print self.improper_prm
+        print(self.improper_prm)
 
     def update_soft_pairs(self):
         """
@@ -1664,12 +1664,12 @@ class SetupFEP(Toplevel):
         """
         self.softpairs_listbox.delete(0, END)
         #Go through self.change_bonds and set softpairs for bonds broken/formed
-        for atompair in self.change_bonds.keys():
+        for atompair in list(self.change_bonds.keys()):
             q1 = None
             q2 = None
 
             states = []
-            atom1, atom2 = map(int, atompair.split()[0:])
+            atom1, atom2 = list(map(int, atompair.split()[0:]))
 
             #Check that bondings are changed between states
             for state in range(self.evb_states.get()):
@@ -1678,7 +1678,7 @@ class SetupFEP(Toplevel):
                     states.append(s)
             if len(states) > 1:
                 #Bond is broken/formed. Find Q nr for atom1 and atom2
-                for q in self.q_atom_nr.keys():
+                for q in list(self.q_atom_nr.keys()):
                     if int(self.q_atom_nr[q]) == atom1:
                         q1 = q
                     if int(self.q_atom_nr[q]) == atom2:
@@ -1694,12 +1694,12 @@ class SetupFEP(Toplevel):
                         else:
                             note += '%s-%s' % (qt1, qt2)
                         if state != self.evb_states.get() - 1:
-                                note += ' --> '
+                            note += ' --> '
                     self.softpairs_listbox.insert(END, '%3d %3d  !%s' % (q1, q2, note))
 
         #Insert additional soft-pairs (if any)
         if len(self.softpairs_added) > 0:
-            for q1 in self.softpairs_added.keys():
+            for q1 in list(self.softpairs_added.keys()):
                 q2 = self.softpairs_added[q1]
                 bond_change = False
                 bonded = False
@@ -1734,7 +1734,7 @@ class SetupFEP(Toplevel):
                             note += '%s + %s' % (qt1, qt2)
 
                     if state != self.evb_states.get() - 1:
-                            note += ' --> '
+                        note += ' --> '
                 self.softpairs_listbox.insert(END, '%3d %3d  !%s' % (q1, q2, note))
 
     def update_couplings(self):
@@ -1755,10 +1755,10 @@ class SetupFEP(Toplevel):
         bond_list = self.changebond_listbox.get(0, END)
         for line in bond_list:
             nr += 1
-            a1, a2 = map(int, line.split()[0:2])
-            if 0 in map(int, line.split()[2:]):
+            a1, a2 = list(map(int, line.split()[0:2]))
+            if 0 in list(map(int, line.split()[2:])):
                 q1, q2 = None, None
-                for q in self.q_atom_nr.keys():
+                for q in list(self.q_atom_nr.keys()):
                     if int(self.q_atom_nr[q]) == a1:
                         q1 = q
                     if int(self.q_atom_nr[q]) == a2:
@@ -1772,9 +1772,9 @@ class SetupFEP(Toplevel):
         angle_list = self.changeangle_listbox.get(0, END)
         for line in angle_list:
             nr += 1
-            atom1, atom2, atom3 = map(int, line.split()[0:3])
+            atom1, atom2, atom3 = list(map(int, line.split()[0:3]))
             q1, q2, q3 = 0, 0, 0
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -1802,10 +1802,10 @@ class SetupFEP(Toplevel):
         torsion_list = self.changetorsion_listbox.get(0, END)
         for line in torsion_list:
             nr += 1
-            atom1, atom2, atom3, atom4 = map(int, line.split()[0:4])
+            atom1, atom2, atom3, atom4 = list(map(int, line.split()[0:4]))
             q1, q2, q3, q4 = 0, 0, 0, 0
 
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -1840,10 +1840,10 @@ class SetupFEP(Toplevel):
         improper_list = self.changeimproper_listbox.get(0, END)
         for line in improper_list:
             nr += 1
-            atom1, atom2, atom3, atom4 = map(int, line.split()[0:4])
+            atom1, atom2, atom3, atom4 = list(map(int, line.split()[0:4]))
             q1, q2, q3, q4 = 0, 0, 0, 0
 
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if self.q_atom_nr[q] == atom1:
                     q1 = q
                 if self.q_atom_nr[q] == atom2:
@@ -1878,7 +1878,7 @@ class SetupFEP(Toplevel):
         """
         self.excludedpairs_listbox.delete(0, END)
 
-        for atompair in self.excluded_pairs.keys():
+        for atompair in list(self.excluded_pairs.keys()):
             states = ' '
             for state in range(self.evb_states.get()):
                 states += '%3d ' % self.excluded_pairs[atompair][state]
@@ -1888,7 +1888,7 @@ class SetupFEP(Toplevel):
         self.lambdasteps_listbox.delete(0, END)
 
         for i in sorted(self.step_lambdavalues.keys()):
-            l1, l2, l3, l4 = map(float, self.step_lambdavalues[i][0:])
+            l1, l2, l3, l4 = list(map(float, self.step_lambdavalues[i][0:]))
             l1, l2, l3, l4 = '%03.3f' % l1, '%03.3f' % l2, '%03.3f' % l3, '%03.3f' % l4
             if self.evb_states.get() < 3:
                 l3 = ' '
@@ -1902,13 +1902,13 @@ class SetupFEP(Toplevel):
         except:
             lambda_steps = 0
 
-        self.qstatus[u"\N{GREEK small LETTER LAMDA}-steps/run"] = '%s' % str(lambda_steps)
+        self.qstatus["\N{GREEK small LETTER LAMDA}-steps/run"] = '%s' % str(lambda_steps)
         status_list = self.qstatus_listbox.get(0, END)
 
         for i in range(len(status_list)):
-            if u"\N{GREEK small LETTER LAMDA}-steps/run" in status_list[i]:
+            if "\N{GREEK small LETTER LAMDA}-steps/run" in status_list[i]:
                 self.qstatus_listbox.delete(i)
-                self.qstatus_listbox.insert(i, u"\N{GREEK small LETTER LAMDA}-steps/run: %s" % str(lambda_steps))
+                self.qstatus_listbox.insert(i, "\N{GREEK small LETTER LAMDA}-steps/run: %s" % str(lambda_steps))
 
         #Update temperatures to get correct total simulation time:
         self.update_temperatures()
@@ -1983,7 +1983,7 @@ class SetupFEP(Toplevel):
                          'Torsion parameters' : self.torsiontypes_listbox,
                          'Improper parameters' : self.impropertypes_listbox}
 
-        for term in missing_check.keys():
+        for term in list(missing_check.keys()):
             listbox_ = missing_check[term].get(0, END)
             listbox = []
             for i in listbox_:
@@ -2004,7 +2004,7 @@ class SetupFEP(Toplevel):
 
         #Check if Q-atoms and bond change is defined:
         exist_check = {'Q-atoms': self.qatoms_listbox, 'Form/Break bonds': self.fepatoms_listbox}
-        for term in exist_check.keys():
+        for term in list(exist_check.keys()):
             listbox_ = exist_check[term].get(0, END)
             listbox = []
             for i in listbox_:
@@ -2021,7 +2021,7 @@ class SetupFEP(Toplevel):
         if not print_all:
             do_not_print = ['OK','ok','na','NA','']
 
-        for i in self.qstatus.keys():
+        for i in list(self.qstatus.keys()):
             if self.qstatus[i] not in do_not_print:
                 self.qstatus_listbox.insert(END, '%s: %s' % (i, self.qstatus[i]))
 
@@ -2061,21 +2061,21 @@ class SetupFEP(Toplevel):
         """
         Takes selected atomtype from list and appends it to Q-atom state 1,2,3 or 4
         """
-        type_selected = map(int, self.atomtypes_listbox.curselection())
+        type_selected = list(map(int, self.atomtypes_listbox.curselection()))
         if len(type_selected) != 1:
             self.app.errorBox('Error', 'Select exactly 1 atomtype to assign to Q-atoms.')
             return
 
         newtype = self.atomtypes_listbox.get(type_selected[0]).split()[0].strip()
 
-        q_atoms_selections = map(int, self.changetypes_listbox.curselection())
+        q_atoms_selections = list(map(int, self.changetypes_listbox.curselection()))
         for selected in q_atoms_selections:
             qi = int(self.changetypes_listbox.get(selected).split()[0])
             self.q_atomtypes[qi][state] = newtype
 
         #If new atom parameter is not in atomtype:parameter list, append it:
-        if newtype not in self.atomtype_prm.keys():
-            ri, ei, ci, ai, ri1_4, ei_1_4, mass = map(float, self.atomtypes_listbox.get(type_selected[0]).split()[1:])
+        if newtype not in list(self.atomtype_prm.keys()):
+            ri, ei, ci, ai, ri1_4, ei_1_4, mass = list(map(float, self.atomtypes_listbox.get(type_selected[0]).split()[1:]))
             self.atomtype_prm[newtype] = [ri, ei, ci, ai, ri1_4, ei_1_4, mass]
 
         #Go through parameter files and try to find bond parameters for new atomtyp
@@ -2092,7 +2092,7 @@ class SetupFEP(Toplevel):
         """
         Edit selected atom type
         """
-        selections = map(int, self.atomtypes_listbox.curselection())
+        selections = list(map(int, self.atomtypes_listbox.curselection()))
         if len(selections) != 1:
             return
 
@@ -2108,7 +2108,7 @@ class SetupFEP(Toplevel):
         """
         Deletes selected atom parameter from list
         """
-        selections = map(int, self.atomtypes_listbox.curselection())
+        selections = list(map(int, self.atomtypes_listbox.curselection()))
         if len(selections) != 1:
             return
 
@@ -2116,7 +2116,7 @@ class SetupFEP(Toplevel):
         del self.atomtype_prm[del_type]
 
         #Check if any Q atoms have atomtype, and change:
-        for atomtype in self.q_atomtypes.keys():
+        for atomtype in list(self.q_atomtypes.keys()):
             for state in range(self.evb_states.get()):
                 if del_type in self.q_atomtypes[atomtype][state]:
                     #Check if atomtype can be adapted from other states for Q-atom
@@ -2134,7 +2134,7 @@ class SetupFEP(Toplevel):
         """
         Edit existing bond parameter
         """
-        selections = map(int, self.bondtypes_listbox.curselection())
+        selections = list(map(int, self.bondtypes_listbox.curselection()))
         if len(selections) != 1:
             return
 
@@ -2150,15 +2150,15 @@ class SetupFEP(Toplevel):
         """
         Add selected Q-atom pair to bond change list
         """
-        sel_index = map(int, self.qatoms_listbox.curselection())
+        sel_index = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(sel_index) < 1:
             return
-        
+
         for selected in sel_index:
             qatom = int(self.qatoms_listbox.get(selected).split()[0])
             atom = self.q_atom_nr[qatom]
-            if atom not in self.fep_atoms.keys():
+            if atom not in list(self.fep_atoms.keys()):
                 self.fep_atoms[atom] = [1, 1, 1, 1]
 
         self.qatoms_listbox.select_clear(0, END)
@@ -2171,7 +2171,7 @@ class SetupFEP(Toplevel):
         ==> self.fepatoms_listbox
         """
 
-        selections = map(int, self.fepatoms_listbox.curselection())
+        selections = list(map(int, self.fepatoms_listbox.curselection()))
         if len(selections) == 0:
             return
 
@@ -2183,16 +2183,16 @@ class SetupFEP(Toplevel):
             atomchange = self.fepatoms_listbox.get(selected)
             q = int(atomchange.split()[0])
             atom = self.q_atom_nr[q]
-            states = map(int, atomchange.split()[1:])
+            states = list(map(int, atomchange.split()[1:]))
 
             #Change selected state:
             states[state] = abs(states[state] - 1)
             fep_atom = int(states[state])
             if fep_atom == 0:
                 mass = round(self.atomtype_prm[self.q_atomtypes[q][state]][-1], 2)
-                print mass
+                print(mass)
                 dummyType = dummyDict[mass]
-                if not dummyType in self.atomtype_prm.keys():
+                if not dummyType in list(self.atomtype_prm.keys()):
                     self.atomtype_prm[dummyType] = [0, 0, 0, 0, 0, 0, mass]
                 self.q_atomtypes[q][state] = dummyType
                 self.q_charges[q][state] = 0
@@ -2222,7 +2222,7 @@ class SetupFEP(Toplevel):
         removes bond change from list
         ==> self.change_bonds
         """
-        sel_index = map(int, self.fepatoms_listbox.curselection())
+        sel_index = list(map(int, self.fepatoms_listbox.curselection()))
 
         if len(sel_index) == 0:
             return
@@ -2245,7 +2245,7 @@ class SetupFEP(Toplevel):
         """
         Edit existing angle parameter
         """
-        selections = map(int, self.angletypes_listbox.curselection())
+        selections = list(map(int, self.angletypes_listbox.curselection()))
         if len(selections) != 1:
             return
         self.editangle = EditAngleParameters(self, self.root, self.angletypes_listbox, selections[0], True)
@@ -2260,7 +2260,7 @@ class SetupFEP(Toplevel):
         """
         edit existing torsion parameter
         """
-        selections = map(int, self.torsiontypes_listbox.curselection())
+        selections = list(map(int, self.torsiontypes_listbox.curselection()))
         if len(selections) != 1:
             return
         self.edittorsion = EditTorsionParameters(self, self.root, self.torsiontypes_listbox, selections[0], True)
@@ -2275,7 +2275,7 @@ class SetupFEP(Toplevel):
         """
         edit existing improper parameter
         """
-        selections = map(int, self.impropertypes_listbox.curselection())
+        selections = list(map(int, self.impropertypes_listbox.curselection()))
         if len(selections) != 1:
             return
         self.editimproper = EditImproperParameters(self, self.root, self.impropertypes_listbox, selections[0], True)
@@ -2291,7 +2291,7 @@ class SetupFEP(Toplevel):
         Add selection of 4 Q-atoms to improper list
         """
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
         except:
             return
 
@@ -2337,14 +2337,14 @@ class SetupFEP(Toplevel):
                             q1 = qj
                             break
 
-        print bonds
-        print 'q2 is %d in state %d' % (q2, s+1)
+        print(bonds)
+        print('q2 is %d in state %d' % (q2, s+1))
 
         if not q1:
             self.app.errorBox('Error', 'Could not add new improper. '
                                        'It seems selection is not unique and therefore already existing.')
             return
-        print 'q1 is %d' % q1
+        print('q1 is %d' % q1)
         del q_atoms[q_atoms.index(q1)]
 
         #Find q3 and q4 based on atomnumbers:
@@ -2360,15 +2360,15 @@ class SetupFEP(Toplevel):
         """
         delete selected improper
         """
-        selections = map(int, self.changeimproper_listbox.curselection())
+        selections = list(map(int, self.changeimproper_listbox.curselection()))
 
         for selected in selections:
             line = self.changeimproper_listbox.get(selected)
             atom2 = line.split()[1]
             #Find Q atom number for atom2:
-            for q in self.q_atom_nr.keys():
+            for q in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[q]) == int(atom2):
-                    if q in self.q_impropers.keys():
+                    if q in list(self.q_impropers.keys()):
                         del self.q_impropers[q]
 
         self.update_impropers()
@@ -2378,7 +2378,7 @@ class SetupFEP(Toplevel):
         """
         add additional softpair (that is not autogenerated)
         """
-        selections = map(int, self.qatoms_listbox.curselection())
+        selections = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(selections) != 2:
             self.app.errorBox('Warning','Select exactly two Q-atoms for soft pairs!')
@@ -2390,36 +2390,36 @@ class SetupFEP(Toplevel):
             else:
                 q2 = int(self.qatoms_listbox.get(selections[i]).split()[0])
 
-        if q1 not in self.softpairs_added.keys():
+        if q1 not in list(self.softpairs_added.keys()):
             self.softpairs_added[q1] = q2
-        elif q2 not in self.softpairs_added.keys():
+        elif q2 not in list(self.softpairs_added.keys()):
             if self.softpairs_added[q1] != q2:
                 self.softpairs_added[q2] = q1
         else:
-            print 'Could not add softpair'
+            print('Could not add softpair')
         self.update_soft_pairs()
 
     def del_softpair(self):
         """
         Delete manually added softpair (it is not possible to delete required soft-pairs)
         """
-        selections = map(int, self.softpairs_listbox.curselection())
+        selections = list(map(int, self.softpairs_listbox.curselection()))
 
         if len(selections) == 0:
             return
 
         for selected in selections:
-            q1, q2 = map(int, self.softpairs_listbox.get(selected).split()[0:2])
-            if q1 in self.softpairs_added.keys():
+            q1, q2 = list(map(int, self.softpairs_listbox.get(selected).split()[0:2]))
+            if q1 in list(self.softpairs_added.keys()):
                 if self.softpairs_added[q1] == q2:
                     del self.softpairs_added[q1]
-            if q2 in self.softpairs_added.keys():
+            if q2 in list(self.softpairs_added.keys()):
                 if self.softpairs_added[q2] == q1:
                     del self.softpairs_added[q2]
         self.update_soft_pairs()
 
     def add_excludedpair(self):
-        selections = map(int, self.qatoms_listbox.curselection())
+        selections = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(selections) != 2:
             self.app.errorBox('Warning','Select exactly two atoms for excluded pairs!')
@@ -2434,23 +2434,23 @@ class SetupFEP(Toplevel):
         atompair = '%6d %6d'  % (atom1, atom2)
         atompair_rev = '%6d %6d' % (atom2, atom1)
 
-        if atompair not in self.excluded_pairs.keys() and atompair_rev not in self.excluded_pairs.keys():
+        if atompair not in list(self.excluded_pairs.keys()) and atompair_rev not in list(self.excluded_pairs.keys()):
             self.excluded_pairs[atompair] = [1,1,1,1]
             self.update_excluded_pairs()
 
     def del_excludedpair(self):
-        selections = map(int, self.excludedpairs_listbox.curselection())
+        selections = list(map(int, self.excludedpairs_listbox.curselection()))
 
         if len(selections) == 0:
             return
 
         for selected in selections:
-            atom1, atom2 = map(int, self.excludedpairs_listbox.get(selected).split()[0:2])
+            atom1, atom2 = list(map(int, self.excludedpairs_listbox.get(selected).split()[0:2]))
             atompair = '%6d %6d' % (atom1, atom2)
             atompair_rev = '%6d %6d' % (atom2, atom1)
-            if atompair in self.excluded_pairs.keys():
+            if atompair in list(self.excluded_pairs.keys()):
                 del self.excluded_pairs[atompair]
-            elif atompair_rev in self.excluded_pairs.keys():
+            elif atompair_rev in list(self.excluded_pairs.keys()):
                 del self.excluded_pairs[atompair_rev]
 
         self.update_excluded_pairs()
@@ -2459,19 +2459,19 @@ class SetupFEP(Toplevel):
         """
         Toggle excluded pair ON/OFF in state
         """
-        selections = map(int, self.excludedpairs_listbox.curselection())
+        selections = list(map(int, self.excludedpairs_listbox.curselection()))
         if len(selections) == 0:
             return
 
         indexes = []
         for selected in selections:
             indexes.append(selected)
-            atom1, atom2 = map(int, self.excludedpairs_listbox.get(selected).split()[0:2])
+            atom1, atom2 = list(map(int, self.excludedpairs_listbox.get(selected).split()[0:2]))
             excluded_state = int(self.excludedpairs_listbox.get(selected).split()[state + 2])
             excluded_state = abs(excluded_state - 1)
             atompair = '%6d %6d' % (atom1, atom2)
             atompair_rev = '%6d %6d' % (atom2, atom1)
-            if atompair_rev in self.excluded_pairs.keys():
+            if atompair_rev in list(self.excluded_pairs.keys()):
                 atompair = atompair_rev
             self.excluded_pairs[atompair][state] = excluded_state
 
@@ -2490,10 +2490,10 @@ class SetupFEP(Toplevel):
             temp = '%.2f' % float(self.temperature.get())
             runs = int(self.runs.get())
         except:
-            print 'Invalid values for temperature and runs'
+            print('Invalid values for temperature and runs')
             return
 
-        if temp not in self.temp_runs.keys():
+        if temp not in list(self.temp_runs.keys()):
             self.temp_runs[temp] = runs
         else:
             self.temp_runs[temp] += runs
@@ -2501,7 +2501,7 @@ class SetupFEP(Toplevel):
         self.update_temperatures()
 
     def del_temperature(self):
-        selections = map(int, self.temp_listbox.curselection())
+        selections = list(map(int, self.temp_listbox.curselection()))
 
         if len(selections) == 0:
             return
@@ -2521,7 +2521,7 @@ class SetupFEP(Toplevel):
         ==> self.q_charges
         ==> self.charge_listbox
         """
-        selections = map(int, self.charge_listbox.curselection())
+        selections = list(map(int, self.charge_listbox.curselection()))
         if len(selections) != 1:
             return
         try:
@@ -2536,7 +2536,7 @@ class SetupFEP(Toplevel):
             charges = [charge1, charge2, charge3, charge4]
 
         except:
-            print 'Can not change selection to specified charge!'
+            print('Can not change selection to specified charge!')
             return
 
         try:
@@ -2554,7 +2554,7 @@ class SetupFEP(Toplevel):
         """
         Adds selected q atoms from Q-atoms listbox to softcore list
         """
-        selections = map(int, self.qatoms_listbox.curselection())
+        selections = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -2572,7 +2572,7 @@ class SetupFEP(Toplevel):
         """
         Deletes selected softcores in softore listbox
         """
-        selections = map(int, self.softcore_listbox.curselection())
+        selections = list(map(int, self.softcore_listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -2587,7 +2587,7 @@ class SetupFEP(Toplevel):
         """
         Edit softcore value in softcore listbox
         """
-        selections = map(int, self.softcore_listbox.curselection())
+        selections = list(map(int, self.softcore_listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -2606,7 +2606,7 @@ class SetupFEP(Toplevel):
             soft = [s1, s2, s3, s4]
 
         except:
-            print 'Please specify valid number'
+            print('Please specify valid number')
             return
 
         for selected in range(len(selections)):
@@ -2615,8 +2615,8 @@ class SetupFEP(Toplevel):
                 for state in range(4):
                     self.q_softcore[q][state] = soft[state]
             except:
-                print 'Could not get Q atom number ...'
-                print selections
+                print('Could not get Q atom number ...')
+                print(selections)
 
 
 
@@ -2629,14 +2629,14 @@ class SetupFEP(Toplevel):
         Takes new scaling factor from self.elscale field and replaces original value
         """
         try:
-            selections = map(int, self.elscale_listbox.curselection())
+            selections = list(map(int, self.elscale_listbox.curselection()))
         except:
             return
 
         if len(selections) != 1:
             return
 
-        q1, q2 = map(int, self.elscale_listbox.get(selections[0]).split()[0:2])
+        q1, q2 = list(map(int, self.elscale_listbox.get(selections[0]).split()[0:2]))
         scale = self.elscale.get()
 
         qpair = '%3d %3d' % (q1, q2)
@@ -2646,13 +2646,13 @@ class SetupFEP(Toplevel):
     def update_elscale(self):
         self.elscale_listbox.delete(0, END)
 
-        for i in self.qpair_elscale.keys():
+        for i in list(self.qpair_elscale.keys()):
             scale = str(self.qpair_elscale[i])
             self.elscale_listbox.insert(END, '%7s   %s' % (i, scale))
 
     def add_elscale(self):
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
             if len(selections) != 2:
                 self.app.errorBox('Warning', 'Selected exactly 2 atoms for el scale!')
                 return
@@ -2667,25 +2667,25 @@ class SetupFEP(Toplevel):
 
         qpair = '%3d %3d' % (q1, q2)
         scale = self.elscale.get()
-        if qpair not in self.qpair_elscale.keys():
+        if qpair not in list(self.qpair_elscale.keys()):
             self.qpair_elscale[qpair] = [scale, scale, scale, scale]
 
         self.update_elscale()
 
     def del_elscale(self):
         try:
-            selections = map(int, self.elscale_listbox.curselection())
+            selections = list(map(int, self.elscale_listbox.curselection()))
         except:
             return
 
         for selected in selections:
-            q1, q2 = map(int, self.elscale_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.elscale_listbox.get(selected).split()[0:2]))
             qpair = '%3d %3d' % (q1, q2)
-            if qpair in self.qpair_elscale.keys():
+            if qpair in list(self.qpair_elscale.keys()):
                 del self.qpair_elscale[qpair]
             else:
                 qpair = '%3d %3d' % (q2, q1)
-                if qpair in self.qpair_elscale.keys():
+                if qpair in list(self.qpair_elscale.keys()):
                     del self.qpair_elscale[qpair]
                 else:
                     self.app.errorBox('Error', 'An error has occured in el scale lists. Please report problem!')
@@ -2794,8 +2794,8 @@ class SetupFEP(Toplevel):
         beta = 1.00 / (increase_end - increase_start)
         gamma = increase_start
 
-        print 'BETA GAMMA'
-        print (beta, gamma)
+        print('BETA GAMMA')
+        print((beta, gamma))
 
         #nitialize
         x = 0
@@ -2821,20 +2821,20 @@ class SetupFEP(Toplevel):
             l_values[increase_ind] = increase_start
             l_values[decrease_ind] = decrease_start
 
-            if l_values not in self.step_lambdavalues.values():
+            if l_values not in list(self.step_lambdavalues.values()):
                 step += 1
                 self.step_lambdavalues[step] = l_values
 
 
-            print (decrease_start, increase_start)
+            print((decrease_start, increase_start))
 
             if float(abs(increase_start)) >= float(increase_end):
                 break
 
             if loop_count > 2999:
-                print 'WOOOPS!! You just reached 3000 lambda steps!!'
-                print 'Something probably went wrong!? Or did you really want this?'
-                print 'Either way, please report this problem!'
+                print('WOOOPS!! You just reached 3000 lambda steps!!')
+                print('Something probably went wrong!? Or did you really want this?')
+                print('Either way, please report this problem!')
                 break
 
         self.update_lambdasteps()
@@ -2844,7 +2844,7 @@ class SetupFEP(Toplevel):
         Deletes selected lambda steps from list, and renumbers list:
         """
         try:
-            selections = map(int, self.lambdasteps_listbox.curselection())
+            selections = list(map(int, self.lambdasteps_listbox.curselection()))
         except:
             return
 
@@ -2891,16 +2891,16 @@ class SetupFEP(Toplevel):
         """
         Add selected atoms in Qatoms listbox to the change atom list
         """
-        
 
-        selections = map(int, self.qatoms_listbox.curselection())
+
+        selections = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(selections) < 1:
             return
 
         for selected in selections:
             q = int(self.qatoms_listbox.get(selected).split()[0])
-            if q not in self.q_element.keys():
+            if q not in list(self.q_element.keys()):
                 types = []
                 #Get atomtype(s) for Q atom:
                 for state in range(4):
@@ -2912,7 +2912,7 @@ class SetupFEP(Toplevel):
                     dmass = 1000.00
                     atom = '??'
                     mass = float(self.atomtype_prm[at][-1])
-                    for elem in self.massDict.keys():
+                    for elem in list(self.massDict.keys()):
                         if abs(self.massDict[elem] - mass) < dmass:
                             dmass = abs(self.massDict[elem] - mass)
                             atom = elem
@@ -2925,10 +2925,10 @@ class SetupFEP(Toplevel):
         """
         Deletes selection from the change atom listbox
         """
-        selection = map(int, self.atoms_listbox.curselection())
+        selection = list(map(int, self.atoms_listbox.curselection()))
 
         if len(selection) < 1:
-            print 'Nothing selected'
+            print('Nothing selected')
             return
 
         for selected in reversed(selection):
@@ -2942,17 +2942,17 @@ class SetupFEP(Toplevel):
         Takes selected atom in element list, and replaces the selected state atom
         """
 
-        elem_ind = map(int, self.elem_listbox.curselection())
+        elem_ind = list(map(int, self.elem_listbox.curselection()))
 
         if len(elem_ind) != 1:
-            print 'Select exactly one element!'
+            print('Select exactly one element!')
 
         elem = self.elem_listbox.get(elem_ind[0]).strip()
 
-        selection = map(int, self.atoms_listbox.curselection())
+        selection = list(map(int, self.atoms_listbox.curselection()))
 
         if len(selection) < 1:
-            print 'No Q-atoms selected!'
+            print('No Q-atoms selected!')
             return
 
         for selected in selection:
@@ -2961,14 +2961,14 @@ class SetupFEP(Toplevel):
             old_type = self.q_atomtypes[q][state]
             new_type = '.%s.' % elem
             mass = self.massDict[elem]
-            if not new_type in self.atomtype_prm.keys():
+            if not new_type in list(self.atomtype_prm.keys()):
                 self.atomtype_prm[new_type] = copy.deepcopy(self.atomtype_prm[old_type])
                 self.atomtype_prm[new_type][-1] = mass
             self.q_atomtypes[q][state] = new_type
 
         self.update_all()
         self.update_pymol_bonds()
-            
+
 
     def list_q_atoms_event(self, *args):
         """
@@ -2980,7 +2980,7 @@ class SetupFEP(Toplevel):
         self.session.stdin.write('hide spheres\n')
         atoms = []
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
         except:
             return
 
@@ -3005,7 +3005,7 @@ class SetupFEP(Toplevel):
 
     def list_fepatoms_event(self, *args):
         try:
-            selections = map(int, self.fepatoms_listbox.curselection())
+            selections = list(map(int, self.fepatoms_listbox.curselection()))
         except:
             return
 
@@ -3025,7 +3025,7 @@ class SetupFEP(Toplevel):
         self.charge4.delete(0, END)
 
         try:
-            selections = map(int, self.charge_listbox.curselection())
+            selections = list(map(int, self.charge_listbox.curselection()))
         except:
             return
 
@@ -3063,7 +3063,7 @@ class SetupFEP(Toplevel):
         self.softcore4.delete(0, END)
 
         try:
-            selections = map(int, self.softcore_listbox.curselection())
+            selections = list(map(int, self.softcore_listbox.curselection()))
         except:
             return
 
@@ -3080,7 +3080,7 @@ class SetupFEP(Toplevel):
                 indexes.append(_ind)
 
             except:
-                print 'Did not find Q atom! Contact developer!'
+                print('Did not find Q atom! Contact developer!')
                 return
         self.qatoms_listbox.yview(min(indexes))
         if len(selections) == 1:
@@ -3100,7 +3100,7 @@ class SetupFEP(Toplevel):
 
     def list_changetypes_event(self, *args):
         try:
-            selections = map(int, self.changetypes_listbox.curselection())
+            selections = list(map(int, self.changetypes_listbox.curselection()))
         except:
             return
 
@@ -3136,7 +3136,7 @@ class SetupFEP(Toplevel):
 
     def list_changebond_event(self, *args):
         try:
-            selections = map(int, self.changebond_listbox.curselection())
+            selections = list(map(int, self.changebond_listbox.curselection()))
         except:
             return
 
@@ -3147,8 +3147,8 @@ class SetupFEP(Toplevel):
         bonds = self.bondtypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            atom1, atom2 = map(int, self.changebond_listbox.get(selected).split()[0:2])
-            states = map(str, self.changebond_listbox.get(selected).split()[2:])
+            atom1, atom2 = list(map(int, self.changebond_listbox.get(selected).split()[0:2]))
+            states = list(map(str, self.changebond_listbox.get(selected).split()[2:]))
 
             for ind in range(len(qatoms)):
                 if int(qatoms[ind].split()[1]) == atom1 or int(qatoms[ind].split()[1]) == atom2:
@@ -3168,7 +3168,7 @@ class SetupFEP(Toplevel):
 
     def list_changeangle_event(self, *args):
         try:
-            selections = map(int, self.changeangle_listbox.curselection())
+            selections = list(map(int, self.changeangle_listbox.curselection()))
         except:
             return
 
@@ -3177,10 +3177,10 @@ class SetupFEP(Toplevel):
         angles = self.angletypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            a1, a2, a3 = map(int, self.changeangle_listbox.get(selected).split()[0:3])
-            states = map(str, self.changeangle_listbox.get(selected).split()[3:])
+            a1, a2, a3 = list(map(int, self.changeangle_listbox.get(selected).split()[0:3]))
+            states = list(map(str, self.changeangle_listbox.get(selected).split()[3:]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1:
                     q1 = i
                 if int(self.q_atom_nr[i]) == a2:
@@ -3200,7 +3200,7 @@ class SetupFEP(Toplevel):
 
     def list_changetorsion_event(self, *args):
         try:
-            selections = map(int, self.changetorsion_listbox.curselection())
+            selections = list(map(int, self.changetorsion_listbox.curselection()))
         except:
             return
 
@@ -3209,10 +3209,10 @@ class SetupFEP(Toplevel):
         torsions = self.torsiontypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            a1, a2, a3, a4 = map(int, self.changetorsion_listbox.get(selected).split()[0:4])
-            states = map(str, self.changetorsion_listbox.get(selected).split()[4:])
+            a1, a2, a3, a4 = list(map(int, self.changetorsion_listbox.get(selected).split()[0:4]))
+            states = list(map(str, self.changetorsion_listbox.get(selected).split()[4:]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1:
                     q1 = i
                 if int(self.q_atom_nr[i]) == a2:
@@ -3235,7 +3235,7 @@ class SetupFEP(Toplevel):
 
     def list_changeimproper_event(self, *args):
         try:
-            selections = map(int, self.changeimproper_listbox.curselection())
+            selections = list(map(int, self.changeimproper_listbox.curselection()))
         except:
             return
 
@@ -3244,10 +3244,10 @@ class SetupFEP(Toplevel):
         torsions = self.impropertypes_listbox.get(0, END)
         indexes = []
         for selected in selections:
-            a1, a2, a3, a4 = map(int, self.changeimproper_listbox.get(selected).split()[0:4])
-            states = map(str, self.changeimproper_listbox.get(selected).split()[4:])
+            a1, a2, a3, a4 = list(map(int, self.changeimproper_listbox.get(selected).split()[0:4]))
+            states = list(map(str, self.changeimproper_listbox.get(selected).split()[4:]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1:
                     q1 = i
                 if int(self.q_atom_nr[i]) == a2:
@@ -3270,7 +3270,7 @@ class SetupFEP(Toplevel):
 
     def list_softpairs_event(self, *args):
         try:
-            selections = map(int, self.softpairs_listbox.curselection())
+            selections = list(map(int, self.softpairs_listbox.curselection()))
         except:
             return
 
@@ -3278,7 +3278,7 @@ class SetupFEP(Toplevel):
         indexes = []
 
         for selected in selections:
-            q1, q2 = map(int, self.softpairs_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.softpairs_listbox.get(selected).split()[0:2]))
             indexes.append(q1 - 1)
             indexes.append(q2 - 1)
             self.qatoms_listbox.selection_set(q1 - 1)
@@ -3289,7 +3289,7 @@ class SetupFEP(Toplevel):
 
     def list_excludedpairs_event(self, *args):
         try:
-            selections = map(int, self.excludedpairs_listbox.curselection())
+            selections = list(map(int, self.excludedpairs_listbox.curselection()))
         except:
             return
 
@@ -3297,9 +3297,9 @@ class SetupFEP(Toplevel):
         indexes = []
 
         for selected in selections:
-            a1, a2 = map(int, self.excludedpairs_listbox.get(selected).split()[0:2])
+            a1, a2 = list(map(int, self.excludedpairs_listbox.get(selected).split()[0:2]))
 
-            for i in self.q_atom_nr.keys():
+            for i in list(self.q_atom_nr.keys()):
                 if int(self.q_atom_nr[i]) == a1 or int(self.q_atom_nr[i]) == a2:
                     indexes.append(i - 1)
                     self.qatoms_listbox.selection_set(i-1)
@@ -3310,7 +3310,7 @@ class SetupFEP(Toplevel):
     def list_elscale_event(self, *args):
 
         try:
-            selections = map(int, self.elscale_listbox.curselection())
+            selections = list(map(int, self.elscale_listbox.curselection()))
 
         except:
             return
@@ -3319,7 +3319,7 @@ class SetupFEP(Toplevel):
         indexes = []
 
         for selected in selections:
-            q1, q2 = map(int, self.elscale_listbox.get(selected).split()[0:2])
+            q1, q2 = list(map(int, self.elscale_listbox.get(selected).split()[0:2]))
             scale = float(self.elscale_listbox.get(selected).split()[2])
             indexes.append(q1 - 1)
             indexes.append(q2 - 1)
@@ -3335,7 +3335,7 @@ class SetupFEP(Toplevel):
         """
         Do something when change atoms are selected... hmm
         """
-        selections = map(int, self.atoms_listbox.curselection())
+        selections = list(map(int, self.atoms_listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -3356,7 +3356,7 @@ class SetupFEP(Toplevel):
 
     def list_monitorgroups_event(self, *args):
         self.group_atoms_listbox.delete(0, END)
-        selections = map(int, self.groups_listbox.curselection())
+        selections = list(map(int, self.groups_listbox.curselection()))
 
         if len(selections) != 1:
             return
@@ -3402,7 +3402,7 @@ class SetupFEP(Toplevel):
             return
 
         try:
-            selections = map(int, self.qatoms_listbox.curselection())
+            selections = list(map(int, self.qatoms_listbox.curselection()))
         except:
             return
 
@@ -3420,7 +3420,7 @@ class SetupFEP(Toplevel):
                 if 'You clicked' in line:
                     state = line.split('/')[1]
 
-        print 'Fixing geometry for %s: %s' % (state, pml_string)
+        print('Fixing geometry for %s: %s' % (state, pml_string))
         self.session.stdin.write('clean %s and (%s)\n' % (state, pml_string))
 
     def update_pymol_bonds(self):
@@ -3448,13 +3448,13 @@ class SetupFEP(Toplevel):
                       'Fe': 'orange',
                       'Zn': 'pink'}
 
-        for atom in self.fep_atoms.keys():
+        for atom in list(self.fep_atoms.keys()):
             for state in range(self.evb_states.get()):
                 cmd = hide_show[self.fep_atoms[atom][state]]
                 self.session.stdin.write('%s sticks, state%d and id %s\n' % (cmd, state + 1, atom))
 
         #Go through change atoms list and make changes:
-        for q in self.q_element.keys():
+        for q in list(self.q_element.keys()):
             atom_id = self.q_atom_nr[q]
             for state in range(self.evb_states.get()):
                 elem = self.q_element[q][state].strip()
@@ -3545,7 +3545,7 @@ class SetupFEP(Toplevel):
                             if '`' in selected:
                                 selected = ' '.join(selected.split('`'))
                             selected = selected.split('\n')[0]
-                            print selected
+                            print(selected)
                             #Get atomnumer of clicked atom:
                             self.session.stdin.write('id_atom sele\n')
                         if 'cmd.id_atom:' in line:
@@ -3804,8 +3804,8 @@ class SetupFEP(Toplevel):
         atom1 = int(self.q_atom_nr[int(q1)])
         atom2 = int(self.q_atom_nr[int(q2)])
 
-        print atom1
-        print atom2
+        print(atom1)
+        print(atom2)
 
         c1 = None
         c2 = None
@@ -3814,18 +3814,18 @@ class SetupFEP(Toplevel):
             for line in pdb:
                 if 'ATOM' in line:
                     if int(line.split()[1]) == atom1:
-                        c1 = map(lambda x: float(x), line[26:].split()[0:3])
+                        c1 = [float(x) for x in line[26:].split()[0:3]]
                     if int(line.split()[1]) == atom2:
-                        c2 = map(lambda x: float(x), line[26:].split()[0:3])
+                        c2 = [float(x) for x in line[26:].split()[0:3]]
 
                 if c1 and c2:
                     break
 
         if not c1:
-            print 'No coordinates found'
+            print('No coordinates found')
             return
         if not c2:
-            print 'No coordinates found'
+            print('No coordinates found')
             return
 
         c1_c2 = [x - y for x,y in zip(c1, c2)]
@@ -3836,11 +3836,11 @@ class SetupFEP(Toplevel):
 
         r_old = np.sqrt(dx**2 + dy**2 + dz**2)
 
-        c1_c2_adjust = map(lambda x: round((x/r_old) * r_target, 3), c1_c2)
+        c1_c2_adjust = [round((x/r_old) * r_target, 3) for x in c1_c2]
 
         c1_new = [x + y for x,y in zip(c2, c1_c2_adjust)]
 
-        print c1_new
+        print(c1_new)
 
         #if self.sync_pymol.get() != 0:
         #    self.session.stdin.write('alter_state 1, %s and id %d, (x,y,z)=(%.3f, %.3f, %.3f)\n'
@@ -3875,9 +3875,9 @@ class SetupFEP(Toplevel):
 
         #Get q-atoms that are changin bonds
         q_changing = []
-        for pair in self.change_bonds.keys():
-            atom1, atom2 = map(int, pair.split()[0:2])
-            for q in self.q_atom_nr.keys():
+        for pair in list(self.change_bonds.keys()):
+            atom1, atom2 = list(map(int, pair.split()[0:2]))
+            for q in list(self.q_atom_nr.keys()):
                 if (self.q_atom_nr[q] == atom1) or (self.q_atom_nr[q] == atom2):
                     q_changing.append(q)
 
@@ -3941,7 +3941,7 @@ class SetupFEP(Toplevel):
             for q in sorted(self.q_atom_nr.keys()):
                 residues.append('id %d' % self.q_atom_nr[q])
             try:
-                selections = map(int, self.qatoms_listbox.curselection())
+                selections = list(map(int, self.qatoms_listbox.curselection()))
                 for selected in selections:
                     h_add_list.append('id %s' % self.qatoms_listbox.get(selected).split()[1])
             except:
@@ -3949,7 +3949,7 @@ class SetupFEP(Toplevel):
 
         pml_select = ' or '.join(residues)
         h_add_string = ' or '.join(h_add_list)
-        print h_add_string
+        print(h_add_string)
 
         #Fix bond distances to any H-atom that has replaced another atom. (The H-bond distances are crucial to
         #avoid ffld_server failure)
@@ -3966,13 +3966,13 @@ class SetupFEP(Toplevel):
                 for i in range(len(atoms_)):
                     if atoms_[i] == 'H':
                         state = i+1
-                        if state not in state_qnr.keys():
+                        if state not in list(state_qnr.keys()):
                             state_qnr[state] = dict()
                         for line in feps:
                             q = int(line.split()[0])
                             if int(line.split()[state]) == 0:
                                 no_bonds.append(q)
-                                if not state in no_copy_atoms.keys():
+                                if not state in list(no_copy_atoms.keys()):
                                     no_copy_atoms[state] = list()
                                 no_copy_atoms[state].append('id %d' % self.q_atom_nr[q])
 
@@ -3985,7 +3985,7 @@ class SetupFEP(Toplevel):
         #Make templates for ffld_server in pymol:
         for state in range(1, self.evb_states.get() + 1):
             atom_xyz = dict()
-            if state in no_copy_atoms.keys():
+            if state in list(no_copy_atoms.keys()):
                 not_string = ' or '.join(no_copy_atoms[state])
                 self.session.stdin.write('create state%d_auto, state%d and (%s) and not (%s) \n'
                                      % (state, state, pml_select, not_string))
@@ -3993,16 +3993,16 @@ class SetupFEP(Toplevel):
                 self.session.stdin.write('create state%d_auto, state%d and (%s)\n'
                                      % (state, state, pml_select))
 
-            if state in state_qnr.keys():
+            if state in list(state_qnr.keys()):
                 time.sleep(1)
-                for q1 in state_qnr[state].keys():
+                for q1 in list(state_qnr[state].keys()):
                     q2 = state_qnr[state][q1]
                     if q2 > 0:
                         xyz = self.change_bond_length(q1, q2, 1.0, 'state%d_auto' % state)
                         #If server delay, this sometimes fails --> do it explixitly in pdb file:
                         resnr = self.q_atom_res[q1].split()[-1]
                         name = self.q_atom_name[q1]
-                        if resnr not in atom_xyz.keys():
+                        if resnr not in list(atom_xyz.keys()):
                             atom_xyz[resnr] = dict()
 
                         atom_xyz[resnr][name] = xyz
@@ -4025,16 +4025,16 @@ class SetupFEP(Toplevel):
                     t_delayed += 1
                     time.sleep(0.5)
                     if t_delayed > 20:
-                        print 'Could  not find pdb template from pymol!!'
+                        print('Could  not find pdb template from pymol!!')
                         return
                 old_pdb = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'r').readlines()
                 new_pdb = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'w')
                 for l in old_pdb:
                     if 'ATOM' in l:
                         resnr = l[21:26].strip()
-                        if resnr in atom_xyz.keys():
+                        if resnr in list(atom_xyz.keys()):
                             name = l[11:17].strip()
-                            if name in atom_xyz[resnr].keys():
+                            if name in list(atom_xyz[resnr].keys()):
                                 x,y,z = atom_xyz[resnr][name][0:]
                                 new_pdb.write('%s%8.3f%8.3f%8.3f%s' % (l[0:30], x, y, z, l[54:]))
                             else:
@@ -4056,7 +4056,7 @@ class SetupFEP(Toplevel):
         org_pdb = []
         for line in pdb:
             try:
-                if int(line.split()[1]) in self.q_atom_nr.values():
+                if int(line.split()[1]) in list(self.q_atom_nr.values()):
                     org_pdb.append(line)
             except:
                 continue
@@ -4068,13 +4068,13 @@ class SetupFEP(Toplevel):
             check_count = 0
             while True:
                 if os.path.isfile('%s/qevb_org%d.pdb' % (self.app.workdir, state)):
-                    print 'Found file'
+                    print('Found file')
                     break
                 else:
                     check_count += 1
                     time.sleep(0.1)
                 if check_count >= 50:
-                    print 'Could not find file'
+                    print('Could not find file')
                     break
 
             q_state = open('%s/qevb_org%d.pdb' % (self.app.workdir, state), 'r').readlines()
@@ -4087,7 +4087,7 @@ class SetupFEP(Toplevel):
                     orgres = orgline[17:26]
                     if orgtype == atomtype and orgres == res:
                         atomnr = int(orgline.split()[1])
-                        for q in self.q_atom_nr.keys():
+                        for q in list(self.q_atom_nr.keys()):
                             if self.q_atom_nr[q] == atomnr:
                                 cord_q[cord] = q
 
@@ -4099,7 +4099,7 @@ class SetupFEP(Toplevel):
             if not response:
                 self.app.errorBox('Error', 'Could not translate all atomtypes. Pleas verify pdb file.')
                 return
-            print 'ffld_server templet qevb_tmp%d.pdb generated' % state
+            print('ffld_server templet qevb_tmp%d.pdb generated' % state)
 
             #Run ffld_server and generate parameter for state
             ff = 'OPLS'+self.force_field.get()
@@ -4107,7 +4107,7 @@ class SetupFEP(Toplevel):
             #Can use maestro files for ffld if existing (better structure description)
             if os.path.isfile(self.app.workdir+'/qevb_tmp%d.mae' % state):
                 ffld_input = 'qevb_tmp%d.mae' % state
-                print 'Found MAE file. Using this by default.'
+                print('Found MAE file. Using this by default.')
             else:
                 ffld_input = 'qevb_tmp%d.pdb' % state
 
@@ -4188,11 +4188,11 @@ class SetupFEP(Toplevel):
         del qbonds[qlist.index(q1)]
         del qlist[qlist.index(q1)]
 
-        print qlist
+        print(qlist)
         q3, q4 = qlist[0:]
 
         #Check if improper exist and rearange accordingly:
-        if q2 in self.q_impropers.keys():
+        if q2 in list(self.q_impropers.keys()):
             if q1 == self.q_impropers[q2][0]:
                 #Improper exists in dict. Check that q3 and q4 are in correct order:
                 if q3 == self.q_impropers[q2][-1]:
@@ -4231,8 +4231,8 @@ class SetupFEP(Toplevel):
                     else:
                         atom1, atom2, atom3, atom4 = line.split()[0:4]
                         k = 0.5 * float(line.split()[4])
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
-                            if atom3 in newname_q.keys() and atom4 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
+                            if atom3 in list(newname_q.keys()) and atom4 in list(newname_q.keys()):
                                 q1 = newname_q[atom1]
                                 q2 = newname_q[atom2]
                                 q3 = newname_q[atom3]
@@ -4261,12 +4261,12 @@ class SetupFEP(Toplevel):
                         found_torsion = False
                     else:
                         atom1, atom2, atom3, atom4 = line.split()[0:4]
-                        k1, k2, k3 = map(float, line.split()[4:7])
+                        k1, k2, k3 = list(map(float, line.split()[4:7]))
                         k1 *= 0.5
                         k2 *= 0.5
                         k3 *= 0.5
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
-                            if atom3 in newname_q.keys() and atom4 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
+                            if atom3 in list(newname_q.keys()) and atom4 in list(newname_q.keys()):
                                 quart = '%s %s %s %s' % (newname_atomtype[atom1], newname_atomtype[atom2],
                                                          newname_atomtype[atom3], newname_atomtype[atom4])
                                 quart_rev = '%s %s %s %s' % (newname_atomtype[atom1], newname_atomtype[atom2],
@@ -4280,8 +4280,8 @@ class SetupFEP(Toplevel):
                         found_bending = False
                     else:
                         atom1, atom2, atom3 = line.split()[0:3]
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
-                            if atom3 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
+                            if atom3 in list(newname_q.keys()):
                                 trip = '%s %s %s' % (newname_atomtype[atom1], newname_atomtype[atom2],
                                                      newname_atomtype[atom3])
                                 trip_rev = '%s %s %s' % (trip.split()[2], trip.split()[1], trip.split()[0])
@@ -4295,7 +4295,7 @@ class SetupFEP(Toplevel):
                         found_stretch = False
                     else:
                         atom1, atom2 = line.split()[0:2]
-                        if atom1 in newname_q.keys() and atom2 in newname_q.keys():
+                        if atom1 in list(newname_q.keys()) and atom2 in list(newname_q.keys()):
                             #{'type1 type2' : [De, alpha, R, Kb]}
                             pair = '%s %s' % (newname_atomtype[atom1], newname_atomtype[atom2])
                             pair_rev = '%s %s' % (pair.split()[1], pair.split()[0])
@@ -4326,14 +4326,14 @@ class SetupFEP(Toplevel):
                         if newname[0] == 'H':
                             ci = 7.0
                         mass = self.massDict[newname[0]]
-                        if cord[type_nr] in cord_q.keys():
+                        if cord[type_nr] in list(cord_q.keys()):
                             q = cord_q[cord[type_nr]]
                             if not only_charges:
                                 newname_atomtype[newname] = atomtype
                                 newname_q[newname] = q
                                 self.atomtype_prm[atomtype] = [ri, ei, ci, ai, ri1_4, ei_1_4, mass]
                                 self.q_atomtypes[q][state] = atomtype
-                            if q in self.q_charges.keys():
+                            if q in list(self.q_charges.keys()):
                                 self.q_charges[q][state] = charge
 
                         type_nr += 1
@@ -4396,7 +4396,7 @@ class SetupFEP(Toplevel):
                 found_atom = False
                 while not found_atom:
                     atom = line[j]
-                    if atom not in atom_count.keys():
+                    if atom not in list(atom_count.keys()):
                         if j > 16:
                             pdb_created = False
                             break
@@ -4424,7 +4424,7 @@ class SetupFEP(Toplevel):
 
         ffld_path = self.app.q_settings[ 'schrodinger path' ]
 
-        print ff
+        print(ff)
 
         if ff == 'OPLS2001':
             version = '11'
@@ -4495,7 +4495,7 @@ class SetupFEP(Toplevel):
         if not os.path.isfile(fepname):
             fepname = '%s/%s' % (self.app.workdir, fepname)
             if not os.path.isfile(fepname):
-                print 'Could not find %s' % fepname
+                print('Could not find %s' % fepname)
                 return
 
         self.app.log(' ', 'Editing FEP file: \n'
@@ -4567,7 +4567,7 @@ class SetupFEP(Toplevel):
 
         fepname = self.pdbfile.split('/')[-1].split('.')[0] + '.fep'
 
-        q_settings = cPickle.load(open(self.app.settings_path + '/Qsettings','rb'))
+        q_settings = pickle.load(open(self.app.settings_path + '/Qsettings','rb'))
 
 
         lambda_list = list(self.lambdasteps_listbox.get(0, END))
@@ -4600,7 +4600,7 @@ class SetupFEP(Toplevel):
                 submissionscipt = open(self.app.workdir + '/' + 'qsubmit','r').readlines()
             else:
                 submissionscipt = ['#!/bin/bash\n#Qdyn I/O\n']
-                print 'submission script not found! Please edit this in settings'
+                print('submission script not found! Please edit this in settings')
             for line in submissionscipt:
                 if '#Qdyn I/O' in line:
                     break
@@ -4924,7 +4924,7 @@ class SetupFEP(Toplevel):
             submitfile.write('for i in {%d..%d}\ndo\ncd %s/$i\n%s run.sh\n' % (start, end, T,self.app.q_settings[ 'subscript' ][1]))
             submitfile.write('cd ../../\ndone')
             for run in range(start, end + 1):
-                print 'T=%s   run=%d' % (T, run)
+                print('T=%s   run=%d' % (T, run))
                 if not os.path.exists('%s/%d' % (T, run)):
                     os.makedirs('%s/%d' % (T, run))
                 for inputfile in evb_files:
@@ -4973,7 +4973,7 @@ class SetupFEP(Toplevel):
         self.update_monitor_listboxes()
 
     def del_monitor_group(self):
-        selections = map(int, self.groups_listbox.curselection())
+        selections = list(map(int, self.groups_listbox.curselection()))
 
         if len(selections) < 1:
             return
@@ -4988,18 +4988,18 @@ class SetupFEP(Toplevel):
         self.update_monitor_listboxes()
 
     def add_monitor_atoms(self):
-        sel_group = map(int, self.groups_listbox.curselection())
+        sel_group = list(map(int, self.groups_listbox.curselection()))
 
         if len(sel_group) != 1:
-            print 'Select exactly one group to append monitor atoms to!'
+            print('Select exactly one group to append monitor atoms to!')
             return
 
         group = int(self.groups_listbox.get(sel_group[0]).split()[1])
 
-        sel_atoms = map(int, self.qatoms_listbox.curselection())
+        sel_atoms = list(map(int, self.qatoms_listbox.curselection()))
 
         if len(sel_atoms) < 1:
-            print 'No atoms selected!'
+            print('No atoms selected!')
             return
 
         for i in sel_atoms:
@@ -5010,15 +5010,15 @@ class SetupFEP(Toplevel):
         self.update_monitor_listboxes()
 
     def del_monitor_atoms(self):
-        sel_group = map(int, self.groups_listbox.curselection())
+        sel_group = list(map(int, self.groups_listbox.curselection()))
 
         if len(sel_group) != 1:
-            print 'Select exactly one group to remove monitor atoms from!'
+            print('Select exactly one group to remove monitor atoms from!')
             return
 
         group = int(self.groups_listbox.get(sel_group[0]).split()[1])
 
-        sel_atoms = map(int, self.group_atoms_listbox.curselection())
+        sel_atoms = list(map(int, self.group_atoms_listbox.curselection()))
 
         for i in sel_atoms:
             atom = self.group_atoms_listbox.get(i).strip()
@@ -5027,10 +5027,10 @@ class SetupFEP(Toplevel):
         self.update_monitor_listboxes()
 
     def add_monitor_pair(self):
-        sel_groups = map(int, self.groups_listbox.curselection())
+        sel_groups = list(map(int, self.groups_listbox.curselection()))
 
         if len(sel_groups) != 2:
-            print 'Select exactly to groups to monitor!'
+            print('Select exactly to groups to monitor!')
             return
 
         groups = list()
@@ -5044,7 +5044,7 @@ class SetupFEP(Toplevel):
         self.update_monitor_listboxes()
 
     def del_monitor_pair(self):
-        sel_pairs = map(int, self.monitor_pairs_listbox.curselection())
+        sel_pairs = list(map(int, self.monitor_pairs_listbox.curselection()))
 
         if len(sel_pairs) < 1:
             return
@@ -5085,10 +5085,10 @@ class SetupFEP(Toplevel):
                   #'El-scale': self.elscale_frame,
                   #'Excluded pairs': self.excludedpairs_frame,
                   'Softcore': self.softcore_frame,
-                   u"\N{GREEK SMALL LETTER LAMDA}-steps": self.lambdasteps_frame,
+                   "\N{GREEK SMALL LETTER LAMDA}-steps": self.lambdasteps_frame,
                    'Temperature(s)': self.temperature_frame}
 
-        for i in frames.keys():
+        for i in list(frames.keys()):
             frames[i].grid_forget()
         try:
             frames[self.setup_evb.get()].grid(row=2, column=0, columnspan=2)
@@ -5155,7 +5155,7 @@ class SetupFEP(Toplevel):
         qatoms_yscroll.config(command=self.qatoms_listbox.yview)
         qatoms_xscroll.config(command=self.qatoms_listbox.xview)
         self.qatoms_listbox.grid(in_=qatoms_label, row=1, rowspan=10, column = 0, sticky='e')
-        self.qatoms_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.qatoms_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.qatoms_listbox.bind('<<ListboxSelect>>', self.list_q_atoms_event)
 
 
@@ -5176,8 +5176,8 @@ class SetupFEP(Toplevel):
         change_bonds = LabelFrame(frame2, text='Remove atoms', bg=self.main_color)
         change_bonds.grid(sticky='ns')
 
-        bond_label = Label(frame2, text=u" Qi     \N{GREEK SMALL LETTER PHI}1   \N{GREEK SMALL LETTER PHI}2"
-                                        u"   \N{GREEK SMALL LETTER PHI}3   \N{GREEK SMALL LETTER PHI}4",
+        bond_label = Label(frame2, text=" Qi     \N{GREEK SMALL LETTER PHI}1   \N{GREEK SMALL LETTER PHI}2"
+                                        "   \N{GREEK SMALL LETTER PHI}3   \N{GREEK SMALL LETTER PHI}4",
                            bg=self.main_color)
         bond_label.grid(in_=change_bonds, row=0, column=0, sticky='w')
 
@@ -5188,7 +5188,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         bondchange_yscroll.config(command=self.fepatoms_listbox.yview)
         self.fepatoms_listbox.grid(in_=change_bonds, row=1, rowspan=5, column = 0, sticky = 'e')
-        self.fepatoms_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.fepatoms_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.fepatoms_listbox.bind('<<ListboxSelect>>', self.list_fepatoms_event)
 
         add_bondchange = Button(frame2, text='+', highlightbackground=self.main_color, command=self.add_fep_atom)
@@ -5197,21 +5197,21 @@ class SetupFEP(Toplevel):
         del_bondchange = Button(frame2, text='-', highlightbackground=self.main_color, command=self.del_fep_atom)
         del_bondchange.grid(in_=change_bonds, row=0, column=3)
 
-        alter_bond1 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        alter_bond1 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                               command = lambda: self.set_fep_state(0), width=2)
         alter_bond1.grid(in_=change_bonds,row=1, column=2)
 
-        alter_bond2 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        alter_bond2 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                               command = lambda: self.set_fep_state(1), width=2)
         alter_bond2.grid(in_=change_bonds, row=1, column=3)
 
-        self.alter_bond3 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
+        self.alter_bond3 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
                               command = lambda: self.set_fep_state(2), width=2)
         self.alter_bond3.grid(in_=change_bonds, row=2, column=2)
         self.alter_bond3.config(state=DISABLED)
         self.state3_enabled.append(self.alter_bond3)
 
-        self.alter_bond4 = Button(frame2, text=u"\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
+        self.alter_bond4 = Button(frame2, text="\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
                               command = lambda: self.set_fep_state(3), width=2)
         self.alter_bond4.grid(in_=change_bonds, row=2, column=3)
         self.alter_bond4.config(state=DISABLED)
@@ -5254,7 +5254,7 @@ class SetupFEP(Toplevel):
                                    #'Excluded pairs',
                                    'Monitor groups',
                                    'Softcore',
-                                   u"\N{GREEK SMALL LETTER LAMDA}-steps",
+                                   "\N{GREEK SMALL LETTER LAMDA}-steps",
                                    'Temperature(s)')
         self.setup_menu.config(highlightbackground=self.main_color, bg=self.main_color, width=15)
         self.setup_menu.grid(in_=setup_label, row=4, column=0)
@@ -5266,7 +5266,7 @@ class SetupFEP(Toplevel):
 
         self.force_field = Spinbox(frame2, width=5, highlightthickness=0, relief=GROOVE, values=self.forcefields)
         self.force_field.grid(in_=setup_label, row=3, column=2)
-        #self.force_field.config(font=tkFont.Font(family="Courier", size=10))
+        #self.force_field.config(font=tkinter.font.Font(family="Courier", size=10))
         self.force_field.config(state=DISABLED)
 
         #Status frame
@@ -5279,14 +5279,14 @@ class SetupFEP(Toplevel):
                                       width=77, height=3, highlightthickness=0, relief=GROOVE, selectmode=EXTENDED)
         qstatus_yscroll.config(command=self.qstatus_listbox.yview)
         self.qstatus_listbox.grid(in_=status_label, row=1, rowspan=3, column = 0, sticky = 'e')
-        self.qstatus_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.qstatus_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         #Variable frames from dropdown menu (.grid_remove)
         ######### Charges ##########
-        charge_label = Label(self.charge_frame, text=u" Qi       \N{GREEK SMALL LETTER PHI}1    "
-                                                     u"    \N{GREEK SMALL LETTER PHI}2"
-                                                     u"       \N{GREEK SMALL LETTER PHI}3"
-                                                     u"       \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        charge_label = Label(self.charge_frame, text=" Qi       \N{GREEK SMALL LETTER PHI}1    "
+                                                     "    \N{GREEK SMALL LETTER PHI}2"
+                                                     "       \N{GREEK SMALL LETTER PHI}3"
+                                                     "       \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         charge_label.grid(row=0, column=0, sticky='w')
 
         charge_yscroll = Scrollbar(self.charge_frame)
@@ -5296,7 +5296,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         charge_yscroll.config(command=self.charge_listbox.yview)
         self.charge_listbox.grid(row=1, rowspan=10, column = 0, sticky = 'e')
-        self.charge_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.charge_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.charge_listbox.bind('<<ListboxSelect>>', self.list_charge_event)
 
         self.autocharge = Button(self.charge_frame, text='Auto Charge', highlightbackground=self.main_color,
@@ -5304,10 +5304,10 @@ class SetupFEP(Toplevel):
         self.autocharge.grid(row=0, column=3, columnspan=2)
         self.autocharge.config(state=DISABLED)
 
-        s1 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}1", bg=self.main_color)
+        s1 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}1", bg=self.main_color)
         s1.grid(row=3, column=3)
 
-        s2 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}2", bg=self.main_color)
+        s2 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}2", bg=self.main_color)
         s2.grid(row=3, column=4)
 
         self.charge1 = Spinbox(self.charge_frame, width=7, highlightthickness=0, relief=GROOVE,
@@ -5338,10 +5338,10 @@ class SetupFEP(Toplevel):
         self.charge4.config(state=DISABLED)
         self.state4_enabled.append(self.charge4)
 
-        s3 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}3", bg=self.main_color)
+        s3 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}3", bg=self.main_color)
         s3.grid(row=5, column=3)
 
-        s4 = Label(self.charge_frame, text=u"\N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        s4 = Label(self.charge_frame, text="\N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         s4.grid(row=5, column=4)
 
         edit_charges = Button(self.charge_frame, text='Change charge', highlightbackground=self.main_color,
@@ -5360,7 +5360,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         atomtypes_yscroll.config(command=self.atomtypes_listbox.yview)
         self.atomtypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.atomtypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.atomtypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         #self.atomtypes_listbox.bind('<<ListboxSelect>>', self.list_charge_event)
 
         import_atom_prm = Button(self.atomtype_frame, text='Import', highlightbackground=self.main_color,
@@ -5379,10 +5379,10 @@ class SetupFEP(Toplevel):
                               command=self.delete_atom_prm)
         del_atom_prm.grid(row=11, column=4)
 
-        changetypes_label = Label(self.atomtype_frame, text=u"Qi  \N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.atomtype_frame, text="Qi  \N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, columnspan=4, sticky='w')
 
         changetypes_yscroll = Scrollbar(self.atomtype_frame)
@@ -5392,24 +5392,24 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         changetypes_yscroll.config(command=self.changetypes_listbox.yview)
         self.changetypes_listbox.grid(row=1, rowspan=10, column = 7, columnspan=4, sticky = 'e')
-        self.changetypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changetypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changetypes_listbox.bind('<<ListboxSelect>>', self.list_changetypes_event)
 
-        alter_state1 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        alter_state1 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(0))
         alter_state1.grid(row=11, column=7)
 
-        alter_state2 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        alter_state2 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(1))
         alter_state2.grid(row=11, column=8)
 
-        self.alter_state3 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
+        self.alter_state3 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}3", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(2))
         self.alter_state3.grid(row=11, column=9)
         self.alter_state3.config(state=DISABLED)
         self.state3_enabled.append(self.alter_state3)
 
-        self.alter_state4 = Button(self.atomtype_frame, text=u"\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
+        self.alter_state4 = Button(self.atomtype_frame, text="\N{GREEK SMALL LETTER PHI}4", highlightbackground=self.main_color,
                               command = lambda: self.set_atomtype_state(3))
         self.alter_state4.grid(row=11, column=10)
         self.alter_state4.config(state=DISABLED)
@@ -5417,7 +5417,7 @@ class SetupFEP(Toplevel):
 
 
         ####### Bond types ########
-        bondtypes_label = Label(self.bond_frame, text=u"#      De       \N{GREEK SMALL LETTER ALPHA}        R0      "
+        bondtypes_label = Label(self.bond_frame, text="#      De       \N{GREEK SMALL LETTER ALPHA}        R0      "
                                 , bg=self.main_color)
         bondtypes_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5428,7 +5428,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         bondtypes_yscroll.config(command=self.bondtypes_listbox.yview)
         self.bondtypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.bondtypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.bondtypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_bond_prm = Button(self.bond_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_bond_prm)
@@ -5442,10 +5442,10 @@ class SetupFEP(Toplevel):
                               command=self.add_bond_prm)
         add_bond_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.bond_frame, text=u"     i            j       \N{GREEK SMALL LETTER PHI}1"
-                                                            u"  \N{GREEK SMALL LETTER PHI}2"
-                                                            u"  \N{GREEK SMALL LETTER PHI}3"
-                                                            u"  \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.bond_frame, text="     i            j       \N{GREEK SMALL LETTER PHI}1"
+                                                            "  \N{GREEK SMALL LETTER PHI}2"
+                                                            "  \N{GREEK SMALL LETTER PHI}3"
+                                                            "  \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changebond_yscroll = Scrollbar(self.bond_frame)
@@ -5455,7 +5455,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         changebond_yscroll.config(command=self.changebond_listbox.yview)
         self.changebond_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changebond_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changebond_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changebond_listbox.bind('<<ListboxSelect>>', self.list_changebond_event)
 
         #update_bonds = Button(self.bond_frame, text='Update', highlightbackground=self.main_color,
@@ -5463,7 +5463,7 @@ class SetupFEP(Toplevel):
         #update_bonds.grid(row=11, column=7)
 
         #### ANGLE TYPES ####
-        angle_label = Label(self.angle_frame, text=u"#      K          \N{GREEK CAPITAL LETTER THETA}  ",
+        angle_label = Label(self.angle_frame, text="#      K          \N{GREEK CAPITAL LETTER THETA}  ",
                             bg=self.main_color)
         angle_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5474,7 +5474,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         angletypes_yscroll.config(command=self.angletypes_listbox.yview)
         self.angletypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.angletypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.angletypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_angle_prm = Button(self.angle_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_angle_prm)
@@ -5488,11 +5488,11 @@ class SetupFEP(Toplevel):
                               command=self.add_angle_prm)
         add_angle_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.angle_frame, text=u"   i             j           k     "
-                                                         u"\N{GREEK SMALL LETTER PHI}1"
-                                                            u"   \N{GREEK SMALL LETTER PHI}2"
-                                                            u"   \N{GREEK SMALL LETTER PHI}3"
-                                                            u"   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.angle_frame, text="   i             j           k     "
+                                                         "\N{GREEK SMALL LETTER PHI}1"
+                                                            "   \N{GREEK SMALL LETTER PHI}2"
+                                                            "   \N{GREEK SMALL LETTER PHI}3"
+                                                            "   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changeangle_yscroll = Scrollbar(self.angle_frame)
@@ -5502,7 +5502,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         changeangle_yscroll.config(command=self.changeangle_listbox.yview)
         self.changeangle_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changeangle_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changeangle_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changeangle_listbox.bind('<<ListboxSelect>>', self.list_changeangle_event)
 
         include_ang = Label(self.angle_frame, text='Include changing angles:', bg=self.main_color)
@@ -5512,7 +5512,7 @@ class SetupFEP(Toplevel):
         all_angles_check.grid(row=11, column=7, sticky='e')
 
         #### TORSION TYPES ####
-        torsion_label = Label(self.torsion_frame, text=u"#      K          min.    phase     paths  ",
+        torsion_label = Label(self.torsion_frame, text="#      K          min.    phase     paths  ",
                             bg=self.main_color)
         torsion_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5523,7 +5523,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         torsiontypes_yscroll.config(command=self.torsiontypes_listbox.yview)
         self.torsiontypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.torsiontypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.torsiontypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_torsion_prm = Button(self.torsion_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_torsion_prm)
@@ -5537,11 +5537,11 @@ class SetupFEP(Toplevel):
                               command=self.add_torsion_prm)
         add_torsion_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.torsion_frame, text=u"    i           j           k           l       "
-                                                         u"\N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.torsion_frame, text="    i           j           k           l       "
+                                                         "\N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changetorsion_yscroll = Scrollbar(self.torsion_frame)
@@ -5551,7 +5551,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         changetorsion_yscroll.config(command=self.changetorsion_listbox.yview)
         self.changetorsion_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changetorsion_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changetorsion_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changetorsion_listbox.bind('<<ListboxSelect>>', self.list_changetorsion_event)
 
         include_ang = Label(self.torsion_frame, text='Include changing torsions:', bg=self.main_color)
@@ -5562,7 +5562,7 @@ class SetupFEP(Toplevel):
         all_torsion_check.grid(row=11, column=7, sticky='e')
 
         #### IMPROPER TYPES ####
-        improper_label = Label(self.improper_frame, text=u"#      K          phase  ",
+        improper_label = Label(self.improper_frame, text="#      K          phase  ",
                             bg=self.main_color)
         improper_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5573,7 +5573,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         impropertypes_yscroll.config(command=self.impropertypes_listbox.yview)
         self.impropertypes_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.impropertypes_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.impropertypes_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         import_improper_prm = Button(self.improper_frame, text='Import', highlightbackground=self.main_color,
                             command=self.import_improper_prm)
@@ -5587,11 +5587,11 @@ class SetupFEP(Toplevel):
                               command=self.add_improper_prm)
         add_improper_prm.grid(row=11, column=3)
 
-        changetypes_label = Label(self.improper_frame, text=u"    i           j           k           l       "
-                                                         u"\N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        changetypes_label = Label(self.improper_frame, text="    i           j           k           l       "
+                                                         "\N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         changetypes_label.grid(row=0, column=7, sticky='w')
 
         changeimproper_yscroll = Scrollbar(self.improper_frame)
@@ -5601,7 +5601,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         changeimproper_yscroll.config(command=self.changeimproper_listbox.yview)
         self.changeimproper_listbox.grid(row=1, rowspan=10, column = 7, sticky = 'e')
-        self.changeimproper_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.changeimproper_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.changeimproper_listbox.bind('<<ListboxSelect>>', self.list_changeimproper_event)
 
         add_imp = Button(self.improper_frame, text = 'Add', highlightbackground=self.main_color, command=self.add_improper)
@@ -5619,7 +5619,7 @@ class SetupFEP(Toplevel):
 
 
         #### SOFT PAIRS ####
-        soft_label = Label(self.softpair_frame, text=u"Qi      Qj ",
+        soft_label = Label(self.softpair_frame, text="Qi      Qj ",
                             bg=self.main_color)
         soft_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
@@ -5630,7 +5630,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         softpairs_yscroll.config(command=self.softpairs_listbox.yview)
         self.softpairs_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.softpairs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.softpairs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.softpairs_listbox.bind('<<ListboxSelect>>', self.list_softpairs_event)
 
         add_softpair = Button(self.softpair_frame, text='+', highlightbackground=self.main_color,
@@ -5653,7 +5653,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         angcop_yscroll.config(command=self.angle_couplings_listbox.yview)
         self.angle_couplings_listbox.grid(row=1, rowspan=10, column = 0, columnspan=1, sticky = 'e')
-        self.angle_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.angle_couplings_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         torsion_coupling = Label(self.coupling_frame, text='Torsions',
                             bg=self.main_color)
@@ -5666,7 +5666,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         torcop_yscroll.config(command=self.torsion_couplings_listbox.yview)
         self.torsion_couplings_listbox.grid(row=1, rowspan=10, column = 2, columnspan=1, sticky = 'e')
-        self.torsion_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.torsion_couplings_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         improper_coupling = Label(self.coupling_frame, text='Impropers',
                             bg=self.main_color)
@@ -5679,14 +5679,14 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         impcop_yscroll.config(command=self.improper_couplings_listbox.yview)
         self.improper_couplings_listbox.grid(row=1, rowspan=10, column = 4, columnspan=1, sticky = 'e')
-        self.improper_couplings_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.improper_couplings_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
 
         #### EXCLUDED PAIRS ####
-        excluded_label = Label(self.excludedpairs_frame, text=u"     i          j       \N{GREEK SMALL LETTER PHI}1"
-                                                            u"   \N{GREEK SMALL LETTER PHI}2"
-                                                            u"   \N{GREEK SMALL LETTER PHI}3"
-                                                            u"   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        excluded_label = Label(self.excludedpairs_frame, text="     i          j       \N{GREEK SMALL LETTER PHI}1"
+                                                            "   \N{GREEK SMALL LETTER PHI}2"
+                                                            "   \N{GREEK SMALL LETTER PHI}3"
+                                                            "   \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         excluded_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
         excludedpairs_yscroll = Scrollbar(self.excludedpairs_frame)
@@ -5696,7 +5696,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         excludedpairs_yscroll.config(command=self.excludedpairs_listbox.yview)
         self.excludedpairs_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.excludedpairs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.excludedpairs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.excludedpairs_listbox.bind('<<ListboxSelect>>', self.list_excludedpairs_event)
 
         add_excludedpair = Button(self.excludedpairs_frame, text='+', highlightbackground=self.main_color,
@@ -5711,31 +5711,31 @@ class SetupFEP(Toplevel):
                               command=self.del_excludedpair)
         del_excludedpair.grid(row=4, column=8)
 
-        state1 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        state1 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                         command=lambda: self.excluded_state(0))
         state1.grid(row=11, column=2)
 
-        state2 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        state2 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                         command=lambda: self.excluded_state(1))
         state2.grid(row=11, column=3)
 
-        self.state3 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+        self.state3 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}3",
                              highlightbackground=self.main_color, command=lambda: self.excluded_state(2))
         self.state3.grid(row=11, column=4)
         self.state3.config(state=DISABLED)
         self.state3_enabled.append(self.state3)
 
-        self.state4 = Button(self.excludedpairs_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+        self.state4 = Button(self.excludedpairs_frame, text="\N{GREEK SMALL LETTER PHI}4",
                              highlightbackground=self.main_color, command=lambda: self.excluded_state(3))
         self.state4.grid(row=11, column=5)
         self.state4.config(state=DISABLED)
         self.state4_enabled.append(self.state4)
 
         #### EL SCALE ####
-        elscale_label = Label(self.elscale_frame, text=u"Qi      Qj      \N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        elscale_label = Label(self.elscale_frame, text="Qi      Qj      \N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         elscale_label.grid(row=0, column=0, columnspan=6, sticky='w')
 
         elscale_yscroll = Scrollbar(self.softpair_frame)
@@ -5745,7 +5745,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         elscale_yscroll.config(command=self.elscale_listbox.yview)
         self.elscale_listbox.grid(row=1, rowspan=10, column = 0, columnspan=6, sticky = 'e')
-        self.elscale_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.elscale_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.elscale_listbox.bind('<<ListboxSelect>>', self.list_elscale_event)
 
         add_elscale = Button(self.elscale_frame, text='+', highlightbackground=self.main_color,
@@ -5766,21 +5766,21 @@ class SetupFEP(Toplevel):
                              command=self.set_elscale)
         set_elscale.grid(row=6, column=7, columnspan=2)
 
-        el_state1 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        el_state1 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                         command=lambda: self.el_state(0))
         el_state1.grid(row=11, column=2)
 
-        el_state2 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        el_state2 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                         command=lambda: self.el_state(1))
         el_state2.grid(row=11, column=3)
 
-        self.el_state3 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+        self.el_state3 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}3",
                              highlightbackground=self.main_color, command=lambda: self.el_state(2))
         self.el_state3.grid(row=11, column=4)
         self.el_state3.config(state=DISABLED)
         self.state3_enabled.append(self.el_state3)
 
-        self.el_state4 = Button(self.elscale_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+        self.el_state4 = Button(self.elscale_frame, text="\N{GREEK SMALL LETTER PHI}4",
                              highlightbackground=self.main_color, command=lambda: self.el_state(3))
         self.el_state4.grid(row=11, column=5)
         self.el_state4.config(state=DISABLED)
@@ -5797,16 +5797,16 @@ class SetupFEP(Toplevel):
         end_label = Label(self.lambdasteps_frame, text='END', bg=self.main_color)
         end_label.grid(row=0, column=3)
 
-        l1_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}1', bg=self.main_color)
+        l1_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}1', bg=self.main_color)
         l1_label.grid(row=1, column=0)
 
-        l2_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}2', bg=self.main_color)
+        l2_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}2', bg=self.main_color)
         l2_label.grid(row=2, column=0)
 
-        l3_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}3', bg=self.main_color)
+        l3_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}3', bg=self.main_color)
         l3_label.grid(row=3, column=0)
 
-        l4_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}4', bg=self.main_color)
+        l4_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}4', bg=self.main_color)
         l4_label.grid(row=4, column=0)
 
         sum_label = Label(self.lambdasteps_frame, text='SUM', bg=self.main_color)
@@ -5892,24 +5892,24 @@ class SetupFEP(Toplevel):
         lambda_sampling.configure(bg=self.main_color, width=10)
         lambda_sampling.grid(row=1, column=4, columnspan=2)
 
-        step_label = Label(self.lambdasteps_frame, text=u'\N{GREEK SMALL LETTER LAMDA}-Step', bg=self.main_color)
+        step_label = Label(self.lambdasteps_frame, text='\N{GREEK SMALL LETTER LAMDA}-Step', bg=self.main_color)
         step_label.grid(row=2, column=4, sticky='s', padx=10)
 
         lambdastep = Spinbox(self.lambdasteps_frame, width=5, highlightthickness=0, relief=GROOVE,
                                    from_=0.01, to=0.40, increment=0.01, textvariable=self.lambdastep)
         lambdastep.grid(row=3,rowspan=3, column=4, sticky='n', padx=10)
 
-        add_button = Button(self.lambdasteps_frame, text=u"\u21D2",
+        add_button = Button(self.lambdasteps_frame, text="\u21D2",
                             highlightbackground=self.main_color, command=self.add_lambda_steps)
         add_button.grid(row=2, rowspan=2, column=5, padx=(0,10))
-        add_button.config(font=tkFont.Font(family="Courier", size=28))
+        add_button.config(font=tkinter.font.Font(family="Courier", size=28))
 
 
 
-        lambda_label = Label(self.lambdasteps_frame, text=u"  #      \N{GREEK SMALL LETTER LAMDA}1    "
-                                                          u"  \N{GREEK SMALL LETTER LAMDA}2    "
-                                                          u"   \N{GREEK SMALL LETTER LAMDA}3    "
-                                                          u"   \N{GREEK SMALL LETTER LAMDA}4",
+        lambda_label = Label(self.lambdasteps_frame, text="  #      \N{GREEK SMALL LETTER LAMDA}1    "
+                                                          "  \N{GREEK SMALL LETTER LAMDA}2    "
+                                                          "   \N{GREEK SMALL LETTER LAMDA}3    "
+                                                          "   \N{GREEK SMALL LETTER LAMDA}4",
                                                           bg=self.main_color)
         lambda_label.grid(row=0, column=6, columnspan=6, sticky='w')
 
@@ -5920,7 +5920,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         lambdasteps_yscroll.config(command=self.lambdasteps_listbox.yview)
         self.lambdasteps_listbox.grid(row=1, rowspan=10, column = 6, columnspan=6, sticky = 'e')
-        self.lambdasteps_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.lambdasteps_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         del_lamda_steps = Button(self.lambdasteps_frame, text='Delete', highlightbackground=self.main_color,
                                  command=self.del_lambda_steps)
@@ -5950,10 +5950,10 @@ class SetupFEP(Toplevel):
         self.runs.delete(0, END)
         self.runs.insert(0, 1)
 
-        add_button = Button(self.temperature_frame, text=u"\u21D2",
+        add_button = Button(self.temperature_frame, text="\u21D2",
                             highlightbackground=self.main_color, command=self.add_temperature)
         add_button.grid(row=0, rowspan=10, column=5, padx=(10,10))
-        add_button.config(font=tkFont.Font(family="Courier", size=28))
+        add_button.config(font=tkinter.font.Font(family="Courier", size=28))
 
 
 
@@ -5968,7 +5968,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         temp_yscroll.config(command=self.temp_listbox.yview)
         self.temp_listbox.grid(row=1, rowspan=10, column = 6, columnspan=6, sticky = 'e')
-        self.temp_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.temp_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         del_temp = Button(self.temperature_frame, text='Delete', highlightbackground=self.main_color,
                                  command=self.del_temperature)
@@ -5976,10 +5976,10 @@ class SetupFEP(Toplevel):
 
         #SOFTCORE
         ######### Charges ##########
-        softcore_label = Label(self.softcore_frame, text=u" Qi       \N{GREEK SMALL LETTER PHI}1    "
-                                                     u"    \N{GREEK SMALL LETTER PHI}2"
-                                                     u"       \N{GREEK SMALL LETTER PHI}3"
-                                                     u"       \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        softcore_label = Label(self.softcore_frame, text=" Qi       \N{GREEK SMALL LETTER PHI}1    "
+                                                     "    \N{GREEK SMALL LETTER PHI}2"
+                                                     "       \N{GREEK SMALL LETTER PHI}3"
+                                                     "       \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         softcore_label.grid(row=0, column=0, sticky='w')
 
         softcore_yscroll = Scrollbar(self.softcore_frame)
@@ -5989,7 +5989,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         softcore_yscroll.config(command=self.softcore_listbox.yview)
         self.softcore_listbox.grid(row=1, rowspan=10, column = 0, sticky = 'e')
-        self.softcore_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.softcore_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.softcore_listbox.bind('<<ListboxSelect>>', self.list_softcore_event)
 
         add_softcore = Button(self.softcore_frame, text = '+', highlightbackground=self.main_color,
@@ -6000,16 +6000,16 @@ class SetupFEP(Toplevel):
                               command=self.del_softcore)
         del_softcore.grid(row=0, column=4, sticky='w')
 
-        s1 = Label(self.softcore_frame, text=u"\N{GREEK SMALL LETTER PHI}1", bg=self.main_color)
+        s1 = Label(self.softcore_frame, text="\N{GREEK SMALL LETTER PHI}1", bg=self.main_color)
         s1.grid(row=3, column=3)
 
-        s2 = Label(self.softcore_frame, text=u"\N{GREEK SMALL LETTER PHI}2", bg=self.main_color)
+        s2 = Label(self.softcore_frame, text="\N{GREEK SMALL LETTER PHI}2", bg=self.main_color)
         s2.grid(row=3, column=4)
 
-        s3 = Label(self.softcore_frame, text=u"\N{GREEK SMALL LETTER PHI}3", bg=self.main_color)
+        s3 = Label(self.softcore_frame, text="\N{GREEK SMALL LETTER PHI}3", bg=self.main_color)
         s3.grid(row=5, column=3)
 
-        s4 = Label(self.softcore_frame, text=u"\N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        s4 = Label(self.softcore_frame, text="\N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         s4.grid(row=5, column=4)
 
         self.softcore1 = Spinbox(self.softcore_frame, width=7, highlightthickness=0, relief=GROOVE,
@@ -6051,10 +6051,10 @@ class SetupFEP(Toplevel):
         use_soft_max_pot.grid(row=11,column=1, columnspan=2, sticky='w')
 
         #ATOMS frame
-        atoms_label = Label(self.atoms_frame, text=u"   Qi     \N{GREEK SMALL LETTER PHI}1"
-                                                            u"    \N{GREEK SMALL LETTER PHI}2"
-                                                            u"    \N{GREEK SMALL LETTER PHI}3"
-                                                            u"    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
+        atoms_label = Label(self.atoms_frame, text="   Qi     \N{GREEK SMALL LETTER PHI}1"
+                                                            "    \N{GREEK SMALL LETTER PHI}2"
+                                                            "    \N{GREEK SMALL LETTER PHI}3"
+                                                            "    \N{GREEK SMALL LETTER PHI}4", bg=self.main_color)
         atoms_label.grid(row=0, column=2, columnspan=6, sticky='w')
 
         atoms_yscroll = Scrollbar(self.atoms_frame)
@@ -6064,7 +6064,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         atoms_yscroll.config(command=self.atoms_listbox.yview)
         self.atoms_listbox.grid(row=1, rowspan=10, column = 2, columnspan=6, sticky = 'e')
-        self.atoms_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.atoms_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.atoms_listbox.bind('<<ListboxSelect>>', self.list_atomchange_event)
 
 
@@ -6078,7 +6078,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         elem_yscroll.config(command=self.elem_listbox.yview)
         self.elem_listbox.grid(row=1, rowspan=10, column = 0, sticky = 'e')
-        self.elem_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.elem_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         #Insert default elements here
         elements = ['H', 'C', 'N', 'O', 'P', 'S', 'F', 'Cl', 'Br', 'Na', 'Mg', 'K', 'Ca', 'Fe', 'Zn']
@@ -6094,21 +6094,21 @@ class SetupFEP(Toplevel):
                               command=self.del_atom_change)
         del_atomchange.grid(row=4, column=10)
 
-        atom_state1 = Button(self.atoms_frame, text=u"\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
+        atom_state1 = Button(self.atoms_frame, text="\N{GREEK SMALL LETTER PHI}1", highlightbackground=self.main_color,
                         command=lambda: self.change_atom_state(0))
         atom_state1.grid(row=11, column=4)
 
-        atom_state2 = Button(self.atoms_frame, text=u"\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
+        atom_state2 = Button(self.atoms_frame, text="\N{GREEK SMALL LETTER PHI}2", highlightbackground=self.main_color,
                         command=lambda: self.change_atom_state(1))
         atom_state2.grid(row=11, column=5)
 
-        self.atom_state3 = Button(self.atoms_frame, text=u"\N{GREEK SMALL LETTER PHI}3",
+        self.atom_state3 = Button(self.atoms_frame, text="\N{GREEK SMALL LETTER PHI}3",
                              highlightbackground=self.main_color, command=lambda: self.change_atom_state(2))
         self.atom_state3.grid(row=11, column=6)
         self.atom_state3.config(state=DISABLED)
         self.state3_enabled.append(self.atom_state3)
 
-        self.atom_state4 = Button(self.atoms_frame, text=u"\N{GREEK SMALL LETTER PHI}4",
+        self.atom_state4 = Button(self.atoms_frame, text="\N{GREEK SMALL LETTER PHI}4",
                              highlightbackground=self.main_color, command=lambda: self.change_atom_state(3))
         self.atom_state4.grid(row=11, column=7)
         self.atom_state4.config(state=DISABLED)
@@ -6127,7 +6127,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         groups_yscroll.config(command=self.groups_listbox.yview)
         self.groups_listbox.grid(row=1, rowspan=10, column = 0, columnspan=1, sticky = 'e')
-        self.groups_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.groups_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
         self.groups_listbox.bind('<<ListboxSelect>>', self.list_monitorgroups_event)
 
 
@@ -6151,7 +6151,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         group_atoms_yscroll.config(command=self.group_atoms_listbox.yview)
         self.group_atoms_listbox.grid(row=1, rowspan=10, column = 2, columnspan=1, sticky = 'e')
-        self.group_atoms_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.group_atoms_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         add_monitor_atoms = Button(self.monitorgroups_frame, text='+', highlightbackground=self.main_color,
                            command=self.add_monitor_atoms)
@@ -6173,7 +6173,7 @@ class SetupFEP(Toplevel):
                                       exportselection=False)
         monitor_pairs_yscroll.config(command=self.monitor_pairs_listbox.yview)
         self.monitor_pairs_listbox.grid(row=1, rowspan=10, column = 4, columnspan=1, sticky = 'e')
-        self.monitor_pairs_listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.monitor_pairs_listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
         add_monitor_pair = Button(self.monitorgroups_frame, text='+', highlightbackground=self.main_color,
                            command=self.add_monitor_pair)
@@ -6207,5 +6207,3 @@ class SetupFEP(Toplevel):
 
         close_button= Button(frame4, text='Close', highlightbackground=self.main_color, command=self.destroy)
         close_button.grid(row=1, column=3)
-
-

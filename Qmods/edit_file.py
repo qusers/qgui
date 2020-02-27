@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Button, Text, Frame, Toplevel, Scrollbar, END, LEFT
+from tkinter import Button, Text, Frame, Toplevel, Scrollbar, END, LEFT
 
 
 class FileEdit(Toplevel):
@@ -73,5 +73,3 @@ class FileEdit(Toplevel):
         save_button = Button(left_frame, text = 'Save', command=self.save_file)
         save_button.grid(row=1, column=8)
         save_button.config(highlightbackground=self.main_color)
-
-

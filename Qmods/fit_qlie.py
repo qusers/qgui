@@ -13,22 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import Label, TOP, Button, Listbox, Scrollbar, BROWSE, Spinbox, Entry, LabelFrame, Text, Frame, \
-    Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton
-
-import tkFont
+from tkinter import *
+import tkinter.font
 import numpy as np
 import os
 
 import matplotlib
 matplotlib.use('TkAgg')
 #Implement default mpl key bindings
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import  key_press_handler
 from matplotlib.figure import Figure
 from matplotlib import rc
 rc('text', usetex=True)
-from tkFileDialog import askopenfilename, asksaveasfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from edit_lie import EditLIE
 
 
@@ -75,7 +73,7 @@ class FitQlie(Toplevel):
         self.gamma_entry.insert(0, '0.00')
 
     def on_key_event(self, event):
-        print('you pressed %s' % event.key)
+        print(('you pressed %s' % event.key))
         key_press_handler(event, self.canvas, self.toolbar)
 
     def import_lie_results(self):
@@ -150,8 +148,8 @@ class FitQlie(Toplevel):
         Performs linear regression f(x) = ax + b.
         returns a and b
         """
-        x = map(float, x)
-        y = map(float, y)
+        x = list(map(float, x))
+        y = list(map(float, y))
 
         A = np.array([x, np.ones(len(x))])
         w = np.linalg.lstsq(A.T, y)[0]
@@ -166,7 +164,7 @@ class FitQlie(Toplevel):
         real = np.array(real)
         r_i = (predicted - real)
 
-        sse = np.sum(map(lambda x: x ** 2, r_i))
+        sse = np.sum([x ** 2 for x in r_i])
 
         return sse
 
@@ -178,7 +176,7 @@ class FitQlie(Toplevel):
         """
         ave_real = np.average(real)
 
-        ess = np.sum(map(lambda x: (x - ave_real) **2, predicted))
+        ess = np.sum([(x - ave_real) **2 for x in predicted])
 
         return ess
 
@@ -212,7 +210,7 @@ class FitQlie(Toplevel):
         #Get regrssion line for points:
         if len(self.lie_data) > 0:
             a,b = self.linear_regression(dG_exp, dG)
-            dG_reg = map(lambda x: (x * a) + b, dG_exp)
+            dG_reg = [(x * a) + b for x in dG_exp]
 
         #Set color cycle for plots:
         matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
@@ -547,11 +545,11 @@ class FitQlie(Toplevel):
         #Frame2 (Table with data)
         table_heading = Text(frame2, width=70, height=1, bg=self.main_color, borderwidth=0, highlightthickness=0)
         table_heading.grid(row=0, column=0, columnspan=10)
-        table_heading.config(font=tkFont.Font(family="Courier", size=12))
-        table_heading.insert(0.0, u"#NAME         \N{GREEK SMALL LETTER BETA}     \N{GREEK CAPITAL LETTER DELTA}E(el)"
-                                  u"   \N{GREEK SMALL LETTER ALPHA}    \N{GREEK CAPITAL LETTER DELTA}E(vdW)     "
-                                  u"\N{GREEK SMALL LETTER GAMMA}    "
-                                  u"  \N{GREEK CAPITAL LETTER DELTA}G     \N{GREEK CAPITAL LETTER DELTA}G(exp)")
+        table_heading.config(font=tkinter.font.Font(family="Courier", size=12))
+        table_heading.insert(0.0, "#NAME         \N{GREEK SMALL LETTER BETA}     \N{GREEK CAPITAL LETTER DELTA}E(el)"
+                                  "   \N{GREEK SMALL LETTER ALPHA}    \N{GREEK CAPITAL LETTER DELTA}E(vdW)     "
+                                  "\N{GREEK SMALL LETTER GAMMA}    "
+                                  "  \N{GREEK CAPITAL LETTER DELTA}G     \N{GREEK CAPITAL LETTER DELTA}G(exp)")
 
         listbox_scroll = Scrollbar(frame2)
         listbox_scroll.grid(row = 1, column = 10, sticky = 'nsw', padx=(0,10))
@@ -559,22 +557,22 @@ class FitQlie(Toplevel):
                                highlightthickness=0, relief=GROOVE, selectmode=BROWSE)
         listbox_scroll.config(command=self.listbox.yview)
         self.listbox.grid(row=1, column = 0, columnspan=9, sticky = 'w')
-        self.listbox.config(font=tkFont.Font(family="Courier", size=12))
+        self.listbox.config(font=tkinter.font.Font(family="Courier", size=12))
 
 
-        alpha_label = Label(frame2, text= u"\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
+        alpha_label = Label(frame2, text= "\N{GREEK SMALL LETTER ALPHA}", bg=self.main_color)
         alpha_label.grid(row=2, column=0)
         self.alpha_entry = Spinbox(frame2, width=7, highlightthickness=0, relief=GROOVE,
                                   from_=-1.00, to=1.00, increment=0.01, textvariable=self.alpha_var)
         self.alpha_entry.grid(row=3, column=0)
 
-        beta_label = Label(frame2, text= u"\N{GREEK SMALL LETTER BETA}", bg=self.main_color)
+        beta_label = Label(frame2, text= "\N{GREEK SMALL LETTER BETA}", bg=self.main_color)
         beta_label.grid(row=2, column=1)
         self.beta_entry = Spinbox(frame2, width=7, highlightthickness=0, relief=GROOVE,
                                   from_=-1.00, to=1.00, increment=0.01, textvariable=self.beta_var)
         self.beta_entry.grid(row=3, column=1)
 
-        gamma_label = Label(frame2, text= u"\N{GREEK SMALL LETTER GAMMA}", bg=self.main_color)
+        gamma_label = Label(frame2, text= "\N{GREEK SMALL LETTER GAMMA}", bg=self.main_color)
         gamma_label.grid(row=2, column=2)
         self.gamma_entry = Spinbox(frame2, width=7, highlightthickness=0, relief=GROOVE,
                                   from_=-99.99, to=99.99, increment=0.05, textvariable=self.gamma_var)
