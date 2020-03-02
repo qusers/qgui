@@ -1471,9 +1471,9 @@ class TopologyPrepare(Toplevel):
 
         tmpfile = open(self.app.workdir+'/.tmpfile','wb')
         if 'darwin' in sys.platform:
-            self.session = Popen(["pymol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+            self.session = Popen(["pymol", "-p -x -i", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, universal_newlines=True, bufsize=0, preexec_fn=os.setsid)
         else:
-            self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+            self.session = Popen(["pymol", "-p", "%s" % self.pdbfile], stdout=tmpfile, stdin=PIPE,  universal_newlines=True, bufsize=0, preexec_fn=os.setsid)
 
         self.update()
         len_log = 35
