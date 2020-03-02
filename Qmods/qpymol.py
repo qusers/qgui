@@ -926,14 +926,14 @@ class ViewPyMol(Toplevel):
 
         if 'darwin' in sys.platform:
             try:
-                self.session = Popen(["pymol", "-p -x -i"], stdout=tmpfile, stdin=PIPE,
+                self.session = Popen(["pymol", "-p -x -i"], stdout=tmpfile, stdin=PIPE, universal_newlines=True, bufsize=0,
                                      preexec_fn=os.setsid)
             except:
                 print('pymol not found')
 
         else:
             try:
-                self.session = Popen(["pymol", "-p"], stdout=tmpfile, stdin=PIPE, preexec_fn=os.setsid)
+                self.session = Popen(["pymol", "-p"], stdout=tmpfile, stdin=PIPE, universal_newlines=True, bufsize=0, preexec_fn=os.setsid)
             except:
                 print('No pymol version found')
 
