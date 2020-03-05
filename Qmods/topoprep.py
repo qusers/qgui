@@ -924,7 +924,7 @@ class TopologyPrepare(Toplevel):
 
         self.writeTopology()
 
-        Popen(args= "%s < %s/%s > %s/%s" % (q_settings[ 'executables' ][0],self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name),shell=True).wait()
+        Popen(args= "%s < %s/%s > %s/%s" % (q_settings[ 'executables' ][0],self.app.workdir, qprepinp_name, self.app.workdir, qprepout_name), universal_newlines=True, bufsize=0, shell=True).wait()
 
         if os.path.isfile(self.app.workdir + '/' + qprepout_name):
             with open(self.app.workdir + '/' + qprepout_name, 'r') as qpreplog:
