@@ -27,7 +27,7 @@ __status__ = "Production"
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
-from tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE
+from tkinter import Tk, Entry, Label, Button, Toplevel, GROOVE, messagebox
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from urllib.request import urlopen
 import os
@@ -308,11 +308,11 @@ class QGui(object):
 
     def errorBox(self, tit ='Error', msg=''):
         if tit == 'Error':
-            tkMessageBox.showerror(tit, msg)
+            messagebox.showerror(tit, msg)
         elif tit == 'Info':
-            tkMessageBox.showinfo(tit, msg)
+            messagebox.showinfo(tit, msg)
         else:
-            tkMessageBox.showwarning(tit, msg)
+            messagebox.showwarning(tit, msg)
 
     def setup_md(self):
         """Opens the Setup MD for Qdyn when Setup --> MD is selected from the menubar
