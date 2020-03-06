@@ -498,7 +498,7 @@ class QGui(object):
                 self.main_window.clear_button_pressed()
 
             else:
-                with open(self.workdir + '/' + pdb_id, 'w') as f:
+                with open(self.workdir + '/' + pdb_id, 'wb') as f:
                     for line in pdbfile:
                         f.write(line)
                 self.pdb_id = '%s/%s' % (self.workdir, pdb_id)
