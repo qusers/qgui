@@ -16,6 +16,7 @@
 from tkinter import PhotoImage, Toplevel, Canvas, Scrollbar, Listbox, Checkbutton, DISABLED, NORMAL, END, GROOVE, IntVar
 import os
 import sys
+import psutil
 
 class SplashScreen(Toplevel):
     def __init__(self, app, root, image="/Qmods/qgui_box.gif", timeout=2000):
@@ -27,11 +28,15 @@ class SplashScreen(Toplevel):
         self.root = root
         self.app = app
 
+
         if 'darwin' in sys.platform:
+            pid = os.getpid()
+            process = psutil.Process(pid)
+            process_name = process.name()
             try:
-                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python3" to true' ''')
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "%s" to true' ''', process_name)
             except:
-                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "%s" to true' ''', process_name)
 
         # don't show main window
         #self.main.withdraw()
