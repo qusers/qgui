@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 ###############EDITABLE REGION################################
@@ -31,7 +31,7 @@ else:
     print('Install path %s exists' % install_path)
     print('Existing files will be overwritten!\n')
     print('Press Y to continue or N to cancel:')
-    if raw_input().lower() != 'y':
+    if input().lower() != 'y':
         sys.exit()
 
 if not os.path.isdir('%s/Qmods' % install_path):
