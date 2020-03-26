@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 __author__ = "Geir Villy Isaksen"
 __copyright__ = "Copyright (C) 2017 University of Tromso / Geir Villy Isaksen"
@@ -96,7 +96,7 @@ class QGui(object):
         #On mac the following is needed to make window pop to front when opened:
         if 'darwin' in sys.platform:
             try:
-                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python" to true' ''')
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "python3" to true' ''')
             except:
                 os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
 
