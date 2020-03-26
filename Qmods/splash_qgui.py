@@ -34,9 +34,9 @@ class SplashScreen(Toplevel):
             process = psutil.Process(pid)
             process_name = process.name()
             try:
-                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "%s" to true' ''' % process_name)
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "%s" to true' ''', process_name)
             except:
-                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "%s" to true' ''' % process_name)
+                os.system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "%s" to true' ''', process_name)
 
         # don't show main window
         #self.main.withdraw()
