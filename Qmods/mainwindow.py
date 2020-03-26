@@ -94,9 +94,9 @@ class MainWindow(Frame):
             self.root.maxsize(589,508)
             self.root.minsize(589,508)
         else:
-            self.root.geometry("599x509+%d+%d" % (x0, y0))
-            self.root.maxsize(589,518)
-            self.root.minsize(589,518)
+            self.root.geometry("670x635+%d+%d" % (x0, y0))
+            #self.root.maxsize(589,518)
+            #self.root.minsize(589,518)
 
         upper_frame = Frame(self, bg = self.main_color)
         upper_frame.pack(side = TOP)
