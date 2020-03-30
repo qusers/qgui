@@ -16,19 +16,17 @@ kinetic experiments.
 ###Installation
 
 **Qgui** is easy to install. The only demand on the user is that of making sure
-of having a working version of **Q**, Python3 with the Tkinter, psutil, matplotlib, and numpy python
-packages used in the analysis modules.
+of having a working version of **Q** and Python3 (not installed using Conda) with the Tkinter, matplotlib, and numpy python packages used in the analysis modules.
 
-If your installation of Python does not come with these packages, you can install them using:
+If your installation of Python3 does not come with these packages, you can install them using:
 ```bash
 bash-3.2$ apt-get install python3-tk
 bash-3.2$ apt-get install python3-pip
 bash-3.2$ pip3 install numpy
 bash-3.2$ pip3 install matplotlib
-bash-3.2$ pip3 install psutil
 ```
 
-Qgui3 can be cloned from github issuing the following command in the user
+**Qgui3** can be cloned from github issuing the following command in the user
 terminal:
 
 ```git
