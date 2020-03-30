@@ -453,6 +453,7 @@ class AnalyzeQcalc(Toplevel):
 
         #Write topology name to input file
         input_file.write('%s\n' % self.app.top_id)
+        input_file.write('.\n')
 
         if not atoms:
             atoms = self.selected_listbox.get(0, END)
