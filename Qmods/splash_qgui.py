@@ -14,9 +14,7 @@
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
 from tkinter import PhotoImage, Toplevel, Canvas, Scrollbar, Listbox, Checkbutton, DISABLED, NORMAL, END, GROOVE, IntVar
-import os
-import sys
-import psutil
+
 
 class SplashScreen(Toplevel):
     def __init__(self, app, root, image="/Qmods/qgui_box.gif", timeout=2000):
