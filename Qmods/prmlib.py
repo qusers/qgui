@@ -303,7 +303,7 @@ class CreatePrmLib(Toplevel):
             print('Found maestro file, using this by default')
             input_type = 'mae'
 
-        call('%s/utilities/ffld_server -i%s %s/%s.%s -print_parameters -version %s' %
+        call('%s/utilities/ffld_server -i%s "%s/%s.%s" -print_parameters -version %s\n' %
              (self.ffld_path, input_type, self.app.workdir, self.ligname, input_type, version),
              shell=True, stdout=tmpfile, stderr=tmpfile)
 

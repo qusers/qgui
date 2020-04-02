@@ -4533,7 +4533,7 @@ class SetupEVB(Toplevel):
         else:
             ffld_type = '-ipdb'
 
-        call('%s/utilities/ffld_server %s %s/%s -print_parameters -version %s' %
+        call('%s/utilities/ffld_server %s "%s/%s" -print_parameters -version %s\n' %
              (ffld_path, ffld_type, self.app.workdir, ipdb, version), shell=True, stdout=tmpfile, stderr=tmpfile)
 
         self.update()
