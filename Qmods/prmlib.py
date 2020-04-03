@@ -320,9 +320,10 @@ class CreatePrmLib(Toplevel):
             if 'exception' in line:
                 done = True
                 self.impact_failed = True
-            if 'FATAL' in line:
-                self.impact_failed = True
-                done = True
+            #if 'FATAL' in line:
+                #030420: The call function returns a FATAL at the end... nuking this for now. GVI
+            #    self.impact_failed = True
+            #    done = True
 
         if not done:
             #Wait for ffld_server to finish if not done:

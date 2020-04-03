@@ -4549,9 +4549,10 @@ class SetupEVB(Toplevel):
             if 'exception' in line:
                 done = True
                 ffld_failed = True
-            if 'FATAL' in line:
-                ffld_failed = True
-                done = True
+            #if 'FATAL' in line:
+                # 030420: The call function returns a FATAL at the end... nuking this for now. GVI
+            #    ffld_failed = True
+            #   done = True
 
         if not done:
             #Wait for ffld_server to finish if not done:
