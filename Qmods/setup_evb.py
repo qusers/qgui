@@ -4533,7 +4533,7 @@ class SetupEVB(Toplevel):
         else:
             ffld_type = '-ipdb'
 
-        call('%s/utilities/ffld_server %s %s/%s -print_parameters -version %s' %
+        call('%s/utilities/ffld_server %s "%s/%s" -print_parameters -version %s' %
              (ffld_path, ffld_type, self.app.workdir, ipdb, version), shell=True, stdout=tmpfile, stderr=tmpfile)
 
         self.update()
@@ -4549,9 +4549,9 @@ class SetupEVB(Toplevel):
             if 'exception' in line:
                 done = True
                 ffld_failed = True
-            if 'FATAL' in line:
-                ffld_failed = True
-                done = True
+            #if 'FATAL' in line:
+            #    ffld_failed = True
+            #    done = True
 
         if not done:
             #Wait for ffld_server to finish if not done:
