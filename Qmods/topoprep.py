@@ -774,7 +774,7 @@ class TopologyPrepare(Toplevel):
         self.topname = self.topology_entry.get(0.0,END).strip()
         self.top_pdbname = self.topo_pdb_entry.get(0.0,END).strip()
         for entry in self.lib:
-            qprepinp.write('readlib %s\n' % entry)
+            qprepinp.write('readlib "%s"\n' % entry)
 
         #Can only use 1 prm file. If more than 1 is in settings, merge them!
         if len(self.prm) > 1:
@@ -877,11 +877,11 @@ class TopologyPrepare(Toplevel):
                 pass
 
             merged_file.close()
-            qprepinp.write('readprm %s/%s\n' % (self.app.workdir, merged_name))
+            qprepinp.write('readprm "%s/%s"\n' % (self.app.workdir, merged_name))
         else:
-            qprepinp.write('readprm %s\n' % self.prm[0])
+            qprepinp.write('readprm "%s"\n' % self.prm[0])
 
-        qprepinp.write('readpdb %s\n' % self.pdbfile)
+        qprepinp.write('readpdb "%s"\n' % self.pdbfile)
 
         if self.makeSS:
             for cys_i in sorted(self.cys_residues.keys()):
@@ -902,7 +902,7 @@ class TopologyPrepare(Toplevel):
                 solvation = 'SPC'
             qprepinp.write('solvate %s %s %s %s 1 %s\n' % (xc,yc, zc,radius,solvation))
 
-        qprepinp.write('maketop %s topology\n' % self.pdbfile.split('.')[0])
+        qprepinp.write('maketop %s "topology"\n' % self.pdbfile.split('.')[0])
         qprepinp.write('writetop %s' % self.topname)
         qprepinp.write('\n')
         qprepinp.write('writepdb %s' % self.top_pdbname)
