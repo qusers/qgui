@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
+#Changes for matplotlib v2.2.3 on lines 525, 530, 564, 724, 1689, 1809, 1812, 633
+# NavigationToolbar2TkAgg->NavigationToolbar2Tk
+
 from Tkinter import Label, TOP, Button, Listbox, Scrollbar, EXTENDED, Spinbox, Entry, Text, Frame, \
     Toplevel, DISABLED, END, GROOVE, NORMAL, BOTH, IntVar, StringVar, Checkbutton, OptionMenu, HORIZONTAL
 from tkFileDialog import askopenfilename
@@ -25,11 +28,11 @@ import shutil
 import matplotlib
 matplotlib.use('TkAgg')
 #Implement default mpl key bindings
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from tkFileDialog import asksaveasfilename, askdirectory
-
+from cycler import cycler
 
 class EvbReactions(Toplevel):
     def __init__(self, app, root):         #Receives app and root from Qgui-class.
@@ -518,13 +521,14 @@ class EvbReactions(Toplevel):
         if self.dg_plot:
             self.dg_plot.clear()
 
-        #Set color cycle for plots:
-        matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        #Set color cycle for plots: 
+        #Made a change here
+        matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
+                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
 
         #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
@@ -558,7 +562,7 @@ class EvbReactions(Toplevel):
             self.dg_plot.plot(deps, dG, '-', linewidth=2.0, label=r'%s$_{%s}$' % (title, nr))
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
 
-        self.canvas.show()
+        self.canvas.draw()
 
     def update_diabatic_plot(self):
         """
@@ -626,7 +630,7 @@ class EvbReactions(Toplevel):
 
 
         #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, axisbg='white')
+        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
         self.plot_window.subplots_adjust(hspace=0.5)
 
         #X/Y labels
@@ -718,7 +722,7 @@ class EvbReactions(Toplevel):
 
         if plot_it:
             self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
-        self.canvas.show()
+        self.canvas.draw()
 
     def recomp_evb(self):
         """
@@ -1683,7 +1687,7 @@ class EvbReactions(Toplevel):
                 self.reorg_frame.grid(row=4, column=0, columnspan=2)
                 if self.dg_plot:
                     self.dg_plot.clear()
-                    self.canvas.show()
+                    self.canvas.draw()
             else:
                 self.diabatic_plot = False
                 self.reorg_frame.grid_forget()
@@ -1803,10 +1807,10 @@ class EvbReactions(Toplevel):
         self.canvas = FigureCanvasTkAgg(self.plot_window, master=frame_plot)
         self.plot_window.patch.set_facecolor('white')
 
-        self.canvas.show()
+        self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, frame_plot)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, frame_plot)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
 

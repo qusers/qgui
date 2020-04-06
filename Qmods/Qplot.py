@@ -13,15 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Qgui.  If not, see <http://www.gnu.org/licenses/>.
 
+# BB: matplotlib changes on lines 64, 85, 103, 164
+# NavigationToolbar2TkAgg -> NavigationToolbar2Tk
+
 from Tkinter import X, BOTH, TOP, Button, Frame, Toplevel, Label, Spinbox, GROOVE
 
 
 import matplotlib
 matplotlib.use('TkAgg')
 #Implement default mpl key bindings
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+from cycler import cycler
 
 
 class Qplot(Toplevel):
@@ -59,9 +63,9 @@ class Qplot(Toplevel):
 
 
         #Default color cycle
-        matplotlib.rcParams['axes.color_cycle'] = ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+        matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
                                                    'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold']
+                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
 
         #Find min X and max X to scale xrange:
         min_x = 100000.00
@@ -80,7 +84,7 @@ class Qplot(Toplevel):
 
         for plot in range(1, plots_to_make + 1):
             placement = '%d1%d' % (plots_to_make, plot)
-            self.plotlist.append(self.plot_window.add_subplot(int(placement), axisbg='white'))
+            self.plotlist.append(self.plot_window.add_subplot(int(placement), facecolor='white'))
             self.plot_window.subplots_adjust(hspace=0.5)
 
         for plots in range(len(self.plotlist)):
@@ -98,7 +102,7 @@ class Qplot(Toplevel):
                 #plotlist[plots].set_autoscale_on(False)
                 self.plotlist[plots].set_xlim([min_x, max_x])
 
-        self.canvas.show()
+        self.canvas.draw()
 
     def on_key_event(self, event):
         print('you pressed %s' % event.key)
@@ -159,10 +163,10 @@ class Qplot(Toplevel):
         self.plot_window = Figure(figsize=(8,5), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.plot_window, master=frame)
         self.plot_window.patch.set_facecolor('white')
-        self.canvas.show()
+        self.canvas.draw() #self.canvas.show()
         self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, frame)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, frame)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
 
