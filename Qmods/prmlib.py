@@ -131,7 +131,7 @@ class CreatePrmLib(Toplevel):
                 atom = pdb_dict[i][j]
                 if atom not in list(atom_count.keys()):
                     if j > 16:
-                        self.app.errorBox('Error', 'Could not translate all atomtypes. Pleas verify pdb file.')
+                        self.app.errorBox('Error', 'Could not translate all atomtypes. Please verify pdb file.')
                         pdb_dict = None
                         break
                     j += 1
@@ -248,7 +248,8 @@ class CreatePrmLib(Toplevel):
                     if int(line.split()[1]) in atom_numbers:
                     #Increas res nr by 1 the first time new res is inserted:
                         if not found_lig:
-                            res += 1
+                            if res != 1:
+                                res += 1
                             found_lig = True
 
                         #Find key to replace:
