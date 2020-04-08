@@ -248,7 +248,7 @@ class CreatePrmLib(Toplevel):
                     if int(line.split()[1]) in atom_numbers:
                     #Increas res nr by 1 the first time new res is inserted:
                         if not found_lig:
-                            if res != 1:
+                            if int(line[21:26]) != 1:
                                 res += 1
                             found_lig = True
 
