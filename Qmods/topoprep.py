@@ -318,10 +318,14 @@ class TopologyPrepare(Toplevel):
                     print(('(Can not toggle %4s to %4s: %4s not found in lib.)' % (term, toggle_to, toggle_to)))
 
         #Remove temp NRES and CRES definitions for terminals
-        for to_remove in del_list:
-            del self.toggle_res[to_remove]
-            del self.resname_distatom[to_remove]
-            del self.resname_nr_dist[to_remove]
+        try:
+            for to_remove in del_list:
+                del self.toggle_res[to_remove]
+                del self.resname_distatom[to_remove]
+                del self.resname_nr_dist[to_remove]
+        except:
+            print("Library check failed. Maybe you have two conflicting lib/prm files in settings?")
+            return
 
         #Get info from pdb file and compare to existing lib entries
         pdb_atoms = list()
