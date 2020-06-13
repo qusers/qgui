@@ -4289,6 +4289,17 @@ class SetupEVB(Toplevel):
                 #Improper exists in dict. Check that q3 and q4 are in correct order:
                 if q3 == self.q_impropers[q2][-1]:
                     q3, q4 = q4, q3
+            #In case q1 was assigned wrongly, and the improper indeed do exist in the dict. 
+            elif q3 == self.q_impropers[q2][0]:
+                if q1 == self.q_impropers[q2][-1]:
+                    q1, q3, q4  = q3, q4, q1
+                else:
+                    q1, q3 = q3, q1
+            elif q4 == self.q_impropers[q2][0]:
+                if q1 == self.q_impropers[q2][-2]:
+                    q1, q4, q3 = q4, q3, q1
+                else:
+                    q1, q4 = q4, q1
 
         return q1, q2, q3, q4
 
@@ -4337,7 +4348,6 @@ class SetupEVB(Toplevel):
                                 tmp_dict = {q1: atom1, q2: atom2,
                                             q3: atom3, q4: atom4}
 
-                                #This sometimes causes a problem TODO :
                                 q1, q2, q3, q4 = self.check_imp(q1,q2,q3,q4)
                                 self.q_impropers[q2] = [q1,q3,q4]
 
