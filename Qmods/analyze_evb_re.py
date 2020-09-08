@@ -419,7 +419,7 @@ class EvbReactions(Toplevel):
 
         self.app.log('info', 'Collecting Reaction Free Energies ...')
 
-        for nr in sorted(self.titles[prj_title].keys()):
+        for nr in sorted([x for x in self.titles[prj_title].keys() if type(x)==int]) + [x for x in self.titles[prj_title].keys() if type(x)!=int]:
             path = self.titles[prj_title][nr]
             qfepfile = '%s/qfep.out' % self.titles[prj_title][nr]
             if not os.path.isfile(qfepfile):
@@ -1538,7 +1538,7 @@ class EvbReactions(Toplevel):
         #Show runs for titles:
         self.runs_listbox.delete(0, END)
         for title in titles:
-            for run in sorted(self.titles[title].keys()):
+            for run in sorted([x for x in self.titles[title].keys() if type(x)==int]) + [x for x in self.titles[title].keys() if type(x)!=int]:
                 if run != 'all':
                     self.runs_listbox.insert(END,'../%s' % '/'.join(self.titles[title][run].split('/')[-3:]))
 
