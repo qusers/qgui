@@ -595,7 +595,7 @@ class CreatePrmLib(Toplevel):
                 sigma = float(self.log[i].split()[5])
                 epsilon = float(self.log[i].split()[6])
                 avdw1,avdw2,avdw3,bvdw1,bvdw23 = self.calcNBpar(sigma,epsilon)
-                mass = self.massDict[self.log[i].split()[0][0]]
+                mass = self.massDict["".join([x for x in self.log[i].split()[0] if not x.isdigit()])] # log-file has atom-name in field 0 on the form "Br5", we only want the "Br" to lookup the atomic weight
                 comment = str(self.log[i][52:])
                 vdwFile.write('%4s  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f !%s'\
                           % (prmname.ljust(4), avdw1, avdw2, bvdw1, avdw3, bvdw23, mass, comment))
