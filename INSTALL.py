@@ -69,6 +69,9 @@ for f in os.listdir('FF'):
 #Write to bash file so that Qgui can be started from command line.
 
 if simlink:
+    if (os.path.exists('/usr/bin/Qgui')):
+        print('old simlink version found, overwriting')
+        os.remove('/usr/bin/Qgui')
     os.symlink('/usr/lib/QGUI/Qgui','/usr/bin/Qgui')
 else:
     if os.path.isfile(bashfile):
