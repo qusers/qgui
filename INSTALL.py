@@ -4,7 +4,10 @@
 ###############EDITABLE REGION################################
 #Path where Qgui will be installed. 
 #Default is to create QGUI in /home/$user
+#root will install QGui to /usr/lib
 #If you modify 'default', use the entire adress ('/Users/../')
+#If an argument is passed to the install script that will overide the path varible
+
 
 install_path='default' 
 
@@ -17,8 +20,17 @@ bashfile='.bash_profile'
 import os
 import shutil
 import sys
+
+simlink = False
+
+if len(sys.argv) == 2:
+    install_path = sys.argv[1]
+
 if install_path == 'default':
     install_path='%s/QGUI' % os.path.expanduser("~")
+elif install_path == 'root':
+    install_path='/usr/lib/QGUI'
+    simlink = True
 elif install_path.split('/')[-1] != 'QGUI':
     install_path = '%s/QGUI' % install_path
 
@@ -55,31 +67,35 @@ for f in os.listdir('FF'):
     shutil.copytree('%s/FF/%s' % (org_path, f), '%s/FF/%s' % (install_path, f))
 
 #Write to bash file so that Qgui can be started from command line.
-if os.path.isfile(bashfile):
-    oldfile = open(bashfile, 'r').readlines()
+
+if simlink:
+    os.symlink('/usr/lib/QGUI/Qgui','/usr/bin/Qgui')
 else:
-    oldfile = list()
-    print('%s created' % bashfile)
+    if os.path.isfile(bashfile):
+        oldfile = open(bashfile, 'r').readlines()
+    else:
+        oldfile = list()
+        print('%s created' % bashfile)
 
-newfile = open(bashfile, 'w')
+    newfile = open(bashfile, 'w')
 
-export_exist = False
-export_line = 'PATH=$PATH:%s' % install_path
+    export_exist = False
+    export_line = 'PATH=$PATH:%s' % install_path
 
-for line in oldfile:
-    if export_line in line:
-        export_exist = True
-    elif export_line.split('/')[-1] in line:
-        line = '\nPATH=$PATH:%s\n' % install_path
-        export_exist = True
-    newfile.write(line)
+    for line in oldfile:
+        if export_line in line:
+            export_exist = True
+        elif export_line.split('/')[-1] in line:
+            line = '\nPATH=$PATH:%s\n' % install_path
+            export_exist = True
+        newfile.write(line)
 
-if not export_exist:
-    newfile.write('\nPATH=$PATH:%s\n' % install_path)
-    newfile.write('export PATH\n')
+    if not export_exist:
+        newfile.write('\nPATH=$PATH:%s\n' % install_path)
+        newfile.write('export PATH\n')
 
-newfile.close()
-print('%s updated' % bashfile)
+    newfile.close()
+    print('%s updated' % bashfile)
 
 print('\nInstallation successful!')
 print('Restart terminal and type "Qgui" to launch')
