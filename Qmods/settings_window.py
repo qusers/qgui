@@ -109,7 +109,7 @@ class QguiSettings(Toplevel):
         """
 
         if self.q_settings[ 'workdir' ] == 'default':
-            self.workdir = os.path.dirname(os.path.abspath(__file__))
+            self.workdir = os.path.dirname(os.path.realpath(__file__))
         else:
             self.workdir = self.q_settings[ 'workdir' ]
 

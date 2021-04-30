@@ -35,7 +35,7 @@ import sys
 import datetime
 import getpass
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/Qmods')
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/Qmods')
 
 from splash_qgui import SplashScreen
 from pdbpreparewindow import PdbFilePrepare
@@ -80,7 +80,7 @@ class QGui(object):
             os.makedirs(self.settings_path)
 
         #path to Qgui code
-        self.qgui_path = os.path.dirname(os.path.abspath(__file__))
+        self.qgui_path = os.path.dirname(os.path.realpath(__file__))
 
         self.root.withdraw()
         self.show_splash()
@@ -192,7 +192,7 @@ class QGui(object):
 
         #Get workdirectory:
         if self.q_settings[ 'workdir' ] == 'default':
-            #self.workdir = os.path.dirname(os.path.abspath(__file__))
+            #self.workdir = os.path.dirname(os.path.realpath(__file__))
             if 'darwin' in sys.platform:
                 self.workdir = '/Users/' + getpass.getuser()
             else:
