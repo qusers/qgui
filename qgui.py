@@ -81,7 +81,6 @@ class QGui(object):
 
         #path to Qgui code
         self.qgui_path = os.path.dirname(os.path.realpath(__file__))
-
         self.root.withdraw()
         self.show_splash()
 
