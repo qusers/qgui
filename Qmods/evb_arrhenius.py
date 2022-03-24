@@ -1004,6 +1004,9 @@ class EvbArrhenius(Toplevel):
         qfepout = '%s/%s' % (path, filename)
         with open(qfepout, 'r') as qfepout:
             for line in qfepout:
+                if "# Part 4:" in line:
+                    found_part3 = False
+                    break
                 if found_part3:
                     if not line.startswith('#') and len(line.split()) > 4:
                         part3.append(line)
