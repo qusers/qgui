@@ -683,22 +683,22 @@ class EvbCalibration(Toplevel):
         if self.dg_plot:
             self.dg_plot.clear()
 
+        else:
+            #Create subplot
+            self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
+            self.plot_window.subplots_adjust(hspace=0.5)
 
-        #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
-        self.plot_window.subplots_adjust(hspace=0.5)
+            #X/Y labels
+            self.dg_plot.set_xlabel(r'$\Delta \epsilon$ (kcal/mol)')
+            self.dg_plot.set_ylabel(r'$\Delta G$ (kcal/mol)')
 
-        #X/Y labels
-        self.dg_plot.set_xlabel(r'$\Delta \epsilon$ (kcal/mol)')
-        self.dg_plot.set_ylabel(r'$\Delta G$ (kcal/mol)')
+            #Move label box outside plot region
+            box = self.dg_plot.get_position()
+            self.dg_plot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
-        #Move label box outside plot region
-        box = self.dg_plot.get_position()
-        self.dg_plot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-        #Fit subplot to figure/canvas
-        #rect=(left,bottom,top,right)
-        self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
+            #Fit subplot to figure/canvas
+            #rect=(left,bottom,top,right)
+            self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
 
         self.dg_plot.plot(self.enegaps, self.dG, 'k.', label='Reference')
         self.dg_plot.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
