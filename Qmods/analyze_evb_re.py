@@ -520,28 +520,28 @@ class EvbReactions(Toplevel):
 
         if self.dg_plot:
             self.dg_plot.clear()
+        else:
+            #Set color cycle for plots:
+            #Made a change here
+            matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
+                                                       'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
+                                                       'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
 
-        #Set color cycle for plots:
-        #Made a change here
-        matplotlib.rcParams['axes.prop_cycle'] = cycler('color', ['k', 'b', 'g', 'r', 'm', 'y', 'c', 'brown',
-                                                   'burlyWood', 'cadetBlue', 'DarkGreen', 'DarkBlue',
-                                                   'DarkMagenta', 'DarkSalmon', 'DimGray', 'Gold'])
+            #Create subplot
+            self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
+            self.plot_window.subplots_adjust(hspace=0.5)
 
-        #Create subplot
-        self.dg_plot = self.plot_window.add_subplot(111, facecolor='white')
-        self.plot_window.subplots_adjust(hspace=0.5)
+            #X/Y labels
+            self.dg_plot.set_xlabel(r'$\Delta \epsilon$ (kcal/mol)')
+            self.dg_plot.set_ylabel(r'$\Delta G$ (kcal/mol)')
 
-        #X/Y labels
-        self.dg_plot.set_xlabel(r'$\Delta \epsilon$ (kcal/mol)')
-        self.dg_plot.set_ylabel(r'$\Delta G$ (kcal/mol)')
+            #Move label box outside plot region
+            box = self.dg_plot.get_position()
+            self.dg_plot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
-        #Move label box outside plot region
-        box = self.dg_plot.get_position()
-        self.dg_plot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-        #Fit subplot to figure/canvas
-        #rect=(left,bottom,top,right)
-        self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
+            #Fit subplot to figure/canvas
+            #rect=(left,bottom,top,right)
+            self.plot_window.tight_layout(rect=(0.005, 0, 0.8, 1))
 
         for i in range(len(titles)):
             title = str(titles[i])
