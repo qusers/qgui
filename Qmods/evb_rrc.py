@@ -242,7 +242,7 @@ class EvbCalibration(Toplevel):
                     self.app.log(' ', '\n')
                     part3 = True
                 if part3:
-                    if line == '':
+                    if line == '' or '# Part 4:' in line:
                         part3 = False
                         break
                     if count > 0:
