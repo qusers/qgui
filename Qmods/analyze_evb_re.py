@@ -457,7 +457,7 @@ class EvbReactions(Toplevel):
                     if '# Part 3: Bin-averaged summary' in line:
                         part3 = True
                     if part3:
-                        if line == '':
+                        if line == '' or "# Part 4:" in line:
                             break
                         if count > 1:
                             try:

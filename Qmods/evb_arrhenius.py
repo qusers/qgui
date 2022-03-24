@@ -401,7 +401,7 @@ class EvbArrhenius(Toplevel):
                     if '# Part 3: Bin-averaged summary' in line:
                         part3 = True
                     if part3:
-                        if line == '':
+                        if line == '' or "# Part 4:" in line:
                             break
                         if count > 1:
                             try:
@@ -1005,7 +1005,6 @@ class EvbArrhenius(Toplevel):
         with open(qfepout, 'r') as qfepout:
             for line in qfepout:
                 if "# Part 4:" in line:
-                    found_part3 = False
                     break
                 if found_part3:
                     if not line.startswith('#') and len(line.split()) > 4:
