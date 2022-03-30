@@ -20,6 +20,7 @@ bashfile='.bash_profile'
 import os
 import shutil
 import sys
+import subprocess
 
 simlink = False
 
@@ -51,6 +52,7 @@ if not os.path.isdir('%s/Qmods' % install_path):
 
 org_path = os.path.dirname(os.path.realpath(__file__))
 shutil.copy2('%s/qgui.py' % org_path, '%s/Qgui' % install_path)
+shutil.copy2('%s/requirements.txt' % org_path, '%s/requirements.txt' % install_path)
 
 for f in os.listdir('Qmods'):
     try:
@@ -99,6 +101,12 @@ else:
 
     newfile.close()
     print('%s updated' % bashfile)
+
+#Make venv and install requirements
+venv_activate = "python3 -m venve %s/venv; source %s/venv/bin/activate\; pip install -r %s/requirements.txt" % (install_path, install_paht, install_path)
+
+ret = subprocess.run(venv_activate, capture_output=True, shell=True)
+print(ret.stdout.decode())
 
 print('\nInstallation successful!')
 print('Restart terminal and type "Qgui" to launch')
