@@ -155,7 +155,7 @@ class QGui(object):
                           ['End', 10.0,'None',0, 1.0, 100000]
                       ],
                       'subscript': [1, './'],
-                      'executables': ['Qprep5','Qdyn5','Qfep5','Qcalc5'],
+                      'executables': ['qprep','qdyn','qfep','qcalc'],
                       'schrodinger path':  None}
 
         return q_settings
