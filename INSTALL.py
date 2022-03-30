@@ -109,7 +109,7 @@ else:
 #install requirements
 reqs = "python3 -m pip install -r %s/requirements.txt" % install_path
 
-ret = subprocess.run(venv_activate, capture_output=True, shell=True)
+ret = subprocess.run(reqs, capture_output=True, shell=True)
 print(ret.stdout.decode())
 
 print('\nInstallation successful!')
