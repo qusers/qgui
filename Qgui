@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+pysrc=$( cd "$(dirname "$0")" ; pwd -P )
+
+
+
+
+. "$pysrc/venv/bin/activate"
+
+export LC_ALL=en_US.utf-8
+export LANG=en_US.utf-8
+
+python "$pysrc"/qgui.py "$@"

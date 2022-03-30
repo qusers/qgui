@@ -1,5 +1,6 @@
-#!venv/bin/python3
+:#/usr/bin/env python
 
+# -*- coding: utf-8 -*-
 __author__ = "Geir Villy Isaksen"
 __copyright__ = "Copyright (C) 2017 University of Tromso / Geir Villy Isaksen"
 __credits__ = ["Bjorn Olav Brandsdal", "Tor Arne Heim Andberg", "Laura Liikanen", "Johan Aqvist", "Christoffer Lind",
