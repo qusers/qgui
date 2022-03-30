@@ -103,7 +103,7 @@ else:
     print('%s updated' % bashfile)
 
 #Make venv and install requirements
-venv_activate = "python3 -m venve %s/venv; source %s/venv/bin/activate\; pip install -r %s/requirements.txt" % (install_path, install_paht, install_path)
+venv_activate = "python3 -m venve %s/venv; source %s/venv/bin/activate\; pip install -r %s/requirements.txt" % (install_path, install_path, install_path)
 
 ret = subprocess.run(venv_activate, capture_output=True, shell=True)
 print(ret.stdout.decode())
