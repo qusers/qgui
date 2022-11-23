@@ -182,7 +182,7 @@ class AnalyzeLie(Toplevel):
         for logs in logfiles:
             if logs.split('/')[-1] not in select_logs:
                 select_logs.append(logs.split('/')[-1])
-        if select_logs > 1:
+        if len(select_logs) > 1:
             self.app.log('info', 'Found %d unique MD files. Select the ones to analyze.' % len(select_logs))
             self.select_name = SelectReturn(self, self.root, select_logs, tmptitle, None)
             self.select_name.configure(background=self.main_color)
